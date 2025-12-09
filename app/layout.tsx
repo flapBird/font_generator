@@ -53,6 +53,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Google Analytics */}
         <Script
           strategy="afterInteractive"
           src="https://www.googletagmanager.com/gtag/js?id=G-1LZVVCMCK5"
@@ -66,6 +67,19 @@ export default function RootLayout({
             gtag('config', 'G-1LZVVCMCK5', {
               send_page_view: true
             });
+          `}
+        </Script>
+        
+        {/* Privacy-friendly analytics by Plausible */}
+        <Script 
+          async 
+          src="http://analytics.leeswalmonitor.top/js/pa-JsbpbgqJFsUhK4yyUg3tr.js"
+          strategy="afterInteractive"
+        />
+        <Script id="plausible-init" strategy="afterInteractive">
+          {`
+            window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+            plausible.init()
           `}
         </Script>
         <Header />
