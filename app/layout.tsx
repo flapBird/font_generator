@@ -71,17 +71,8 @@ export default function RootLayout({
         </Script>
         
         {/* Privacy-friendly analytics by Plausible */}
-        <Script 
-          async 
-          src="http://analytics.leeswalmonitor.top/js/pa-JsbpbgqJFsUhK4yyUg3tr.js"
-          strategy="afterInteractive"
-        />
-        <Script id="plausible-init" strategy="afterInteractive">
-          {`
-            window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-            plausible.init()
-          `}
-        </Script>
+        <Script defer data-domain="font-generators.org" src="https://analytics.leeswalmonitor.top/js/plausible.js"></Script>
+
         <Header />
         <div className="flex flex-col min-h-screen">
           <main className="flex-1">
