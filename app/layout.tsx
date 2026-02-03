@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     default: "Fancy Text Generator — Free Unicode Text Converter | Font Generators",
     template: "%s | Font Generators"
   },
-  description: "Transform your text into fancy Unicode styles. Create stylish text for Instagram, Twitter, Discord, and more. Free online fancy text generator.",
+  description: "Transform your text into fancy Unicode styles. Create stylish text for Instagram, Twitter, Discord, and more. Free online fancy text converter.",
   authors: [{ name: "Font Generators" }],
   creator: "Font Generators",
   publisher: "Font Generators",
@@ -41,6 +41,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  other: {
+    'google-adsense-account': 'ca-pub-4183802444188513'
+  }
 };
 
 export default function RootLayout({
