@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
+import Head from "next/head";
 import "./globals.css";
 import { Header, Footer } from "@/components";
 
@@ -53,6 +54,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Head>
+          <script 
+            async 
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4183802444188513"
+            crossOrigin="anonymous"
+          ></script>
+        </Head>
         {/* Google Analytics */}
         <Script
           strategy="afterInteractive"
@@ -69,9 +77,6 @@ export default function RootLayout({
             });
           `}
         </Script>
-
-        <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4183802444188513" crossOrigin="anonymous"></Script>
-
         
         {/* Privacy-friendly analytics by Plausible */}
         <Script defer data-domain="font-generators.org" src="https://analytics.leeswalmonitor.top/js/plausible.js"></Script>
