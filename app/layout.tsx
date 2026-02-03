@@ -69,6 +69,9 @@ export default function RootLayout({
             });
           `}
         </Script>
+
+        <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4183802444188513" crossOrigin="anonymous"></Script>
+
         
         {/* Privacy-friendly analytics by Plausible */}
         <Script defer data-domain="font-generators.org" src="https://analytics.leeswalmonitor.top/js/plausible.js"></Script>
