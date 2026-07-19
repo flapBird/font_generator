@@ -1,36 +1,23 @@
-@import "tailwindcss";
-
-:root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #e0e7ff;
-  --accent: #8b5cf6;
-  --border: #e2e8f0;
-  --ring: #6366f1;
-  --gradient-start: #6366f1;
-  --gradient-end: #a855f7;
-  --card-bg: rgba(255, 255, 255, 0.7);
-  --card-hover: rgba(255, 255, 255, 0.9);
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
-  --color-border: var(--border);
-  --color-ring: var(--ring);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+ @tailwind base;
+ @tailwind components;
+ @tailwind utilities;
+ 
+ :root {
+   --background: #f8fafc;
+   --foreground: #0f172a;
+   --muted: #f1f5f9;
+   --muted-foreground: #64748b;
+   --primary: #6366f1;
+   --primary-foreground: #ffffff;
+   --secondary: #e0e7ff;
+   --accent: #8b5cf6;
+   --border: #e2e8f0;
+   --ring: #6366f1;
+   --gradient-start: #6366f1;
+   --gradient-end: #a855f7;
+   --card-bg: rgba(255, 255, 255, 0.7);
+   --card-hover: rgba(255, 255, 255, 0.9);
+ }
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -93,12 +80,14 @@ body {
 }
 
 /* Gradient text utility */
-.gradient-text {
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+ @layer utilities {
+   .gradient-text {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+   }
+ }
 
 /* Card styles */
 .card {

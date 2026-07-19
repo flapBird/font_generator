@@ -1,26 +1,20 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
-import "./globals.css";
-import { Header, Footer } from "@/components";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+ import type { Metadata } from "next";
+ import Script from "next/script";
+ import "./globals.css";
+ import { Header, Footer } from "@/components";
+ 
+ // Using system fonts for production to avoid Google Fonts fetch dependency
+ // and improve page load speed with zero external font requests
+ const geistSans = { variable: '--font-geist-sans' };
+ const geistMono = { variable: '--font-geist-mono' };
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://font-generators.org'),
   title: {
-    default: "Fancy Text Generator — Free Unicode Text Converter | Font Generators",
+     default: "Free Font Generator — Create Fancy Unicode Text | Font Generators",
     template: "%s | Font Generators"
   },
-  description: "Transform your text into fancy Unicode styles. Create stylish text for Instagram, Twitter, Discord, and more. Free online fancy text converter.",
+  description: "Free online font generator for creating fancy Unicode text. Transform your words into stylish fonts for Instagram, Discord, TikTok, and more. Try our font generator free.",
   authors: [{ name: "Font Generators" }],
   creator: "Font Generators",
   publisher: "Font Generators",
@@ -29,13 +23,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://font-generators.org",
     siteName: "Font Generators",
-    title: "Fancy Text Generator — Free Unicode Text Converter",
-    description: "Transform your text into fancy Unicode styles for social media, bios, and creative projects.",
+    title: "Free Font Generator — Fancy Unicode Text",
+    description: "Free online font generator. Create fancy Unicode text for social media bios, posts, and creative projects.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fancy Text Generator — Free Unicode Text Converter",
-    description: "Transform your text into fancy Unicode styles.",
+    title: "Free Font Generator — Fancy Unicode Text",
+    description: "Free font generator. Create fancy Unicode text for social media.",
   },
   robots: {
     index: true,
