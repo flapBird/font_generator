@@ -99,8 +99,8 @@ export default function PrivacyPolicyPage() {
           <h2>9. Contact Us</h2>
           <p>
             If you have any questions about this Privacy Policy, please contact us at{' '}
-            <Link href="mailto:leeswal123@gmail.com" className="text-primary hover:underline">
-              leeswal123@gmail.com
+            <Link href="mailto:contact@font-generators.org" className="text-primary hover:underline">
+              contact@font-generators.org
             </Link>
           </p>
         </motion.div>
