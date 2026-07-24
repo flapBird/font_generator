@@ -14,6 +14,9 @@
    return {
      title: buildMetaTitle(page),
      description: buildMetaDescription(page),
+     alternates: {
+       canonical: `https://font-generators.org/styles/${page.slug}`,
+     },
      openGraph: {
        title: buildMetaTitle(page),
        description: buildMetaDescription(page),

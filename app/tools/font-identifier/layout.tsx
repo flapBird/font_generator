@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Font Identifier - AI Font Recognition Tool',
+  alternates: {
+    canonical: 'https://font-generators.org/tools/font-identifier',
+  },  title: 'Font Identifier - AI Font Recognition Tool',
   description: 'Upload an image and let AI identify the font. Get font name, similar alternatives, and download links instantly. Free font finder tool.',
   keywords: ['font identifier', 'font finder', 'what font is this', 'font recognition', 'identify font', 'font detector'],
   openGraph: {

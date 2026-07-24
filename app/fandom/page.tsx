@@ -4,6 +4,9 @@
  
  export const metadata: Metadata = {
    title: 'Fandom Font Generators',
+   alternates: {
+     canonical: 'https://font-generators.org/fandom',
+   },
    description: 'Unicode text styles inspired by pop culture franchises. Create Disney, Mario, Stranger Things, and other fandom-inspired text for fan content.',
  };
  

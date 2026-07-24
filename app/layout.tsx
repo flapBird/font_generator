@@ -11,7 +11,7 @@
 export const metadata: Metadata = {
   metadataBase: new URL('https://font-generators.org'),
   title: {
-     default: "Free Font Generator — Create Fancy Unicode Text | Font Generators",
+    default: "Free Font Generator — Create Fancy Unicode Text | Font Generators",
     template: "%s | Font Generators"
   },
   description: "Free online font generator for creating fancy Unicode text. Transform your words into stylish fonts for Instagram, Discord, TikTok, and more. Try our font generator free.",
@@ -37,7 +37,10 @@ export const metadata: Metadata = {
   },
   other: {
     'google-adsense-account': 'ca-pub-4183802444188513'
-  }
+  },
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export default function RootLayout({
@@ -45,11 +48,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID || 'G-XZ8VM9EYM9';
+ 
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+  <body
+    className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+  >
         <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4183802444188513"
           strategy="beforeInteractive"
@@ -58,7 +63,7 @@ export default function RootLayout({
         {/* Google Analytics */}
         <Script
           strategy="afterInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=G-XZ8VM9EYM9"
+          src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
         />
 
         <Script id="ga-init" strategy="afterInteractive">
@@ -66,7 +71,7 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-XZ8VM9EYM9', {
+            gtag('config', '${gaId}', {
               send_page_view: true
             });
           `}

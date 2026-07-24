@@ -4,6 +4,9 @@
  
  export const metadata: Metadata = {
    title: 'Guides',
+   alternates: {
+     canonical: 'https://font-generators.org/guides',
+   },
    description: 'Learn how fancy text generators work, why Reddit recommends certain tools, and the Unicode technology behind decorative text styles.',
  };
  

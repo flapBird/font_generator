@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     description: 'Learn about Font Generators and our mission to provide free AI-powered typography tools.',
     url: 'https://font-generators.org/about',
   },
+  alternates: {
+    canonical: 'https://font-generators.org/about',
+  },
 };
 
 export default function AboutLayout({

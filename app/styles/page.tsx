@@ -4,6 +4,9 @@
  
  export const metadata: Metadata = {
    title: 'Text Style Generators',
+   alternates: {
+     canonical: 'https://font-generators.org/styles',
+   },
    description: 'Browse all our Unicode text style generators. Small text, cursive, fraktur, bold, italic, bubble letters, and more — all free and copy-paste ready.',
  };
  
