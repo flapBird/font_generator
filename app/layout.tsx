@@ -9,7 +9,7 @@
  const geistMono = { variable: '--font-geist-mono' };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://font-generators.org'),
+  metadataBase: new URL('https://font-generators.org/'),
   title: {
     default: "Free Font Generator — Create Fancy Unicode Text | Font Generators",
     template: "%s | Font Generators"
