@@ -1,16 +1,15 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
   alternates: {
     canonical: 'https://font-generators.org/tools/font-identifier',
-  },  title: 'Font Identifier - AI Font Recognition Tool',
-  description: 'Upload an image and let AI identify the font. Get font name, similar alternatives, and download links instantly. Free font finder tool.',
-  keywords: ['font identifier', 'font finder', 'what font is this', 'font recognition', 'identify font', 'font detector'],
-  openGraph: {
-    title: 'Font Identifier - AI Font Recognition Tool',
-    description: 'Upload an image and let AI identify the font. Get font name and similar alternatives.',
-    url: 'https://font-generators.org/tools/font-identifier',
   },
+  title: 'Font Identifier - Feature Status',
+  description: 'Current availability and development status of the image-based font identifier.',
 };
 
 export default function FontIdentifierLayout({

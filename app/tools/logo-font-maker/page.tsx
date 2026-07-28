@@ -36,6 +36,34 @@ export default function LogoFontMakerPage() {
     return [];
   }, [results, brandName]);
 
+  const handleDownloadSVG = (
+    item: { style: typeof logoFontStyles[0]; preview: string },
+  ) => {
+    const escapeXml = (value: string) =>
+      value.replace(/[<>&"']/g, (character) => ({
+        '<': '&lt;',
+        '>': '&gt;',
+        '&': '&amp;',
+        '"': '&quot;',
+        "'": '&apos;',
+      })[character] ?? character);
+
+    const text = item.style.style.textTransform === 'uppercase'
+      ? item.preview.toUpperCase()
+      : item.preview;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360">
+  <rect width="1200" height="360" fill="#09090b"/>
+  <text x="600" y="205" text-anchor="middle" fill="#ffffff" font-family="${escapeXml(item.style.fontFamily)}" font-size="104" font-weight="${item.style.style.fontWeight ?? 400}" font-style="${item.style.style.fontStyle ?? 'normal'}" letter-spacing="${item.style.style.letterSpacing ?? 'normal'}">${escapeXml(text)}</text>
+</svg>`;
+    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${item.style.id}-${brandName.trim().replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'logo'}.svg`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <ToolLayout>
       {/* JSON-LD */}
@@ -155,13 +183,14 @@ export default function LogoFontMakerPage() {
                 <p className="text-sm text-zinc-400 text-center">{item.style.name}</p>
               </div>
 
-              {/* Hover Actions */}
+              {/* Hover Action */}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                <button className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-white/90 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => handleDownloadSVG(item)}
+                  className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-white/90 transition-colors"
+                >
                   Download SVG
-                </button>
-                <button className="px-4 py-2 bg-white/20 text-white rounded-lg text-sm font-medium hover:bg-white/30 transition-colors">
-                  Customize
                 </button>
               </div>
             </motion.div>
@@ -190,7 +219,7 @@ export default function LogoFontMakerPage() {
       >
         <h2>What is the Logo Font Maker?</h2>
         <p>
-          The Logo Font Maker is a free online tool designed to help you explore different typography styles for your brand logo. Simply enter your brand name, and instantly see how it looks in dozens of professional font styles. This tool is perfect for entrepreneurs, designers, and marketers looking for logo inspiration or testing different typographic approaches.
+          The Logo Font Maker is a free online preview tool for comparing your brand name in 12 browser-based typography treatments. It is useful for early logo exploration, mood boards, and testing whether a short name feels better in serif, sans-serif, condensed, monospaced, or script-like lettering.
         </p>
 
         <h2>How to Create the Perfect Logo Typography</h2>
@@ -216,12 +245,12 @@ export default function LogoFontMakerPage() {
 
         <h2>Export and Customize</h2>
         <p>
-          Once you find a style you like, you can download it as an SVG file for further customization in professional design software like Adobe Illustrator, Figma, or Sketch. SVG format ensures your logo stays crisp and scalable at any size.
+          Once you find a useful direction, download a simple SVG preview for further editing in a vector design tool. The SVG uses the named system font and is an exploration asset, not a licensed font file or a finished trademark-ready logo.
         </p>
 
         <h2>Free Logo Font Exploration</h2>
         <p>
-          Our Logo Font Maker is completely free to use. Explore unlimited font styles, download as many variations as you want, and find the perfect typography for your brand. No signup required, no watermarks, no limitations.
+          The preview is free and does not require an account. Before publishing a final logo, confirm the font license, refine spacing and proportions, and test the mark at small and large sizes.
         </p>
       </motion.div>
     </ToolLayout>

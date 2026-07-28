@@ -1,14 +1,19 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
   alternates: {
     canonical: 'https://font-generators.org/tools/logo-font-maker',
-  },  title: 'Logo Font Maker - Create Logo Typography',
-  description: 'Create stunning logo typography. Enter your brand name and explore dozens of professional font styles. Free logo font generator.',
+  },
+  title: 'Logo Font Maker - Preview 12 Typography Styles',
+  description: 'Preview a brand name in 12 browser-based typography styles and download a simple editable SVG concept.',
   keywords: ['logo font', 'logo maker', 'logo typography', 'brand font', 'logo design', 'font for logo'],
   openGraph: {
-    title: 'Logo Font Maker - Create Logo Typography',
-    description: 'Create stunning logo typography. Explore dozens of professional font styles for your brand.',
+    title: 'Logo Font Maker - Preview 12 Typography Styles',
+    description: 'Compare 12 browser-based typography directions for a brand name.',
     url: 'https://font-generators.org/tools/logo-font-maker',
   },
 };

@@ -16,7 +16,7 @@ export default function AboutPage() {
             "@type": "Organization",
             "name": "Font Generators",
             "url": "https://font-generators.org",
-            "description": "AI-powered font generation and typography tools.",
+            "description": "Browser-based Unicode text generators and typography guides.",
             "sameAs": []
           })
         }}
@@ -34,7 +34,7 @@ export default function AboutPage() {
               About <span className="gradient-text">Font Generators</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Empowering designers and creators with AI-powered typography tools.
+              Practical Unicode text tools for names, bios, captions, and creative projects.
             </p>
           </motion.div>
 
@@ -49,9 +49,9 @@ export default function AboutPage() {
             <div className="prose prose-neutral dark:prose-invert max-w-none">
               <p>
                 At Font Generators, we believe that great typography should be accessible to everyone. 
-                Our mission is to democratize font design and discovery by providing free, powerful, 
-                AI-driven tools that help designers, developers, and content creators bring their 
-                typographic visions to life.
+                Our mission is to make decorative Unicode text easy to understand, preview, and copy.
+                Each generator is designed around a specific style or use case so visitors can compare
+                relevant results without installing software or creating an account.
               </p>
               <p>
                 Whether you&apos;re a professional designer looking for inspiration, a startup founder 
@@ -137,12 +137,13 @@ export default function AboutPage() {
             <div className="prose prose-neutral dark:prose-invert max-w-none">
               <p>
                 Font Generators is built using cutting-edge web technologies including Next.js, 
-                React, and TypeScript. Our AI features leverage advanced machine learning models 
-                to understand design concepts and generate creative typography solutions.
+                React, and TypeScript. Text transformations run directly in the browser using
+                documented Unicode character mappings and carefully designed decorative presets.
               </p>
               <p>
                 We&apos;re constantly improving our tools and adding new features. Our roadmap includes 
-                more AI-powered capabilities, additional font styles, and enhanced customization options.
+                more useful style presets, broader character coverage, clearer compatibility guidance,
+                and enhanced customization options.
               </p>
             </div>
           </motion.section>

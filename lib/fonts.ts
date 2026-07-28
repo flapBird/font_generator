@@ -1,18 +1,3 @@
-// Font style definitions
-export interface FontStyle {
-  id: string;
-  name: string;
-  preview: string;
-  category: string;
-}
-
-export interface IdentifiedFont {
-  name: string;
-  confidence: number;
-  similarFonts: string[];
-  downloadUrl: string;
-}
-
 export interface LogoStyle {
   id: string;
   name: string;
@@ -219,12 +204,33 @@ export const fancyTextStyles = [
   { id: 'strikethrough', name: 'Strikethrough' },
 ];
 
+const unicodeDigitMappings: Record<string, string[]> = {
+  bold: Array.from({ length: 10 }, (_, i) => String.fromCodePoint(0x1d7ce + i)),
+  doubleStruck: Array.from({ length: 10 }, (_, i) => String.fromCodePoint(0x1d7d8 + i)),
+  monospace: Array.from({ length: 10 }, (_, i) => String.fromCodePoint(0x1d7f6 + i)),
+  fullwidth: Array.from({ length: 10 }, (_, i) => String.fromCodePoint(0xff10 + i)),
+  superscript: ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹'],
+  subscript: ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'],
+  circled: ['⓪', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨'],
+};
+
 // Convert text to fancy style
 export function convertToFancyText(text: string, styleId: string): string {
   const mapping = unicodeMappings[styleId];
   if (!mapping) return text;
-  
-  return text.split('').map(char => mapping[char] || char).join('');
+
+  const digitMapping = unicodeDigitMappings[styleId];
+  const converted = Array.from(text).map((char) => {
+    if (mapping[char]) return mapping[char];
+    if (digitMapping && /^[0-9]$/.test(char)) {
+      return digitMapping[Number(char)];
+    }
+    return char;
+  });
+
+  return styleId === 'inverted'
+    ? converted.reverse().join('')
+    : converted.join('');
 }
 
 // Generate all fancy text variants
@@ -234,46 +240,6 @@ export function generateAllFancyVariants(text: string): { id: string; name: stri
     name: style.name,
     text: convertToFancyText(text, style.id),
   }));
-}
-
-// Mock AI font generation
-export async function generateFontStyles(prompt: string): Promise<FontStyle[]> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  const categories = ['serif', 'sans-serif', 'display', 'handwriting', 'monospace'];
-  const adjectives = ['Modern', 'Classic', 'Elegant', 'Bold', 'Minimal', 'Artistic', 'Creative', 'Professional'];
-  const styles = ['Regular', 'Light', 'Medium', 'Bold', 'Italic', 'Condensed'];
-  
-  return Array.from({ length: 8 }, (_, i) => ({
-    id: `font-${Date.now()}-${i}`,
-    name: `${adjectives[i % adjectives.length]} ${styles[i % styles.length]}`,
-    preview: prompt || 'The quick brown fox jumps over the lazy dog',
-    category: categories[i % categories.length],
-  }));
-}
-
-// Mock font identification
-export async function identifyFont(imageFile: File): Promise<IdentifiedFont> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  const fonts = [
-    { name: 'Helvetica Neue', similarFonts: ['Arial', 'Inter', 'SF Pro Display'] },
-    { name: 'Roboto', similarFonts: ['Open Sans', 'Lato', 'Source Sans Pro'] },
-    { name: 'Playfair Display', similarFonts: ['Didot', 'Bodoni', 'Cormorant'] },
-    { name: 'Montserrat', similarFonts: ['Gotham', 'Proxima Nova', 'Raleway'] },
-    { name: 'Futura', similarFonts: ['Century Gothic', 'Avenir', 'Poppins'] },
-  ];
-  
-  const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
-  
-  return {
-    name: randomFont.name,
-    confidence: Math.round(85 + Math.random() * 10),
-    similarFonts: randomFont.similarFonts,
-    downloadUrl: '#',
-  };
 }
 
 // Logo font styles
@@ -293,9 +259,7 @@ export const logoFontStyles: LogoStyle[] = [
 ];
 
 // Generate logo styles for a brand name
-export async function generateLogoStyles(brandName: string): Promise<{ style: LogoStyle; preview: string }[]> {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
+export function generateLogoStyles(brandName: string): { style: LogoStyle; preview: string }[] {
   return logoFontStyles.map(style => ({
     style,
     preview: brandName || 'Brand',

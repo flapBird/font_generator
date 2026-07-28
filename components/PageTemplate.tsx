@@ -1,271 +1,245 @@
- 'use client';
- 
- import { useState, useMemo } from 'react';
- import { motion } from 'framer-motion';
- import Link from 'next/link';
- import { generateAllFancyVariants, fancyTextStyles } from '@/lib/fonts';
- import { PageDefinition, buildMetaTitle, buildMetaDescription } from '@/lib/data';
- 
- interface PageTemplateProps {
-   page: PageDefinition;
-   categoryPath: string;
-   categoryName: string;
- }
- 
- export default function PageTemplate({ page, categoryPath, categoryName }: PageTemplateProps) {
-   const [inputText, setInputText] = useState('Hello World');
-   const [copiedId, setCopiedId] = useState<string | null>(null);
- 
-  const allVariants = useMemo(() => {
-    return generateAllFancyVariants(inputText || 'Hello World');
-  }, [inputText]);
- 
-   const variants = useMemo(() => {
-     if (page.defaultStyleIds && page.defaultStyleIds.length > 0) {
-       return allVariants.filter(v => page.defaultStyleIds!.includes(v.id));
-     }
-     return allVariants;
-   }, [allVariants, page.defaultStyleIds]);
-   
-   const totalCount = allVariants.length;
-   const styleCount = variants.length;
- 
-   const handleCopy = async (text: string, id: string) => {
-     await navigator.clipboard.writeText(text);
-     setCopiedId(id);
-     setTimeout(() => setCopiedId(null), 2000);
-   };
- 
-   return (
-     <div className="min-h-screen pt-20 pb-16">
-       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-         {/* Breadcrumb */}
-         <nav className="mb-6 text-sm text-muted-foreground">
-           <Link href="/" className="hover:text-primary transition-colors">Font Generators</Link>
-           <span className="mx-2">/</span>
-           <Link href={categoryPath} className="hover:text-primary transition-colors">{categoryName}</Link>
-           <span className="mx-2">/</span>
-           <span className="text-foreground">{page.title}</span>
-         </nav>
- 
-         {/* Header */}
-         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-             <span className="gradient-text">{page.title}</span>
-           </h1>
-           <p className="text-lg text-muted-foreground max-w-3xl">
-             {page.description}
-           </p>
-         </motion.div>
- 
-         {/* Tool Area */}
-         <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.1 }}
-           className="mt-8 bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-lg border border-white/60 dark:border-slate-800/60"
-         >
-           <label className="block text-sm font-semibold mb-3 text-foreground">Enter Your Text</label>
-           <textarea
-             value={inputText}
-             onChange={(e) => setInputText(e.target.value)}
-             placeholder="Type something..."
-             rows={4}
-             className="w-full px-5 py-4 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 focus:bg-white dark:focus:bg-slate-800 resize-none text-lg transition-all duration-300 placeholder:text-slate-400"
-             autoFocus
-           />
- 
+import Link from 'next/link';
+import GeneratorTool from './GeneratorTool';
+import type { PageDefinition } from '@/lib/data';
+import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
 
-          {styleCount < totalCount ? (
-            <p className="mt-3 text-sm text-muted-foreground">Showing <strong>{styleCount}</strong> {page.title.replace(' Generator', '').replace(' Font', '')} styles. Type your text to transform.</p>
-          ) : (
-            <p className="mt-3 text-sm text-muted-foreground">All {totalCount} Unicode styles below. Type your text to transform.</p>
-          )}
-           <div className="mt-6 space-y-3 max-h-[500px] overflow-y-auto pr-1">
-             {variants.map((variant, index) => (
-               <motion.div
-                 key={variant.id}
-                 initial={{ opacity: 0, y: 8 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ delay: index * 0.02 }}
-                 className="group bg-gradient-to-r from-slate-50/80 to-white/80 dark:from-slate-800/40 dark:to-slate-800/20 hover:from-indigo-50/40 hover:to-purple-50/40 dark:hover:from-indigo-900/20 dark:hover:to-purple-900/20 border border-slate-100 dark:border-slate-700/50 hover:border-indigo-200/50 dark:hover:border-indigo-700/30 rounded-2xl p-4 transition-all duration-300 hover:shadow-md"
-               >
-                 <div className="flex items-center justify-between">
-                   <div className="flex-1 min-w-0 mr-4">
-                     <p className="text-xs font-medium text-muted-foreground mb-1">{variant.name}</p>
-                     <p className="text-lg truncate">{variant.text}</p>
-                   </div>
-                   <button
-                     onClick={() => handleCopy(variant.text, variant.id)}
-                     className="shrink-0 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/25 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 text-sm font-medium"
-                   >
-                     {copiedId === variant.id ? (
-                       <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>Copied!</>
-                     ) : (
-                       <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>Copy</>
-                     )}
-                   </button>
-                 </div>
-               </motion.div>
-             ))}
-           </div>
-         </motion.div>
- 
-         {/* About this Style */}
-         <motion.section
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.2 }}
-           className="mt-12"
-         >
-           <h2 className="text-2xl font-bold mb-4">About This Style</h2>
-           <div className="prose prose-neutral dark:prose-invert max-w-none leading-relaxed">
-             {page.content.split('\n\n').map((paragraph, i) => {
-               if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
-                 return <p key={i} className="font-semibold mt-4 mb-2">{paragraph.replace(/\*\*/g, '')}</p>;
-               }
-               return <p key={i}>{paragraph}</p>;
-             })}
-           </div>
-         </motion.section>
- 
-         {/* How to Use */}
-         {page.howToUse && (
-           <motion.section
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.25 }}
-             className="mt-10"
-           >
-             <h2 className="text-2xl font-bold mb-4">How to Use</h2>
-             <div className="prose prose-neutral dark:prose-invert max-w-none">
-               <p>{page.howToUse}</p>
-             </div>
-           </motion.section>
-         )}
- 
-         {/* Examples */}
-         <motion.section
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.3 }}
-           className="mt-10"
-         >
-          <h2 className="text-2xl font-bold mb-4">Examples</h2>
-           <p className="text-sm text-muted-foreground mb-6">See how {page.title.replace(' Generator', '').replace(' Font', '')} text looks with different words and phrases.</p>
-           <div className="space-y-4">
-             {page.examples.slice(0, 4).map((ex, i) => (
-               <div key={i} className="bg-muted/30 rounded-2xl p-5 border border-border/50">
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                   <div>
-                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Before</p>
-                     <p className="text-lg">{ex.before}</p>
-                   </div>
-                   <div>
-                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">After</p>
-                     <p className="text-lg font-medium">{ex.after}</p>
-                   </div>
-                 </div>
-                 {ex.note && <p className="mt-2 text-sm text-muted-foreground italic">{ex.note}</p>}
-               </div>
-             ))}
-           </div>
-         </motion.section>
- 
-         {/* FAQ */}
-         <motion.section
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.35 }}
-           className="mt-10"
-         >
-           <h2 className="text-2xl font-bold mb-4">Frequently Asked Questions</h2>
-           <div className="space-y-4">
-             {page.faq.map((item, i) => (
-               <details key={i} className="group bg-muted/20 rounded-2xl border border-border/50 overflow-hidden">
-                 <summary className="flex justify-between items-center cursor-pointer p-5 font-medium hover:bg-muted/30 transition-colors">
-                   {item.q}
-                   <svg className="w-5 h-5 text-muted-foreground group-open:rotate-180 transition-transform shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                   </svg>
-                 </summary>
-                 <div className="px-5 pb-5 text-muted-foreground leading-relaxed">
-                   {item.a}
-                 </div>
-               </details>
-             ))}
-           </div>
-         </motion.section>
- 
-         {/* Related Generators */}
-         <motion.section
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.4 }}
-           className="mt-10 mb-12"
-         >
-           <h2 className="text-2xl font-bold mb-4">Related Generators</h2>
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-             {page.relatedSlugs.slice(0, 3).map((slug) => {
-               const href = categoryPath + '/' + slug;
-               const label = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-               return (
-                 <Link
-                   key={slug}
-                   href={href}
-                   className="group flex items-center gap-3 p-4 bg-muted/20 rounded-2xl border border-border/50 hover:bg-muted/40 hover:border-primary/30 transition-all duration-300"
-                 >
-                   <span className="text-lg font-medium group-hover:text-primary transition-colors">{label}</span>
-                   <svg className="w-4 h-4 ml-auto text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                   </svg>
-                 </Link>
-               );
-             })}
-           </div>
-         </motion.section>
- 
-         {/* Disclaimer / Brand Notes */}
-         {page.disclaimer && (
-           <motion.div
-             initial={{ opacity: 0 }}
-             animate={{ opacity: 1 }}
-             transition={{ delay: 0.45 }}
-             className="mt-8 p-5 bg-amber-50/80 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/30 rounded-2xl text-sm text-amber-800 dark:text-amber-200 leading-relaxed"
-           >
-             {page.disclaimer}
-           </motion.div>
-         )}
- 
-         {page.fontNote && (
-           <motion.div
-             initial={{ opacity: 0 }}
-             animate={{ opacity: 1 }}
-             transition={{ delay: 0.45 }}
-             className="mt-4 p-5 bg-blue-50/80 dark:bg-blue-900/10 border border-blue-200/50 dark:border-blue-700/30 rounded-2xl text-sm text-blue-800 dark:text-blue-200 leading-relaxed"
-           >
-             {page.fontNote}
-           </motion.div>
-         )}
- 
-         {/* Back to Home */}
-         <motion.div
-           initial={{ opacity: 0 }}
-           animate={{ opacity: 1 }}
-           transition={{ delay: 0.5 }}
-           className="mt-12 text-center"
-         >
-           <Link
-             href="/"
-             className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors"
-           >
-             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-             </svg>
-             Back to Fancy Text Generator
-           </Link>
-         </motion.div>
-       </div>
-     </div>
-   );
- }
+interface PageTemplateProps {
+  page: PageDefinition;
+  categoryPath: string;
+  categoryName: string;
+}
+
+const fandomSlugs = new Set([
+  'pop-culture-font-generators',
+  'disney-font-generator',
+  'mario-font-generator',
+  'stranger-things-font-generator',
+]);
+
+const relatedHref = (slug: string) =>
+  fandomSlugs.has(slug) ? `/fandom/${slug}` : `/styles/${slug}`;
+
+const relatedLabel = (slug: string) =>
+  slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+const cleanFaqQuestion = (question: string) =>
+  question.replace(/\s+a:\s+.*$/i, '').trim();
+
+export default function PageTemplate({
+  page,
+  categoryPath,
+  categoryName,
+}: PageTemplateProps) {
+  const config = getGeneratorPageConfig(page.slug, page.title);
+  const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
+    const styleId = config.styleIds[index % config.styleIds.length];
+    const style = getStyleDefinition(styleId);
+    return {
+      before: example.before,
+      after: style?.transform(example.before) ?? example.after,
+      note: style?.name ?? example.note,
+    };
+  });
+
+  return (
+    <div className="min-h-screen pb-20 pt-20">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <Link href="/" className="font-medium hover:text-violet-700 dark:hover:text-violet-300">
+            Font Generators
+          </Link>
+          <span aria-hidden="true">/</span>
+          <Link href={categoryPath} className="font-medium hover:text-violet-700 dark:hover:text-violet-300">
+            {categoryName}
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span className="text-slate-900 dark:text-slate-100">{page.title}</span>
+        </nav>
+
+        <header className="relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white px-6 py-9 shadow-[0_24px_80px_-56px_rgba(79,70,229,0.5)] sm:px-10 sm:py-12 dark:border-slate-800 dark:bg-slate-950">
+          <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-violet-200/45 blur-3xl dark:bg-violet-900/20" aria-hidden="true" />
+          <div className="absolute -bottom-28 left-1/3 h-56 w-56 rounded-full bg-sky-100/55 blur-3xl dark:bg-sky-900/10" aria-hidden="true" />
+          <div className="relative max-w-4xl">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-violet-700 dark:text-violet-300">
+              <span>{page.icon}</span>
+              <span>Free online generator</span>
+              <span className="text-slate-300 dark:text-slate-700">•</span>
+              <span>{config.styleIds.length} recommended styles</span>
+            </div>
+            <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-6xl dark:text-white">
+              {page.title}
+            </h1>
+            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl dark:text-slate-300">
+              {page.description}
+            </p>
+            <a
+              href="#generator"
+              className="mt-7 inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20"
+            >
+              Start generating
+            </a>
+          </div>
+        </header>
+
+        <GeneratorTool
+          config={config}
+          examples={page.examples.map((example) => example.before)}
+          pageTitle={page.title}
+        />
+
+        <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="min-w-0">
+            <section>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
+                About this generator
+              </p>
+              <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+                What is the {page.title}?
+              </h2>
+              <div className="mt-5 space-y-5 text-base leading-8 text-slate-700 dark:text-slate-300">
+                {page.content.split('\n\n').map((paragraph, index) => {
+                  if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
+                    return (
+                      <h3 key={index} className="pt-2 text-xl font-bold text-slate-950 dark:text-white">
+                        {paragraph.replace(/\*\*/g, '')}
+                      </h3>
+                    );
+                  }
+                  return <p key={index}>{paragraph}</p>;
+                })}
+              </div>
+            </section>
+
+            {page.howToUse && (
+              <section className="mt-12 rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900/60">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
+                  Simple workflow
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-slate-950 dark:text-white">
+                  How to use this generator
+                </h2>
+                <ol className="mt-5 grid gap-4 sm:grid-cols-3">
+                  {[
+                    ['1', 'Enter text', 'Type a name, phrase, caption, or heading in the generator.'],
+                    ['2', 'Compare styles', `Review the ${config.styleIds.length} page-specific recommendations or choose another style family.`],
+                    ['3', 'Copy and test', 'Copy your preferred result and test it in the app or field where you plan to use it.'],
+                  ].map(([number, title, copy]) => (
+                    <li key={number} className="rounded-2xl bg-white p-4 dark:bg-slate-950">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-sm font-black text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+                        {number}
+                      </span>
+                      <h3 className="mt-3 font-bold text-slate-950 dark:text-white">{title}</h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-400">{copy}</p>
+                    </li>
+                  ))}
+                </ol>
+                <p className="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-400">{page.howToUse}</p>
+              </section>
+            )}
+
+            <section className="mt-12">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
+                Live output examples
+              </p>
+              <h2 className="mt-2 text-2xl font-black text-slate-950 dark:text-white">
+                {page.title.replace(/\s+Generator$/i, '')} examples
+              </h2>
+              <p className="mt-3 text-slate-600 dark:text-slate-400">
+                These examples are produced by the same transformations used in the generator above.
+              </p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                {generatedExamples.map((example, index) => (
+                  <article key={`${example.before}-${index}`} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Plain text</p>
+                    <p className="mt-1 text-slate-700 dark:text-slate-300">{example.before}</p>
+                    <div className="my-4 h-px bg-slate-200 dark:bg-slate-800" />
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-violet-600 dark:text-violet-300">
+                        {example.note}
+                      </p>
+                    </div>
+                    <p className="mt-2 break-words text-xl leading-8 text-slate-950 dark:text-white">{example.after}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="mt-12">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
+                Common questions
+              </p>
+              <h2 className="mt-2 text-2xl font-black text-slate-950 dark:text-white">
+                Frequently asked questions
+              </h2>
+              <div className="mt-5 space-y-3">
+                {page.faq.map((item, index) => (
+                  <details key={index} className="group rounded-2xl border border-slate-200 bg-white open:border-violet-300 dark:border-slate-800 dark:bg-slate-950 dark:open:border-violet-700">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-bold text-slate-900 dark:text-white">
+                      {cleanFaqQuestion(item.q)}
+                      <span aria-hidden="true" className="text-xl text-violet-600 transition group-open:rotate-45">+</span>
+                    </summary>
+                    <p className="border-t border-slate-100 px-5 py-4 leading-7 text-slate-600 dark:border-slate-800 dark:text-slate-300">
+                      {item.a}
+                    </p>
+                  </details>
+                ))}
+              </div>
+            </section>
+
+            {(page.disclaimer || page.fontNote) && (
+              <section className="mt-10 space-y-3" aria-label="Important notes">
+                {page.disclaimer && (
+                  <p className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-7 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+                    {page.disclaimer}
+                  </p>
+                )}
+                {page.fontNote && (
+                  <p className="rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sm leading-7 text-sky-900 dark:border-sky-900/50 dark:bg-sky-950/30 dark:text-sky-200">
+                    {page.fontNote}
+                  </p>
+                )}
+              </section>
+            )}
+          </div>
+
+          <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
+              <h2 className="font-black text-slate-950 dark:text-white">Related generators</h2>
+              <nav className="mt-3 space-y-2" aria-label="Related generators">
+                {page.relatedSlugs.slice(0, 4).map((slug) => (
+                  <Link
+                    key={slug}
+                    href={relatedHref(slug)}
+                    className="flex items-center justify-between gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 transition hover:bg-violet-50 hover:text-violet-700 dark:text-slate-300 dark:hover:bg-violet-950/40 dark:hover:text-violet-300"
+                  >
+                    <span>{relatedLabel(slug)}</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                ))}
+              </nav>
+              <Link
+                href={categoryPath}
+                className="mt-4 inline-flex text-sm font-bold text-violet-700 hover:text-violet-900 dark:text-violet-300"
+              >
+                Browse all {categoryName.toLowerCase()} →
+              </Link>
+            </div>
+
+            <div className="rounded-3xl bg-slate-950 p-5 text-white">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-300">Unicode note</p>
+              <p className="mt-3 text-sm leading-6 text-slate-300">
+                Fancy text changes characters, not the installed font. That is why the result can be copied into many apps, but rendering may vary by device.
+              </p>
+              <Link href="/guides/how-unicode-text-works-guide" className="mt-4 inline-flex text-sm font-bold text-white hover:text-violet-300">
+                Learn how Unicode text works →
+              </Link>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}

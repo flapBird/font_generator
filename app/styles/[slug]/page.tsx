@@ -2,6 +2,7 @@
  import PageTemplate from '@/components/PageTemplate';
  import type { Metadata } from 'next';
  import { notFound } from 'next/navigation';
+ import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
  
  export async function generateStaticParams() {
    return stylePages.map((page) => ({ slug: page.slug }));
@@ -20,6 +21,15 @@
      openGraph: {
        title: buildMetaTitle(page),
        description: buildMetaDescription(page),
+       url: `https://font-generators.org/styles/${page.slug}`,
+       type: 'website',
+       images: ['/og-font-generators.png'],
+     },
+     twitter: {
+       card: 'summary_large_image',
+       title: buildMetaTitle(page),
+       description: buildMetaDescription(page),
+       images: ['/og-font-generators.png'],
      },
    };
  }
@@ -28,6 +38,10 @@
    const { slug } = await params;
    const page = getPageBySlug(slug, stylePages);
    if (!page) notFound();
+   const config = getGeneratorPageConfig(page.slug, page.title);
+   const featureList = config.styleIds
+     .map((styleId) => getStyleDefinition(styleId)?.name)
+     .filter((name): name is string => Boolean(name));
  
    return (
      <>
@@ -36,13 +50,43 @@
          dangerouslySetInnerHTML={{
            __html: JSON.stringify({
              "@context": "https://schema.org",
-             "@type": "WebApplication",
-             "name": page.title,
-             "url": `https://font-generators.org/styles/${page.slug}`,
-             "description": page.metaDescription,
-             "applicationCategory": "DesignApplication",
-             "operatingSystem": "Any",
-             "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+             "@graph": [
+               {
+                 "@type": "WebApplication",
+                 "name": page.title,
+                 "url": `https://font-generators.org/styles/${page.slug}`,
+                 "description": buildMetaDescription(page),
+                 "applicationCategory": "DesignApplication",
+                 "operatingSystem": "Any",
+                 "isAccessibleForFree": true,
+                 "browserRequirements": "Requires a modern Unicode-capable web browser",
+                 "featureList": featureList,
+                 "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+               },
+               {
+                 "@type": "BreadcrumbList",
+                 "itemListElement": [
+                   {
+                     "@type": "ListItem",
+                     "position": 1,
+                     "name": "Font Generators",
+                     "item": "https://font-generators.org/"
+                   },
+                   {
+                     "@type": "ListItem",
+                     "position": 2,
+                     "name": "Text Styles",
+                     "item": "https://font-generators.org/styles"
+                   },
+                   {
+                     "@type": "ListItem",
+                     "position": 3,
+                     "name": page.title,
+                     "item": `https://font-generators.org/styles/${page.slug}`
+                   }
+                 ]
+               }
+             ]
            })
          }}
        />

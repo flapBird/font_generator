@@ -25,11 +25,18 @@ export const metadata: Metadata = {
     siteName: "Font Generators",
     title: "Free Font Generator — Fancy Unicode Text",
     description: "Free online font generator. Create fancy Unicode text for social media bios, posts, and creative projects.",
+    images: [{
+      url: "/og-font-generators.png",
+      width: 1731,
+      height: 909,
+      alt: "Font Generators — Type it. Style it. Copy it.",
+    }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Free Font Generator — Fancy Unicode Text",
     description: "Free font generator. Create fancy Unicode text for social media.",
+    images: ["/og-font-generators.png"],
   },
   robots: {
     index: true,
@@ -57,7 +64,7 @@ export default function RootLayout({
   >
         <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4183802444188513"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
           crossOrigin="anonymous"
         />
         {/* Google Analytics */}
@@ -77,9 +84,6 @@ export default function RootLayout({
           `}
         </Script>
         
-        {/* Privacy-friendly analytics by Plausible */}
-        <Script defer data-domain="font-generators.org" src="https://analytics.leeswalmonitor.top/js/plausible.js"></Script>
-
         <Header />
         <div className="flex flex-col min-h-screen">
           <main className="flex-1">

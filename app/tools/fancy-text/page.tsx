@@ -36,7 +36,7 @@ export default function FancyTextPage() {
             "@type": "WebApplication",
             "name": "Fancy Text Generator",
             "url": "https://font-generators.org/tools/fancy-text",
-            "description": "Transform your text into 50+ fancy Unicode styles. Perfect for social media, bios, and creative projects.",
+            "description": "Transform your text into 20+ fancy Unicode styles. Perfect for social media, bios, and creative projects.",
             "applicationCategory": "DesignApplication",
             "operatingSystem": "Any",
             "offers": {

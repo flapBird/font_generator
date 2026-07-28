@@ -1,6 +1,7 @@
  import Link from 'next/link';
  import { fandomPages } from '@/lib/data';
  import type { Metadata } from 'next';
+ import { generateStyleVariants, getGeneratorPageConfig } from '@/lib/generator';
  
  export const metadata: Metadata = {
    title: 'Fandom Font Generators',
@@ -24,19 +25,32 @@
          </div>
  
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-           {fandomPages.map((page) => (
-             <Link
-               key={page.slug}
-               href={`/fandom/${page.slug}`}
-               className="group p-5 bg-white/50 dark:bg-slate-900/30 backdrop-blur-sm rounded-2xl border border-white/60 dark:border-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/40 hover:shadow-lg hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all duration-300"
-             >
-               <div className="flex items-center gap-3 mb-2">
-                 <span className="text-2xl">{page.icon}</span>
-                 <h2 className="text-lg font-semibold group-hover:text-primary transition-colors">{page.title}</h2>
-               </div>
-               <p className="text-sm text-muted-foreground line-clamp-2">{page.description}</p>
-             </Link>
-           ))}
+           {fandomPages.map((page) => {
+             const config = getGeneratorPageConfig(page.slug, page.title);
+             const preview = generateStyleVariants(page.title.replace(' Font Generator', ''), config.styleIds.slice(0, 1))[0];
+             return (
+               <Link
+                 key={page.slug}
+                 href={`/fandom/${page.slug}`}
+                 className="group flex min-h-56 flex-col rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-42px_rgba(15,23,42,0.5)] transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_24px_60px_-40px_rgba(109,40,217,0.45)] dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700"
+               >
+                 <div className="flex items-start justify-between gap-3">
+                   <span className="text-2xl" aria-hidden="true">{page.icon}</span>
+                   <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-violet-700 dark:bg-violet-950/50 dark:text-violet-300">
+                     {config.styleIds.length} styles
+                   </span>
+                 </div>
+                 <h2 className="mt-4 text-lg font-black text-slate-950 transition group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">
+                   {page.title}
+                 </h2>
+                 <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{page.description}</p>
+                 <div className="mt-auto pt-5">
+                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{preview?.name}</p>
+                   <p className="mt-1 break-words text-lg text-slate-900 dark:text-slate-100">{preview?.text}</p>
+                 </div>
+               </Link>
+             );
+           })}
          </div>
  
          <div className="mt-12 text-center">

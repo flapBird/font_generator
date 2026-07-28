@@ -14,7 +14,7 @@ export default function TermsPage() {
         >
           <h1 className="text-3xl sm:text-4xl font-bold mb-4">Terms of Service</h1>
           <p className="text-lg text-muted-foreground">
-            Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Last updated: July 28, 2026
           </p>
         </motion.div>
 
@@ -32,7 +32,7 @@ export default function TermsPage() {
 
           <h2>2. Description of Service</h2>
           <p>
-            Font Generators provides free online tools for generating fancy text, identifying fonts, and creating logo designs. 
+            Font Generators provides free online tools for generating and previewing decorative Unicode text.
             All services are provided &quot;as is&quot; without warranty of any kind.
           </p>
 

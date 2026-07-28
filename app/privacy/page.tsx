@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
         >
           <h1 className="text-3xl sm:text-4xl font-bold mb-4">Privacy Policy</h1>
           <p className="text-lg text-muted-foreground">
-            Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Last updated: July 28, 2026
           </p>
         </motion.div>
 
@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
           <p>When you access our Service, we may automatically collect certain information:</p>
           <ul>
             <li><strong>Log Data</strong>: IP address, browser type, pages visited, time spent</li>
-            <li><strong>Cookies</strong>: Session cookies for website functionality</li>
+            <li><strong>Cookies and similar technologies</strong>: Used by analytics and advertising providers</li>
             <li><strong>Device Information</strong>: Device type, operating system, browser version</li>
           </ul>
 
@@ -54,13 +54,16 @@ export default function PrivacyPolicyPage() {
 
           <h2>3. Cookies and Tracking Technologies</h2>
           <p>
-            We use cookies and similar tracking technologies to track activity on our Service and store certain information. 
-            You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.
+            We use Google Analytics to understand aggregate website usage and Google AdSense to support the
+            service with advertising. These providers may use cookies or similar technologies according to
+            their own policies. You can control cookies through your browser and any consent controls shown
+            for your region.
           </p>
 
           <h2>4. Third-Party Services</h2>
           <p>
-            We may employ third-party companies and individuals due to the following reasons:
+            Our current third-party service providers include Google Analytics and Google AdSense. We use
+            these services for the following reasons:
           </p>
           <ul>
             <li>To facilitate our Service</li>
