@@ -1,3 +1,5 @@
+ import { additionalGuidePages } from './additional-guides';
+
  export interface PageDefinition {
    slug: string;
    title: string;
@@ -974,7 +976,7 @@
      metaDescription: 'Learn how fancy text generators really work. Unicode characters, not fonts — the technical explanation behind decorative text. Free guide.',
      category: 'guides',
      description: 'A plain-English explanation of how fancy text generators work. Spoiler: they are not fonts — they are Unicode character substitutions.',
-     content: 'When you type text into a fancy text generator and get something that looks like a different font, what actually happened is not font switching. The generator replaced each letter you typed with a different Unicode character that happens to have a different visual shape.\n\n**Unicode, the backbone.** Unicode is a standard that assigns a unique number (a codepoint) to every character, symbol, and emoji across every writing system. The letter "A" is U+0041. The superscript "ᴬ" is U+1D2C. They are different characters with different shapes.\n\n**The Mathematical Alphanumerics block.** Most fancy text comes from a region of Unicode called Mathematical Alphanumeric Symbols (U+1D400–U+1D7FF). Despite the name, these characters look like ordinary letters — they are just drawn in different styles (bold, italic, script, fraktur, double-struck, monospace).\n\n**Copy-paste magic.** Because the output is made of standard Unicode characters, it survives copy-paste between applications. Contrast this with formatting-based styling (like bold in a word processor), which gets stripped when you paste into plain-text fields.\n\n**Limitations you should know.\n- Not every letter exists in every style (subscript b and superscript q have no Unicode codepoint)\n- Numbers are especially spotty — many fancy styles lack numeral mappings\n- Unicode style characters render differently depending on the device\'s installed fonts\n- Screen readers announce Unicode characters by name, which can make styled text unintelligible\n\n**Why people use it anyway.** Because it works — your styled text stays styled when you paste it into Instagram, Twitter, Discord, TikTok, and any other platform that supports Unicode input.',
+     content: 'When you type text into a fancy text generator and get something that looks like a different font, what actually happened is not font switching. The generator replaced each letter you typed with a different Unicode character that happens to have a different visual shape.\n\n**Unicode, the backbone.** Unicode is a standard that assigns a unique number (a codepoint) to every character, symbol, and emoji across every writing system. The letter "A" is U+0041. The superscript "ᴬ" is U+1D2C. They are different characters with different shapes.\n\n**The Mathematical Alphanumerics block.** Most fancy text comes from a region of Unicode called Mathematical Alphanumeric Symbols (U+1D400–U+1D7FF). Despite the name, these characters look like ordinary letters — they are just drawn in different styles (bold, italic, script, fraktur, double-struck, monospace).\n\n**Copy-paste magic.** Because the output is made of standard Unicode characters, it survives copy-paste between applications. Contrast this with formatting-based styling (like bold in a word processor), which gets stripped when you paste into plain-text fields.\n\n**Limitations you should know.**\n\n- Not every letter exists in every style (subscript b and superscript q have no Unicode codepoint)\n- Numbers are especially spotty — many fancy styles lack numeral mappings\n- Unicode style characters render differently depending on the device\'s installed fonts\n- Screen readers announce Unicode characters by name, which can make styled text unintelligible\n\n**Why people use it anyway.** Because it works — your styled text stays styled when you paste it into Instagram, Twitter, Discord, TikTok, and any other platform that supports Unicode input.',
      howToUse: 'Read this guide, then try the free Fancy Text Generator on this site to see Unicode character substitution in action. Type a sentence and watch it transform across 20+ character sets.',
      examples: [
        { before: 'Hello (regular)', after: '𝐇𝐞𝐥𝐥𝐨 (bold)', note: 'Regular to bold — same text, different Unicode characters' },
@@ -988,6 +990,7 @@
      relatedSlugs: ['reddit-fancy-text-guide'],
      icon: '📖',
    },
+   ...additionalGuidePages,
  ];
  
  // Helper functions

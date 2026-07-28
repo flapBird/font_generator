@@ -2,6 +2,7 @@ import Link from 'next/link';
 import GeneratorTool from './GeneratorTool';
 import type { PageDefinition } from '@/lib/data';
 import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
+import { getPageSupplement } from '@/lib/page-supplements';
 
 interface PageTemplateProps {
   page: PageDefinition;
@@ -34,6 +35,7 @@ export default function PageTemplate({
   categoryName,
 }: PageTemplateProps) {
   const config = getGeneratorPageConfig(page.slug, page.title);
+  const supplement = getPageSupplement(page.slug);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
     const styleId = config.styleIds[index % config.styleIds.length];
     const style = getStyleDefinition(styleId);
@@ -112,6 +114,32 @@ export default function PageTemplate({
                 })}
               </div>
             </section>
+
+            {supplement && (
+              <section className="mt-12 rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-950">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
+                  Practical selection guide
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-slate-950 dark:text-white">
+                  {supplement.heading}
+                </h2>
+                <div className="mt-5 space-y-4 leading-8 text-slate-700 dark:text-slate-300">
+                  {supplement.paragraphs.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+                <ul className="mt-6 grid gap-3 sm:grid-cols-3">
+                  {supplement.tips.map((tip) => (
+                    <li
+                      key={tip}
+                      className="rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                    >
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             {page.howToUse && (
               <section className="mt-12 rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900/60">

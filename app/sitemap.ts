@@ -8,6 +8,7 @@
    const staticPages = [
      { url: baseUrl, lastModified: contentLastModified, changeFrequency: 'weekly' as const, priority: 1 },
      { url: `${baseUrl}/about`, lastModified: contentLastModified, changeFrequency: 'monthly' as const, priority: 0.5 },
+     { url: `${baseUrl}/contact`, lastModified: contentLastModified, changeFrequency: 'monthly' as const, priority: 0.4 },
      { url: `${baseUrl}/privacy`, lastModified: contentLastModified, changeFrequency: 'monthly' as const, priority: 0.3 },
      { url: `${baseUrl}/terms`, lastModified: contentLastModified, changeFrequency: 'monthly' as const, priority: 0.3 },
      { url: `${baseUrl}/styles`, lastModified: contentLastModified, changeFrequency: 'weekly' as const, priority: 0.8 },

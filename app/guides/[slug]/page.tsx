@@ -20,6 +20,15 @@
      openGraph: {
        title: buildMetaTitle(page),
        description: buildMetaDescription(page),
+       url: `https://font-generators.org/guides/${page.slug}`,
+       type: 'article',
+       images: ['/og-font-generators.png'],
+     },
+     twitter: {
+       card: 'summary_large_image',
+       title: buildMetaTitle(page),
+       description: buildMetaDescription(page),
+       images: ['/og-font-generators.png'],
      },
    };
  }
@@ -37,9 +46,22 @@
            __html: JSON.stringify({
              "@context": "https://schema.org",
              "@type": "Article",
-             "name": page.title,
+             "headline": page.title,
              "url": `https://font-generators.org/guides/${page.slug}`,
              "description": page.metaDescription,
+             "dateModified": "2026-07-28",
+             "author": {
+               "@type": "Organization",
+               "name": "Font Generators",
+               "url": "https://font-generators.org/about"
+             },
+             "publisher": {
+               "@type": "Organization",
+               "name": "Font Generators",
+               "url": "https://font-generators.org"
+             },
+             "image": "https://font-generators.org/og-font-generators.png",
+             "mainEntityOfPage": `https://font-generators.org/guides/${page.slug}`
            })
          }}
        />

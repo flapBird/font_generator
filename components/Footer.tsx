@@ -46,6 +46,7 @@
                <li><Link href="/" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Fancy Text Generator</Link></li>
                <li><Link href="/guides" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Guides</Link></li>
                <li><Link href="/about" className="text-muted-foreground hover:text-foreground text-sm transition-colors">About</Link></li>
+               <li><Link href="/contact" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Contact</Link></li>
                <li><Link href="/terms" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Terms of Service</Link></li>
                <li><Link href="/privacy" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Privacy Policy</Link></li>
              </ul>

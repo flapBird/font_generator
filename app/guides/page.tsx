@@ -7,7 +7,7 @@
    alternates: {
      canonical: 'https://font-generators.org/guides',
    },
-   description: 'Learn how fancy text generators work, why Reddit recommends certain tools, and the Unicode technology behind decorative text styles.',
+   description: 'Practical guides to Unicode text, compatibility, accessibility, Instagram bios, Discord, character coverage, and troubleshooting.',
  };
  
  export default function GuidesIndexPage() {
@@ -19,7 +19,7 @@
              <span className="gradient-text">Guides</span>
            </h1>
            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-             Learn how fancy text and Unicode generators work, plus community-curated recommendations.
+             Learn how Unicode text works, where it is compatible, and how to use decorative styles responsibly.
            </p>
          </div>
  

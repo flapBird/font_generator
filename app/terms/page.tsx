@@ -44,9 +44,10 @@ export default function TermsPage() {
 
           <h2>4. User-Generated Content</h2>
           <p>
-            You retain ownership of any content you submit to the Service. By submitting content, you grant Font Generators 
-            a worldwide, non-exclusive, royalty-free license to use, reproduce, adapt, publish, translate, and distribute 
-            your content in connection with the Service.
+            Text entered in the primary Unicode generators is processed locally in your browser and is
+            not submitted to Font Generators for publication or storage. If you voluntarily email us
+            feedback, corrections, or other material, you confirm that you have the right to share it
+            and allow us to use it to respond to your request and improve the Service.
           </p>
 
           <h2>5. Prohibited Activities</h2>

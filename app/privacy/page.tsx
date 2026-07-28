@@ -1,112 +1,140 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen pt-24 pb-16">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-3xl sm:text-4xl font-bold mb-4">Privacy Policy</h1>
-          <p className="text-lg text-muted-foreground">
+    <div className="min-h-screen pb-16 pt-24">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <header className="mb-12 text-center">
+          <h1 className="text-3xl font-bold sm:text-4xl">Privacy Policy</h1>
+          <p className="mt-4 text-lg text-muted-foreground">
             Last updated: July 28, 2026
           </p>
-        </motion.div>
+        </header>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="prose prose-neutral dark:prose-invert max-w-none bg-white/50 backdrop-blur-sm rounded-2xl p-8 border border-white/60"
-        >
-          <h2>1. Information We Collect</h2>
-          
-          <h3>Personal Information</h3>
-          <p>We do not collect personal information unless you voluntarily provide it to us. This may include:</p>
-          <ul>
-            <li>Name and email address when contacting support</li>
-            <li>User-generated content submitted through our tools</li>
-          </ul>
-
-          <h3>Automatically Collected Information</h3>
-          <p>When you access our Service, we may automatically collect certain information:</p>
-          <ul>
-            <li><strong>Log Data</strong>: IP address, browser type, pages visited, time spent</li>
-            <li><strong>Cookies and similar technologies</strong>: Used by analytics and advertising providers</li>
-            <li><strong>Device Information</strong>: Device type, operating system, browser version</li>
-          </ul>
-
-          <h2>2. How We Use Your Information</h2>
-          <p>We use the collected information for various purposes:</p>
-          <ul>
-            <li>To provide and maintain our Service</li>
-            <li>To notify you about changes to our Service</li>
-            <li>To allow participation in interactive features</li>
-            <li>To provide customer support</li>
-            <li>To gather analysis for improving our Service</li>
-            <li>To monitor usage of our Service</li>
-          </ul>
-
-          <h2>3. Cookies and Tracking Technologies</h2>
+        <article className="prose prose-neutral max-w-none rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10 dark:prose-invert dark:border-slate-800 dark:bg-slate-950">
+          <h2>1. Scope of this policy</h2>
           <p>
-            We use Google Analytics to understand aggregate website usage and Google AdSense to support the
-            service with advertising. These providers may use cookies or similar technologies according to
-            their own policies. You can control cookies through your browser and any consent controls shown
-            for your region.
+            This policy explains how Font Generators handles information when
+            you visit font-generators.org, use a Unicode text generator, or
+            contact us. It also explains the data practices associated with
+            Google Analytics and Google AdSense.
           </p>
 
-          <h2>4. Third-Party Services</h2>
+          <h2>2. Text entered in the generators</h2>
           <p>
-            Our current third-party service providers include Google Analytics and Google AdSense. We use
-            these services for the following reasons:
-          </p>
-          <ul>
-            <li>To facilitate our Service</li>
-            <li>To provide analytics services</li>
-            <li>To assist us in monitoring and analyzing Service usage</li>
-          </ul>
-          <p>
-            These third parties have access to your Personal Information only to perform these tasks on our behalf 
-            and are obligated not to disclose or use it for any other purpose.
+            The primary Unicode generators transform text directly in your
+            browser. Text typed into those generators is not sent to a Font
+            Generators conversion server, stored in our database, or attached
+            to a user account. Avoid entering passwords, payment details, or
+            other sensitive information into any public website tool.
           </p>
 
-          <h2>5. Data Security</h2>
+          <h2>3. Information collected automatically</h2>
           <p>
-            We take reasonable measures to protect your information. However, no method of transmission over the Internet 
-            or electronic storage is 100% secure, and we cannot guarantee absolute security.
+            Our hosting provider and third-party services may automatically
+            process information such as your IP address, browser and device
+            type, operating system, referring page, pages visited, approximate
+            region, timestamps, and interaction or diagnostic events. This
+            information is used to operate, secure, measure, and improve the
+            website.
           </p>
 
-          <h2>6. Data Retention</h2>
+          <h2>4. Google Analytics</h2>
           <p>
-            We retain information we collect as long as necessary to provide our Service and for legitimate business purposes. 
-            User-generated content may be retained indefinitely unless requested for deletion.
+            We use Google Analytics to understand aggregate traffic and product
+            usage. Google Analytics may use cookies or similar identifiers to
+            process information about visits and interactions. We do not send
+            names, email addresses, generator input, or other information that
+            we intend to identify you personally through analytics events.
           </p>
 
-          <h2>7. Children&apos;s Privacy</h2>
+          <h2>5. Google AdSense and advertising cookies</h2>
           <p>
-            Our Service does not address anyone under the age of 13. We do not knowingly collect personally identifiable 
-            information from children under 13. If we discover such information, we will delete it promptly.
+            We use Google AdSense to support the site with advertising.
+            Third-party vendors, including Google, use cookies to serve ads
+            based on a user&apos;s prior visits to this website or other
+            websites. Google&apos;s use of advertising cookies enables Google
+            and its partners to serve ads based on visits to this site and
+            other sites on the Internet.
+          </p>
+          <p>
+            As a result of ad serving, third parties may place and read cookies
+            in your browser or use web beacons, IP addresses, or other
+            identifiers to collect information. Other third-party advertising
+            vendors or networks may also use cookies where they are enabled in
+            our advertising settings.
+          </p>
+          <p>
+            You can manage or opt out of personalized Google advertising in{' '}
+            <Link href="https://adssettings.google.com/" rel="noopener noreferrer">
+              Google Ads Settings
+            </Link>
+            . You can also learn{' '}
+            <Link
+              href="https://policies.google.com/technologies/partner-sites"
+              rel="noopener noreferrer"
+            >
+              how Google uses information from sites that use its services
+            </Link>
+            .
           </p>
 
-          <h2>8. Changes to This Privacy Policy</h2>
+          <h2>6. Consent controls</h2>
           <p>
-            We may update our Privacy Policy from time to time. We will notify you of any changes by posting 
-            the new Privacy Policy on this page and updating the &quot;Last updated&quot; date.
+            Where required, visitors may be shown a consent message that
+            provides choices about advertising cookies, analytics storage, and
+            personalized advertising. You can revisit the available privacy
+            controls or adjust browser settings to delete or block cookies.
+            Blocking cookies may affect some site or advertising features.
           </p>
 
-          <h2>9. Contact Us</h2>
+          <h2>7. Contact information</h2>
           <p>
-            If you have any questions about this Privacy Policy, please contact us at{' '}
-            <Link href="mailto:contact@font-generators.org" className="text-primary hover:underline">
+            If you contact us by email, we receive the email address, message,
+            and any information you choose to include. We use it to respond to
+            the request and maintain necessary support or security records. We
+            do not sell contact information.
+          </p>
+
+          <h2>8. Data retention and sharing</h2>
+          <p>
+            We retain direct correspondence only for as long as reasonably
+            needed to respond, keep business records, prevent abuse, or meet
+            legal obligations. Hosting, analytics, and advertising providers
+            may retain information under their own policies. We may disclose
+            information when required by law, to protect the service and its
+            users, or to service providers acting on our behalf.
+          </p>
+
+          <h2>9. Children&apos;s privacy</h2>
+          <p>
+            Font Generators is a general-audience service and is not directed
+            to children under 13. We do not knowingly collect personal
+            information from children under 13. If you believe a child has sent
+            us personal information, contact us so we can review and delete it
+            where appropriate.
+          </p>
+
+          <h2>10. Your choices and rights</h2>
+          <p>
+            Depending on your location, you may have rights to request access,
+            correction, deletion, or restriction of certain personal
+            information. You may also object to some processing or withdraw
+            consent where processing relies on consent. Contact us to submit a
+            request.
+          </p>
+
+          <h2>11. Changes and contact</h2>
+          <p>
+            We may update this policy as the site or legal requirements change.
+            The date at the top shows the latest revision. Questions and privacy
+            requests can be sent to{' '}
+            <Link href="mailto:contact@font-generators.org">
               contact@font-generators.org
             </Link>
+            .
           </p>
-        </motion.div>
+        </article>
       </div>
     </div>
   );

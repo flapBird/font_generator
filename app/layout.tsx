@@ -2,19 +2,30 @@
  import Script from "next/script";
  import "./globals.css";
  import { Header, Footer } from "@/components";
+ import AdvertisingScripts from "@/components/AdvertisingScripts";
+ import { fandomPages, guidePages, stylePages } from "@/lib/data";
  
  // Using system fonts for production to avoid Google Fonts fetch dependency
  // and improve page load speed with zero external font requests
  const geistSans = { variable: '--font-geist-sans' };
  const geistMono = { variable: '--font-geist-mono' };
+ const adsenseClientId = 'ca-pub-4183802444188513';
+ const homeMetaTitle = 'Font Generator – Copy & Paste Fancy Text Online';
+ const homeMetaDescription = 'Free online font generator for fancy Unicode text. Type your words, choose a style, then copy and paste it into Instagram, TikTok, Discord, and more.';
+ const adEligiblePaths = [
+   '/',
+   ...stylePages.map((page) => `/styles/${page.slug}`),
+   ...fandomPages.map((page) => `/fandom/${page.slug}`),
+   ...guidePages.map((page) => `/guides/${page.slug}`),
+ ];
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://font-generators.org/'),
   title: {
-    default: "Free Font Generator — Create Fancy Unicode Text | Font Generators",
+    default: homeMetaTitle,
     template: "%s | Font Generators"
   },
-  description: "Free online font generator for creating fancy Unicode text. Transform your words into stylish fonts for Instagram, Discord, TikTok, and more. Try our font generator free.",
+  description: homeMetaDescription,
   authors: [{ name: "Font Generators" }],
   creator: "Font Generators",
   publisher: "Font Generators",
@@ -23,8 +34,8 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://font-generators.org",
     siteName: "Font Generators",
-    title: "Free Font Generator — Fancy Unicode Text",
-    description: "Free online font generator. Create fancy Unicode text for social media bios, posts, and creative projects.",
+    title: homeMetaTitle,
+    description: homeMetaDescription,
     images: [{
       url: "/og-font-generators.png",
       width: 1731,
@@ -34,8 +45,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free Font Generator — Fancy Unicode Text",
-    description: "Free font generator. Create fancy Unicode text for social media.",
+    title: homeMetaTitle,
+    description: homeMetaDescription,
     images: ["/og-font-generators.png"],
   },
   robots: {
@@ -62,10 +73,9 @@ export default function RootLayout({
   <body
     className={`${geistSans.variable} ${geistMono.variable} antialiased`}
   >
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4183802444188513"
-          strategy="afterInteractive"
-          crossOrigin="anonymous"
+        <AdvertisingScripts
+          clientId={adsenseClientId}
+          allowedPaths={adEligiblePaths}
         />
         {/* Google Analytics */}
         <Script

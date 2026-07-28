@@ -17,6 +17,7 @@ export default function AboutPage() {
             "name": "Font Generators",
             "url": "https://font-generators.org",
             "description": "Browser-based Unicode text generators and typography guides.",
+            "email": "contact@font-generators.org",
             "sameAs": []
           })
         }}
@@ -114,7 +115,7 @@ export default function AboutPage() {
                 {
                   icon: '🔒',
                   title: 'Privacy First',
-                  description: 'We don\'t store your data. Your text and images are processed and forgotten.'
+                  description: 'Generator text is transformed locally in your browser. Analytics and advertising data are handled as described in our Privacy Policy.'
                 }
               ].map((item) => (
                 <div key={item.title} className="text-center p-6">
@@ -148,11 +149,38 @@ export default function AboutPage() {
             </div>
           </motion.section>
 
-          {/* CTA */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
+            className="mb-16"
+          >
+            <h2 className="text-2xl font-bold mb-4">How We Create and Review Content</h2>
+            <div className="prose prose-neutral dark:prose-invert max-w-none">
+              <p>
+                Generator presets are selected for the specific style, platform, or use case named on
+                each page. We distinguish copy-paste Unicode text from downloadable font files and
+                call out incomplete character coverage, accessibility limitations, and device-dependent
+                rendering where they matter.
+              </p>
+              <p>
+                Guides are written and reviewed by the Font Generators editorial team. When a platform
+                can change its character rules, we recommend testing the final result in the exact field
+                where it will be used. Fandom and named-typeface pages are independent references and do
+                not claim official affiliation or reproduce proprietary font files.
+              </p>
+              <p>
+                To report an incorrect mapping, outdated compatibility note, or accessibility issue,
+                visit the <Link href="/contact">Contact page</Link>.
+              </p>
+            </div>
+          </motion.section>
+
+          {/* CTA */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
             className="text-center"
           >
           </motion.section>
