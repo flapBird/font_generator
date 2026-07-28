@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Fragment, type ReactNode } from 'react';
 import type { PageDefinition } from '@/lib/data';
 
 interface GuideTemplateProps {
@@ -9,6 +10,15 @@ interface GuideTemplateProps {
 
 const cleanQuestion = (question: string) =>
   question.replace(/\s+a:\s+.*$/i, '').trim();
+
+const renderInlineFormatting = (text: string): ReactNode[] =>
+  text.split(/(\*\*.*?\*\*)/g).filter(Boolean).map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+
+    return <Fragment key={index}>{part.replace(/\\'/g, "'")}</Fragment>;
+  });
 
 export default function GuideTemplate({
   page,
@@ -47,12 +57,14 @@ export default function GuideTemplate({
               return (
                 <ul key={index}>
                   {paragraph.split('\n').map((line, lineIndex) => (
-                    <li key={lineIndex}>{line.replace(/^- /, '').replace(/\\'/g, "'")}</li>
+                    <li key={lineIndex}>
+                      {renderInlineFormatting(line.replace(/^- /, ''))}
+                    </li>
                   ))}
                 </ul>
               );
             }
-            return <p key={index}>{paragraph.replace(/\\'/g, "'")}</p>;
+            return <p key={index}>{renderInlineFormatting(paragraph)}</p>;
           })}
         </article>
 
