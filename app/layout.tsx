@@ -18,6 +18,16 @@
    ...fandomPages.map((page) => `/fandom/${page.slug}`),
    ...guidePages.map((page) => `/guides/${page.slug}`),
  ];
+ const styleNavigationLinks = stylePages.map((page) => ({
+   href: `/styles/${page.slug}`,
+   label: page.title,
+   icon: page.icon,
+ }));
+ const fandomNavigationLinks = fandomPages.map((page) => ({
+   href: `/fandom/${page.slug}`,
+   label: page.title,
+   icon: page.icon,
+ }));
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://font-generators.org/'),
@@ -94,7 +104,10 @@ export default function RootLayout({
           `}
         </Script>
         
-        <Header />
+        <Header
+          styleLinks={styleNavigationLinks}
+          fandomLinks={fandomNavigationLinks}
+        />
         <div className="flex flex-col min-h-screen">
           <main className="flex-1">
             {children}
