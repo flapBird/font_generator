@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import GeneratorTool from './GeneratorTool';
-import type { PageDefinition } from '@/lib/data';
+import { fandomPages, guidePages, stylePages, type PageDefinition } from '@/lib/data';
 import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
 import { getPageSupplement } from '@/lib/page-supplements';
 
@@ -10,15 +10,22 @@ interface PageTemplateProps {
   categoryName: string;
 }
 
-const fandomSlugs = new Set([
-  'pop-culture-font-generators',
-  'disney-font-generator',
-  'mario-font-generator',
-  'stranger-things-font-generator',
-]);
+const pagesBySlug = new Map(
+  [...stylePages, ...fandomPages, ...guidePages].map((page) => [page.slug, page]),
+);
 
-const relatedHref = (slug: string) =>
-  fandomSlugs.has(slug) ? `/fandom/${slug}` : `/styles/${slug}`;
+const getRelatedLinks = (slugs: string[]) =>
+  slugs
+    .map((slug) => {
+      const relatedPage = pagesBySlug.get(slug);
+      if (!relatedPage) return null;
+
+      return {
+        slug,
+        href: `/${relatedPage.category}/${relatedPage.slug}`,
+      };
+    })
+    .filter((link): link is { slug: string; href: string } => link !== null);
 
 const relatedLabel = (slug: string) =>
   slug
@@ -237,10 +244,10 @@ export default function PageTemplate({
             <div className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
               <h2 className="font-black text-slate-950 dark:text-white">Related generators</h2>
               <nav className="mt-3 space-y-2" aria-label="Related generators">
-                {page.relatedSlugs.slice(0, 4).map((slug) => (
+                {getRelatedLinks(page.relatedSlugs).slice(0, 4).map(({ slug, href }) => (
                   <Link
                     key={slug}
-                    href={relatedHref(slug)}
+                    href={href}
                     className="flex items-center justify-between gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 transition hover:bg-violet-50 hover:text-violet-700 dark:text-slate-300 dark:hover:bg-violet-950/40 dark:hover:text-violet-300"
                   >
                     <span>{relatedLabel(slug)}</span>

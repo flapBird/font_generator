@@ -25,6 +25,8 @@ export default function HomePage() {
 
   return (
     <>
+      <link rel="canonical" href="https://font-generators.org/" />
+
       {/* JSON-LD */}
       <script
         type="application/ld+json"

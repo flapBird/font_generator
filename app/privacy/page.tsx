@@ -129,9 +129,11 @@ export default function PrivacyPolicyPage() {
             We may update this policy as the site or legal requirements change.
             The date at the top shows the latest revision. Questions and privacy
             requests can be sent to{' '}
-            <Link href="mailto:contact@font-generators.org">
-              contact@font-generators.org
-            </Link>
+            <span>
+              <span>contact</span>
+              <span aria-hidden="true">@</span>
+              <span>font-generators.org</span>
+            </span>
             .
           </p>
         </article>

@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Link from 'next/link';
 
 export default function TermsPage() {
   return (
@@ -82,9 +81,11 @@ export default function TermsPage() {
           <h2>9. Contact Us</h2>
           <p>
             If you have any questions about these Terms, please contact us at{' '}
-            <Link href="mailto:contact@font-generators.org" className="text-primary hover:underline">
-              contact@font-generators.org
-            </Link>
+            <span className="text-primary">
+              <span>contact</span>
+              <span aria-hidden="true">@</span>
+              <span>font-generators.org</span>
+            </span>
           </p>
         </motion.div>
       </div>
