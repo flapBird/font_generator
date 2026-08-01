@@ -55,7 +55,7 @@ For essential information, choose bold, italic, monospace, or small caps before 
 Decorative text is most successful when it adds personality without carrying the entire message. Treat it like an accent: intentional, limited, and easy to replace when a device or assistive technology cannot present it clearly.`,
     howToUse: 'Limit decoration to a short phrase, preserve the plain-text original, and check how the result sounds with a screen reader or text-to-speech feature.',
     examples: [
-      { before: 'Support: contact@example.com', after: 'Support: contact@example.com', note: 'Keep contact information in ordinary text' },
+      { before: 'Support: contact@font-generators.org', after: 'Support: contact@font-generators.org', note: 'Keep contact information in ordinary text' },
       { before: 'Creative Designer', after: '𝒞𝓇ℯ𝒶𝓉𝒾𝓋ℯ Designer', note: 'Decorate one part instead of the full profile' },
       { before: 'Important update', after: '𝐈𝐦𝐩𝐨𝐫𝐭𝐚𝐧𝐭 update', note: 'A short bold accent is easier to scan' },
     ],

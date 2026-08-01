@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -32,12 +31,11 @@ export default function ContactPage() {
           </h2>
           <p className="mt-3 leading-7 text-slate-600 dark:text-slate-300">
             Send your message to{' '}
-            <Link
-              href="mailto:contact@font-generators.org"
-              className="font-semibold text-violet-700 hover:underline dark:text-violet-300"
-            >
-              contact@font-generators.org
-            </Link>
+            <span className="font-semibold text-violet-700 dark:text-violet-300">
+              <span>contact</span>
+              <span aria-hidden="true">@</span>
+              <span>font-generators.org</span>
+            </span>
             . Include the page URL and a short description when reporting a
             problem.
           </p>

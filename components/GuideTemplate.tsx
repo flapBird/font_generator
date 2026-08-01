@@ -15,14 +15,57 @@ interface GuideTemplateProps {
 const cleanQuestion = (question: string) =>
   question.replace(/\s+a:\s+.*$/i, '').trim();
 
-const renderInlineFormatting = (text: string): ReactNode[] =>
-  text.split(/(\*\*.*?\*\*)/g).filter(Boolean).map((part, index) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={index}>{part.slice(2, -2)}</strong>;
+const emailPattern = /([A-Z0-9._%+-]+)@([A-Z0-9.-]+\.[A-Z]{2,})/gi;
+
+const renderSafeEmailText = (text: string, keyPrefix: string): ReactNode[] => {
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(emailPattern)) {
+    const matchIndex = match.index ?? 0;
+    if (matchIndex > lastIndex) {
+      nodes.push(
+        <Fragment key={`${keyPrefix}-text-${lastIndex}`}>
+          {text.slice(lastIndex, matchIndex)}
+        </Fragment>,
+      );
     }
 
-    return <Fragment key={index}>{part.replace(/\\'/g, "'")}</Fragment>;
-  });
+    nodes.push(
+      <span key={`${keyPrefix}-email-${matchIndex}`}>
+        <span>{match[1]}</span>
+        <span aria-hidden="true">@</span>
+        <span>{match[2]}</span>
+      </span>,
+    );
+    lastIndex = matchIndex + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(
+      <Fragment key={`${keyPrefix}-text-${lastIndex}`}>
+        {text.slice(lastIndex)}
+      </Fragment>,
+    );
+  }
+
+  return nodes.length > 0 ? nodes : [text];
+};
+
+const renderInlineFormatting = (text: string): ReactNode[] =>
+  text.split(/(\*\*.*?\*\*)/g).filter(Boolean).reduce<ReactNode[]>((nodes, part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      nodes.push(
+        <strong key={index}>
+          {renderSafeEmailText(part.slice(2, -2), `inline-${index}`)}
+        </strong>,
+      );
+    } else {
+      nodes.push(...renderSafeEmailText(part.replace(/\\'/g, "'"), `inline-${index}`));
+    }
+
+    return nodes;
+  }, []);
 
 export default function GuideTemplate({
   page,
@@ -91,14 +134,14 @@ export default function GuideTemplate({
                   className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950"
                 >
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    {example.before}
+                    {renderSafeEmailText(example.before, `example-before-${index}`)}
                   </p>
                   <p className="mt-3 break-words text-xl font-semibold leading-8 text-slate-950 dark:text-white">
-                    {example.after}
+                    {renderSafeEmailText(example.after, `example-after-${index}`)}
                   </p>
                   {example.note && (
                     <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      {example.note}
+                      {renderSafeEmailText(example.note, `example-note-${index}`)}
                     </p>
                   )}
                 </article>
