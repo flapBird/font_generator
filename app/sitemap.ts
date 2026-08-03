@@ -4,6 +4,22 @@
  export default function sitemap(): MetadataRoute.Sitemap {
    const baseUrl = 'https://font-generators.org';
    const contentLastModified = new Date('2026-07-28T00:00:00.000Z');
+   const newContentLastModified = new Date('2026-08-03T00:00:00.000Z');
+   const newPageSlugs = new Set([
+     'instagram-font-generator',
+     'tattoo-font-generator',
+     'name-font-generator',
+     'aesthetic-font-generator',
+     'creepy-scary-font-generator',
+     'goth-font-generator',
+     'medieval-font-generator',
+     'metal-font-generator',
+     'glitch-font-generator',
+     'typewriter-font-generator',
+     'japanese-font-generator',
+     'minecraft-font-generator',
+     'fortnite-font-generator',
+   ]);
    
    const staticPages = [
      { url: baseUrl, lastModified: contentLastModified, changeFrequency: 'weekly' as const, priority: 1 },
@@ -18,14 +34,14 @@
    
    const styleUrls = stylePages.map(page => ({
      url: `${baseUrl}/styles/${page.slug}`,
-     lastModified: contentLastModified,
+     lastModified: newPageSlugs.has(page.slug) ? newContentLastModified : contentLastModified,
      changeFrequency: 'monthly' as const,
      priority: 0.7,
    }));
    
    const fandomUrls = fandomPages.map(page => ({
      url: `${baseUrl}/fandom/${page.slug}`,
-     lastModified: contentLastModified,
+     lastModified: newPageSlugs.has(page.slug) ? newContentLastModified : contentLastModified,
      changeFrequency: 'monthly' as const,
      priority: 0.6,
    }));

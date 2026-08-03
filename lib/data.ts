@@ -1,4 +1,5 @@
  import { additionalGuidePages } from './additional-guides';
+ import { newKeywordFandomPages, newKeywordStylePages } from './new-keyword-pages';
 
  export interface PageDefinition {
    slug: string;
@@ -843,6 +844,7 @@
      icon: '✝️',
      defaultStyleIds: ['fraktur'],
    },
+   ...newKeywordStylePages,
  ];
  
  export const fandomPages: PageDefinition[] = [
@@ -945,6 +947,7 @@
      defaultStyleIds: ['doubleStruck', 'fraktur'],
      disclaimer: 'This is an unofficial fan-made tool. Stranger Things is a trademark of Netflix Studios, LLC. This site is not affiliated with, endorsed by, or sponsored by Netflix.',
    },
+   ...newKeywordFandomPages,
  ];
  
  export const guidePages: PageDefinition[] = [

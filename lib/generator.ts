@@ -430,9 +430,23 @@ const packs: Record<string, string[]> = {
   'disney-font-generator': ['script', 'boldScript', 'sparkle', 'stars', 'hearts', 'circled', 'sansBold', 'fullwidth', 'dotted'],
   'mario-font-generator': ['squared', 'darkCircled', 'pixelFrame', 'sansBold', 'circled', 'bold', 'stars', 'fullwidth', 'arrows'],
   'stranger-things-font-generator': ['doubleStruck', 'boldFraktur', 'fraktur', 'gothicFrame', 'fullwidth', 'glitch', 'wideSpaced', 'darkCircled', 'overline'],
+  'instagram-font-generator': ['sansBold', 'boldScript', 'script', 'smallCaps', 'sansItalic', 'circled', 'sparkle', 'hearts', 'fullwidth', 'spaced'],
+  'tattoo-font-generator': ['boldScript', 'boldFraktur', 'script', 'fraktur', 'boldItalic', 'bold', 'gothicFrame', 'cross', 'underline'],
+  'name-font-generator': ['boldScript', 'sansBold', 'smallCaps', 'fraktur', 'script', 'bold', 'circled', 'sparkle', 'hearts', 'brackets'],
+  'aesthetic-font-generator': ['sparkle', 'script', 'spaced', 'fullwidth', 'smallCaps', 'hearts', 'doubleStruck', 'fraktur', 'circled', 'wideSpaced'],
+  'creepy-scary-font-generator': ['boldFraktur', 'gothicFrame', 'glitch', 'cross', 'fraktur', 'slash', 'inverted', 'strikethrough', 'ransom', 'darkCircled'],
+  'goth-font-generator': ['fraktur', 'boldFraktur', 'gothicFrame', 'boldItalic', 'cross', 'overline', 'glitch', 'wideSpaced', 'darkCircled'],
+  'medieval-font-generator': ['fraktur', 'boldFraktur', 'gothicFrame', 'bold', 'doubleStruck', 'stars', 'smallCaps', 'wideSpaced', 'overline'],
+  'metal-font-generator': ['boldFraktur', 'gothicFrame', 'slash', 'glitch', 'cross', 'darkCircled', 'bold', 'angleBrackets', 'wideSpaced'],
+  'glitch-font-generator': ['glitch', 'slash', 'strikethrough', 'monospace', 'angleBrackets', 'randomCase', 'ransom', 'wave', 'backwards'],
+  'typewriter-font-generator': ['monospace', 'spaced', 'strikethrough', 'bold', 'underline', 'smallCaps', 'fullwidth', 'dotDivider', 'overline'],
+  'japanese-font-generator': ['fullwidth', 'wideSpaced', 'angleBrackets', 'monospace', 'brackets', 'spaced', 'sparkle', 'smallCaps', 'dotDivider'],
+  'minecraft-font-generator': ['squared', 'pixelFrame', 'monospace', 'fullwidth', 'darkCircled', 'sansBold', 'angleBrackets', 'wideSpaced', 'glitch'],
+  'fortnite-font-generator': ['sansBold', 'squared', 'darkCircled', 'arrows', 'bold', 'fullwidth', 'pixelFrame', 'wideSpaced', 'angleBrackets'],
 };
 
 const platformSlugs = new Set([
+  'instagram-font-generator',
   'tiktok-font-generator',
   'facebook-font-generator',
   'linkedin-font-generator',
@@ -451,6 +465,8 @@ const realTypefaceSlugs = new Set([
 const fandomSlugs = new Set([
   'pop-culture-font-generators',
   'disney-font-generator',
+  'minecraft-font-generator',
+  'fortnite-font-generator',
   'mario-font-generator',
   'stranger-things-font-generator',
 ]);

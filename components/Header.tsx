@@ -198,7 +198,7 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
                   className={`${dropdownClass('styles')} pt-2`}
                   data-origin="top-center"
                 >
-                  <div className="max-h-[calc(100vh-5rem)] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 lg:p-6 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
+                  <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-y-contain rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 lg:p-6 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
                     <div className="mb-4 flex items-end justify-between gap-6 border-b border-border/70 pb-4">
                       <div>
                         <p className="font-semibold text-foreground">Text Style Generators</p>
@@ -263,7 +263,7 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
                   className={`${dropdownClass('fandom')} pt-2`}
                   data-origin="top-right"
                 >
-                  <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_24px_65px_-18px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
+                  <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-y-contain rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_24px_65px_-18px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
                     <div className="mb-2 flex items-center justify-between px-2 py-1">
                       <p className="text-sm font-semibold text-foreground">Fandom Generators</p>
                       <Link
@@ -328,7 +328,7 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden border-t border-slate-200 bg-white shadow-xl md:hidden dark:border-slate-700 dark:bg-slate-950"
             >
-              <div className="max-h-[calc(100vh-4rem)] space-y-1 overflow-y-auto py-3">
+              <div className="max-h-[calc(100vh-4rem)] space-y-1 overflow-y-auto overscroll-y-contain py-3">
                 <Link
                   href="/"
                   className="block rounded-xl px-4 py-3 font-medium transition-colors hover:bg-muted"
