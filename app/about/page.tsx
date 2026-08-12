@@ -81,8 +81,7 @@ export default function AboutPage() {
                   <div>
                     <h3 className="font-semibold mb-1">{tool.name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {tool.id === 'fancy-text' && 'Transform text into Unicode styles'}
-                      {tool.id === 'logo-font-maker' && 'Create logo typography'}
+                      Transform text into Unicode styles
                     </p>
                   </div>
                 </Link>

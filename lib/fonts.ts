@@ -1,10 +1,3 @@
-export interface LogoStyle {
-  id: string;
-  name: string;
-  fontFamily: string;
-  style: React.CSSProperties;
-}
-
 // Unicode character mappings for fancy text
 const unicodeMappings: Record<string, Record<string, string>> = {
   bold: {
@@ -242,31 +235,7 @@ export function generateAllFancyVariants(text: string): { id: string; name: stri
   }));
 }
 
-// Logo font styles
-export const logoFontStyles: LogoStyle[] = [
-  { id: 'modern-sans', name: 'Modern Sans', fontFamily: 'system-ui', style: { fontWeight: 700, letterSpacing: '-0.02em' } },
-  { id: 'elegant-serif', name: 'Elegant Serif', fontFamily: 'Georgia', style: { fontWeight: 400, fontStyle: 'italic' } },
-  { id: 'bold-display', name: 'Bold Display', fontFamily: 'Impact', style: { fontWeight: 900, textTransform: 'uppercase' as const } },
-  { id: 'minimal-thin', name: 'Minimal Thin', fontFamily: 'system-ui', style: { fontWeight: 200, letterSpacing: '0.2em' } },
-  { id: 'tech-mono', name: 'Tech Mono', fontFamily: 'monospace', style: { fontWeight: 500 } },
-  { id: 'classic-serif', name: 'Classic Serif', fontFamily: 'Times New Roman', style: { fontWeight: 700 } },
-  { id: 'rounded-friendly', name: 'Rounded Friendly', fontFamily: 'system-ui', style: { fontWeight: 600, letterSpacing: '0.05em' } },
-  { id: 'condensed-bold', name: 'Condensed Bold', fontFamily: 'Arial Narrow', style: { fontWeight: 700, letterSpacing: '-0.03em' } },
-  { id: 'script-elegant', name: 'Script Elegant', fontFamily: 'cursive', style: { fontWeight: 400 } },
-  { id: 'geometric-clean', name: 'Geometric Clean', fontFamily: 'Verdana', style: { fontWeight: 500, letterSpacing: '0.1em' } },
-  { id: 'vintage-display', name: 'Vintage Display', fontFamily: 'Georgia', style: { fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase' as const } },
-  { id: 'futuristic', name: 'Futuristic', fontFamily: 'system-ui', style: { fontWeight: 300, letterSpacing: '0.3em', textTransform: 'uppercase' as const } },
-];
-
-// Generate logo styles for a brand name
-export function generateLogoStyles(brandName: string): { style: LogoStyle; preview: string }[] {
-  return logoFontStyles.map(style => ({
-    style,
-    preview: brandName || 'Brand',
-  }));
-}
-
-// Tools list for sidebar
+// Core tool shown on the About page
 export const tools = [
   { id: 'fancy-text', name: 'Fancy Text Generator', href: '/', icon: '🎨' },
 ];
