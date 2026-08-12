@@ -5,7 +5,7 @@ import AsciiGeneratorTool from './AsciiGeneratorTool';
 import { fandomPages, guidePages, stylePages, type PageDefinition } from '@/lib/data';
 import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
 import { getPageSupplement } from '@/lib/page-supplements';
-import { getSpecializedAbout, getSpecializedDescription, getSpecializedFaq, getSpecializedHowTo, getVisualGeneratorConfig } from '@/lib/visual-generator';
+import { getSpecializedAbout, getSpecializedFaq, getSpecializedHowTo, getVisualGeneratorConfig } from '@/lib/visual-generator';
 
 interface PageTemplateProps {
   page: PageDefinition;
@@ -48,15 +48,9 @@ export default function PageTemplate({
   const visualConfig = getVisualGeneratorConfig(page.slug);
   const isAsciiGenerator = page.slug === 'big-font-generator';
   const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator;
-  const specializedDescription = getSpecializedDescription(page.slug);
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
-  const generatorCountLabel = isAsciiGenerator
-    ? '6 ASCII styles'
-    : visualConfig
-      ? `${visualConfig.presets.length} rendered presets`
-      : `${config.styleIds.length} recommended styles`;
   const supplement = getPageSupplement(page.slug);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
     const styleId = config.styleIds[index % config.styleIds.length];
@@ -71,7 +65,7 @@ export default function PageTemplate({
   return (
     <div className="min-h-screen pb-20 pt-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400 sm:mb-5">
           <Link href="/" className="font-medium hover:text-violet-700 dark:hover:text-violet-300">
             Font Generators
           </Link>
@@ -83,29 +77,10 @@ export default function PageTemplate({
           <span className="text-slate-900 dark:text-slate-100">{page.title}</span>
         </nav>
 
-        <header className="relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white px-6 py-9 shadow-[0_24px_80px_-56px_rgba(79,70,229,0.5)] sm:px-10 sm:py-12 dark:border-slate-800 dark:bg-slate-950">
-          <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-violet-200/45 blur-3xl dark:bg-violet-900/20" aria-hidden="true" />
-          <div className="absolute -bottom-28 left-1/3 h-56 w-56 rounded-full bg-sky-100/55 blur-3xl dark:bg-sky-900/10" aria-hidden="true" />
-          <div className="relative max-w-4xl">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-violet-700 dark:text-violet-300">
-              <span>{page.icon}</span>
-              <span>Free online generator</span>
-              <span className="text-slate-300 dark:text-slate-700">•</span>
-              <span>{generatorCountLabel}</span>
-            </div>
-            <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-6xl dark:text-white">
-              {page.title}
-            </h1>
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl dark:text-slate-300">
-              {specializedDescription ?? page.description}
-            </p>
-            <a
-              href="#generator"
-              className="mt-7 inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/20"
-            >
-              Start generating
-            </a>
-          </div>
+        <header className="text-center">
+          <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-white">
+            {page.title}
+          </h1>
         </header>
 
         {isAsciiGenerator ? (
