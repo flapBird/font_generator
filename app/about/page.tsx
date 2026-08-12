@@ -81,9 +81,7 @@ export default function AboutPage() {
                   <div>
                     <h3 className="font-semibold mb-1">{tool.name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {tool.id === 'ai-font-generator' && 'Generate unique font styles with AI'}
                       {tool.id === 'fancy-text' && 'Transform text into Unicode styles'}
-                      {tool.id === 'font-identifier' && 'Identify fonts from images'}
                       {tool.id === 'logo-font-maker' && 'Create logo typography'}
                     </p>
                   </div>

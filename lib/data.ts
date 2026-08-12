@@ -676,8 +676,8 @@
    },
    {
      slug: 'minecraftia-font-generator',
-     title: 'Minecraft Font Generator',
-    metaTitle: 'Minecraft Font Gen — Block Style',
+     title: 'Minecraftia Font Generator',
+    metaTitle: 'Minecraftia Font Generator — Pixel Text',
      metaDescription: 'Create Minecraft-inspired block text with squared, pixel, monospace, bold, and glitch Unicode styles for server names and gaming posts.',
      category: 'styles',
      description: 'Create blocky, pixel-inspired text in the style of Minecraft\'s typeface. Squared and monospace Unicode characters for that signature game look.',

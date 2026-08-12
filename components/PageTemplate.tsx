@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import GeneratorTool from './GeneratorTool';
+import VisualGeneratorTool from './VisualGeneratorTool';
+import AsciiGeneratorTool from './AsciiGeneratorTool';
 import { fandomPages, guidePages, stylePages, type PageDefinition } from '@/lib/data';
 import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
 import { getPageSupplement } from '@/lib/page-supplements';
+import { getSpecializedAbout, getSpecializedDescription, getSpecializedFaq, getSpecializedHowTo, getVisualGeneratorConfig } from '@/lib/visual-generator';
 
 interface PageTemplateProps {
   page: PageDefinition;
@@ -42,6 +45,18 @@ export default function PageTemplate({
   categoryName,
 }: PageTemplateProps) {
   const config = getGeneratorPageConfig(page.slug, page.title);
+  const visualConfig = getVisualGeneratorConfig(page.slug);
+  const isAsciiGenerator = page.slug === 'big-font-generator';
+  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator;
+  const specializedDescription = getSpecializedDescription(page.slug);
+  const specializedAbout = getSpecializedAbout(page.slug, page.title);
+  const specializedFaq = getSpecializedFaq(page.slug, page.title);
+  const specializedHowTo = getSpecializedHowTo(page.slug);
+  const generatorCountLabel = isAsciiGenerator
+    ? '6 ASCII styles'
+    : visualConfig
+      ? `${visualConfig.presets.length} rendered presets`
+      : `${config.styleIds.length} recommended styles`;
   const supplement = getPageSupplement(page.slug);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
     const styleId = config.styleIds[index % config.styleIds.length];
@@ -76,13 +91,13 @@ export default function PageTemplate({
               <span>{page.icon}</span>
               <span>Free online generator</span>
               <span className="text-slate-300 dark:text-slate-700">•</span>
-              <span>{config.styleIds.length} recommended styles</span>
+              <span>{generatorCountLabel}</span>
             </div>
             <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-6xl dark:text-white">
               {page.title}
             </h1>
             <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl dark:text-slate-300">
-              {page.description}
+              {specializedDescription ?? page.description}
             </p>
             <a
               href="#generator"
@@ -93,11 +108,24 @@ export default function PageTemplate({
           </div>
         </header>
 
-        <GeneratorTool
-          config={config}
-          examples={page.examples.map((example) => example.before)}
-          pageTitle={page.title}
-        />
+        {isAsciiGenerator ? (
+          <AsciiGeneratorTool
+            examples={page.examples.map((example) => example.before)}
+            pageTitle={page.title}
+          />
+        ) : visualConfig ? (
+          <VisualGeneratorTool
+            config={visualConfig}
+            examples={page.examples.map((example) => example.before)}
+            pageTitle={page.title}
+          />
+        ) : (
+          <GeneratorTool
+            config={config}
+            examples={page.examples.map((example) => example.before)}
+            pageTitle={page.title}
+          />
+        )}
 
         <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div className="min-w-0">
@@ -109,7 +137,7 @@ export default function PageTemplate({
                 What is the {page.title}?
               </h2>
               <div className="mt-5 space-y-5 text-base leading-8 text-slate-700 dark:text-slate-300">
-                {page.content.split('\n\n').map((paragraph, index) => {
+                {(specializedAbout ?? page.content.split('\n\n')).map((paragraph, index) => {
                   if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
                     return (
                       <h3 key={index} className="pt-2 text-xl font-bold text-slate-950 dark:text-white">
@@ -159,8 +187,8 @@ export default function PageTemplate({
                 <ol className="mt-5 grid gap-4 sm:grid-cols-3">
                   {[
                     ['1', 'Enter text', 'Type a name, phrase, caption, or heading in the generator.'],
-                    ['2', 'Compare styles', `Review the ${config.styleIds.length} page-specific recommendations or choose another style family.`],
-                    ['3', 'Copy and test', 'Copy your preferred result and test it in the app or field where you plan to use it.'],
+                    ['2', 'Compare styles', isSpecializedGenerator ? 'Compare the page-specific rendered presets and adjust the visual controls.' : `Review the ${config.styleIds.length} page-specific recommendations or choose another style family.`],
+                    ['3', isSpecializedGenerator ? 'Download and use' : 'Copy and test', isSpecializedGenerator ? 'Export your finished result in the format that fits your project.' : 'Copy your preferred result and test it in the app or field where you plan to use it.'],
                   ].map(([number, title, copy]) => (
                     <li key={number} className="rounded-2xl bg-white p-4 dark:bg-slate-950">
                       <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-sm font-black text-violet-700 dark:bg-violet-950 dark:text-violet-300">
@@ -171,11 +199,11 @@ export default function PageTemplate({
                     </li>
                   ))}
                 </ol>
-                <p className="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-400">{page.howToUse}</p>
+                <p className="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-400">{specializedHowTo ?? page.howToUse}</p>
               </section>
             )}
 
-            <section className="mt-12">
+            {!isSpecializedGenerator && <section className="mt-12">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
                 Live output examples
               </p>
@@ -200,7 +228,7 @@ export default function PageTemplate({
                   </article>
                 ))}
               </div>
-            </section>
+            </section>}
 
             <section className="mt-12">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
@@ -210,7 +238,7 @@ export default function PageTemplate({
                 Frequently asked questions
               </h2>
               <div className="mt-5 space-y-3">
-                {page.faq.map((item, index) => (
+                {(specializedFaq ?? page.faq).map((item, index) => (
                   <details key={index} className="group rounded-2xl border border-slate-200 bg-white open:border-violet-300 dark:border-slate-800 dark:bg-slate-950 dark:open:border-violet-700">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-bold text-slate-900 dark:text-white">
                       {cleanFaqQuestion(item.q)}
@@ -224,14 +252,14 @@ export default function PageTemplate({
               </div>
             </section>
 
-            {(page.disclaimer || page.fontNote) && (
+            {(page.disclaimer || (!isSpecializedGenerator && page.fontNote)) && (
               <section className="mt-10 space-y-3" aria-label="Important notes">
                 {page.disclaimer && (
                   <p className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-7 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
                     {page.disclaimer}
                   </p>
                 )}
-                {page.fontNote && (
+                {!isSpecializedGenerator && page.fontNote && (
                   <p className="rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sm leading-7 text-sky-900 dark:border-sky-900/50 dark:bg-sky-950/30 dark:text-sky-200">
                     {page.fontNote}
                   </p>
@@ -264,13 +292,15 @@ export default function PageTemplate({
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-300">Unicode note</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-300">{isSpecializedGenerator ? 'Export note' : 'Unicode note'}</p>
               <p className="mt-3 text-sm leading-6 text-slate-300">
-                Fancy text changes characters, not the installed font. That is why the result can be copied into many apps, but rendering may vary by device.
+                {isSpecializedGenerator
+                  ? 'PNG preserves the current rendered appearance. SVG keeps editable text, so its font can change when opened on a device without the same typeface.'
+                  : 'Fancy text changes characters, not the installed font. That is why the result can be copied into many apps, but rendering may vary by device.'}
               </p>
-              <Link href="/guides/how-unicode-text-works-guide" className="mt-4 inline-flex text-sm font-bold text-white hover:text-violet-300">
+              {!isSpecializedGenerator && <Link href="/guides/how-unicode-text-works-guide" className="mt-4 inline-flex text-sm font-bold text-white hover:text-violet-300">
                 Learn how Unicode text works →
-              </Link>
+              </Link>}
             </div>
           </aside>
         </div>

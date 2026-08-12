@@ -33,8 +33,6 @@ export default function GeneratorTool({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
 
-  const fallbackText = inputText || config.initialText;
-
   const visibleStyleIds = useMemo(() => {
     if (activeFilter === 'recommended') return config.styleIds;
     return generatorStyles
@@ -43,8 +41,8 @@ export default function GeneratorTool({
   }, [activeFilter, config.styleIds]);
 
   const variants = useMemo(
-    () => generateStyleVariants(fallbackText, visibleStyleIds),
-    [fallbackText, visibleStyleIds],
+    () => inputText ? generateStyleVariants(inputText, visibleStyleIds) : [],
+    [inputText, visibleStyleIds],
   );
 
   const copyText = async (text: string, id: string) => {
@@ -200,6 +198,11 @@ export default function GeneratorTool({
           </div>
         </div>
 
+        {!inputText && (
+          <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+            Enter text above to generate results.
+          </div>
+        )}
         <div id="generated-results" className="mt-4 grid gap-3 scroll-mt-24">
           {variants.map((variant) => (
             <article

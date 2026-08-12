@@ -2,6 +2,7 @@
  import { fandomPages } from '@/lib/data';
  import type { Metadata } from 'next';
  import { generateStyleVariants, getGeneratorPageConfig } from '@/lib/generator';
+ import { getSpecializedDescription, getVisualGeneratorConfig } from '@/lib/visual-generator';
  
  export const metadata: Metadata = {
    title: 'Fandom Font Generators',
@@ -27,6 +28,7 @@
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
            {fandomPages.map((page) => {
              const config = getGeneratorPageConfig(page.slug, page.title);
+             const visualConfig = getVisualGeneratorConfig(page.slug);
              const preview = generateStyleVariants(page.title.replace(' Font Generator', ''), config.styleIds.slice(0, 1))[0];
              return (
                <Link
@@ -37,16 +39,16 @@
                  <div className="flex items-start justify-between gap-3">
                    <span className="text-2xl" aria-hidden="true">{page.icon}</span>
                    <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-violet-700 dark:bg-violet-950/50 dark:text-violet-300">
-                     {config.styleIds.length} styles
+                     {visualConfig ? `${visualConfig.presets.length} presets` : `${config.styleIds.length} styles`}
                    </span>
                  </div>
                  <h2 className="mt-4 text-lg font-black text-slate-950 transition group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">
                    {page.title}
                  </h2>
-                 <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{page.description}</p>
+                 <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{getSpecializedDescription(page.slug) ?? page.description}</p>
                  <div className="mt-auto pt-5">
-                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{preview?.name}</p>
-                   <p className="mt-1 break-words text-lg text-slate-900 dark:text-slate-100">{preview?.text}</p>
+                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{visualConfig ? 'Rendered artwork + downloads' : preview?.name}</p>
+                   <p className="mt-1 break-words text-lg text-slate-900 dark:text-slate-100">{visualConfig?.presets[0]?.name ?? preview?.text}</p>
                  </div>
                </Link>
              );

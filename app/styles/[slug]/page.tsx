@@ -3,6 +3,7 @@
  import type { Metadata } from 'next';
  import { notFound } from 'next/navigation';
  import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
+ import { getSpecializedDescription, getSpecializedFeatureList } from '@/lib/visual-generator';
  
  export async function generateStaticParams() {
    return stylePages.map((page) => ({ slug: page.slug }));
@@ -12,15 +13,16 @@
    const { slug } = await params;
    const page = getPageBySlug(slug, stylePages);
    if (!page) return {};
+   const description = getSpecializedDescription(page.slug) ?? buildMetaDescription(page);
    return {
      title: buildMetaTitle(page),
-     description: buildMetaDescription(page),
+     description,
      alternates: {
        canonical: `https://font-generators.org/styles/${page.slug}`,
      },
      openGraph: {
        title: buildMetaTitle(page),
-       description: buildMetaDescription(page),
+       description,
        url: `https://font-generators.org/styles/${page.slug}`,
        type: 'website',
        images: ['/og-font-generators.png'],
@@ -28,7 +30,7 @@
      twitter: {
        card: 'summary_large_image',
        title: buildMetaTitle(page),
-       description: buildMetaDescription(page),
+       description,
        images: ['/og-font-generators.png'],
      },
    };
@@ -39,7 +41,7 @@
    const page = getPageBySlug(slug, stylePages);
    if (!page) notFound();
    const config = getGeneratorPageConfig(page.slug, page.title);
-   const featureList = config.styleIds
+   const featureList = getSpecializedFeatureList(page.slug) ?? config.styleIds
      .map((styleId) => getStyleDefinition(styleId)?.name)
      .filter((name): name is string => Boolean(name));
  
@@ -55,11 +57,11 @@
                  "@type": "WebApplication",
                  "name": page.title,
                  "url": `https://font-generators.org/styles/${page.slug}`,
-                 "description": buildMetaDescription(page),
+                 "description": getSpecializedDescription(page.slug) ?? buildMetaDescription(page),
                  "applicationCategory": "DesignApplication",
                  "operatingSystem": "Any",
                  "isAccessibleForFree": true,
-                 "browserRequirements": "Requires a modern Unicode-capable web browser",
+                 "browserRequirements": "Requires a modern web browser",
                  "featureList": featureList,
                  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
                },
