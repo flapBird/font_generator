@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local artifact-tool runtime links
+/.artifact-runtime/
+/scripts/node_modules

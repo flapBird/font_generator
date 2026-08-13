@@ -10,8 +10,8 @@
  const geistSans = { variable: '--font-geist-sans' };
  const geistMono = { variable: '--font-geist-mono' };
  const adsenseClientId = 'ca-pub-4183802444188513';
- const homeMetaTitle = 'Font Generator – Copy & Paste Fancy Text Online';
- const homeMetaDescription = 'Free online font generator for copyable Unicode text, rendered font artwork, and ASCII banners. Create in your browser with no sign-up.';
+ const homeMetaTitle = 'Font Generator: Copy & Paste Fancy Text Online';
+ const homeMetaDescription = 'Free font generator and text changer. Search bold, cursive, gothic, bubble, tiny and other Unicode fonts, then copy and paste your favorite style.';
  const adEligiblePaths = [
    '/',
    ...stylePages.map((page) => `/styles/${page.slug}`),

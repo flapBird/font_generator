@@ -99,6 +99,7 @@ export default function PageTemplate({
             config={config}
             examples={page.examples.map((example) => example.before)}
             pageTitle={page.title}
+            compactResults
           />
         )}
 
@@ -214,7 +215,7 @@ export default function PageTemplate({
               </h2>
               <div className="mt-5 space-y-3">
                 {(specializedFaq ?? page.faq).map((item, index) => (
-                  <details key={index} className="group rounded-2xl border border-slate-200 bg-white open:border-violet-300 dark:border-slate-800 dark:bg-slate-950 dark:open:border-violet-700">
+                  <details open={index === 0} key={index} className="group rounded-2xl border border-slate-200 bg-white open:border-violet-300 dark:border-slate-800 dark:bg-slate-950 dark:open:border-violet-700">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-bold text-slate-900 dark:text-white">
                       {cleanFaqQuestion(item.q)}
                       <span aria-hidden="true" className="text-xl text-violet-600 transition group-open:rotate-45">+</span>
