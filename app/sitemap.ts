@@ -5,6 +5,7 @@
    const baseUrl = 'https://font-generators.org';
    const contentLastModified = new Date('2026-07-28T00:00:00.000Z');
    const newContentLastModified = new Date('2026-08-03T00:00:00.000Z');
+   const guideLastModified = new Date('2026-08-13T00:00:00.000Z');
    const newPageSlugs = new Set([
      'instagram-font-generator',
      'tattoo-font-generator',
@@ -48,7 +49,7 @@
    
    const guideUrls = guidePages.map(page => ({
      url: `${baseUrl}/guides/${page.slug}`,
-     lastModified: contentLastModified,
+     lastModified: guideLastModified,
      changeFrequency: 'monthly' as const,
      priority: 0.5,
    }));

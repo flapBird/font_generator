@@ -234,15 +234,3 @@ export function generateAllFancyVariants(text: string): { id: string; name: stri
     text: convertToFancyText(text, style.id),
   }));
 }
-
-// Core tool shown on the About page
-export const tools = [
-  { id: 'fancy-text', name: 'Fancy Text Generator', href: '/', icon: '🎨' },
-];
-
-// Category page data for navigation
-export const categories = [
-  { id: 'styles', name: 'Text Styles', href: '/styles', icon: '🎨' },
-  { id: 'fandom', name: 'Fandom Styles', href: '/fandom', icon: '⭐' },
-  { id: 'guides', name: 'Guides', href: '/guides', icon: '📖' },
-];

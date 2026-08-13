@@ -108,7 +108,7 @@ The strongest profile usually uses one visual idea consistently. A single script
     metaDescription: 'Use fancy Unicode text in Discord display names, channel labels, server descriptions, and messages without hurting readability.',
     category: 'guides',
     description: 'Where decorative Unicode works in Discord, where Markdown is better, and how to avoid unreadable server navigation.',
-    content: `Discord offers two different ways to change how text looks: Markdown formatting and Unicode character substitution. Markdown is usually the better choice inside messages because it preserves ordinary letters and adds semantic formatting such as bold, italic, code, or headings. Fancy Unicode is most useful where Markdown is not available or where a short display label needs a distinct visual tone.
+    content: `Discord offers two different ways to change how text looks: its native Markdown-style formatting and Unicode character substitution. Discord’s formatting controls are usually the better choice inside messages because they preserve ordinary letters while displaying bold, italic, code, headings, lists, or quotes. Fancy Unicode is most useful where those controls are unavailable or where a short display label needs a distinct visual tone.
 
 **Display names and server descriptions.** A short bold, monospace, or small-cap phrase can make a role or community theme recognizable. Keep the searchable part of a name readable. Excessively decorated names are harder to mention, moderate, type on mobile, and distinguish from impersonation attempts.
 

@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'About Us - Font Generators',
-  description: 'Learn how Font Generators creates free browser-based Unicode text tools for names, bios, captions, and creative projects.',
+  title: 'About',
+  description: 'Learn how Font Generators creates browser-based Unicode text, rendered typography, ASCII art, and downloadable text graphics.',
   openGraph: {
     title: 'About Us - Font Generators',
-    description: 'Learn about our free browser-based Unicode text tools and the principles behind them.',
+    description: 'Learn how our browser-based text generators work, how input is handled, and what compatibility limits to expect.',
     url: 'https://font-generators.org/about',
   },
   alternates: {

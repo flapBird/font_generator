@@ -11,7 +11,7 @@
  const geistMono = { variable: '--font-geist-mono' };
  const adsenseClientId = 'ca-pub-4183802444188513';
  const homeMetaTitle = 'Font Generator – Copy & Paste Fancy Text Online';
- const homeMetaDescription = 'Free online font generator for fancy Unicode text. Type your words, choose a style, then copy and paste it into Instagram, TikTok, Discord, and more.';
+ const homeMetaDescription = 'Free online font generator for copyable Unicode text, rendered font artwork, and ASCII banners. Create in your browser with no sign-up.';
  const adEligiblePaths = [
    '/',
    ...stylePages.map((page) => `/styles/${page.slug}`),

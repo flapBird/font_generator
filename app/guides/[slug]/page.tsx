@@ -2,6 +2,7 @@
  import GuideTemplate from '@/components/GuideTemplate';
  import type { Metadata } from 'next';
  import { notFound } from 'next/navigation';
+ import { getGuideMetadata } from '@/lib/guide-metadata';
  
  export async function generateStaticParams() {
    return guidePages.map((page) => ({ slug: page.slug }));
@@ -37,6 +38,7 @@
    const { slug } = await params;
    const page = getPageBySlug(slug, guidePages);
    if (!page) notFound();
+   const guideMetadata = getGuideMetadata(page.slug);
  
    return (
      <>
@@ -49,7 +51,7 @@
              "headline": page.title,
              "url": `https://font-generators.org/guides/${page.slug}`,
              "description": page.metaDescription,
-             "dateModified": "2026-07-28",
+             "dateModified": guideMetadata.updatedAt,
              "author": {
                "@type": "Organization",
                "name": "Font Generators",

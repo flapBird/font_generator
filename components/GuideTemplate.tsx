@@ -5,6 +5,7 @@ import {
   guidePages,
   type PageDefinition,
 } from '@/lib/data';
+import { getGuideMetadata } from '@/lib/guide-metadata';
 
 interface GuideTemplateProps {
   page: PageDefinition;
@@ -67,6 +68,8 @@ const renderInlineFormatting = (text: string): ReactNode[] =>
     return nodes;
   }, []);
 
+const sectionLeadPattern = /^\*\*(.+?)\.\*\*\s*([\s\S]*)$/;
+
 export default function GuideTemplate({
   page,
   categoryPath,
@@ -74,6 +77,7 @@ export default function GuideTemplate({
 }: GuideTemplateProps) {
   const paragraphs = page.content.split('\n\n');
   const relatedPages = getRelatedPages(page, guidePages);
+  const guideMetadata = getGuideMetadata(page.slug);
 
   return (
     <div className="min-h-screen pb-20 pt-20">
@@ -95,12 +99,21 @@ export default function GuideTemplate({
           </h1>
           <p className="mt-5 text-lg leading-8 text-slate-600 dark:text-slate-300">{page.description}</p>
           <p className="mt-6 text-sm font-medium text-slate-500 dark:text-slate-400">
-            Written and reviewed by the Font Generators editorial team · Updated July 28, 2026
+            Maintained and reviewed by Font Generators · Updated {guideMetadata.updatedLabel}
           </p>
         </header>
 
         <article className="prose prose-slate mt-10 max-w-none dark:prose-invert">
           {paragraphs.map((paragraph, index) => {
+            const sectionLead = paragraph.match(sectionLeadPattern);
+            if (sectionLead) {
+              return (
+                <section key={index}>
+                  <h2>{sectionLead[1]}</h2>
+                  {sectionLead[2] && <p>{renderInlineFormatting(sectionLead[2])}</p>}
+                </section>
+              );
+            }
             if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
               return <h2 key={index}>{paragraph.replace(/\*\*/g, '')}</h2>;
             }
@@ -174,6 +187,29 @@ export default function GuideTemplate({
           </div>
         </section>
 
+        {guideMetadata.sources.length > 0 && (
+          <section className="mt-12 rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900/60">
+            <h2 className="text-xl font-black text-slate-950 dark:text-white">Sources and further reading</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              Primary references used to check the technical and platform-specific details in this guide.
+            </p>
+            <ul className="mt-4 space-y-2">
+              {guideMetadata.sources.map((source) => (
+                <li key={source.url}>
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-violet-700 hover:underline dark:text-violet-300"
+                  >
+                    {source.title} ↗
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {relatedPages.length > 0 && (
           <section className="mt-12">
             <h2 className="text-2xl font-black text-slate-950 dark:text-white">
@@ -195,8 +231,8 @@ export default function GuideTemplate({
         )}
 
         <div className="mt-12 border-t border-slate-200 pt-8 text-center dark:border-slate-800">
-          <Link href="/" className="inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white hover:bg-violet-500">
-            Try the Fancy Text Generator
+          <Link href={guideMetadata.toolLink.href} className="inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white hover:bg-violet-500">
+            {guideMetadata.toolLink.label}
           </Link>
         </div>
       </div>

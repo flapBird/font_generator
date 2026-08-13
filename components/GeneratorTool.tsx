@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import type { GeneratorPageConfig, GeneratorStyleCategory } from '@/lib/generator';
 import {
@@ -9,6 +10,13 @@ import {
 
 interface GeneratorToolProps {
   config: GeneratorPageConfig;
+  discoveryItems?: {
+    icon: string;
+    title: string;
+    description: string;
+    href?: string;
+    linkLabel?: string;
+  }[];
   examples: string[];
   pageTitle: string;
 }
@@ -25,6 +33,7 @@ type ActiveFilter = 'recommended' | GeneratorStyleCategory;
 
 export default function GeneratorTool({
   config,
+  discoveryItems,
   examples,
   pageTitle,
 }: GeneratorToolProps) {
@@ -156,6 +165,59 @@ export default function GeneratorTool({
             </div>
           </div>
         </div>
+
+        {discoveryItems?.length ? (
+          <nav
+            aria-labelledby="generator-paths-heading"
+            className="mt-7 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-900/70"
+          >
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+              <div>
+                <h3 id="generator-paths-heading" className="text-base font-bold text-slate-950 dark:text-white">
+                  What would you like to create?
+                </h3>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  Continue to the copyable results below, or choose an output made for a different task.
+                </p>
+              </div>
+              <span className="text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+                Explore the site
+              </span>
+            </div>
+            <div className="mt-4 flex snap-x gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-5">
+              {discoveryItems.map((item) => {
+                const content = (
+                  <>
+                    <span aria-hidden="true" className="text-xl">{item.icon}</span>
+                    <span className="mt-3 block text-sm font-bold text-slate-950 dark:text-white">{item.title}</span>
+                    <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">{item.description}</span>
+                    <span className="mt-3 block text-xs font-bold text-violet-700 dark:text-violet-300">
+                      {item.linkLabel ?? 'Explore'} {item.href ? '→' : ''}
+                    </span>
+                  </>
+                );
+
+                return item.href ? (
+                  <Link
+                    key={item.title}
+                    href={item.href}
+                    className="group w-56 shrink-0 snap-start rounded-xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-sm sm:w-auto dark:border-slate-700 dark:bg-slate-950 dark:hover:border-violet-700"
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  <div
+                    key={item.title}
+                    aria-current="page"
+                    className="w-56 shrink-0 snap-start rounded-xl border border-violet-200 bg-violet-50/70 p-4 sm:w-auto dark:border-violet-800 dark:bg-violet-950/30"
+                  >
+                    {content}
+                  </div>
+                );
+              })}
+            </div>
+          </nav>
+        ) : null}
 
         <div className="mt-7 border-t border-slate-200 pt-6 dark:border-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
