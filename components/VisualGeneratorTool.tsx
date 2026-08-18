@@ -16,6 +16,10 @@ const formats: Record<CanvasFormat, { label: string; width: number; height: numb
   square: { label: 'Square', width: 1080, height: 1080 },
 };
 
+const LINE_HEIGHT_RATIO = 1.18;
+const MIN_FITTED_FONT_SIZE = 24;
+const TEXT_AREA_RATIO = 0.84;
+
 const palette = ['#ef4444', '#3b82f6', '#facc15', '#22c55e', '#a855f7', '#f97316'];
 
 const fileSlug = (value: string) =>
@@ -103,6 +107,42 @@ export default function VisualGeneratorTool({
     return () => { active = false; };
   }, [currentPreset]);
 
+  const resolveTextLayout = useCallback((
+    context: CanvasRenderingContext2D,
+    lines: string[],
+    width: number,
+    minimumHeight: number,
+  ) => {
+    if (!currentPreset) return { fontSize, height: minimumHeight };
+
+    const effectPadding = Math.max(
+      controls.strokeWidth * 2,
+      controls.shadowBlur + Math.abs(controls.shadowOffset),
+    );
+    const maxWidth = Math.max(1, width * TEXT_AREA_RATIO - effectPadding * 2);
+    const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${size}px ${currentPreset.fontFamily}`;
+    let resolvedSize = fontSize;
+
+    while (resolvedSize > MIN_FITTED_FONT_SIZE) {
+      context.font = fontSpec(resolvedSize);
+      const exceedsWidth = lines.some((line) => (
+        context.measureText(line).width
+        + Math.max(0, line.length - 1) * controls.letterSpacing
+        > maxWidth
+      ));
+      if (!exceedsWidth) break;
+      resolvedSize = Math.max(MIN_FITTED_FONT_SIZE, resolvedSize - 2);
+    }
+
+    context.font = fontSpec(resolvedSize);
+    const textHeight = resolvedSize * LINE_HEIGHT_RATIO * Math.max(lines.length, 1);
+    const verticalPadding = Math.max(24, effectPadding * 2 + resolvedSize * 0.12);
+    return {
+      fontSize: resolvedSize,
+      height: Math.max(minimumHeight, Math.ceil(textHeight + verticalPadding)),
+    };
+  }, [controls.letterSpacing, controls.shadowBlur, controls.shadowOffset, controls.strokeWidth, currentPreset, fontSize]);
+
   const drawCanvas = useCallback((canvas: HTMLCanvasElement) => {
     if (!currentPreset) return;
     const context = canvas.getContext('2d');
@@ -110,6 +150,10 @@ export default function VisualGeneratorTool({
 
     canvas.width = dimensions.width;
     canvas.height = dimensions.height;
+    const sourceLines = renderedText.split('\n');
+    const lines = sourceLines.length ? sourceLines : [''];
+    const layout = resolveTextLayout(context, lines, dimensions.width, dimensions.height);
+    canvas.height = layout.height;
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     if (!transparent) {
@@ -128,20 +172,9 @@ export default function VisualGeneratorTool({
       context.globalAlpha = 1;
     }
 
-    const sourceLines = renderedText.split('\n').slice(0, 4);
-    const lines = sourceLines.length ? sourceLines : [''];
-    const maxWidth = canvas.width * 0.84;
-    const lineGap = 1.18;
-    let resolvedSize = fontSize;
     const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${size}px ${currentPreset.fontFamily}`;
-
-    context.font = fontSpec(resolvedSize);
-    while (resolvedSize > 34 && lines.some((line) => context.measureText(line).width + Math.max(0, line.length - 1) * controls.letterSpacing > maxWidth)) {
-      resolvedSize -= 2;
-      context.font = fontSpec(resolvedSize);
-    }
-
-    const lineHeight = resolvedSize * lineGap;
+    const resolvedSize = layout.fontSize;
+    const lineHeight = resolvedSize * LINE_HEIGHT_RATIO;
     const totalHeight = lineHeight * lines.length;
     const startY = (canvas.height - totalHeight) / 2 + resolvedSize * 0.92;
 
@@ -227,7 +260,7 @@ export default function VisualGeneratorTool({
       }
       drawSpacedText(line, canvas.width / 2, y, 'fill');
     });
-  }, [controls, currentPreset, dimensions, fontSize, renderedText, transparent]);
+  }, [controls, currentPreset, dimensions, renderedText, resolveTextLayout, transparent]);
 
   useEffect(() => {
     if (canvasRef.current) drawCanvas(canvasRef.current);
@@ -245,14 +278,20 @@ export default function VisualGeneratorTool({
 
   const buildSvg = () => {
     const width = dimensions.width;
-    const height = dimensions.height;
-    const lines = renderedText.split('\n').slice(0, 4);
-    const lineHeight = fontSize * 1.18;
-    const startY = (height - lineHeight * lines.length) / 2 + fontSize * 0.92;
+    const lines = renderedText.split('\n');
+    const measureCanvas = document.createElement('canvas');
+    const measureContext = measureCanvas.getContext('2d');
+    const layout = measureContext
+      ? resolveTextLayout(measureContext, lines, width, dimensions.height)
+      : { fontSize, height: dimensions.height };
+    const resolvedSize = layout.fontSize;
+    const height = layout.height;
+    const lineHeight = resolvedSize * LINE_HEIGHT_RATIO;
+    const startY = (height - lineHeight * lines.length) / 2 + resolvedSize * 0.92;
     const gradientId = `gradient-${currentPreset.id}`;
     const filterId = `shadow-${currentPreset.id}`;
     const fill = currentPreset.gradient ? `url(#${gradientId})` : controls.textColor;
-    const textAttributes = `font-family="${escapeXml(currentPreset.fontFamily)}" font-size="${fontSize}" font-weight="${currentPreset.fontWeight ?? 700}" font-style="${currentPreset.fontStyle ?? 'normal'}" letter-spacing="${controls.letterSpacing}" fill="${fill}" stroke="${controls.strokeWidth ? controls.strokeColor : 'none'}" stroke-width="${controls.strokeWidth * 2}" paint-order="stroke fill" filter="url(#${filterId})"`;
+    const textAttributes = `font-family="${escapeXml(currentPreset.fontFamily)}" font-size="${resolvedSize}" font-weight="${currentPreset.fontWeight ?? 700}" font-style="${currentPreset.fontStyle ?? 'normal'}" letter-spacing="${controls.letterSpacing}" fill="${fill}" stroke="${controls.strokeWidth ? controls.strokeColor : 'none'}" stroke-width="${controls.strokeWidth * 2}" paint-order="stroke fill" filter="url(#${filterId})"`;
     const textElements = lines.map((line, lineIndex) => {
       const y = startY + lineIndex * lineHeight;
       if (currentPreset.multicolor) {
@@ -266,7 +305,7 @@ export default function VisualGeneratorTool({
     const decorations = currentPreset.decoration === 'lines'
       ? `<path d="M ${width * 0.16} ${height * 0.25} H ${width * 0.84} M ${width * 0.16} ${height * 0.75} H ${width * 0.84}" stroke="${controls.textColor}" stroke-width="${Math.max(2, controls.strokeWidth)}"/>`
       : currentPreset.decoration === 'sparkles'
-        ? `<text x="14%" y="28%" font-size="${Math.max(28, fontSize * 0.35)}" fill="${controls.textColor}">✦</text><text x="85%" y="72%" font-size="${Math.max(28, fontSize * 0.35)}" fill="${controls.textColor}">✧</text>`
+        ? `<text x="14%" y="28%" font-size="${Math.max(28, resolvedSize * 0.35)}" fill="${controls.textColor}">✦</text><text x="85%" y="72%" font-size="${Math.max(28, resolvedSize * 0.35)}" fill="${controls.textColor}">✧</text>`
         : '';
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <defs>${gradient}<filter id="${filterId}" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="${controls.shadowOffset}" dy="${controls.shadowOffset}" stdDeviation="${controls.shadowBlur / 2}" flood-color="${currentPreset.shadowColor ?? '#000000'}"/></filter></defs>
@@ -293,7 +332,7 @@ export default function VisualGeneratorTool({
           <div>
             <label htmlFor="visual-text-input" className="text-sm font-semibold text-slate-900 dark:text-white">Your text</label>
             <textarea id="visual-text-input" value={inputText} onChange={(event) => setInputText(event.target.value)} rows={3} maxLength={120} placeholder="Type a short title" className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-base outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900" />
-            <div className="mt-2 flex justify-between text-xs text-slate-500"><span>Up to four lines</span><span>{inputText.length}/120</span></div>
+            <div className="mt-2 flex justify-between text-xs text-slate-500"><span>Canvas grows with additional lines</span><span>{inputText.length}/120</span></div>
             <p className="mt-1 text-xs text-slate-500">Rendered locally—your text isn&apos;t uploaded.</p>
           </div>
 
@@ -359,7 +398,7 @@ export default function VisualGeneratorTool({
               <p className="mt-1 text-xs text-slate-500">The PNG download matches this browser-rendered canvas.</p>
             </div>
             <select aria-label="Canvas format" value={format} onChange={(event) => setFormat(event.target.value as CanvasFormat)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
-              {Object.entries(formats).map(([id, item]) => <option key={id} value={id}>{item.label} · {item.width}×{item.height}</option>)}
+              {Object.entries(formats).map(([id, item]) => <option key={id} value={id}>{item.label} · {item.width}px wide</option>)}
             </select>
           </div>
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%),linear-gradient(-45deg,#e5e7eb_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e5e7eb_75%),linear-gradient(-45deg,transparent_75%,#e5e7eb_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0] p-2 dark:border-slate-700 dark:opacity-95">
