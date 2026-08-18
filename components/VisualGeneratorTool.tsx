@@ -6,7 +6,6 @@ import type { VisualFontPreset, VisualGeneratorConfig } from '@/lib/visual-gener
 interface VisualGeneratorToolProps {
   config: VisualGeneratorConfig;
   pageTitle: string;
-  examples: string[];
 }
 
 type CanvasFormat = 'banner' | 'social' | 'square';
@@ -53,7 +52,6 @@ const applyPreset = (preset: VisualFontPreset) => ({
 export default function VisualGeneratorTool({
   config,
   pageTitle,
-  examples,
 }: VisualGeneratorToolProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [inputText, setInputText] = useState(config.initialText);
@@ -283,31 +281,20 @@ export default function VisualGeneratorTool({
     setStatusMessage('SVG downloaded. It keeps editable text and may need the named font on another device.');
   };
 
-  const cycleExample = () => {
-    const candidates = [config.initialText, ...examples].filter(Boolean);
-    const currentIndex = candidates.indexOf(inputText);
-    setInputText(candidates[(currentIndex + 1) % candidates.length] ?? config.initialText);
-  };
-
   return (
-    <section id="generator" aria-labelledby="visual-generator-heading" className="mt-8 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-950">
-      <div className="bg-slate-950 px-5 py-6 text-white sm:px-8 sm:py-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">{config.intentLabel}</p>
-        <h2 id="visual-generator-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Create {pageTitle.replace(/\s+Generator$/i, '')}</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">{config.resultIntro}</p>
-        <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-slate-300">
-          <span className="rounded-full border border-white/15 px-3 py-1.5">Real rendered preview</span>
-          <span className="rounded-full border border-white/15 px-3 py-1.5">PNG &amp; SVG export</span>
-          <span className="rounded-full border border-white/15 px-3 py-1.5">No upload</span>
-        </div>
+    <section id="generator" aria-labelledby="visual-generator-heading" className="mt-8 rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-950">
+      <div className="rounded-t-[2rem] bg-slate-950 px-5 py-4 text-white sm:px-8 sm:py-5">
+        <h2 id="visual-generator-heading" className="text-xl font-bold sm:text-2xl">Create {pageTitle.replace(/\s+Generator$/i, '')}</h2>
+        <p className="mt-1.5 max-w-4xl text-sm leading-5 text-slate-300 sm:leading-6">{config.resultIntro}</p>
       </div>
 
-      <div className="grid gap-7 p-5 sm:p-8 xl:grid-cols-[330px_minmax(0,1fr)]">
+      <div className="grid items-start gap-7 p-5 sm:p-8 xl:grid-cols-[330px_minmax(0,1fr)]">
         <div className="space-y-5">
           <div>
             <label htmlFor="visual-text-input" className="text-sm font-semibold text-slate-900 dark:text-white">Your text</label>
             <textarea id="visual-text-input" value={inputText} onChange={(event) => setInputText(event.target.value)} rows={3} maxLength={120} placeholder="Type a short title" className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-base outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900" />
             <div className="mt-2 flex justify-between text-xs text-slate-500"><span>Up to four lines</span><span>{inputText.length}/120</span></div>
+            <p className="mt-1 text-xs text-slate-500">Rendered locally—your text isn&apos;t uploaded.</p>
           </div>
 
           <div>
@@ -362,10 +349,7 @@ export default function VisualGeneratorTool({
             Transparent background
           </label>
 
-          <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={cycleExample} className="rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-semibold hover:border-violet-400 dark:border-slate-700">Try example</button>
-            <button type="button" onClick={() => { setInputText(''); setStatusMessage('Canvas cleared.'); }} className="rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-semibold hover:border-violet-400 dark:border-slate-700">Clear</button>
-          </div>
+          <button type="button" onClick={() => { setInputText(''); setStatusMessage('Canvas cleared.'); }} className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-semibold hover:border-violet-400 dark:border-slate-700">Clear</button>
         </div>
 
         <div className="min-w-0">

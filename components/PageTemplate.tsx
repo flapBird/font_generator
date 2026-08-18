@@ -85,19 +85,16 @@ export default function PageTemplate({
 
         {isAsciiGenerator ? (
           <AsciiGeneratorTool
-            examples={page.examples.map((example) => example.before)}
             pageTitle={page.title}
           />
         ) : visualConfig ? (
           <VisualGeneratorTool
             config={visualConfig}
-            examples={page.examples.map((example) => example.before)}
             pageTitle={page.title}
           />
         ) : (
           <GeneratorTool
             config={config}
-            examples={page.examples.map((example) => example.before)}
             pageTitle={page.title}
             compactResults
           />

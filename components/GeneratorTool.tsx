@@ -19,7 +19,6 @@ interface GeneratorToolProps {
     href?: string;
     linkLabel?: string;
   }[];
-  examples: string[];
   pageTitle: string;
   enableStyleSearch?: boolean;
   initialResultLimit?: number;
@@ -111,7 +110,6 @@ const discoveryToneClasses = {
 export default function GeneratorTool({
   config,
   discoveryItems,
-  examples,
   pageTitle,
   enableStyleSearch = false,
   initialResultLimit = 100,
@@ -199,12 +197,6 @@ export default function GeneratorTool({
     void copyText(combined, 'all');
   };
 
-  const cycleExample = () => {
-    const candidates = [config.initialText, ...examples].filter(Boolean);
-    const currentIndex = candidates.indexOf(inputText);
-    setInputText(candidates[(currentIndex + 1) % candidates.length] ?? config.initialText);
-  };
-
   const filters: { id: ActiveFilter; label: string }[] = [
     { id: 'recommended', label: `${recommendedLabel ?? 'Best for this page'} (${config.styleIds.length})` },
     ...Object.entries(categoryLabels).map(([id, label]) => ({
@@ -219,25 +211,13 @@ export default function GeneratorTool({
       aria-labelledby="generator-heading"
       className="mt-8 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-950"
     >
-      <div className="border-b border-slate-200/80 bg-slate-950 px-5 py-6 text-white sm:px-8 sm:py-7 dark:border-slate-800">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">
-              {config.intentLabel}
-            </p>
-            <h2 id="generator-heading" className="mt-2 text-2xl font-bold sm:text-3xl">
-              Generate {pageTitle.replace(/\s+Generator$/i, '')}
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">
-              {config.resultIntro}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-300">
-            <span className="rounded-full border border-white/15 px-3 py-1.5">Instant preview</span>
-            <span className="rounded-full border border-white/15 px-3 py-1.5">No sign-up</span>
-            <span className="rounded-full border border-white/15 px-3 py-1.5">Copy &amp; paste</span>
-          </div>
-        </div>
+      <div className="border-b border-slate-200/80 bg-slate-950 px-5 py-4 text-white sm:px-8 sm:py-5 dark:border-slate-800">
+        <h2 id="generator-heading" className="text-xl font-bold sm:text-2xl">
+          Generate {pageTitle.replace(/\s+Generator$/i, '')}
+        </h2>
+        <p className="mt-1.5 max-w-4xl text-sm leading-5 text-slate-300 sm:leading-6">
+          {config.resultIntro}
+        </p>
       </div>
 
       <div className="p-5 sm:p-8">
@@ -262,30 +242,23 @@ export default function GeneratorTool({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+          <div className="self-start pt-0.5">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
               Quick actions
-            </p>
-            <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-1">
-              <button
-                type="button"
-                onClick={cycleExample}
-                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:border-violet-400 hover:text-violet-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-              >
-                Try another example
-              </button>
+            </h3>
+            <div className="mt-2.5 grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900">
               <button
                 type="button"
                 onClick={() => setInputText('')}
                 disabled={!inputText}
-                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:border-violet-400 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-45 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 transition hover:border-violet-400 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-45 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
               >
                 Clear input
               </button>
               <button
                 type="button"
                 onClick={copyAll}
-                className="col-span-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500 lg:col-span-1"
+                className="rounded-xl bg-violet-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-violet-500"
               >
                 {copiedId === 'all' ? 'Copied all styles' : 'Copy visible styles'}
               </button>

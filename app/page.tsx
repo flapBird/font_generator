@@ -97,7 +97,6 @@ export default function HomePage() {
           <GeneratorTool
             config={homeConfig}
             discoveryItems={discoveryItems}
-            examples={['Font Generator', 'Creative Text', 'Social Bio 2026']}
             pageTitle="Font Generator"
             enableStyleSearch
             initialResultLimit={18}

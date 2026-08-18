@@ -3,16 +3,46 @@
  import type { Metadata } from 'next';
  import { generateStyleVariants, getGeneratorPageConfig } from '@/lib/generator';
  import { getSpecializedDescription, getVisualGeneratorConfig } from '@/lib/visual-generator';
+ import StyleDirectory, { type StyleDirectoryCard, type StyleDirectoryKind } from '@/components/StyleDirectory';
  
  export const metadata: Metadata = {
    title: 'Text Style Generators',
    alternates: {
      canonical: 'https://font-generators.org/styles',
    },
-   description: 'Browse all our Unicode text style generators. Small text, cursive, fraktur, bold, italic, bubble letters, and more — all free and copy-paste ready.',
+   description: 'Browse copy-and-paste Unicode styles, rendered text artwork, and ASCII generators. Search cursive, gothic, pixel, social, and other text tools.',
  };
  
  export default function StylesIndexPage() {
+   const cards: StyleDirectoryCard[] = stylePages.map((page) => {
+     const config = getGeneratorPageConfig(page.slug, page.title);
+     const visualConfig = getVisualGeneratorConfig(page.slug);
+     const preview = generateStyleVariants('Your Text', config.styleIds.slice(0, 1))[0];
+     const isAscii = page.slug === 'big-font-generator';
+     const kind: StyleDirectoryKind = isAscii ? 'ascii' : visualConfig ? 'artwork' : 'unicode';
+     const description = getSpecializedDescription(page.slug) ?? page.description;
+
+     return {
+       slug: page.slug,
+       title: page.title,
+       icon: page.icon,
+       description,
+       kind,
+       badge: isAscii ? '6 ASCII styles' : visualConfig ? `${visualConfig.presets.length} presets` : `${config.styleIds.length} styles`,
+       metaLabel: isAscii ? 'ASCII + downloads' : visualConfig ? 'Rendered artwork + downloads' : preview?.name ?? 'Copy & paste',
+       previewText: visualConfig?.presets[0]?.name ?? (isAscii ? 'Block · Outline · Shadow' : preview?.text ?? 'Your Text'),
+       searchText: [
+         page.title,
+         page.slug,
+         description,
+         kind,
+         kind === 'unicode' ? 'copy paste unicode font text' : kind === 'artwork' ? 'rendered artwork image png svg design' : 'ascii banner text download',
+         config.styleIds.join(' '),
+         visualConfig?.presets.flatMap((preset) => [preset.name, preset.description]).join(' '),
+       ].filter(Boolean).join(' '),
+     };
+   });
+
    return (
      <div className="min-h-screen pt-24 pb-16">
        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -21,39 +51,11 @@
              <span className="gradient-text">Text Style Generators</span>
            </h1>
            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-             Browse all our Unicode text style generators. Each page lets you transform plain text into a different decorative look.
+             Browse copy-and-paste Unicode styles, rendered text artwork, and ASCII generators, then choose the output that fits your project.
            </p>
          </div>
  
-         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-           {stylePages.map((page) => {
-             const config = getGeneratorPageConfig(page.slug, page.title);
-             const visualConfig = getVisualGeneratorConfig(page.slug);
-             const preview = generateStyleVariants('Your Text', config.styleIds.slice(0, 1))[0];
-             return (
-               <Link
-                 key={page.slug}
-                 href={`/styles/${page.slug}`}
-                 className="group flex min-h-56 flex-col rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-42px_rgba(15,23,42,0.5)] transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_24px_60px_-40px_rgba(109,40,217,0.45)] dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700"
-               >
-                 <div className="flex items-start justify-between gap-3">
-                   <span className="text-2xl" aria-hidden="true">{page.icon}</span>
-                   <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-violet-700 dark:bg-violet-950/50 dark:text-violet-300">
-                     {page.slug === 'big-font-generator' ? '6 ASCII styles' : visualConfig ? `${visualConfig.presets.length} presets` : `${config.styleIds.length} styles`}
-                   </span>
-                 </div>
-                 <h2 className="mt-4 text-lg font-black text-slate-950 transition group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">
-                   {page.title}
-                 </h2>
-                 <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{getSpecializedDescription(page.slug) ?? page.description}</p>
-                 <div className="mt-auto pt-5">
-                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{page.slug === 'big-font-generator' ? 'ASCII + downloads' : visualConfig ? 'Rendered artwork + downloads' : preview?.name}</p>
-                   <p className="mt-1 break-words text-lg text-slate-900 dark:text-slate-100">{visualConfig?.presets[0]?.name ?? (page.slug === 'big-font-generator' ? 'Block · Outline · Shadow' : preview?.text)}</p>
-                 </div>
-               </Link>
-             );
-           })}
-         </div>
+         <StyleDirectory cards={cards} />
  
          <div className="mt-12 text-center">
            <Link

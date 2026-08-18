@@ -4,7 +4,6 @@ import { useMemo, useRef, useState } from 'react';
 import { asciiStyleLabels, generateAsciiArt, type AsciiStyle } from '@/lib/ascii-font';
 
 interface AsciiGeneratorToolProps {
-  examples: string[];
   pageTitle: string;
 }
 
@@ -20,7 +19,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
 const escapeXml = (value: string) =>
   value.replace(/[<>&"']/g, (character) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[character] ?? character);
 
-export default function AsciiGeneratorTool({ examples, pageTitle }: AsciiGeneratorToolProps) {
+export default function AsciiGeneratorTool({ pageTitle }: AsciiGeneratorToolProps) {
   const [inputText, setInputText] = useState('BIG TEXT');
   const [style, setStyle] = useState<AsciiStyle>('block');
   const [align, setAlign] = useState<'left' | 'center' | 'right'>('left');
@@ -84,18 +83,11 @@ export default function AsciiGeneratorTool({ examples, pageTitle }: AsciiGenerat
     setStatus('SVG downloaded.');
   };
 
-  const cycleExample = () => {
-    const candidates = ['BIG TEXT', ...examples].filter(Boolean).map((item) => item.slice(0, 24));
-    const index = candidates.indexOf(inputText);
-    setInputText(candidates[(index + 1) % candidates.length] ?? 'BIG TEXT');
-  };
-
   return (
     <section id="generator" aria-labelledby="ascii-generator-heading" className="mt-8 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-950">
-      <div className="bg-slate-950 px-5 py-6 text-white sm:px-8 sm:py-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">ASCII &amp; giant banner text</p>
-        <h2 id="ascii-generator-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Generate {pageTitle.replace(/\s+Generator$/i, '')}</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base">Turn ordinary letters into genuinely oversized, multi-line ASCII art. Copy the text or export it as TXT, PNG, or SVG.</p>
+      <div className="bg-slate-950 px-5 py-4 text-white sm:px-8 sm:py-5">
+        <h2 id="ascii-generator-heading" className="text-xl font-bold sm:text-2xl">Generate {pageTitle.replace(/\s+Generator$/i, '')}</h2>
+        <p className="mt-1.5 max-w-4xl text-sm leading-5 text-slate-300 sm:leading-6">Turn ordinary letters into genuinely oversized, multi-line ASCII art. Copy the text or export it as TXT, PNG, or SVG.</p>
       </div>
       <div className="p-5 sm:p-8">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -109,7 +101,6 @@ export default function AsciiGeneratorTool({ examples, pageTitle }: AsciiGenerat
             <select id="ascii-style" value={style} onChange={(event) => setStyle(event.target.value as AsciiStyle)} className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-950">
               {Object.entries(asciiStyleLabels).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
             </select>
-            <button type="button" onClick={cycleExample} className="mt-3 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold dark:border-slate-700 dark:bg-slate-950">Try another example</button>
           </div>
         </div>
 
