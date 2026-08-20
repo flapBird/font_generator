@@ -1,3 +1,5 @@
+import { reverseGraphemeLines, segmentGraphemes } from './unicode';
+
 // Unicode character mappings for fancy text
 const unicodeMappings: Record<string, Record<string, string>> = {
   bold: {
@@ -86,15 +88,23 @@ const unicodeMappings: Record<string, Record<string, string>> = {
     a: 'ᴀ', b: 'ʙ', c: 'ᴄ', d: 'ᴅ', e: 'ᴇ', f: 'ꜰ', g: 'ɢ', h: 'ʜ', i: 'ɪ', j: 'ᴊ',
     k: 'ᴋ', l: 'ʟ', m: 'ᴍ', n: 'ɴ', o: 'ᴏ', p: 'ᴘ', q: 'ǫ', r: 'ʀ', s: 's', t: 'ᴛ',
     u: 'ᴜ', v: 'ᴠ', w: 'ᴡ', x: 'x', y: 'ʏ', z: 'ᴢ',
+    A: 'ᴀ', B: 'ʙ', C: 'ᴄ', D: 'ᴅ', E: 'ᴇ', F: 'ꜰ', G: 'ɢ', H: 'ʜ', I: 'ɪ', J: 'ᴊ',
+    K: 'ᴋ', L: 'ʟ', M: 'ᴍ', N: 'ɴ', O: 'ᴏ', P: 'ᴘ', Q: 'ǫ', R: 'ʀ', S: 's', T: 'ᴛ',
+    U: 'ᴜ', V: 'ᴠ', W: 'ᴡ', X: 'x', Y: 'ʏ', Z: 'ᴢ',
   },
   superscript: {
     a: 'ᵃ', b: 'ᵇ', c: 'ᶜ', d: 'ᵈ', e: 'ᵉ', f: 'ᶠ', g: 'ᵍ', h: 'ʰ', i: 'ⁱ', j: 'ʲ',
     k: 'ᵏ', l: 'ˡ', m: 'ᵐ', n: 'ⁿ', o: 'ᵒ', p: 'ᵖ', q: 'q', r: 'ʳ', s: 'ˢ', t: 'ᵗ',
     u: 'ᵘ', v: 'ᵛ', w: 'ʷ', x: 'ˣ', y: 'ʸ', z: 'ᶻ',
+    A: 'ᴬ', B: 'ᴮ', C: 'ᶜ', D: 'ᴰ', E: 'ᴱ', F: 'ᶠ', G: 'ᴳ', H: 'ᴴ', I: 'ᴵ', J: 'ᴶ',
+    K: 'ᴷ', L: 'ᴸ', M: 'ᴹ', N: 'ᴺ', O: 'ᴼ', P: 'ᴾ', Q: 'q', R: 'ᴿ', S: 'ˢ', T: 'ᵀ',
+    U: 'ᵁ', V: 'ⱽ', W: 'ᵂ', X: 'ˣ', Y: 'ʸ', Z: 'ᶻ',
   },
   subscript: {
     a: 'ₐ', e: 'ₑ', h: 'ₕ', i: 'ᵢ', j: 'ⱼ', k: 'ₖ', l: 'ₗ', m: 'ₘ', n: 'ₙ', o: 'ₒ',
     p: 'ₚ', r: 'ᵣ', s: 'ₛ', t: 'ₜ', u: 'ᵤ', v: 'ᵥ', x: 'ₓ',
+    A: 'ₐ', E: 'ₑ', H: 'ₕ', I: 'ᵢ', J: 'ⱼ', K: 'ₖ', L: 'ₗ', M: 'ₘ', N: 'ₙ', O: 'ₒ',
+    P: 'ₚ', R: 'ᵣ', S: 'ₛ', T: 'ₜ', U: 'ᵤ', V: 'ᵥ', X: 'ₓ',
   },
   inverted: {
     a: 'ɐ', b: 'q', c: 'ɔ', d: 'p', e: 'ǝ', f: 'ɟ', g: 'ƃ', h: 'ɥ', i: 'ᴉ', j: 'ɾ',
@@ -103,6 +113,9 @@ const unicodeMappings: Record<string, Record<string, string>> = {
     A: '∀', B: 'B', C: 'Ɔ', D: 'D', E: 'Ǝ', F: 'Ⅎ', G: 'פ', H: 'H', I: 'I', J: 'ſ',
     K: 'K', L: '˥', M: 'W', N: 'N', O: 'O', P: 'Ԁ', Q: 'Q', R: 'R', S: 'S', T: '┴',
     U: '∩', V: 'Λ', W: 'M', X: 'X', Y: '⅄', Z: 'Z',
+    '?': '¿', '!': '¡', '.': '˙', ',': '‘', "'": ',', '"': '„',
+    '(': ')', ')': '(', '[': ']', ']': '[', '{': '}', '}': '{', '<': '>', '>': '<',
+    '&': '⅋', '_': '‾', ';': '؛',
   },
   strikethrough: {
     a: 'a̶', b: 'b̶', c: 'c̶', d: 'd̶', e: 'e̶', f: 'f̶', g: 'g̶', h: 'h̶', i: 'i̶', j: 'j̶',
@@ -213,16 +226,27 @@ export function convertToFancyText(text: string, styleId: string): string {
   if (!mapping) return text;
 
   const digitMapping = unicodeDigitMappings[styleId];
-  const converted = Array.from(text).map((char) => {
-    if (mapping[char]) return mapping[char];
-    if (digitMapping && /^[0-9]$/.test(char)) {
-      return digitMapping[Number(char)];
+  const converted = segmentGraphemes(text).map((grapheme) => {
+    if (mapping[grapheme]) return mapping[grapheme];
+    if (digitMapping && /^[0-9]$/.test(grapheme)) {
+      return digitMapping[Number(grapheme)];
     }
-    return char;
+
+    // Preserve the complete grapheme while still styling an accented Latin
+    // base character such as e + combining acute.
+    const decomposed = grapheme.normalize('NFD');
+    const codePoints = Array.from(decomposed);
+    const [base, ...marks] = codePoints;
+    if (base && marks.length && marks.every((mark) => /^(?:\p{Mark}|\uFE0F)$/u.test(mark))) {
+      const mappedBase = mapping[base];
+      if (mappedBase) return `${mappedBase}${marks.join('')}`;
+    }
+
+    return grapheme;
   });
 
   return styleId === 'inverted'
-    ? converted.reverse().join('')
+    ? reverseGraphemeLines(converted.join(''))
     : converted.join('');
 }
 

@@ -40,7 +40,7 @@
    const { slug } = await params;
    const page = getPageBySlug(slug, stylePages);
    if (!page) notFound();
-   const config = getGeneratorPageConfig(page.slug, page.title);
+   const config = getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds);
    const featureList = getSpecializedFeatureList(page.slug) ?? config.styleIds
      .map((styleId) => getStyleDefinition(styleId)?.name)
      .filter((name): name is string => Boolean(name));

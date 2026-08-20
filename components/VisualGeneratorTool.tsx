@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { VisualFontPreset, VisualGeneratorConfig } from '@/lib/visual-generator';
+import { convertToFancyText } from '@/lib/fonts';
+import { segmentGraphemes } from '@/lib/unicode';
 
 interface VisualGeneratorToolProps {
   config: VisualGeneratorConfig;
@@ -49,7 +51,8 @@ const applyPreset = (preset: VisualFontPreset) => ({
   strokeColor: preset.strokeColor ?? '#000000',
   strokeWidth: preset.strokeWidth ?? 0,
   shadowBlur: preset.shadowBlur ?? 0,
-  shadowOffset: Math.max(preset.shadowOffsetX ?? 0, preset.shadowOffsetY ?? 0),
+  shadowOffsetX: preset.shadowOffsetX ?? 0,
+  shadowOffsetY: preset.shadowOffsetY ?? 0,
   letterSpacing: preset.letterSpacing ?? 0,
 });
 
@@ -65,6 +68,10 @@ export default function VisualGeneratorTool({
   const [transparent, setTransparent] = useState(false);
   const [fontAvailable, setFontAvailable] = useState<boolean | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
+  const [backgroundImageDataUrl, setBackgroundImageDataUrl] = useState('');
+  const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null);
+  const [minecraftColorCode, setMinecraftColorCode] = useState('a');
+  const [minecraftBold, setMinecraftBold] = useState(false);
   const [controls, setControls] = useState(() => applyPreset(config.presets[0]));
 
   const currentPreset = useMemo(
@@ -73,10 +80,32 @@ export default function VisualGeneratorTool({
   );
   const dimensions = formats[format];
   const renderedText = currentPreset?.uppercase ? inputText.toUpperCase() : inputText;
+  const hasCapability = useCallback(
+    (capability: NonNullable<VisualGeneratorConfig['capabilities']>[number]) => config.capabilities?.includes(capability) ?? false,
+    [config.capabilities],
+  );
+  const minecraftCode = `§${minecraftColorCode}${minecraftBold ? '§l' : ''}${inputText}`;
+  const fortniteNameAlternative = convertToFancyText(inputText, 'bold');
 
   const selectPreset = (preset: VisualFontPreset) => {
     setPresetId(preset.id);
     setControls(applyPreset(preset));
+  };
+
+  const loadBackgroundImage = (file: File | undefined) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') return;
+      const image = new Image();
+      image.onload = () => {
+        setBackgroundImageDataUrl(reader.result as string);
+        setBackgroundImage(image);
+        setStatusMessage(`${file.name} loaded locally as the canvas background.`);
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   useEffect(() => {
@@ -128,7 +157,7 @@ export default function VisualGeneratorTool({
 
     const effectPadding = Math.max(
       controls.strokeWidth * 2,
-      controls.shadowBlur + Math.abs(controls.shadowOffset),
+      controls.shadowBlur + Math.max(Math.abs(controls.shadowOffsetX), Math.abs(controls.shadowOffsetY)),
     );
     const maxWidth = Math.max(1, width * TEXT_AREA_RATIO - effectPadding * 2);
     const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${size}px ${currentPreset.fontFamily}`;
@@ -138,7 +167,7 @@ export default function VisualGeneratorTool({
       context.font = fontSpec(resolvedSize);
       const exceedsWidth = lines.some((line) => (
         context.measureText(line).width
-        + Math.max(0, line.length - 1) * controls.letterSpacing
+        + Math.max(0, segmentGraphemes(line).length - 1) * controls.letterSpacing
         > maxWidth
       ));
       if (!exceedsWidth) break;
@@ -152,7 +181,7 @@ export default function VisualGeneratorTool({
       fontSize: resolvedSize,
       height: Math.max(minimumHeight, Math.ceil(textHeight + verticalPadding)),
     };
-  }, [controls.letterSpacing, controls.shadowBlur, controls.shadowOffset, controls.strokeWidth, currentPreset, fontSize]);
+  }, [controls.letterSpacing, controls.shadowBlur, controls.shadowOffsetX, controls.shadowOffsetY, controls.strokeWidth, currentPreset, fontSize]);
 
   const drawCanvas = useCallback((canvas: HTMLCanvasElement) => {
     if (!currentPreset) return;
@@ -172,6 +201,13 @@ export default function VisualGeneratorTool({
       context.fillRect(0, 0, canvas.width, canvas.height);
     }
 
+    if (backgroundImage) {
+      const scale = Math.max(canvas.width / backgroundImage.width, canvas.height / backgroundImage.height);
+      const width = backgroundImage.width * scale;
+      const height = backgroundImage.height * scale;
+      context.drawImage(backgroundImage, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+    }
+
     if (currentPreset.decoration === 'pixel' && !transparent) {
       context.globalAlpha = 0.12;
       context.fillStyle = '#ffffff';
@@ -184,7 +220,9 @@ export default function VisualGeneratorTool({
     }
 
     const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${size}px ${currentPreset.fontFamily}`;
-    const resolvedSize = layout.fontSize;
+    const resolvedSize = hasCapability('pixel-snap')
+      ? Math.max(MIN_FITTED_FONT_SIZE, Math.round(layout.fontSize / 8) * 8)
+      : layout.fontSize;
     const lineHeight = resolvedSize * LINE_HEIGHT_RATIO;
     const totalHeight = lineHeight * lines.length;
     const startY = (canvas.height - totalHeight) / 2 + resolvedSize * 0.92;
@@ -195,8 +233,8 @@ export default function VisualGeneratorTool({
     context.miterLimit = 2;
     context.shadowColor = currentPreset.shadowColor ?? '#000000';
     context.shadowBlur = controls.shadowBlur;
-    context.shadowOffsetX = controls.shadowOffset;
-    context.shadowOffsetY = controls.shadowOffset;
+    context.shadowOffsetX = controls.shadowOffsetX;
+    context.shadowOffsetY = controls.shadowOffsetY;
 
     if (currentPreset.decoration === 'badge' && !transparent) {
       context.save();
@@ -233,28 +271,74 @@ export default function VisualGeneratorTool({
       context.font = fontSpec(resolvedSize);
     }
 
+    if (currentPreset.decoration === 'flames') {
+      const drawFlame = (x: number, baseY: number, size: number) => {
+        context.beginPath();
+        context.moveTo(x, baseY);
+        context.bezierCurveTo(x - size * 0.65, baseY - size * 0.25, x - size * 0.35, baseY - size * 0.9, x, baseY - size * 1.3);
+        context.bezierCurveTo(x + size * 0.1, baseY - size * 0.78, x + size * 0.72, baseY - size * 0.45, x, baseY);
+        context.closePath();
+        context.fill();
+      };
+      context.save();
+      context.globalAlpha = 0.7;
+      context.shadowBlur = controls.shadowBlur;
+      context.fillStyle = currentPreset.accentColor ?? controls.textColor;
+      drawFlame(canvas.width * 0.11, canvas.height * 0.83, Math.max(42, resolvedSize * 0.65));
+      drawFlame(canvas.width * 0.89, canvas.height * 0.83, Math.max(42, resolvedSize * 0.65));
+      context.restore();
+    }
+
     const drawSpacedText = (line: string, x: number, y: number, mode: 'fill' | 'stroke') => {
-      if (!controls.letterSpacing && !currentPreset.multicolor) {
+      if (!controls.letterSpacing && !currentPreset.multicolor && currentPreset.decoration !== 'ransom') {
         if (mode === 'stroke') context.strokeText(line, x, y);
         else context.fillText(line, x, y);
         return;
       }
-      const characters = Array.from(line);
-      const widths = characters.map((character) => context.measureText(character).width);
+      const characters = segmentGraphemes(line);
+      const fontForIndex = (index: number) => currentPreset.fontAlternates?.[index % currentPreset.fontAlternates.length] ?? currentPreset.fontFamily;
+      const widths = characters.map((character, index) => {
+        context.font = `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${resolvedSize}px ${fontForIndex(index)}`;
+        return context.measureText(character).width;
+      });
       const totalWidth = widths.reduce((sum, width) => sum + width, 0) + Math.max(0, characters.length - 1) * controls.letterSpacing;
       let cursor = x - totalWidth / 2;
       context.textAlign = 'left';
       characters.forEach((character, index) => {
+        context.font = `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${resolvedSize}px ${fontForIndex(index)}`;
         if (mode === 'fill' && currentPreset.multicolor) context.fillStyle = palette[index % palette.length];
-        if (mode === 'stroke') context.strokeText(character, cursor, y);
+        if (mode === 'fill' && currentPreset.decoration === 'ransom' && !/\s/u.test(character)) {
+          const centerX = cursor + widths[index] / 2;
+          const tilt = ((index % 2 ? -1 : 1) * (currentPreset.characterTilt ?? 5) * Math.PI) / 180;
+          context.save();
+          context.translate(centerX, y - resolvedSize * 0.34 + (index % 3 - 1) * resolvedSize * 0.06);
+          context.rotate(tilt);
+          context.shadowBlur = 0;
+          context.shadowOffsetX = 0;
+          context.shadowOffsetY = 0;
+          context.fillStyle = currentPreset.characterBackgrounds?.[index % currentPreset.characterBackgrounds.length] ?? '#ffffff';
+          context.fillRect(-widths[index] / 2 - resolvedSize * 0.08, -resolvedSize * 0.7, widths[index] + resolvedSize * 0.16, resolvedSize * 0.95);
+          context.fillStyle = index % 4 === 1 ? '#dc2626' : controls.textColor;
+          context.textAlign = 'center';
+          context.fillText(character, 0, resolvedSize * 0.34);
+          context.restore();
+        } else if (mode === 'stroke') context.strokeText(character, cursor, y);
         else context.fillText(character, cursor, y);
         cursor += widths[index] + controls.letterSpacing;
       });
       context.textAlign = 'center';
+      context.font = fontSpec(resolvedSize);
     };
 
     lines.forEach((line, index) => {
-      const y = startY + index * lineHeight;
+      const centeredY = startY + index * lineHeight;
+      const y = hasCapability('meme-layout') && lines.length > 1
+        ? index === 0
+          ? resolvedSize * 1.08
+          : index === lines.length - 1
+            ? canvas.height - resolvedSize * 0.28
+            : centeredY
+        : centeredY;
       context.font = fontSpec(resolvedSize);
       if (controls.strokeWidth > 0) {
         context.strokeStyle = controls.strokeColor;
@@ -271,7 +355,7 @@ export default function VisualGeneratorTool({
       }
       drawSpacedText(line, canvas.width / 2, y, 'fill');
     });
-  }, [controls, currentPreset, dimensions, renderedText, resolveTextLayout, transparent]);
+  }, [backgroundImage, controls, currentPreset, dimensions, hasCapability, renderedText, resolveTextLayout, transparent]);
 
   useEffect(() => {
     if (canvasRef.current) drawCanvas(canvasRef.current);
@@ -295,7 +379,9 @@ export default function VisualGeneratorTool({
     const layout = measureContext
       ? resolveTextLayout(measureContext, lines, width, dimensions.height)
       : { fontSize, height: dimensions.height };
-    const resolvedSize = layout.fontSize;
+    const resolvedSize = hasCapability('pixel-snap')
+      ? Math.max(MIN_FITTED_FONT_SIZE, Math.round(layout.fontSize / 8) * 8)
+      : layout.fontSize;
     const height = layout.height;
     const lineHeight = resolvedSize * LINE_HEIGHT_RATIO;
     const startY = (height - lineHeight * lines.length) / 2 + resolvedSize * 0.92;
@@ -304,23 +390,53 @@ export default function VisualGeneratorTool({
     const fill = currentPreset.gradient ? `url(#${gradientId})` : controls.textColor;
     const textAttributes = `font-family="${escapeXml(currentPreset.fontFamily)}" font-size="${resolvedSize}" font-weight="${currentPreset.fontWeight ?? 700}" font-style="${currentPreset.fontStyle ?? 'normal'}" letter-spacing="${controls.letterSpacing}" fill="${fill}" stroke="${controls.strokeWidth ? controls.strokeColor : 'none'}" stroke-width="${controls.strokeWidth * 2}" paint-order="stroke fill" filter="url(#${filterId})"`;
     const textElements = lines.map((line, lineIndex) => {
-      const y = startY + lineIndex * lineHeight;
+      const centeredY = startY + lineIndex * lineHeight;
+      const y = hasCapability('meme-layout') && lines.length > 1
+        ? lineIndex === 0
+          ? resolvedSize * 1.08
+          : lineIndex === lines.length - 1
+            ? height - resolvedSize * 0.28
+            : centeredY
+        : centeredY;
       if (currentPreset.multicolor) {
-        const chars = Array.from(line).map((character, index) => `<tspan fill="${palette[index % palette.length]}">${escapeXml(character)}</tspan>`).join('');
+        const chars = segmentGraphemes(line)
+          .map((character, index) => `<tspan fill="${palette[index % palette.length]}">${escapeXml(character)}</tspan>`)
+          .join('');
         return `<text x="50%" y="${y}" text-anchor="middle" ${textAttributes}>${chars}</text>`;
       }
       return `<text x="50%" y="${y}" text-anchor="middle" ${textAttributes}>${escapeXml(line)}</text>`;
     }).join('\n  ');
     const background = transparent ? '' : `<rect width="100%" height="100%" fill="${controls.backgroundColor}"/>`;
-    const gradient = currentPreset.gradient ? `<linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${currentPreset.gradient[0]}"/><stop offset="1" stop-color="${currentPreset.gradient[1]}"/></linearGradient>` : '';
-    const decorations = currentPreset.decoration === 'lines'
-      ? `<path d="M ${width * 0.16} ${height * 0.25} H ${width * 0.84} M ${width * 0.16} ${height * 0.75} H ${width * 0.84}" stroke="${controls.textColor}" stroke-width="${Math.max(2, controls.strokeWidth)}"/>`
-      : currentPreset.decoration === 'sparkles'
+    const backgroundAsset = backgroundImageDataUrl
+      ? `<image href="${escapeXml(backgroundImageDataUrl)}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>`
+      : '';
+    const gradient = currentPreset.gradient
+      ? `<linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${currentPreset.gradient[0]}"/><stop offset="1" stop-color="${currentPreset.gradient[1]}"/></linearGradient>`
+      : '';
+    const pixelPattern = currentPreset.decoration === 'pixel' && !transparent
+      ? '<pattern id="pixel-grid" width="96" height="96" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="#ffffff" opacity=".12"/><rect x="48" y="48" width="24" height="24" fill="#ffffff" opacity=".12"/></pattern>'
+      : '';
+    const decorations = [
+      currentPreset.decoration === 'lines'
+        ? `<path d="M ${width * 0.16} ${height * 0.25} H ${width * 0.84} M ${width * 0.16} ${height * 0.75} H ${width * 0.84}" stroke="${controls.textColor}" stroke-width="${Math.max(2, controls.strokeWidth)}"/>`
+        : '',
+      currentPreset.decoration === 'sparkles'
         ? `<text x="14%" y="28%" font-size="${Math.max(28, resolvedSize * 0.35)}" fill="${controls.textColor}">✦</text><text x="85%" y="72%" font-size="${Math.max(28, resolvedSize * 0.35)}" fill="${controls.textColor}">✧</text>`
-        : '';
+        : '',
+      currentPreset.decoration === 'badge' && !transparent
+        ? `<rect x="12%" y="20%" width="76%" height="60%" rx="42" fill="${controls.textColor}" opacity=".16"/>`
+        : '',
+      currentPreset.decoration === 'pixel' && !transparent
+        ? '<rect width="100%" height="100%" fill="url(#pixel-grid)"/>'
+        : '',
+      currentPreset.decoration === 'flames'
+        ? `<g fill="${currentPreset.accentColor ?? controls.textColor}" opacity=".7"><path d="M ${width * 0.11} ${height * 0.83} C ${width * 0.06} ${height * 0.74}, ${width * 0.08} ${height * 0.55}, ${width * 0.11} ${height * 0.43} C ${width * 0.12} ${height * 0.62}, ${width * 0.17} ${height * 0.72}, ${width * 0.11} ${height * 0.83} Z"/><path d="M ${width * 0.89} ${height * 0.83} C ${width * 0.84} ${height * 0.74}, ${width * 0.86} ${height * 0.55}, ${width * 0.89} ${height * 0.43} C ${width * 0.9} ${height * 0.62}, ${width * 0.95} ${height * 0.72}, ${width * 0.89} ${height * 0.83} Z"/></g>`
+        : '',
+    ].join('');
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-  <defs>${gradient}<filter id="${filterId}" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="${controls.shadowOffset}" dy="${controls.shadowOffset}" stdDeviation="${controls.shadowBlur / 2}" flood-color="${currentPreset.shadowColor ?? '#000000'}"/></filter></defs>
+  <defs>${gradient}${pixelPattern}<filter id="${filterId}" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="${controls.shadowOffsetX}" dy="${controls.shadowOffsetY}" stdDeviation="${controls.shadowBlur / 2}" flood-color="${currentPreset.shadowColor ?? '#000000'}"/></filter></defs>
   ${background}
+  ${backgroundAsset}
   ${decorations}
   ${textElements}
 </svg>`;
@@ -329,6 +445,24 @@ export default function VisualGeneratorTool({
   const exportSvg = () => {
     downloadBlob(new Blob([buildSvg()], { type: 'image/svg+xml;charset=utf-8' }), `${fileSlug(pageTitle)}-${fileSlug(currentPreset.name)}.svg`);
     setStatusMessage('SVG downloaded. It keeps editable text and may need the named font on another device.');
+  };
+
+  const exportFaithfulSvg = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const png = canvas.toDataURL('image/png');
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}"><image href="${png}" width="100%" height="100%"/></svg>`;
+    downloadBlob(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), `${fileSlug(pageTitle)}-${fileSlug(currentPreset.name)}-faithful.svg`);
+    setStatusMessage('Faithful SVG downloaded. It embeds the exact canvas as an image.');
+  };
+
+  const copyUtilityText = async (value: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setStatusMessage(`${label} copied.`);
+    } catch {
+      setStatusMessage('Copy was blocked by the browser. Select the value and copy it manually.');
+    }
   };
 
   return (
@@ -343,7 +477,7 @@ export default function VisualGeneratorTool({
           <div>
             <label htmlFor="visual-text-input" className="text-sm font-semibold text-slate-900 dark:text-white">Your text</label>
             <textarea id="visual-text-input" value={inputText} onChange={(event) => setInputText(event.target.value)} rows={3} maxLength={120} placeholder="Type a short title" className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-base outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900" />
-            <div className="mt-2 flex justify-between text-xs text-slate-500"><span>Canvas grows with additional lines</span><span>{inputText.length}/120</span></div>
+            <div className="mt-2 flex justify-between gap-3 text-xs text-slate-500"><span>{hasCapability('meme-layout') ? 'First line goes on top; the final line goes on the bottom.' : 'Canvas grows with additional lines'}</span><span>{inputText.length}/120</span></div>
             <p className="mt-1 text-xs text-slate-500">Rendered locally—your text isn&apos;t uploaded.</p>
           </div>
 
@@ -356,6 +490,30 @@ export default function VisualGeneratorTool({
               {config.presets.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
             </select>
             <p className="mt-2 text-xs leading-5 text-slate-500">{currentPreset.description}</p>
+            <div className="mt-3 grid grid-cols-2 gap-2" aria-label="Preset gallery">
+              {config.presets.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => selectPreset(item)}
+                  aria-pressed={item.id === presetId}
+                  className={`overflow-hidden rounded-xl border p-2 text-left transition ${item.id === presetId ? 'border-violet-500 ring-2 ring-violet-500/20' : 'border-slate-200 hover:border-violet-300 dark:border-slate-700'}`}
+                >
+                  <span
+                    className="block truncate rounded-lg px-2 py-3 text-center text-base"
+                    style={{
+                      background: item.gradient ? `linear-gradient(${item.backgroundColor}, ${item.backgroundColor})` : item.backgroundColor,
+                      color: item.textColor,
+                      fontFamily: item.fontFamily,
+                      fontWeight: item.fontWeight ?? 700,
+                    }}
+                  >
+                    {item.uppercase ? 'STYLE' : 'Style'}
+                  </span>
+                  <span className="mt-1.5 block truncate text-[11px] font-semibold text-slate-600 dark:text-slate-300">{item.name}</span>
+                </button>
+              ))}
+            </div>
             {currentPreset.targetFont && (
               <p className={`mt-2 rounded-lg px-3 py-2 text-xs font-semibold ${fontAvailable ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'}`}>
                 {fontAvailable
@@ -382,9 +540,17 @@ export default function VisualGeneratorTool({
               <input aria-label="Outline width" type="range" min="0" max="8" value={controls.strokeWidth} onChange={(event) => setControls((value) => ({ ...value, strokeWidth: Number(event.target.value) }))} className="mt-2 w-full" />
               <span className="mt-1 block font-normal text-slate-500">{controls.strokeWidth}px</span>
             </label>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow
-              <input aria-label="Shadow amount" type="range" min="0" max="24" value={controls.shadowOffset} onChange={(event) => setControls((value) => ({ ...value, shadowOffset: Number(event.target.value) }))} className="mt-2 w-full" />
-              <span className="mt-1 block font-normal text-slate-500">{controls.shadowOffset}px</span>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow X
+              <input aria-label="Horizontal shadow offset" type="range" min="-24" max="24" value={controls.shadowOffsetX} onChange={(event) => setControls((value) => ({ ...value, shadowOffsetX: Number(event.target.value) }))} className="mt-2 w-full" />
+              <span className="mt-1 block font-normal text-slate-500">{controls.shadowOffsetX}px</span>
+            </label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow Y
+              <input aria-label="Vertical shadow offset" type="range" min="-24" max="24" value={controls.shadowOffsetY} onChange={(event) => setControls((value) => ({ ...value, shadowOffsetY: Number(event.target.value) }))} className="mt-2 w-full" />
+              <span className="mt-1 block font-normal text-slate-500">{controls.shadowOffsetY}px</span>
+            </label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow blur
+              <input aria-label="Shadow blur" type="range" min="0" max="30" value={controls.shadowBlur} onChange={(event) => setControls((value) => ({ ...value, shadowBlur: Number(event.target.value) }))} className="mt-2 w-full" />
+              <span className="mt-1 block font-normal text-slate-500">{controls.shadowBlur}px</span>
             </label>
           </div>
 
@@ -400,6 +566,49 @@ export default function VisualGeneratorTool({
             </label>
           </div>
 
+          {hasCapability('background-image') && (
+            <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+              <label htmlFor="visual-background-image" className="text-sm font-semibold text-slate-900 dark:text-white">Meme background image</label>
+              <input
+                id="visual-background-image"
+                type="file"
+                accept="image/*"
+                onChange={(event) => loadBackgroundImage(event.target.files?.[0])}
+                className="mt-2 block w-full text-xs text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-violet-100 file:px-3 file:py-2 file:font-semibold file:text-violet-700 dark:file:bg-violet-950 dark:file:text-violet-300"
+              />
+              <p className="mt-2 text-xs leading-5 text-slate-500">The file stays in this browser and is cropped to cover the canvas.</p>
+              {backgroundImage && (
+                <button type="button" onClick={() => { setBackgroundImage(null); setBackgroundImageDataUrl(''); setStatusMessage('Background image removed.'); }} className="mt-2 text-xs font-bold text-rose-600 hover:text-rose-800 dark:text-rose-400">Remove background image</button>
+              )}
+            </div>
+          )}
+
+          {hasCapability('game-codes') && (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/60 dark:bg-emerald-950/30">
+              <p className="text-sm font-bold text-emerald-950 dark:text-emerald-200">Minecraft formatting code</p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-300">Color
+                  <select value={minecraftColorCode} onChange={(event) => setMinecraftColorCode(event.target.value)} className="mt-1 block w-full rounded-lg border border-emerald-300 bg-white px-2 py-2 dark:border-emerald-800 dark:bg-slate-900">
+                    <option value="f">White · §f</option><option value="e">Yellow · §e</option><option value="a">Green · §a</option><option value="b">Aqua · §b</option><option value="c">Red · §c</option><option value="d">Pink · §d</option><option value="6">Gold · §6</option><option value="9">Blue · §9</option>
+                  </select>
+                </label>
+                <label className="flex items-end gap-2 pb-2 text-xs font-semibold text-emerald-900 dark:text-emerald-300"><input type="checkbox" checked={minecraftBold} onChange={(event) => setMinecraftBold(event.target.checked)} className="h-4 w-4" /> Bold · §l</label>
+              </div>
+              <code className="mt-3 block break-all rounded-lg bg-white px-3 py-2 text-xs text-slate-800 dark:bg-slate-900 dark:text-slate-200">{minecraftCode}</code>
+              <button type="button" onClick={() => void copyUtilityText(minecraftCode, 'Minecraft formatting code')} className="mt-2 w-full rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-600">Copy game code</button>
+              <p className="mt-2 text-[11px] leading-4 text-emerald-800 dark:text-emerald-300">Compatibility depends on the Minecraft edition, server, command, and field. The image preview is separate from this code.</p>
+            </div>
+          )}
+
+          {hasCapability('copyable-name') && (
+            <div className="rounded-xl border border-sky-200 bg-sky-50 p-3 dark:border-sky-900/60 dark:bg-sky-950/30">
+              <p className="text-sm font-bold text-sky-950 dark:text-sky-200">Copyable player-name alternative</p>
+              <p className="mt-2 break-all rounded-lg bg-white px-3 py-2 text-base text-slate-900 dark:bg-slate-900 dark:text-white">{fortniteNameAlternative}</p>
+              <button type="button" onClick={() => void copyUtilityText(fortniteNameAlternative, 'Player-name alternative')} className="mt-2 w-full rounded-lg bg-sky-700 px-3 py-2 text-xs font-bold text-white hover:bg-sky-600">Copy alternative</button>
+              <p className="mt-2 text-[11px] leading-4 text-sky-800 dark:text-sky-300">This uses Unicode lookalikes, not an in-game font. Some games reject styled characters, so test it before relying on it.</p>
+            </div>
+          )}
+
           <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
             <input type="checkbox" checked={transparent} onChange={(event) => setTransparent(event.target.checked)} className="h-4 w-4 rounded border-slate-300 text-violet-600" />
             Transparent background
@@ -409,6 +618,13 @@ export default function VisualGeneratorTool({
         </div>
 
         <div className="min-w-0">
+          {hasCapability('font-specimen') && (
+            <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-300">Typeface specimen</p>
+              <p className="mt-2 break-words text-3xl leading-tight text-slate-950 dark:text-white" style={{ fontFamily: currentPreset.fontFamily, fontWeight: currentPreset.fontWeight ?? 700, fontStyle: currentPreset.fontStyle ?? 'normal' }}>Aa Bb Cc 0123 &amp;?!</p>
+              <p className="mt-2 text-xs text-slate-500">{currentPreset.sourceLabel}</p>
+            </div>
+          )}
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="font-bold text-slate-950 dark:text-white">Live artwork preview</h3>
@@ -423,17 +639,19 @@ export default function VisualGeneratorTool({
           </div>
           {!inputText && <p className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">Enter text to create a downloadable design.</p>}
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <button type="button" onClick={exportPng} disabled={!inputText} className="rounded-xl bg-violet-600 px-4 py-3 text-sm font-bold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-45">Download PNG</button>
             <button type="button" onClick={exportSvg} disabled={!inputText} className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-45 dark:bg-white dark:text-slate-950">Download editable SVG</button>
+            <button type="button" onClick={exportFaithfulSvg} disabled={!inputText} className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-800 hover:border-violet-400 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-45 dark:border-slate-700 dark:text-slate-200">Download faithful SVG</button>
           </div>
+          <p className="mt-2 text-xs leading-5 text-slate-500">Editable SVG keeps selectable text and can simplify complex per-letter effects. Faithful SVG embeds the exact canvas appearance.</p>
 
           <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
             <p><strong className="text-slate-800 dark:text-slate-200">Font source:</strong> {currentPreset.sourceLabel}</p>
             <p className="mt-1"><strong className="text-slate-800 dark:text-slate-200">Export note:</strong> {currentPreset.licenseNote}</p>
           </div>
           <p className="mt-3 text-xs leading-5 text-slate-500">{config.compatibilityNote}</p>
-          <p className="sr-only" aria-live="polite">{statusMessage}</p>
+          {statusMessage && <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs font-medium text-violet-800 dark:bg-violet-950/40 dark:text-violet-300" aria-live="polite">{statusMessage}</p>}
         </div>
       </div>
     </section>

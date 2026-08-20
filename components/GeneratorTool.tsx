@@ -26,6 +26,7 @@ interface GeneratorToolProps {
   compactResults?: boolean;
   enablePopularFilters?: boolean;
   showSocialPreview?: boolean;
+  sectionId?: string;
 }
 
 const categoryLabels: Record<GeneratorStyleCategory, string> = {
@@ -117,6 +118,7 @@ export default function GeneratorTool({
   compactResults = false,
   enablePopularFilters = false,
   showSocialPreview = false,
+  sectionId = 'generator',
 }: GeneratorToolProps) {
   const [inputText, setInputText] = useState(config.initialText);
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>('recommended');
@@ -126,6 +128,8 @@ export default function GeneratorTool({
   const [visibleLimit, setVisibleLimit] = useState(initialResultLimit);
   const [popularFilterId, setPopularFilterId] = useState('all');
   const [previewStyleId, setPreviewStyleId] = useState<string | null>(null);
+  const headingId = `${sectionId}-heading`;
+  const inputId = `${sectionId}-input`;
 
   const filteredStyleIds = useMemo(() => {
     const categoryStyleIds = activeFilter === 'recommended'
@@ -207,12 +211,12 @@ export default function GeneratorTool({
 
   return (
     <section
-      id="generator"
-      aria-labelledby="generator-heading"
+      id={sectionId}
+      aria-labelledby={headingId}
       className="mt-8 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-950"
     >
       <div className="border-b border-slate-200/80 bg-slate-950 px-5 py-4 text-white sm:px-8 sm:py-5 dark:border-slate-800">
-        <h2 id="generator-heading" className="text-xl font-bold sm:text-2xl">
+        <h2 id={headingId} className="text-xl font-bold sm:text-2xl">
           Generate {pageTitle.replace(/\s+Generator$/i, '')}
         </h2>
         <p className="mt-1.5 max-w-4xl text-sm leading-5 text-slate-300 sm:leading-6">
@@ -223,11 +227,11 @@ export default function GeneratorTool({
       <div className="p-5 sm:p-8">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
           <div>
-            <label htmlFor="generator-input" className="block text-sm font-semibold text-slate-900 dark:text-white">
+            <label htmlFor={inputId} className="block text-sm font-semibold text-slate-900 dark:text-white">
               Enter your text
             </label>
             <textarea
-              id="generator-input"
+              id={inputId}
               value={inputText}
               onChange={(event) => setInputText(event.target.value)}
               rows={3}

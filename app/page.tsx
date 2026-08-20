@@ -1,53 +1,7 @@
 import Link from 'next/link';
 import GeneratorTool from '@/components/GeneratorTool';
 import { generatorStyles, getGeneratorPageConfig } from '@/lib/generator';
-
-const discoveryItems = [
-  {
-    icon: '✨',
-    title: 'Copy & Paste Text',
-    description: 'Turn plain text into copyable Unicode styles.',
-    preview: 'Hello → 𝐻ℯ𝓁𝓁ℴ',
-    tone: 'violet' as const,
-    linkLabel: 'You are here',
-  },
-  {
-    icon: '🎨',
-    title: 'Text Artwork',
-    description: 'Design rendered titles and download PNG or SVG.',
-    preview: 'TYPE · COLOR · EXPORT',
-    tone: 'rose' as const,
-    href: '/styles',
-    linkLabel: 'Browse style tools',
-  },
-  {
-    icon: '🔠',
-    title: 'ASCII Banners',
-    description: 'Build large multi-line art that remains plain text.',
-    preview: '[ F O N T ]\n== TEXT ==',
-    tone: 'cyan' as const,
-    href: '/styles/big-font-generator',
-    linkLabel: 'Make a banner',
-  },
-  {
-    icon: '⭐',
-    title: 'Fandom Styles',
-    description: 'Create unofficial artwork inspired by visual themes.',
-    preview: 'PIXEL · FANTASY · RETRO',
-    tone: 'amber' as const,
-    href: '/fandom',
-    linkLabel: 'Explore fandom tools',
-  },
-  {
-    icon: '📖',
-    title: 'Guides',
-    description: 'Check Unicode, compatibility, and accessibility.',
-    preview: '✓ Unicode  ✓ Compatibility',
-    tone: 'emerald' as const,
-    href: '/guides',
-    linkLabel: 'Read practical guides',
-  },
-];
+import { homepageEntries } from '@/lib/generator-collections';
 
 export default function HomePage() {
   const homeConfig = {
@@ -96,7 +50,7 @@ export default function HomePage() {
 
           <GeneratorTool
             config={homeConfig}
-            discoveryItems={discoveryItems}
+            discoveryItems={homepageEntries}
             pageTitle="Font Generator"
             enableStyleSearch
             initialResultLimit={18}

@@ -22,17 +22,35 @@ export interface VisualFontPreset {
   letterSpacing?: number;
   gradient?: [string, string];
   multicolor?: boolean;
-  decoration?: 'lines' | 'badge' | 'pixel' | 'sparkles' | 'none';
+  fontAlternates?: string[];
+  characterBackgrounds?: string[];
+  characterTilt?: number;
+  material?: VisualMaterial;
+  decoration?: 'lines' | 'badge' | 'pixel' | 'sparkles' | 'flames' | 'ransom' | 'none';
 }
 
+export type VisualMaterial = 'grass' | 'stone' | 'diamond' | 'nether';
+
+export type VisualCapability =
+  | 'background-image'
+  | 'meme-layout'
+  | 'font-specimen'
+  | 'game-codes'
+  | 'copyable-name'
+  | 'inline-format-codes'
+  | 'material-textures'
+  | 'extrusion-depth'
+  | 'pixel-snap';
+
 export interface VisualGeneratorConfig {
-  engine: 'font-renderer' | 'theme-renderer';
+  engine: 'font-renderer' | 'theme-renderer' | 'minecraft-renderer';
   initialText: string;
   intentLabel: string;
   resultIntro: string;
   bestFor: string[];
   presets: VisualFontPreset[];
   compatibilityNote: string;
+  capabilities?: VisualCapability[];
 }
 
 const system = (name: string) => `${JSON.stringify(name)}, serif`;
@@ -101,6 +119,7 @@ const configs: Record<string, VisualGeneratorConfig> = {
     resultIntro: 'Render text with Times New Roman when it is installed, or compare clearly labelled serif fallbacks. Download the rendered result as PNG or SVG.',
     bestFor: ['Formal headings', 'Document previews', 'Editorial graphics'],
     compatibilityNote: 'PNG preserves the current rendering. SVG keeps editable text and therefore needs the named font on the device where it is opened.',
+    capabilities: ['font-specimen'],
     presets: [
       preset('tnr-regular', 'Times New Roman Regular', 'The installed Times New Roman face with a classic editorial treatment.', system('Times New Roman'), { targetFont: 'Times New Roman', fontWeight: 400, textColor: '#171717', backgroundColor: '#f8f4ea' }),
       preset('tnr-bold', 'Times New Roman Bold', 'A heavier system-font rendering for formal headlines.', system('Times New Roman'), { targetFont: 'Times New Roman', fontWeight: 700, textColor: '#111827', backgroundColor: '#ffffff' }),
@@ -115,6 +134,7 @@ const configs: Record<string, VisualGeneratorConfig> = {
     resultIntro: 'Create heavy Impact-style headlines with real font rendering, editable outlines, shadows, colors, and downloadable artwork.',
     bestFor: ['Meme captions', 'Posters', 'Video thumbnails'],
     compatibilityNote: 'Impact is used when installed. The browser falls back to other heavy sans-serif faces when it is unavailable.',
+    capabilities: ['background-image', 'meme-layout'],
     presets: [
       preset('impact-meme', 'Classic Meme', 'White uppercase Impact with a strong black outline.', sans('Impact'), { targetFont: 'Impact', uppercase: true, fontWeight: 900, strokeWidth: 5, backgroundColor: '#475569', letterSpacing: 1 }),
       preset('impact-yellow', 'Poster Yellow', 'A high-energy yellow headline with a deep offset shadow.', sans('Impact'), { targetFont: 'Impact', uppercase: true, fontWeight: 900, textColor: '#fde047', backgroundColor: '#18181b', strokeWidth: 2, shadowOffsetX: 8, shadowOffsetY: 8, letterSpacing: 2 }),
@@ -129,6 +149,7 @@ const configs: Record<string, VisualGeneratorConfig> = {
     resultIntro: 'Preview Papyrus when installed and compare rustic fantasy alternatives on parchment, dark, or transparent-ready backgrounds.',
     bestFor: ['Fantasy titles', 'Invitations', 'Ancient themes'],
     compatibilityNote: 'The original Papyrus face is only used from the visitor’s device. Alternatives are identified instead of being presented as Papyrus.',
+    capabilities: ['font-specimen'],
     presets: [
       preset('papyrus-system', 'Papyrus', 'The system Papyrus face when available.', system('Papyrus'), { targetFont: 'Papyrus', fontWeight: 400, textColor: '#4a2c16', backgroundColor: '#ead8aa', shadowColor: '#8b5e34', shadowBlur: 2 }),
       preset('papyrus-dark', 'Papyrus Night', 'A dark fantasy treatment using the installed Papyrus face.', system('Papyrus'), { targetFont: 'Papyrus', fontWeight: 400, textColor: '#f4d06f', backgroundColor: '#1c1917', shadowColor: '#000000', shadowBlur: 8 }),
@@ -143,6 +164,7 @@ const configs: Record<string, VisualGeneratorConfig> = {
     resultIntro: 'Render friendly comic lettering with Comic Sans MS when installed, plus clearly labelled casual alternatives and speech-bubble presets.',
     bestFor: ['Speech bubbles', 'Classroom cards', 'Casual graphics'],
     compatibilityNote: 'The exact Comic Sans MS face depends on system availability. PNG downloads preserve the browser’s rendered fallback.',
+    capabilities: ['font-specimen'],
     presets: [
       preset('comic-system', 'Comic Sans MS', 'The installed Comic Sans MS face in its familiar friendly style.', sans('Comic Sans MS'), { targetFont: 'Comic Sans MS', fontWeight: 400, textColor: '#1d4ed8', backgroundColor: '#fef9c3' }),
       preset('comic-bold', 'Comic Sans Bold', 'A bold comic caption with a white outline.', sans('Comic Sans MS'), { targetFont: 'Comic Sans MS', fontWeight: 700, textColor: '#ef4444', backgroundColor: '#bfdbfe', strokeColor: '#ffffff', strokeWidth: 3, shadowOffsetX: 4, shadowOffsetY: 4 }),
@@ -157,6 +179,7 @@ const configs: Record<string, VisualGeneratorConfig> = {
     resultIntro: 'Preview text through the Apple system UI font stack and test app-header, notification, and product-card typography.',
     bestFor: ['UI mockups', 'Product cards', 'App headings'],
     compatibilityNote: 'Apple platforms resolve -apple-system to San Francisco. Other platforms use their native UI sans; SF Pro files are not redistributed.',
+    capabilities: ['font-specimen'],
     presets: [
       preset('sf-display', 'SF Display / System UI', 'A large Apple system heading when viewed on an Apple device.', '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', { targetFont: 'SF Pro Display', fontWeight: 700, textColor: '#111827', backgroundColor: '#f8fafc', letterSpacing: -2 }),
       preset('sf-text', 'SF Text / System UI', 'A medium-weight interface label optimized for clarity.', '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', { targetFont: 'SF Pro Text', fontWeight: 500, textColor: '#1f2937', backgroundColor: '#ffffff' }),
@@ -171,6 +194,7 @@ const configs: Record<string, VisualGeneratorConfig> = {
     resultIntro: 'Create crisp pixel-style titles at integer-like sizes with block shadows, game palettes, and downloadable artwork.',
     bestFor: ['Server names', 'Pixel signs', 'Achievement cards'],
     compatibilityNote: 'Minecraftia is used only if already installed. The fallback is a labelled monospace pixel direction, not the official game font.',
+    capabilities: ['font-specimen', 'pixel-snap'],
     presets: [
       preset('minecraftia-system', 'Minecraftia (installed)', 'Uses Minecraftia from the device when available.', 'Minecraftia, "Courier New", monospace', { targetFont: 'Minecraftia', uppercase: true, fontWeight: 400, textColor: '#f8fafc', backgroundColor: '#334155', shadowColor: '#111827', shadowOffsetX: 6, shadowOffsetY: 6, letterSpacing: 2, decoration: 'pixel' }),
       preset('pixel-grass', 'Grass Block', 'Green pixel lettering with a dark block shadow.', 'Minecraftia, "Courier New", monospace', { targetFont: 'Minecraftia', uppercase: true, textColor: '#86efac', backgroundColor: '#3f3f2f', strokeColor: '#14532d', strokeWidth: 2, shadowOffsetX: 6, shadowOffsetY: 6, decoration: 'pixel' }),
@@ -190,6 +214,59 @@ const configs: Record<string, VisualGeneratorConfig> = {
       preset('metal-red', 'Thrash Red', 'Aggressive condensed lettering with red glow.', sans('Impact'), { targetFont: 'Impact', uppercase: true, textColor: '#ef4444', backgroundColor: '#09090b', strokeColor: '#7f1d1d', strokeWidth: 2, shadowColor: '#dc2626', shadowBlur: 18, letterSpacing: 4 }),
       preset('metal-gothic', 'Gothic Steel', 'Historic blackletter energy in a steel palette.', 'UnifrakturCook, "Old English Text MT", serif', { targetFont: 'Old English Text MT', textColor: '#d4d4d8', backgroundColor: '#18181b', strokeColor: '#000000', strokeWidth: 2, shadowOffsetX: 5, shadowOffsetY: 5 }),
       preset('metal-fire', 'Molten', 'A hot metal gradient for posters and cover concepts.', sans('Impact'), { targetFont: 'Impact', uppercase: true, gradient: ['#fef08a', '#dc2626'], textColor: '#f97316', backgroundColor: '#1c0a00', strokeColor: '#450a0a', strokeWidth: 3, shadowColor: '#f97316', shadowBlur: 16, letterSpacing: 2 }),
+    ],
+  },
+  'brat-text-generator': {
+    engine: 'theme-renderer',
+    initialText: 'brat',
+    intentLabel: 'Brat-style artwork and copyable text',
+    resultIntro: 'Create a compressed lime-and-black title graphic, then use the copyable styles below when you need text rather than an image.',
+    bestFor: ['Profile graphics', 'Party posts', 'Square cover art'],
+    compatibilityNote: 'Anton is a bundled open-source condensed display face. This tool creates original brat-inspired artwork and does not distribute proprietary album assets.',
+    presets: [
+      bundledPreset('brat-lime', 'Lime Square', 'Compressed black lowercase lettering on the recognizable high-energy lime field.', 'Anton', 'Impact, sans-serif', { fontWeight: 400, textColor: '#111111', backgroundColor: '#8ace00', letterSpacing: -3 }),
+      bundledPreset('brat-black', 'Night Club', 'Acid-lime condensed lettering on black.', 'Anton', 'Impact, sans-serif', { fontWeight: 400, textColor: '#a3ff12', backgroundColor: '#050505', letterSpacing: -2 }),
+      bundledPreset('brat-white', 'Flash White', 'Minimal black condensed title on a hard white field.', 'Anton', 'Impact, sans-serif', { fontWeight: 400, textColor: '#111111', backgroundColor: '#ffffff', letterSpacing: -3 }),
+      bundledPreset('brat-pink', 'After Party', 'Hot-pink club variation with a deep offset shadow.', 'Anton', 'Impact, sans-serif', { fontWeight: 400, textColor: '#111111', backgroundColor: '#f472b6', shadowOffsetX: 6, shadowOffsetY: 8, letterSpacing: -2 }),
+    ],
+  },
+  'fire-font-generator': {
+    engine: 'theme-renderer',
+    initialText: 'BURN BRIGHT',
+    intentLabel: 'Flame title artwork and copyable text',
+    resultIntro: 'Create hot gradient title artwork with flame accents, outlines, glow, and transparent export.',
+    bestFor: ['Gaming thumbnails', 'Event titles', 'Hot-sale graphics'],
+    compatibilityNote: 'The artwork uses bundled open-source display fonts and original flame effects. Emoji rendering is not required in exported artwork.',
+    presets: [
+      bundledPreset('fire-inferno', 'Inferno', 'Yellow-to-red title lettering with glow and flame accents.', 'Anton', 'Impact, sans-serif', { uppercase: true, gradient: ['#fef08a', '#dc2626'], textColor: '#f97316', backgroundColor: '#180300', strokeColor: '#7f1d1d', strokeWidth: 3, shadowColor: '#fb923c', shadowBlur: 20, decoration: 'flames' }),
+      bundledPreset('fire-blue', 'Blue Flame', 'White-hot cyan lettering on a deep navy field.', 'Anton', 'Impact, sans-serif', { uppercase: true, gradient: ['#ffffff', '#22d3ee'], textColor: '#22d3ee', backgroundColor: '#020617', strokeColor: '#075985', strokeWidth: 3, shadowColor: '#38bdf8', shadowBlur: 22, decoration: 'flames' }),
+      bundledPreset('fire-ember', 'Ember', 'Glowing orange title with a heavy charcoal outline.', 'Anton', 'Impact, sans-serif', { uppercase: true, textColor: '#fb923c', backgroundColor: '#18181b', strokeColor: '#431407', strokeWidth: 4, shadowColor: '#f97316', shadowBlur: 16, decoration: 'flames' }),
+    ],
+  },
+  'glitter-font-generator': {
+    engine: 'theme-renderer',
+    initialText: 'Shine On',
+    intentLabel: 'Glitter artwork and copyable sparkle text',
+    resultIntro: 'Create sparkling script artwork with gradients, glow, star highlights, and transparent downloads.',
+    bestFor: ['Invitations', 'Profile graphics', 'Celebration posts'],
+    compatibilityNote: 'Berkshire Swash is bundled under the SIL Open Font License. Sparkles are original vector decorations rather than a proprietary asset.',
+    presets: [
+      bundledPreset('glitter-pink', 'Pink Glitter', 'Pink-to-white script with a bright glow and scattered highlights.', 'Berkshire Swash', 'Georgia, cursive', { fontWeight: 400, gradient: ['#ffffff', '#ec4899'], textColor: '#f9a8d4', backgroundColor: '#4a044e', strokeColor: '#831843', strokeWidth: 2, shadowColor: '#f0abfc', shadowBlur: 20, decoration: 'sparkles' }),
+      bundledPreset('glitter-gold', 'Gold Glitter', 'Warm gold script for celebrations and invitations.', 'Berkshire Swash', 'Georgia, cursive', { fontWeight: 400, gradient: ['#fff7ae', '#d97706'], textColor: '#fbbf24', backgroundColor: '#422006', strokeColor: '#92400e', strokeWidth: 1, shadowColor: '#fde68a', shadowBlur: 16, decoration: 'sparkles' }),
+      bundledPreset('glitter-silver', 'Silver Glitter', 'Cool silver lettering on a midnight field.', 'Berkshire Swash', 'Georgia, cursive', { fontWeight: 400, gradient: ['#ffffff', '#94a3b8'], textColor: '#e2e8f0', backgroundColor: '#0f172a', shadowColor: '#cbd5e1', shadowBlur: 18, decoration: 'sparkles' }),
+    ],
+  },
+  'ransom-note-font-generator': {
+    engine: 'theme-renderer',
+    initialText: 'SECRET MESSAGE',
+    intentLabel: 'Cutout artwork and copyable mixed text',
+    resultIntro: 'Create deliberately mismatched cutout-style lettering with alternating typefaces, paper tiles, colors, and rotation.',
+    bestFor: ['Escape rooms', 'Halloween props', 'Party graphics'],
+    compatibilityNote: 'This is a fictional craft effect for creative projects. It uses system and bundled open-source fonts; no magazine artwork is distributed.',
+    presets: [
+      preset('ransom-paper', 'Magazine Cutouts', 'Alternating letterforms on mismatched paper tiles.', 'Arial Black, sans-serif', { uppercase: true, textColor: '#111827', backgroundColor: '#d6d3d1', strokeWidth: 0, letterSpacing: 7, decoration: 'ransom', fontAlternates: ['Arial Black, sans-serif', 'Georgia, serif', 'Courier New, monospace', 'Impact, sans-serif'], characterBackgrounds: ['#fef3c7', '#ffffff', '#fecdd3', '#bfdbfe', '#dcfce7'], characterTilt: 5 }),
+      preset('ransom-noir', 'Noir Cutouts', 'Black, white, and red paper fragments on charcoal.', 'Arial Black, sans-serif', { uppercase: true, textColor: '#ffffff', backgroundColor: '#18181b', letterSpacing: 8, decoration: 'ransom', fontAlternates: ['Impact, sans-serif', 'Georgia, serif', 'Courier New, monospace'], characterBackgrounds: ['#ffffff', '#111111', '#dc2626'], characterTilt: 7 }),
+      preset('ransom-party', 'Party Cutouts', 'Bright playful cutouts for fictional clues and party props.', 'Arial Black, sans-serif', { uppercase: true, textColor: '#111827', backgroundColor: '#f5f5f4', letterSpacing: 7, decoration: 'ransom', fontAlternates: ['Arial Black, sans-serif', 'Georgia, serif', 'Courier New, monospace'], characterBackgrounds: ['#fde047', '#f9a8d4', '#67e8f9', '#86efac', '#c4b5fd'], characterTilt: 6 }),
     ],
   },
   'disney-font-generator': {
@@ -235,17 +312,18 @@ const configs: Record<string, VisualGeneratorConfig> = {
     ],
   },
   'minecraft-font-generator': {
-    engine: 'theme-renderer',
+    engine: 'minecraft-renderer',
     initialText: 'CREEPER CLUB',
     intentLabel: 'Unofficial block game title designer',
-    resultIntro: 'Build block, grass, stone, diamond, and nether-style titles for servers, realms, achievements, and fan thumbnails.',
-    bestFor: ['Server banners', 'Realm titles', 'Fan thumbnails'],
-    compatibilityNote: 'The bundled Pixelify Sans face is an open-source pixel alternative. It does not contain Mojangles, Minecraftia, Mojang textures, logos, or official font files.',
+    resultIntro: 'Render variable-width pixel UI text with inline color codes, or build a textured block logo with material inside each letter and adjustable 3D depth.',
+    bestFor: ['Signs and MOTDs', 'Server banners', 'Fan thumbnails'],
+    compatibilityNote: 'Game Text uses an original bitmap alphabet; Block Logo uses the bundled Pixelify Sans face and procedural textures. No Minecraft font sheet, logo, block texture, or official game asset is included.',
+    capabilities: ['game-codes', 'inline-format-codes', 'material-textures', 'extrusion-depth', 'pixel-snap'],
     presets: [
-      bundledPreset('mc-grass', 'Grass Block', 'Green pixel text with an earthy block shadow.', 'Pixelify Sans', 'monospace', { uppercase: true, fontWeight: 700, textColor: '#84cc16', backgroundColor: '#713f12', strokeColor: '#365314', strokeWidth: 3, shadowColor: '#292524', shadowOffsetX: 8, shadowOffsetY: 9, decoration: 'pixel' }),
-      bundledPreset('mc-stone', 'Stone', 'Gray pixel lettering for builds and server labels.', 'Pixelify Sans', 'monospace', { uppercase: true, fontWeight: 700, gradient: ['#e7e5e4', '#78716c'], textColor: '#a8a29e', backgroundColor: '#1c1917', strokeColor: '#44403c', strokeWidth: 3, shadowOffsetX: 7, shadowOffsetY: 8, decoration: 'pixel' }),
-      bundledPreset('mc-diamond', 'Diamond', 'Cyan pixel lettering with a deep blue outline.', 'Pixelify Sans', 'monospace', { uppercase: true, fontWeight: 700, gradient: ['#cffafe', '#06b6d4'], textColor: '#22d3ee', backgroundColor: '#083344', strokeColor: '#155e75', strokeWidth: 3, shadowOffsetX: 7, shadowOffsetY: 7, decoration: 'pixel' }),
-      bundledPreset('mc-nether', 'Nether', 'Hot red pixel text for darker game themes.', 'Pixelify Sans', 'monospace', { uppercase: true, fontWeight: 700, gradient: ['#fb7185', '#991b1b'], textColor: '#ef4444', backgroundColor: '#1c0707', strokeColor: '#450a0a', strokeWidth: 3, shadowColor: '#f97316', shadowBlur: 10, decoration: 'pixel' }),
+      bundledPreset('mc-grass', 'Grass & Dirt', 'Grass and dirt pixels are clipped inside every glyph, with a deep earthy extrusion.', 'Pixelify Sans', 'monospace', { material: 'grass', uppercase: true, fontWeight: 700, textColor: '#84cc16', backgroundColor: '#713f12', strokeColor: '#1a2e05', strokeWidth: 7, decoration: 'pixel' }),
+      bundledPreset('mc-stone', 'Stone & Cobble', 'Mottled stone pixels and crack lines fill the letters instead of changing only the background.', 'Pixelify Sans', 'monospace', { material: 'stone', uppercase: true, fontWeight: 700, textColor: '#a8a29e', backgroundColor: '#292524', strokeColor: '#1c1917', strokeWidth: 7, decoration: 'pixel' }),
+      bundledPreset('mc-diamond', 'Diamond Block', 'Cyan facets and mineral highlights are rendered inside the glyph mask.', 'Pixelify Sans', 'monospace', { material: 'diamond', uppercase: true, fontWeight: 700, textColor: '#22d3ee', backgroundColor: '#083344', strokeColor: '#083344', strokeWidth: 7, decoration: 'pixel' }),
+      bundledPreset('mc-nether', 'Nether & Lava', 'Dark netherrack pixels and glowing lava seams create a distinct internal material.', 'Pixelify Sans', 'monospace', { material: 'nether', uppercase: true, fontWeight: 700, textColor: '#ef4444', backgroundColor: '#1c0707', strokeColor: '#1c0707', strokeWidth: 7, decoration: 'pixel' }),
     ],
   },
   'fortnite-font-generator': {
@@ -255,6 +333,7 @@ const configs: Record<string, VisualGeneratorConfig> = {
     resultIntro: 'Create bold, condensed-feeling squad names, stream titles, and party graphics with outlines and high-energy color presets.',
     bestFor: ['Squad names', 'Stream thumbnails', 'Party invites'],
     compatibilityNote: 'The bundled Anton face is an open-source condensed-display alternative to the commercial Burbank family. It does not contain Epic Games branding or official assets.',
+    capabilities: ['copyable-name'],
     presets: [
       bundledPreset('fn-victory', 'Victory Royale', 'White condensed capitals with a navy outline on victory blue.', 'Anton', 'Impact, sans-serif', { uppercase: true, fontWeight: 400, textColor: '#ffffff', backgroundColor: '#2563eb', strokeColor: '#172554', strokeWidth: 5, shadowColor: '#0f172a', shadowOffsetX: 8, shadowOffsetY: 8, letterSpacing: 2 }),
       bundledPreset('fn-yellow', 'Battle Yellow', 'Yellow condensed title on a purple action background.', 'Anton', 'Impact, sans-serif', { uppercase: true, fontWeight: 400, textColor: '#fde047', backgroundColor: '#6d28d9', strokeColor: '#312e81', strokeWidth: 4, shadowOffsetX: 7, shadowOffsetY: 7, letterSpacing: 2 }),
@@ -280,6 +359,26 @@ const configs: Record<string, VisualGeneratorConfig> = {
   },
 };
 
+export const validateVisualGeneratorConfigs = (definitions: Record<string, VisualGeneratorConfig> = configs) => {
+  const issues: string[] = [];
+  Object.entries(definitions).forEach(([slug, config]) => {
+    if (!config.presets.length) issues.push(`${slug} has no visual presets.`);
+    const presetIds = new Set<string>();
+    config.presets.forEach((item) => {
+      if (presetIds.has(item.id)) issues.push(`${slug} has duplicate preset id ${item.id}.`);
+      presetIds.add(item.id);
+    });
+    const capabilities = config.capabilities ?? [];
+    if (new Set(capabilities).size !== capabilities.length) issues.push(`${slug} has duplicate capabilities.`);
+  });
+  return issues;
+};
+
+const visualConfigIssues = validateVisualGeneratorConfigs();
+if (visualConfigIssues.length) {
+  throw new Error(`Invalid visual generator configuration:\n${visualConfigIssues.join('\n')}`);
+}
+
 export const getVisualGeneratorConfig = (slug: string) => configs[slug];
 
 export const isVisualGeneratorSlug = (slug: string) => Boolean(configs[slug]);
@@ -299,6 +398,13 @@ export const getSpecializedAbout = (slug: string, pageTitle: string): string[] |
       'This page also keeps text and background color controls, alignment, transparent export, and TXT download together in one workflow. It is a real large-text generator rather than a normal-size Unicode alphabet described as “big.”',
     ];
   }
+  if (slug === 'minecraft-font-generator') {
+    return [
+      'The Minecraft Font Generator separates two different jobs that are often mixed together. Game Text creates compact pixel UI lettering for signs, server MOTDs, chat-style graphics, and overlays. Block Logo creates larger textured title artwork for thumbnails and banners. Switching modes changes the renderer, not just the background color.',
+      'Game Text draws an original variable-width 5×7 bitmap alphabet directly onto the output pixel grid, so there is no browser font smoothing step. It understands inline § and & color codes plus bold, italic, underline, strikethrough, obfuscated, and reset codes. Every input line remains a single output line and scales down to fit the preview; only manual line breaks add lines and increase the canvas height.',
+      'Block Logo clips procedural grass and dirt, mottled stone, diamond facets, or nether-and-lava patterns inside the letter shapes. Every manual line break is preserved and the logo canvas grows downward with the line count. Outline width and extrusion depth are independent controls, and transparent PNG or faithful SVG preserves the finished composition. Pixelify Sans is a bundled open-source alternative; no official font sheet, logo, block texture, or other Mojang/Microsoft asset is distributed.',
+    ];
+  }
   const config = configs[slug];
   if (!config) return null;
   const presetNames = config.presets.map((item) => item.name).join(', ');
@@ -310,10 +416,16 @@ export const getSpecializedAbout = (slug: string, pageTitle: string): string[] |
   const fontAvailabilityCopy = bundledFonts
     ? `The primary faces (${bundledFonts}) are bundled open-source alternatives, so the same lettering loads for every visitor instead of silently falling back to Arial, Times New Roman, or Courier New. Proprietary brand fonts and logo assets are not distributed.`
     : 'When a named commercial or system font is already installed on the visitor’s device, the preview can use it without distributing the font software. When it is not available, the generator reports that state and renders a clearly labelled fallback direction instead of claiming the fallback is the original typeface.';
+  const workflowDetails = [
+    config.capabilities?.includes('background-image') ? 'You can add a local image and place the first and final text lines in the familiar top-and-bottom meme layout.' : '',
+    config.capabilities?.includes('game-codes') ? 'A separate Minecraft formatting-code result is provided for compatible game fields; the canvas artwork itself is an image and cannot be pasted into the game as formatted text.' : '',
+    config.capabilities?.includes('copyable-name') ? 'A separate Unicode player-name alternative is available to copy, with a compatibility warning because game name rules vary.' : '',
+    ['brat-text-generator', 'fire-font-generator', 'glitter-font-generator', 'ransom-note-font-generator'].includes(slug) ? 'The page also retains a clearly labelled copyable Unicode section for destinations that accept text but not images.' : '',
+  ].filter(Boolean).join(' ');
   return [
     `The ${pageTitle} now renders ordinary text as visual artwork instead of substituting unrelated Unicode symbols. Its presets—${presetNames}—use real browser font rendering, page-specific colors, outlines, shadows, spacing, and decoration.`,
     fontAvailabilityCopy,
-    `You can adjust font size, letter spacing, outline, shadow, colors, canvas format, and transparency. PNG export fixes the browser-rendered appearance into pixels; SVG export keeps editable text and may therefore require the same font on the device where it is opened. ${config.compatibilityNote}`,
+    `You can adjust font size, letter spacing, outline, shadow, colors, canvas format, and transparency. PNG export fixes the browser-rendered appearance into pixels; editable SVG preserves selectable text, while faithful SVG embeds the exact canvas. ${workflowDetails} ${config.compatibilityNote}`,
   ];
 };
 
@@ -325,11 +437,19 @@ export const getSpecializedFaq = (slug: string, pageTitle: string) => {
       { q: 'Which download should I choose?', a: 'TXT is best for reusable plain text, PNG for consistent sharing, and SVG for scalable graphics and further editing.' },
     ];
   }
+  if (slug === 'minecraft-font-generator') {
+    return [
+      { q: 'What is the difference between Game Text and Block Logo?', a: 'Game Text is for compact Minecraft-like interface lettering, inline color codes, signs, MOTDs, and transparent overlays. Block Logo is decorative artwork with material inside each glyph, a heavy outline, and adjustable 3D extrusion.' },
+      { q: 'Does Game Text use Minecraft’s official bitmap font sheet?', a: 'No. It uses an original 5×7 bitmap alphabet drawn directly as solid pixel cells. This keeps the result sharp without redistributing a proprietary game asset.' },
+      { q: 'Why do Grass, Stone, Diamond, and Nether now look different?', a: 'Each material is procedurally rendered and clipped by the text mask. Grass has a green cap and dirt pixels, Stone adds mottling and cracks, Diamond uses cyan facets, and Nether uses dark rock with lava seams.' },
+      { q: 'Will formatting codes work everywhere in Minecraft?', a: 'Not necessarily. Java, Bedrock, servers, plugins, MOTDs, signs, commands, and chat fields can apply different rules. The preview parses common § and & codes, but you should test the copied result in the exact target field.' },
+    ];
+  }
   const config = configs[slug];
   if (!config) return null;
   const isTypeface = config.engine === 'font-renderer';
   const usesBundledFonts = config.presets.some((item) => item.fontSource === 'bundled');
-  return [
+  const faq = [
     {
       q: `Does this ${pageTitle} use a real rendered font?`,
       a: isTypeface
@@ -341,14 +461,39 @@ export const getSpecializedFaq = (slug: string, pageTitle: string) => {
     { q: 'Why might the font look different on another device?', a: usesBundledFonts ? 'The live preview and PNG use the bundled font consistently. Editable SVG text may still fall back unless the same open-source font is installed in the app or device that opens it.' : 'Commercial and system fonts are not installed everywhere. PNG preserves what this browser rendered; editable SVG text can fall back to a different font on another device.' },
     { q: 'Can I use the downloaded design commercially?', a: 'The generator does not grant rights to trademarks or commercial fonts. Check the chosen font and brand usage rights for the final project, particularly for merchandise, advertising, and logos.' },
   ];
+  if (config.capabilities?.includes('background-image')) {
+    faq.splice(1, 0, { q: 'Is my uploaded meme image sent to a server?', a: 'No. The browser reads the selected file locally and composites it on the canvas without uploading it through this generator.' });
+  }
+  if (config.capabilities?.includes('game-codes')) {
+    faq.splice(1, 0, { q: 'Can I paste the rendered artwork into Minecraft?', a: 'No. PNG and SVG are image outputs. Use the separately labelled formatting-code result only in Minecraft editions, servers, commands, or fields that support those section-sign codes.' });
+  }
+  if (config.capabilities?.includes('copyable-name')) {
+    faq.splice(1, 0, { q: 'Will the copyable alternative work as a Fortnite display name?', a: 'It is a Unicode lookalike, not a Fortnite font or guaranteed name format. Epic’s allowed-character rules can change, so test the result and keep a plain-text fallback.' });
+  }
+  return faq;
 };
 
 export const getSpecializedHowTo = (slug: string): string | null => {
   if (slug === 'big-font-generator') {
     return 'Enter one to three short lines, choose an ASCII banner style, and set the alignment and colors. Copy the plain-text result for monospace destinations, or download TXT, PNG, or SVG for a portable layout.';
   }
+  if (slug === 'minecraft-font-generator') {
+    return 'Choose Game Text for inline color codes, variable-width pixel lettering, alignment, and a game-style shadow. Choose Block Logo for grass, stone, diamond, or nether material inside the letters, then adjust the outline and 3D depth. Export either result as a transparent PNG or faithful SVG.';
+  }
   const config = configs[slug];
   if (!config) return null;
+  if (config.capabilities?.includes('background-image')) {
+    return 'Enter the top caption on the first line and the bottom caption on the final line. Add an image from your device, select a high-contrast preset, adjust the outline, and download PNG or faithful SVG to preserve the exact meme layout.';
+  }
+  if (config.capabilities?.includes('game-codes')) {
+    return 'Enter a server or build title, choose a pixel-art preset, and export the image for banners or thumbnails. Use the separate color and bold controls only when you need a copyable Minecraft formatting code for a compatible field.';
+  }
+  if (config.capabilities?.includes('copyable-name')) {
+    return 'Enter a squad or stream title and customize the rendered artwork for download. If you need text rather than an image, copy the separately labelled Unicode player-name alternative and test whether the target field accepts it.';
+  }
+  if (['brat-text-generator', 'fire-font-generator', 'glitter-font-generator', 'ransom-note-font-generator'].includes(slug)) {
+    return 'Create the page-specific artwork first, then download PNG, editable SVG, or faithful SVG. Use the copyable-text section below the canvas only when the destination accepts Unicode text instead of an image.';
+  }
   return 'Enter a short title, choose a page-specific preset, and adjust font size, spacing, outline, shadow, colors, canvas format, and transparency. Download PNG to preserve the exact rendered appearance or SVG when you need editable text.';
 };
 
@@ -356,14 +501,24 @@ export const getSpecializedFeatureList = (slug: string): string[] | null => {
   if (slug === 'big-font-generator') {
     return ['ASCII art generation', 'Multiple banner styles', 'Copy text', 'TXT download', 'PNG download', 'SVG download'];
   }
+  if (slug === 'minecraft-font-generator') {
+    return ['Game Text and Block Logo modes', 'Variable measured glyph widths', 'Inline § and & formatting codes', '16 Minecraft color values', 'Nearest-neighbor pixel scaling', 'Procedural material inside glyphs', 'Adjustable outline and 3D extrusion', 'Transparent PNG download', 'Faithful SVG download'];
+  }
   const config = configs[slug];
   if (!config) return null;
-  return [
+  const features = [
     `${config.presets.length} rendered presets`,
     'Font size and letter spacing controls',
     'Text and background colors',
     'Outline and shadow controls',
     'Transparent PNG download',
     'Editable SVG download',
+    'Faithful SVG download',
   ];
+  if (config.capabilities?.includes('background-image')) features.splice(1, 0, 'Local background image upload', 'Top-and-bottom meme layout');
+  if (config.capabilities?.includes('font-specimen')) features.splice(1, 0, 'Typeface availability and specimen');
+  if (config.capabilities?.includes('game-codes')) features.splice(1, 0, 'Copyable Minecraft formatting code');
+  if (config.capabilities?.includes('copyable-name')) features.splice(1, 0, 'Copyable Unicode player-name alternative');
+  if (['brat-text-generator', 'fire-font-generator', 'glitter-font-generator', 'ransom-note-font-generator'].includes(slug)) features.splice(1, 0, 'Copyable Unicode alternatives');
+  return features;
 };

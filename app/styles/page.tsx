@@ -4,6 +4,7 @@
  import { generateStyleVariants, getGeneratorPageConfig } from '@/lib/generator';
  import { getSpecializedDescription, getVisualGeneratorConfig } from '@/lib/visual-generator';
  import StyleDirectory, { type StyleDirectoryCard, type StyleDirectoryKind } from '@/components/StyleDirectory';
+ import { getGeneratorDefinition } from '@/lib/generator-registry';
  
  export const metadata: Metadata = {
    title: 'Text Style Generators',
@@ -15,11 +16,12 @@
  
  export default function StylesIndexPage() {
    const cards: StyleDirectoryCard[] = stylePages.map((page) => {
-     const config = getGeneratorPageConfig(page.slug, page.title);
+     const config = getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds);
      const visualConfig = getVisualGeneratorConfig(page.slug);
+     const definition = getGeneratorDefinition(page.slug);
      const preview = generateStyleVariants('Your Text', config.styleIds.slice(0, 1))[0];
      const isAscii = page.slug === 'big-font-generator';
-     const kind: StyleDirectoryKind = isAscii ? 'ascii' : visualConfig ? 'artwork' : 'unicode';
+     const kind: StyleDirectoryKind = isAscii ? 'ascii' : definition?.kind === 'unicode' ? 'unicode' : visualConfig ? 'artwork' : 'unicode';
      const description = getSpecializedDescription(page.slug) ?? page.description;
 
      return {

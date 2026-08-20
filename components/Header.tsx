@@ -185,7 +185,7 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/88 backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Primary navigation">
         <div className="flex h-16 items-center justify-between">
           <Link
@@ -230,13 +230,8 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
                   data-origin="top-center"
                 >
                   <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-y-contain rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 lg:p-6 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
-                    <div className="mb-4 flex min-h-[4.5rem] items-center justify-between gap-6 border-b border-border/70 pb-5">
-                      <div>
-                        <p className="font-semibold text-foreground">Text Style Generators</p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Choose a Unicode style and start creating copy-and-paste text.
-                        </p>
-                      </div>
+                    <div className="mb-4 flex items-center justify-between gap-6 border-b border-border/70 pb-4">
+                      <p className="font-semibold text-foreground">Text Style Generators</p>
                       <Link
                         href="/styles"
                         className="shrink-0 text-sm font-semibold text-primary hover:underline"

@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import GeneratorTool from './GeneratorTool';
 import VisualGeneratorTool from './VisualGeneratorTool';
+import MinecraftGeneratorTool from './MinecraftGeneratorTool';
 import AsciiGeneratorTool from './AsciiGeneratorTool';
 import { fandomPages, guidePages, stylePages, type PageDefinition } from '@/lib/data';
 import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
+import { getGeneratorDefinition } from '@/lib/generator-registry';
 import { getPageSupplement } from '@/lib/page-supplements';
 import { getSpecializedAbout, getSpecializedFaq, getSpecializedHowTo, getVisualGeneratorConfig } from '@/lib/visual-generator';
 
@@ -44,9 +46,20 @@ export default function PageTemplate({
   categoryPath,
   categoryName,
 }: PageTemplateProps) {
-  const config = getGeneratorPageConfig(page.slug, page.title);
+  const config = getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds);
+  const definition = getGeneratorDefinition(page.slug);
   const visualConfig = getVisualGeneratorConfig(page.slug);
-  const isAsciiGenerator = page.slug === 'big-font-generator';
+  const isAsciiGenerator = definition?.kind === 'ascii';
+  const isHybridGenerator = definition?.kind === 'hybrid';
+  const requiresVisualConfig = definition
+    ? ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
+    : false;
+  if (requiresVisualConfig && !visualConfig) {
+    throw new Error(`Generator ${page.slug} is registered as ${definition?.kind} but has no visual configuration.`);
+  }
+  if (visualConfig && definition?.kind === 'unicode') {
+    throw new Error(`Generator ${page.slug} has a visual configuration but is still registered as Unicode-only.`);
+  }
   const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator;
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
@@ -87,11 +100,24 @@ export default function PageTemplate({
           <AsciiGeneratorTool
             pageTitle={page.title}
           />
+        ) : visualConfig?.engine === 'minecraft-renderer' ? (
+          <MinecraftGeneratorTool config={visualConfig} pageTitle={page.title} />
         ) : visualConfig ? (
-          <VisualGeneratorTool
-            config={visualConfig}
-            pageTitle={page.title}
-          />
+          <>
+            <VisualGeneratorTool
+              config={visualConfig}
+              pageTitle={page.title}
+            />
+            {isHybridGenerator && (
+              <GeneratorTool
+                config={config}
+                pageTitle={`${page.title.replace(/\s+Generator$/i, '')} copyable text`}
+                compactResults
+                sectionId="copyable-styles"
+                recommendedLabel="Copyable alternatives"
+              />
+            )}
+          </>
         ) : (
           <GeneratorTool
             config={config}

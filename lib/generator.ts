@@ -1,4 +1,5 @@
 import { convertToFancyText } from './fonts';
+import { joinGraphemes, reverseGraphemeLines, segmentGraphemes } from './unicode';
 
 export type GeneratorStyleCategory =
   | 'classic'
@@ -30,7 +31,7 @@ const alphaNumericTransform = (
   lowerStart: number,
   digitStart?: number,
 ) =>
-  Array.from(text)
+  segmentGraphemes(text)
     .map((char) => {
       const code = char.codePointAt(0) ?? 0;
       if (code >= 65 && code <= 90) {
@@ -47,12 +48,12 @@ const alphaNumericTransform = (
     .join('');
 
 const decorateCharacters = (text: string, mark: string) =>
-  Array.from(text)
+  segmentGraphemes(text)
     .map((char) => (/\s/u.test(char) ? char : `${char}${mark}`))
     .join('');
 
 const alternateTransform = (text: string, first: string, second: string) =>
-  Array.from(text)
+  segmentGraphemes(text)
     .map((char, index) =>
       convertToFancyText(char, index % 2 === 0 ? first : second),
     )
@@ -98,8 +99,10 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
   },
   baseStyle('parenthesized', 'Parenthesized', 'decorative', 'Compact enclosed lowercase letters for labels.'),
   baseStyle('fullwidth', 'Fullwidth', 'modern', 'Wide characters with a retro digital appearance.'),
-  baseStyle('smallCaps', 'Small Caps', 'classic', 'Compact capital-like letters that remain easy to scan.'),
-  baseStyle('superscript', 'Superscript', 'decorative', 'Raised miniature characters for tiny text.'),
+  baseStyle('emojiMix', 'Emoji Mix', 'symbols', 'Replaces supported Latin letters with familiar emoji and symbol lookalikes.'),
+  baseStyle('emojiCute', 'Cute Emoji Mix', 'symbols', 'Turns supported Latin letters into a playful sequence of cute emoji.'),
+  baseStyle('smallCaps', 'Small Caps', 'classic', 'Uses available phonetic small capitals; a few letters use the closest readable form.'),
+  baseStyle('superscript', 'Superscript', 'decorative', 'Raised miniature characters where Unicode provides them; unsupported letters stay readable.'),
   baseStyle('subscript', 'Subscript', 'decorative', 'Lowered miniature characters with partial Unicode coverage.'),
   {
     id: 'inverted',
@@ -157,7 +160,7 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
     category: 'decorative',
     description: 'High-contrast enclosed capitals for badges and labels.',
     transform: (text) =>
-      Array.from(text.toUpperCase())
+      segmentGraphemes(text.toUpperCase())
         .map((char) => {
           const code = char.charCodeAt(0);
           return code >= 65 && code <= 90
@@ -206,14 +209,14 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
     name: 'Letter Spaced',
     category: 'modern',
     description: 'Adds breathing room between characters for clean display text.',
-    transform: (text) => Array.from(text).join(' '),
+    transform: (text) => joinGraphemes(text, ' '),
   },
   {
     id: 'wideSpaced',
     name: 'Wide Spaced',
     category: 'modern',
     description: 'Combines fullwidth characters with generous spacing.',
-    transform: (text) => Array.from(convertToFancyText(text, 'fullwidth')).join(' '),
+    transform: (text) => joinGraphemes(convertToFancyText(text, 'fullwidth'), ' '),
   },
   {
     id: 'wave',
@@ -235,7 +238,7 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
     category: 'effects',
     description: 'Controlled combining marks create a readable glitch texture.',
     transform: (text) =>
-      Array.from(text)
+      segmentGraphemes(text)
         .map((char, index) =>
           /\s/u.test(char) ? char : `${char}${index % 2 ? '\u0337\u0301' : '\u0336\u0308'}`,
         )
@@ -337,7 +340,7 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
     name: 'Dot Dividers',
     category: 'symbols',
     description: 'Centered dots separate letters for compact profile text.',
-    transform: (text) => Array.from(text).join('·'),
+    transform: (text) => joinGraphemes(text, '·'),
   },
   {
     id: 'randomCase',
@@ -345,7 +348,7 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
     category: 'effects',
     description: 'Alternates letter case without changing the message.',
     transform: (text) =>
-      Array.from(text)
+      segmentGraphemes(text)
         .map((char, index) => (index % 2 === 0 ? char.toUpperCase() : char.toLowerCase()))
         .join(''),
   },
@@ -356,7 +359,7 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
     description: 'Mixes several Unicode alphabets for a cut-and-paste look.',
     transform: (text) => {
       const styles = ['bold', 'script', 'fraktur', 'circled', 'doubleStruck'];
-      return Array.from(text)
+      return segmentGraphemes(text)
         .map((char, index) => convertToFancyText(char, styles[index % styles.length]))
         .join('');
     },
@@ -366,7 +369,7 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
     name: 'Backwards',
     category: 'effects',
     description: 'Reverses the character order for playful mirrored messages.',
-    transform: (text) => Array.from(text).reverse().join(''),
+    transform: reverseGraphemeLines,
   },
   {
     id: 'upsideFrame',
@@ -445,6 +448,26 @@ const packs: Record<string, string[]> = {
   'fortnite-font-generator': ['sansBold', 'squared', 'darkCircled', 'arrows', 'bold', 'fullwidth', 'pixelFrame', 'wideSpaced', 'angleBrackets'],
 };
 
+export const validateGeneratorStyleCatalog = () => {
+  const issues: string[] = [];
+  const styleIds = new Set<string>();
+  generatorStyles.forEach((style) => {
+    if (styleIds.has(style.id)) issues.push(`Duplicate Unicode style id: ${style.id}`);
+    styleIds.add(style.id);
+  });
+  Object.entries(packs).forEach(([slug, ids]) => {
+    ids.forEach((id) => {
+      if (!styleIds.has(id)) issues.push(`${slug} references unknown Unicode style ${id}`);
+    });
+  });
+  return issues;
+};
+
+const styleCatalogIssues = validateGeneratorStyleCatalog();
+if (styleCatalogIssues.length) {
+  throw new Error(`Invalid Unicode style catalog:\n${styleCatalogIssues.join('\n')}`);
+}
+
 const platformSlugs = new Set([
   'instagram-font-generator',
   'tiktok-font-generator',
@@ -481,9 +504,10 @@ const seasonalSlugs = new Set([
 export const getGeneratorPageConfig = (
   slug: string,
   pageTitle: string,
+  preferredStyleIds: string[] = [],
 ): GeneratorPageConfig => {
   const cleanName = pageTitle.replace(/\s+Generator$/i, '').replace(/\s+Font$/i, '');
-  const styleIds = packs[slug] ?? [
+  const fallbackStyleIds = packs[slug] ?? [
     'bold',
     'italic',
     'script',
@@ -493,6 +517,10 @@ export const getGeneratorPageConfig = (
     'smallCaps',
     'sparkle',
   ];
+  const styleIds = Array.from(new Set([
+    ...preferredStyleIds.filter((id) => styleMap.has(id)),
+    ...fallbackStyleIds.filter((id) => styleMap.has(id)),
+  ]));
 
   if (platformSlugs.has(slug)) {
     return {

@@ -8,7 +8,8 @@
  import "./globals.css";
  import { Header, Footer } from "@/components";
  import AdvertisingScripts from "@/components/AdvertisingScripts";
- import { fandomPages, guidePages, stylePages } from "@/lib/data";
+ import { guidePages } from "@/lib/data";
+ import { generatorRegistry, getGeneratorsByCategory } from "@/lib/generator-registry";
  
  // The core UI uses system fonts; fandom artwork faces above are self-hosted
  // packages, so production still makes zero external font requests.
@@ -19,19 +20,18 @@
  const homeMetaDescription = 'Free font generator and text changer. Search bold, cursive, gothic, bubble, tiny and other Unicode fonts, then copy and paste your favorite style.';
  const adEligiblePaths = [
    '/',
-   ...stylePages.map((page) => `/styles/${page.slug}`),
-   ...fandomPages.map((page) => `/fandom/${page.slug}`),
+   ...generatorRegistry.map((generator) => generator.canonicalPath),
    ...guidePages.map((page) => `/guides/${page.slug}`),
  ];
- const styleNavigationLinks = stylePages.map((page) => ({
-   href: `/styles/${page.slug}`,
-   label: page.title,
-   icon: page.icon,
+ const styleNavigationLinks = getGeneratorsByCategory('styles').map((generator) => ({
+   href: generator.canonicalPath,
+   label: generator.title,
+   icon: generator.icon,
  }));
- const fandomNavigationLinks = fandomPages.map((page) => ({
-   href: `/fandom/${page.slug}`,
-   label: page.title,
-   icon: page.icon,
+ const fandomNavigationLinks = getGeneratorsByCategory('fandom').map((generator) => ({
+   href: generator.canonicalPath,
+   label: generator.title,
+   icon: generator.icon,
  }));
 
 export const metadata: Metadata = {
