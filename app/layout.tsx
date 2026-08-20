@@ -1,12 +1,17 @@
  import type { Metadata } from "next";
  import Script from "next/script";
+ import "@fontsource/anton/latin-400.css";
+ import "@fontsource/berkshire-swash/latin-400.css";
+ import "@fontsource/eb-garamond/latin-700.css";
+ import "@fontsource/luckiest-guy/latin-400.css";
+ import "@fontsource/pixelify-sans/latin-700.css";
  import "./globals.css";
  import { Header, Footer } from "@/components";
  import AdvertisingScripts from "@/components/AdvertisingScripts";
  import { fandomPages, guidePages, stylePages } from "@/lib/data";
  
- // Using system fonts for production to avoid Google Fonts fetch dependency
- // and improve page load speed with zero external font requests
+ // The core UI uses system fonts; fandom artwork faces above are self-hosted
+ // packages, so production still makes zero external font requests.
  const geistSans = { variable: '--font-geist-sans' };
  const geistMono = { variable: '--font-geist-mono' };
  const adsenseClientId = 'ca-pub-4183802444188513';

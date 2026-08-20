@@ -45,22 +45,45 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
   const [openMobileSection, setOpenMobileSection] = useState<MenuKey | null>(null);
   const [desktopMenu, setDesktopMenu] = useState<MenuKey | null>(null);
   const [closingDesktopMenu, setClosingDesktopMenu] = useState<MenuKey | null>(null);
+  const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
+      if (openTimerRef.current) clearTimeout(openTimerRef.current);
       if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
   }, []);
 
-  const openDropdown = (menu: MenuKey) => {
+  const openDropdown = (menu: MenuKey, delayed = false) => {
+    if (openTimerRef.current) clearTimeout(openTimerRef.current);
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setClosingDesktopMenu(null);
-    setDesktopMenu(menu);
+
+    if (!delayed || desktopMenu === menu) {
+      setDesktopMenu(menu);
+      return;
+    }
+
+    const openDelayMs =
+      parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--dropdown-open-delay')
+      ) || 220;
+
+    openTimerRef.current = setTimeout(() => {
+      setDesktopMenu(menu);
+      openTimerRef.current = null;
+    }, openDelayMs);
   };
 
   const closeDropdown = (menu: MenuKey) => {
+    if (openTimerRef.current) {
+      clearTimeout(openTimerRef.current);
+      openTimerRef.current = null;
+    }
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+
+    if (desktopMenu !== menu) return;
 
     setDesktopMenu((current) => (current === menu ? null : current));
     setClosingDesktopMenu(menu);
@@ -76,6 +99,14 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
   };
 
   const closeAllMenus = () => {
+    if (openTimerRef.current) {
+      clearTimeout(openTimerRef.current);
+      openTimerRef.current = null;
+    }
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
     setIsMobileMenuOpen(false);
     setOpenMobileSection(null);
     setDesktopMenu(null);
@@ -172,7 +203,7 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
 
             <div
               className="flex h-full items-center"
-              onMouseEnter={() => openDropdown('styles')}
+              onMouseEnter={() => openDropdown('styles', true)}
               onMouseLeave={(event) => {
                 if (!event.currentTarget.contains(document.activeElement)) closeDropdown('styles');
               }}
@@ -195,11 +226,11 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
 
               <div className="pointer-events-none fixed left-1/2 top-16 w-[min(72rem,calc(100vw-2rem))] -translate-x-1/2">
                 <div
-                  className={`${dropdownClass('styles')} pt-2`}
+                  className={dropdownClass('styles')}
                   data-origin="top-center"
                 >
                   <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-y-contain rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 lg:p-6 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
-                    <div className="mb-4 flex items-end justify-between gap-6 border-b border-border/70 pb-4">
+                    <div className="mb-4 flex min-h-[4.5rem] items-center justify-between gap-6 border-b border-border/70 pb-5">
                       <div>
                         <p className="font-semibold text-foreground">Text Style Generators</p>
                         <p className="mt-1 text-sm text-muted-foreground">
@@ -237,7 +268,7 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
 
             <div
               className="relative flex h-full items-center"
-              onMouseEnter={() => openDropdown('fandom')}
+              onMouseEnter={() => openDropdown('fandom', true)}
               onMouseLeave={(event) => {
                 if (!event.currentTarget.contains(document.activeElement)) closeDropdown('fandom');
               }}
@@ -260,7 +291,7 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
 
               <div className="pointer-events-none absolute right-0 top-full w-80">
                 <div
-                  className={`${dropdownClass('fandom')} pt-2`}
+                  className={dropdownClass('fandom')}
                   data-origin="top-right"
                 >
                   <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-y-contain rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_24px_65px_-18px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">

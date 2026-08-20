@@ -4,6 +4,7 @@ export interface VisualFontPreset {
   description: string;
   fontFamily: string;
   targetFont?: string;
+  fontSource?: 'bundled' | 'device';
   sourceLabel: string;
   licenseNote: string;
   fontWeight?: number;
@@ -64,6 +65,33 @@ const preset = (
   decoration: 'none',
   ...overrides,
 });
+
+const bundledPreset = (
+  id: string,
+  name: string,
+  description: string,
+  targetFont: string,
+  fallback: string,
+  overrides: Partial<VisualFontPreset> = {},
+): VisualFontPreset => {
+  const license = targetFont === 'Luckiest Guy'
+    ? 'Apache License 2.0'
+    : 'SIL Open Font License 1.1';
+
+  return preset(
+    id,
+    name,
+    description,
+    `${JSON.stringify(targetFont)}, ${fallback}`,
+    {
+      targetFont,
+      fontSource: 'bundled',
+      sourceLabel: `${targetFont} (bundled open-source alternative)`,
+      licenseNote: `${targetFont} is bundled under the ${license}; no proprietary brand font is distributed.`,
+      ...overrides,
+    },
+  );
+};
 
 const configs: Record<string, VisualGeneratorConfig> = {
   'times-new-roman-font-generator': {
@@ -170,12 +198,12 @@ const configs: Record<string, VisualGeneratorConfig> = {
     intentLabel: 'Unofficial magical title designer',
     resultIntro: 'Create storybook, royal, cartoon, and magical-script artwork with colors, sparkles, and downloadable PNG or SVG.',
     bestFor: ['Invitations', 'Story titles', 'Party graphics'],
-    compatibilityNote: 'This independent generator uses generic storybook styles and system fonts. It does not provide or reproduce an official Disney font or logo.',
+    compatibilityNote: 'The bundled Berkshire Swash face is an open-source storybook alternative, not Waltograph or an official Disney font or logo.',
     presets: [
-      preset('magic-script', 'Magical Script', 'Flowing script with a soft violet glow and sparkle decoration.', 'Snell Roundhand, "Brush Script MT", cursive', { targetFont: 'Snell Roundhand', fontWeight: 400, textColor: '#f5d0fe', backgroundColor: '#312e81', shadowColor: '#c084fc', shadowBlur: 14, decoration: 'sparkles' }),
-      preset('royal-story', 'Royal Storybook', 'Regal serif lettering in gold and midnight blue.', system('Georgia'), { uppercase: true, textColor: '#fde68a', backgroundColor: '#172554', strokeColor: '#92400e', strokeWidth: 1, letterSpacing: 3, decoration: 'lines' }),
-      preset('fairy-pink', 'Fairy Tale', 'Playful pink lettering for party and invitation graphics.', '"Arial Rounded MT Bold", Arial, sans-serif', { targetFont: 'Arial Rounded MT Bold', textColor: '#ffffff', backgroundColor: '#db2777', strokeColor: '#831843', strokeWidth: 2, shadowColor: '#fbcfe8', shadowBlur: 10, decoration: 'sparkles' }),
-      preset('storybook', 'Classic Storybook', 'Warm illustrated-book typography with gentle contrast.', system('Palatino'), { targetFont: 'Palatino', fontStyle: 'italic', textColor: '#78350f', backgroundColor: '#fef3c7', letterSpacing: 1 }),
+      bundledPreset('magic-script', 'Magical Swash', 'A flowing storybook display face with a soft violet glow and sparkles.', 'Berkshire Swash', 'Georgia, cursive', { fontWeight: 400, textColor: '#f5d0fe', backgroundColor: '#312e81', shadowColor: '#c084fc', shadowBlur: 14, decoration: 'sparkles' }),
+      bundledPreset('royal-story', 'Royal Storybook', 'Gold swash lettering with a restrained royal frame.', 'Berkshire Swash', 'Georgia, cursive', { fontWeight: 400, textColor: '#fde68a', backgroundColor: '#172554', strokeColor: '#92400e', strokeWidth: 1, letterSpacing: 2, decoration: 'lines' }),
+      bundledPreset('fairy-pink', 'Fairy Tale', 'Playful pink storybook lettering for invitations and party graphics.', 'Berkshire Swash', 'Georgia, cursive', { fontWeight: 400, textColor: '#ffffff', backgroundColor: '#db2777', strokeColor: '#831843', strokeWidth: 2, shadowColor: '#fbcfe8', shadowBlur: 10, decoration: 'sparkles' }),
+      bundledPreset('storybook', 'Classic Storybook', 'Warm illustrated-book typography with gentle contrast.', 'Berkshire Swash', 'Georgia, cursive', { fontWeight: 400, textColor: '#78350f', backgroundColor: '#fef3c7', letterSpacing: 1 }),
     ],
   },
   'mario-font-generator': {
@@ -184,12 +212,12 @@ const configs: Record<string, VisualGeneratorConfig> = {
     intentLabel: 'Unofficial colorful game text',
     resultIntro: 'Design rounded, colorful game titles with per-letter color, strong outlines, and playful dimensional shadows.',
     bestFor: ['Party banners', 'Game thumbnails', 'Fan graphics'],
-    compatibilityNote: 'These are original, generic game-title treatments. No Nintendo logo, character art, or official font asset is included.',
+    compatibilityNote: 'The bundled Luckiest Guy face is an open-source cartoon-display alternative. No Nintendo logo, Super Mario 256 file, character art, or official font asset is included.',
     presets: [
-      preset('mario-rainbow', 'Rainbow Game Title', 'Each letter receives a rotating arcade color with a strong outline.', '"Arial Rounded MT Bold", Arial, sans-serif', { targetFont: 'Arial Rounded MT Bold', uppercase: true, fontWeight: 900, textColor: '#ef4444', backgroundColor: '#7dd3fc', strokeColor: '#ffffff', strokeWidth: 5, shadowColor: '#1e3a8a', shadowOffsetX: 7, shadowOffsetY: 8, multicolor: true }),
-      preset('mario-red', 'Red Hero', 'Bright red rounded lettering with dimensional navy shadow.', '"Arial Rounded MT Bold", Arial, sans-serif', { targetFont: 'Arial Rounded MT Bold', uppercase: true, textColor: '#ef4444', backgroundColor: '#fef3c7', strokeColor: '#ffffff', strokeWidth: 4, shadowColor: '#1e3a8a', shadowOffsetX: 7, shadowOffsetY: 7 }),
-      preset('mario-green', 'Green World', 'Green game lettering on a sunny sky background.', sans('Arial Black'), { targetFont: 'Arial Black', uppercase: true, textColor: '#22c55e', backgroundColor: '#bae6fd', strokeColor: '#ffffff', strokeWidth: 4, shadowColor: '#166534', shadowOffsetX: 6, shadowOffsetY: 6 }),
-      preset('mario-coin', 'Coin Rush', 'Gold arcade lettering with a warm orange outline.', sans('Arial Black'), { targetFont: 'Arial Black', uppercase: true, gradient: ['#fef08a', '#eab308'], textColor: '#facc15', backgroundColor: '#0c4a6e', strokeColor: '#a16207', strokeWidth: 3, shadowOffsetX: 5, shadowOffsetY: 5 }),
+      bundledPreset('mario-rainbow', 'Rainbow Game Title', 'Chunky cartoon letters receive rotating arcade colors, a white outline, and a dimensional shadow.', 'Luckiest Guy', 'Arial Black, sans-serif', { uppercase: true, fontWeight: 400, textColor: '#ef4444', backgroundColor: '#7dd3fc', strokeColor: '#ffffff', strokeWidth: 5, shadowColor: '#1e3a8a', shadowOffsetX: 7, shadowOffsetY: 8, multicolor: true }),
+      bundledPreset('mario-red', 'Red Hero', 'Bright red cartoon-display lettering with a dimensional navy shadow.', 'Luckiest Guy', 'Arial Black, sans-serif', { uppercase: true, fontWeight: 400, textColor: '#ef4444', backgroundColor: '#fef3c7', strokeColor: '#ffffff', strokeWidth: 4, shadowColor: '#1e3a8a', shadowOffsetX: 7, shadowOffsetY: 7 }),
+      bundledPreset('mario-green', 'Green World', 'Green chunky game lettering on a sunny sky background.', 'Luckiest Guy', 'Arial Black, sans-serif', { uppercase: true, fontWeight: 400, textColor: '#22c55e', backgroundColor: '#bae6fd', strokeColor: '#ffffff', strokeWidth: 4, shadowColor: '#166534', shadowOffsetX: 6, shadowOffsetY: 6 }),
+      bundledPreset('mario-coin', 'Coin Rush', 'Gold cartoon-display lettering with a warm orange outline.', 'Luckiest Guy', 'Arial Black, sans-serif', { uppercase: true, fontWeight: 400, gradient: ['#fef08a', '#eab308'], textColor: '#facc15', backgroundColor: '#0c4a6e', strokeColor: '#a16207', strokeWidth: 3, shadowOffsetX: 5, shadowOffsetY: 5 }),
     ],
   },
   'stranger-things-font-generator': {
@@ -198,12 +226,12 @@ const configs: Record<string, VisualGeneratorConfig> = {
     intentLabel: 'Unofficial 80s horror title',
     resultIntro: 'Create high-contrast 80s horror titles with red outlines, wide tracking, glow, and cinematic line decoration.',
     bestFor: ['Horror posters', '80s parties', 'Fan titles'],
-    compatibilityNote: 'This is an independent 80s horror treatment, not the official Stranger Things title artwork or font.',
+    compatibilityNote: 'The bundled EB Garamond face is an open-source high-contrast serif alternative to the commercial ITC Benguiat family, not the official title artwork or font.',
     presets: [
-      preset('st-classic', 'Red Outline Horror', 'Wide serif capitals with red outline and glow on black.', system('Times New Roman'), { targetFont: 'Times New Roman', uppercase: true, fontWeight: 700, textColor: '#09090b', backgroundColor: '#020617', strokeColor: '#ef4444', strokeWidth: 3, shadowColor: '#dc2626', shadowBlur: 18, letterSpacing: 8, decoration: 'lines' }),
-      preset('st-solid', 'Solid Crimson', 'Solid crimson serif title for high legibility.', system('Georgia'), { targetFont: 'Georgia', uppercase: true, textColor: '#dc2626', backgroundColor: '#09090b', shadowColor: '#991b1b', shadowBlur: 12, letterSpacing: 6, decoration: 'lines' }),
-      preset('st-neon', 'Neon 1984', 'A brighter neon-red variation for event graphics.', system('Times New Roman'), { targetFont: 'Times New Roman', uppercase: true, textColor: '#fecaca', backgroundColor: '#170407', strokeColor: '#ef4444', strokeWidth: 2, shadowColor: '#ef4444', shadowBlur: 22, letterSpacing: 9, decoration: 'lines' }),
-      preset('st-paper', 'Paperback Horror', 'Dark red paperback typography on aged cream.', system('Georgia'), { targetFont: 'Georgia', uppercase: true, textColor: '#7f1d1d', backgroundColor: '#fef3c7', letterSpacing: 5, decoration: 'lines' }),
+      bundledPreset('st-classic', 'Red Outline Horror', 'High-contrast serif capitals with red outline, glow, tracking, and title lines.', 'EB Garamond', 'Georgia, serif', { uppercase: true, fontWeight: 700, textColor: '#09090b', backgroundColor: '#020617', strokeColor: '#ef4444', strokeWidth: 3, shadowColor: '#dc2626', shadowBlur: 18, letterSpacing: 8, decoration: 'lines' }),
+      bundledPreset('st-solid', 'Solid Crimson', 'Solid crimson high-contrast serif lettering for legibility.', 'EB Garamond', 'Georgia, serif', { uppercase: true, fontWeight: 700, textColor: '#dc2626', backgroundColor: '#09090b', shadowColor: '#991b1b', shadowBlur: 12, letterSpacing: 6, decoration: 'lines' }),
+      bundledPreset('st-neon', 'Neon 1984', 'A brighter neon-red variation for event graphics.', 'EB Garamond', 'Georgia, serif', { uppercase: true, fontWeight: 700, textColor: '#fecaca', backgroundColor: '#170407', strokeColor: '#ef4444', strokeWidth: 2, shadowColor: '#ef4444', shadowBlur: 22, letterSpacing: 9, decoration: 'lines' }),
+      bundledPreset('st-paper', 'Paperback Horror', 'Dark red 1980s paperback-style typography on aged cream.', 'EB Garamond', 'Georgia, serif', { uppercase: true, fontWeight: 700, textColor: '#7f1d1d', backgroundColor: '#fef3c7', letterSpacing: 5, decoration: 'lines' }),
     ],
   },
   'minecraft-font-generator': {
@@ -212,12 +240,12 @@ const configs: Record<string, VisualGeneratorConfig> = {
     intentLabel: 'Unofficial block game title designer',
     resultIntro: 'Build block, grass, stone, diamond, and nether-style titles for servers, realms, achievements, and fan thumbnails.',
     bestFor: ['Server banners', 'Realm titles', 'Fan thumbnails'],
-    compatibilityNote: 'This independent tool creates generic block-game artwork. It does not contain Mojang textures, logos, or official font files.',
+    compatibilityNote: 'The bundled Pixelify Sans face is an open-source pixel alternative. It does not contain Mojangles, Minecraftia, Mojang textures, logos, or official font files.',
     presets: [
-      preset('mc-grass', 'Grass Block', 'Green block text with an earthy pixel shadow.', 'Minecraftia, "Courier New", monospace', { targetFont: 'Minecraftia', uppercase: true, textColor: '#84cc16', backgroundColor: '#713f12', strokeColor: '#365314', strokeWidth: 3, shadowColor: '#292524', shadowOffsetX: 8, shadowOffsetY: 9, decoration: 'pixel' }),
-      preset('mc-stone', 'Stone', 'Gray block lettering for builds and server labels.', 'Minecraftia, "Courier New", monospace', { targetFont: 'Minecraftia', uppercase: true, gradient: ['#e7e5e4', '#78716c'], textColor: '#a8a29e', backgroundColor: '#1c1917', strokeColor: '#44403c', strokeWidth: 3, shadowOffsetX: 7, shadowOffsetY: 8, decoration: 'pixel' }),
-      preset('mc-diamond', 'Diamond', 'Cyan gemstone lettering with a deep blue outline.', 'Minecraftia, "Courier New", monospace', { targetFont: 'Minecraftia', uppercase: true, gradient: ['#cffafe', '#06b6d4'], textColor: '#22d3ee', backgroundColor: '#083344', strokeColor: '#155e75', strokeWidth: 3, shadowOffsetX: 7, shadowOffsetY: 7, decoration: 'pixel' }),
-      preset('mc-nether', 'Nether', 'Hot red block text for darker game themes.', 'Minecraftia, "Courier New", monospace', { targetFont: 'Minecraftia', uppercase: true, gradient: ['#fb7185', '#991b1b'], textColor: '#ef4444', backgroundColor: '#1c0707', strokeColor: '#450a0a', strokeWidth: 3, shadowColor: '#f97316', shadowBlur: 10, decoration: 'pixel' }),
+      bundledPreset('mc-grass', 'Grass Block', 'Green pixel text with an earthy block shadow.', 'Pixelify Sans', 'monospace', { uppercase: true, fontWeight: 700, textColor: '#84cc16', backgroundColor: '#713f12', strokeColor: '#365314', strokeWidth: 3, shadowColor: '#292524', shadowOffsetX: 8, shadowOffsetY: 9, decoration: 'pixel' }),
+      bundledPreset('mc-stone', 'Stone', 'Gray pixel lettering for builds and server labels.', 'Pixelify Sans', 'monospace', { uppercase: true, fontWeight: 700, gradient: ['#e7e5e4', '#78716c'], textColor: '#a8a29e', backgroundColor: '#1c1917', strokeColor: '#44403c', strokeWidth: 3, shadowOffsetX: 7, shadowOffsetY: 8, decoration: 'pixel' }),
+      bundledPreset('mc-diamond', 'Diamond', 'Cyan pixel lettering with a deep blue outline.', 'Pixelify Sans', 'monospace', { uppercase: true, fontWeight: 700, gradient: ['#cffafe', '#06b6d4'], textColor: '#22d3ee', backgroundColor: '#083344', strokeColor: '#155e75', strokeWidth: 3, shadowOffsetX: 7, shadowOffsetY: 7, decoration: 'pixel' }),
+      bundledPreset('mc-nether', 'Nether', 'Hot red pixel text for darker game themes.', 'Pixelify Sans', 'monospace', { uppercase: true, fontWeight: 700, gradient: ['#fb7185', '#991b1b'], textColor: '#ef4444', backgroundColor: '#1c0707', strokeColor: '#450a0a', strokeWidth: 3, shadowColor: '#f97316', shadowBlur: 10, decoration: 'pixel' }),
     ],
   },
   'fortnite-font-generator': {
@@ -226,12 +254,12 @@ const configs: Record<string, VisualGeneratorConfig> = {
     intentLabel: 'Unofficial battle-game title designer',
     resultIntro: 'Create bold, condensed-feeling squad names, stream titles, and party graphics with outlines and high-energy color presets.',
     bestFor: ['Squad names', 'Stream thumbnails', 'Party invites'],
-    compatibilityNote: 'This independent tool uses generic battle-game styling and does not contain Epic Games branding or official assets.',
+    compatibilityNote: 'The bundled Anton face is an open-source condensed-display alternative to the commercial Burbank family. It does not contain Epic Games branding or official assets.',
     presets: [
-      preset('fn-victory', 'Victory Royale', 'White heavy capitals with a navy outline on victory blue.', sans('Impact'), { targetFont: 'Impact', uppercase: true, textColor: '#ffffff', backgroundColor: '#2563eb', strokeColor: '#172554', strokeWidth: 5, shadowColor: '#0f172a', shadowOffsetX: 8, shadowOffsetY: 8, letterSpacing: 2 }),
-      preset('fn-yellow', 'Battle Yellow', 'Yellow condensed title on a purple action background.', sans('Impact'), { targetFont: 'Impact', uppercase: true, textColor: '#fde047', backgroundColor: '#6d28d9', strokeColor: '#312e81', strokeWidth: 4, shadowOffsetX: 7, shadowOffsetY: 7, letterSpacing: 2 }),
-      preset('fn-neon', 'Neon Squad', 'Electric cyan and pink artwork for stream overlays.', sans('Arial Black'), { targetFont: 'Arial Black', uppercase: true, gradient: ['#67e8f9', '#f472b6'], textColor: '#67e8f9', backgroundColor: '#18181b', strokeColor: '#ffffff', strokeWidth: 2, shadowColor: '#ec4899', shadowBlur: 18 }),
-      preset('fn-stealth', 'Stealth', 'Compact white squad lettering on tactical charcoal.', sans('Impact'), { targetFont: 'Impact', uppercase: true, textColor: '#f8fafc', backgroundColor: '#27272a', strokeColor: '#000000', strokeWidth: 3, letterSpacing: 4 }),
+      bundledPreset('fn-victory', 'Victory Royale', 'White condensed capitals with a navy outline on victory blue.', 'Anton', 'Impact, sans-serif', { uppercase: true, fontWeight: 400, textColor: '#ffffff', backgroundColor: '#2563eb', strokeColor: '#172554', strokeWidth: 5, shadowColor: '#0f172a', shadowOffsetX: 8, shadowOffsetY: 8, letterSpacing: 2 }),
+      bundledPreset('fn-yellow', 'Battle Yellow', 'Yellow condensed title on a purple action background.', 'Anton', 'Impact, sans-serif', { uppercase: true, fontWeight: 400, textColor: '#fde047', backgroundColor: '#6d28d9', strokeColor: '#312e81', strokeWidth: 4, shadowOffsetX: 7, shadowOffsetY: 7, letterSpacing: 2 }),
+      bundledPreset('fn-neon', 'Neon Squad', 'Electric condensed cyan and pink artwork for stream overlays.', 'Anton', 'Impact, sans-serif', { uppercase: true, fontWeight: 400, gradient: ['#67e8f9', '#f472b6'], textColor: '#67e8f9', backgroundColor: '#18181b', strokeColor: '#ffffff', strokeWidth: 2, shadowColor: '#ec4899', shadowBlur: 18 }),
+      bundledPreset('fn-stealth', 'Stealth', 'Compact white squad lettering on tactical charcoal.', 'Anton', 'Impact, sans-serif', { uppercase: true, fontWeight: 400, textColor: '#f8fafc', backgroundColor: '#27272a', strokeColor: '#000000', strokeWidth: 3, letterSpacing: 4 }),
     ],
   },
   'pop-culture-font-generators': {
@@ -240,14 +268,14 @@ const configs: Record<string, VisualGeneratorConfig> = {
     intentLabel: 'Multi-theme title studio',
     resultIntro: 'Compare one phrase across storybook, arcade, block game, 80s horror, superhero, and sci-fi title directions.',
     bestFor: ['Theme comparison', 'Fan graphics', 'Event concepts'],
-    compatibilityNote: 'All themes are original, generic treatments made with browser/system fonts. Referenced genres and brands remain the property of their owners.',
+    compatibilityNote: 'The storybook, arcade, pixel, horror, and condensed-display directions use bundled open-source fonts. Referenced genres and brands remain the property of their owners.',
     presets: [
-      preset('pop-story', 'Storybook Magic', 'A sparkling storybook script direction.', 'Snell Roundhand, "Brush Script MT", cursive', { targetFont: 'Snell Roundhand', textColor: '#f5d0fe', backgroundColor: '#312e81', shadowColor: '#c084fc', shadowBlur: 14, decoration: 'sparkles' }),
-      preset('pop-arcade', 'Color Arcade', 'Bright per-letter arcade title styling.', '"Arial Rounded MT Bold", Arial, sans-serif', { targetFont: 'Arial Rounded MT Bold', uppercase: true, multicolor: true, textColor: '#ef4444', backgroundColor: '#0c4a6e', strokeColor: '#ffffff', strokeWidth: 4, shadowOffsetX: 6, shadowOffsetY: 6 }),
-      preset('pop-block', 'Block Builder', 'Pixel block lettering for sandbox-game themes.', 'Minecraftia, "Courier New", monospace', { targetFont: 'Minecraftia', uppercase: true, textColor: '#84cc16', backgroundColor: '#713f12', strokeColor: '#365314', strokeWidth: 3, shadowOffsetX: 7, shadowOffsetY: 7, decoration: 'pixel' }),
-      preset('pop-horror', '80s Horror', 'Red glowing serif capitals with cinematic lines.', system('Times New Roman'), { targetFont: 'Times New Roman', uppercase: true, textColor: '#09090b', backgroundColor: '#020617', strokeColor: '#ef4444', strokeWidth: 3, shadowColor: '#dc2626', shadowBlur: 18, letterSpacing: 7, decoration: 'lines' }),
-      preset('pop-hero', 'Superhero', 'Bold yellow display text with a dramatic red shadow.', sans('Impact'), { targetFont: 'Impact', uppercase: true, textColor: '#fde047', backgroundColor: '#1e3a8a', strokeColor: '#dc2626', strokeWidth: 4, shadowOffsetX: 8, shadowOffsetY: 8 }),
-      preset('pop-scifi', 'Sci-Fi Signal', 'Wide cyan system lettering with a neon glow.', 'Eurostile, "Arial Narrow", sans-serif', { targetFont: 'Eurostile', uppercase: true, textColor: '#67e8f9', backgroundColor: '#082f49', shadowColor: '#22d3ee', shadowBlur: 16, letterSpacing: 8, decoration: 'lines' }),
+      bundledPreset('pop-story', 'Storybook Magic', 'A sparkling storybook swash direction.', 'Berkshire Swash', 'Georgia, cursive', { fontWeight: 400, textColor: '#f5d0fe', backgroundColor: '#312e81', shadowColor: '#c084fc', shadowBlur: 14, decoration: 'sparkles' }),
+      bundledPreset('pop-arcade', 'Color Arcade', 'Bright per-letter cartoon arcade title styling.', 'Luckiest Guy', 'Arial Black, sans-serif', { uppercase: true, fontWeight: 400, multicolor: true, textColor: '#ef4444', backgroundColor: '#0c4a6e', strokeColor: '#ffffff', strokeWidth: 4, shadowOffsetX: 6, shadowOffsetY: 6 }),
+      bundledPreset('pop-block', 'Block Builder', 'Pixel lettering for sandbox-game themes.', 'Pixelify Sans', 'monospace', { uppercase: true, fontWeight: 700, textColor: '#84cc16', backgroundColor: '#713f12', strokeColor: '#365314', strokeWidth: 3, shadowOffsetX: 7, shadowOffsetY: 7, decoration: 'pixel' }),
+      bundledPreset('pop-horror', '80s Horror', 'Red glowing high-contrast serif capitals with cinematic lines.', 'EB Garamond', 'Georgia, serif', { uppercase: true, fontWeight: 700, textColor: '#09090b', backgroundColor: '#020617', strokeColor: '#ef4444', strokeWidth: 3, shadowColor: '#dc2626', shadowBlur: 18, letterSpacing: 7, decoration: 'lines' }),
+      bundledPreset('pop-hero', 'Superhero', 'Bold condensed yellow text with a dramatic red shadow.', 'Anton', 'Impact, sans-serif', { uppercase: true, fontWeight: 400, textColor: '#fde047', backgroundColor: '#1e3a8a', strokeColor: '#dc2626', strokeWidth: 4, shadowOffsetX: 8, shadowOffsetY: 8 }),
+      bundledPreset('pop-scifi', 'Sci-Fi Signal', 'Wide cyan condensed lettering with a neon glow.', 'Anton', 'Arial Narrow, sans-serif', { uppercase: true, fontWeight: 400, textColor: '#67e8f9', backgroundColor: '#082f49', shadowColor: '#22d3ee', shadowBlur: 16, letterSpacing: 8, decoration: 'lines' }),
     ],
   },
 };
@@ -274,9 +302,17 @@ export const getSpecializedAbout = (slug: string, pageTitle: string): string[] |
   const config = configs[slug];
   if (!config) return null;
   const presetNames = config.presets.map((item) => item.name).join(', ');
+  const bundledFonts = Array.from(new Set(
+    config.presets
+      .filter((item) => item.fontSource === 'bundled' && item.targetFont)
+      .map((item) => item.targetFont),
+  )).join(', ');
+  const fontAvailabilityCopy = bundledFonts
+    ? `The primary faces (${bundledFonts}) are bundled open-source alternatives, so the same lettering loads for every visitor instead of silently falling back to Arial, Times New Roman, or Courier New. Proprietary brand fonts and logo assets are not distributed.`
+    : 'When a named commercial or system font is already installed on the visitor’s device, the preview can use it without distributing the font software. When it is not available, the generator reports that state and renders a clearly labelled fallback direction instead of claiming the fallback is the original typeface.';
   return [
     `The ${pageTitle} now renders ordinary text as visual artwork instead of substituting unrelated Unicode symbols. Its presets—${presetNames}—use real browser font rendering, page-specific colors, outlines, shadows, spacing, and decoration.`,
-    'When a named commercial or system font is already installed on the visitor’s device, the preview can use it without distributing the font software. When it is not available, the generator reports that state and renders a clearly labelled fallback direction instead of claiming the fallback is the original typeface.',
+    fontAvailabilityCopy,
     `You can adjust font size, letter spacing, outline, shadow, colors, canvas format, and transparency. PNG export fixes the browser-rendered appearance into pixels; SVG export keeps editable text and may therefore require the same font on the device where it is opened. ${config.compatibilityNote}`,
   ];
 };
@@ -292,14 +328,17 @@ export const getSpecializedFaq = (slug: string, pageTitle: string) => {
   const config = configs[slug];
   if (!config) return null;
   const isTypeface = config.engine === 'font-renderer';
+  const usesBundledFonts = config.presets.some((item) => item.fontSource === 'bundled');
   return [
     {
       q: `Does this ${pageTitle} use a real rendered font?`,
       a: isTypeface
         ? 'Yes. It uses the named font when that font is installed on your device and reports when a labelled fallback is being rendered. It does not replace letters with mathematical Unicode alphabets.'
-        : 'Yes. It renders ordinary text through real browser font stacks and applies original theme effects on a canvas. It does not claim to reproduce an official brand logo or proprietary artwork.',
+        : usesBundledFonts
+          ? 'Yes. It renders ordinary text with bundled open-source display fonts and applies original theme effects on a canvas. It does not claim to reproduce an official brand logo or proprietary typeface.'
+          : 'Yes. It renders ordinary text through real browser font stacks and applies original theme effects on a canvas. It does not claim to reproduce an official brand logo or proprietary artwork.',
     },
-    { q: 'Why might the font look different on another device?', a: 'Commercial and system fonts are not installed everywhere. PNG preserves what this browser rendered; editable SVG text can fall back to a different font on another device.' },
+    { q: 'Why might the font look different on another device?', a: usesBundledFonts ? 'The live preview and PNG use the bundled font consistently. Editable SVG text may still fall back unless the same open-source font is installed in the app or device that opens it.' : 'Commercial and system fonts are not installed everywhere. PNG preserves what this browser rendered; editable SVG text can fall back to a different font on another device.' },
     { q: 'Can I use the downloaded design commercially?', a: 'The generator does not grant rights to trademarks or commercial fonts. Check the chosen font and brand usage rights for the final project, particularly for merchandise, advertising, and logos.' },
   ];
 };

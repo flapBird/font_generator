@@ -86,22 +86,33 @@ export default function VisualGeneratorTool({
         setFontAvailable(null);
         return;
       }
-      await document.fonts.ready;
-      const testString = 'mmmmmmmmmmlliWW@#';
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      if (!context) {
-        if (active) setFontAvailable(null);
-        return;
+      if (active) setFontAvailable(null);
+      try {
+        const fontStyle = currentPreset.fontStyle ?? 'normal';
+        const fontWeight = currentPreset.fontWeight ?? 700;
+        const testString = 'mmmmmmmmmmlliWW@#';
+        await document.fonts.load(
+          `${fontStyle} ${fontWeight} 72px ${JSON.stringify(currentPreset.targetFont)}`,
+          testString,
+        );
+        await document.fonts.ready;
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        if (!context) {
+          if (active) setFontAvailable(null);
+          return;
+        }
+        const generics = ['monospace', 'serif', 'sans-serif'];
+        const available = generics.some((generic) => {
+          context.font = `72px ${generic}`;
+          const baseline = context.measureText(testString).width;
+          context.font = `72px ${JSON.stringify(currentPreset.targetFont)}, ${generic}`;
+          return context.measureText(testString).width !== baseline;
+        });
+        if (active) setFontAvailable(available);
+      } catch {
+        if (active) setFontAvailable(false);
       }
-      const generics = ['monospace', 'serif', 'sans-serif'];
-      const available = generics.some((generic) => {
-        context.font = `72px ${generic}`;
-        const baseline = context.measureText(testString).width;
-        context.font = `72px ${JSON.stringify(currentPreset.targetFont)}, ${generic}`;
-        return context.measureText(testString).width !== baseline;
-      });
-      if (active) setFontAvailable(available);
     };
     void checkFont();
     return () => { active = false; };
@@ -264,7 +275,7 @@ export default function VisualGeneratorTool({
 
   useEffect(() => {
     if (canvasRef.current) drawCanvas(canvasRef.current);
-  }, [drawCanvas]);
+  }, [drawCanvas, fontAvailable]);
 
   const exportPng = () => {
     const canvas = canvasRef.current;
@@ -347,7 +358,13 @@ export default function VisualGeneratorTool({
             <p className="mt-2 text-xs leading-5 text-slate-500">{currentPreset.description}</p>
             {currentPreset.targetFont && (
               <p className={`mt-2 rounded-lg px-3 py-2 text-xs font-semibold ${fontAvailable ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'}`}>
-                {fontAvailable ? `${currentPreset.targetFont} detected on this device.` : `${currentPreset.targetFont} was not detected; the labelled fallback is shown.`}
+                {fontAvailable
+                  ? currentPreset.fontSource === 'bundled'
+                    ? `${currentPreset.targetFont} loaded from this site.`
+                    : `${currentPreset.targetFont} detected on this device.`
+                  : currentPreset.fontSource === 'bundled'
+                    ? `${currentPreset.targetFont} is still loading; the fallback is shown temporarily.`
+                    : `${currentPreset.targetFont} was not detected; the labelled fallback is shown.`}
               </p>
             )}
           </div>

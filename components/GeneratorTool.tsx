@@ -223,7 +223,7 @@ export default function GeneratorTool({
       <div className="p-5 sm:p-8">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
           <div>
-            <label htmlFor="generator-input" className="text-sm font-semibold text-slate-900 dark:text-white">
+            <label htmlFor="generator-input" className="block text-sm font-semibold text-slate-900 dark:text-white">
               Enter your text
             </label>
             <textarea
@@ -233,7 +233,7 @@ export default function GeneratorTool({
               rows={3}
               maxLength={240}
               placeholder="Type or paste text here"
-              className="mt-2 min-h-28 w-full resize-y rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-lg leading-7 text-slate-950 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-violet-400"
+              className="mt-2 h-28 min-h-28 w-full resize-y rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-lg leading-7 text-slate-950 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-violet-400"
               autoComplete="off"
             />
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
@@ -242,11 +242,11 @@ export default function GeneratorTool({
             </div>
           </div>
 
-          <div className="self-start pt-0.5">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+          <div className="self-start">
+            <h3 className="text-center text-sm font-semibold text-slate-900 dark:text-white">
               Quick actions
             </h3>
-            <div className="mt-2.5 grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900">
+            <div className="mt-2 grid h-28 grid-rows-2 gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900">
               <button
                 type="button"
                 onClick={() => setInputText('')}
