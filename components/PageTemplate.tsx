@@ -51,6 +51,7 @@ export default function PageTemplate({
   const visualConfig = getVisualGeneratorConfig(page.slug);
   const isAsciiGenerator = definition?.kind === 'ascii';
   const isHybridGenerator = definition?.kind === 'hybrid';
+  const isMinecraftGenerator = visualConfig?.engine === 'minecraft-renderer';
   const requiresVisualConfig = definition
     ? ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
     : false;
@@ -64,6 +65,17 @@ export default function PageTemplate({
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
+  const workflowSteps = isMinecraftGenerator
+    ? [
+        ['1', 'Enter text', 'Type a sign, MOTD, server title, label, or short heading.'],
+        ['2', 'Choose mode and color', 'Use Game Text with the 16-color palette and inline codes, or switch to a textured Block Logo.'],
+        ['3', 'Copy or download', 'Copy compatible formatting-code text, or export the exact artwork as PNG or faithful SVG.'],
+      ]
+    : [
+        ['1', 'Enter text', 'Type a name, phrase, caption, or heading in the generator.'],
+        ['2', 'Compare styles', isSpecializedGenerator ? 'Compare the page-specific rendered presets and adjust the visual controls.' : `Review the ${config.styleIds.length} page-specific recommendations or choose another style family.`],
+        ['3', isSpecializedGenerator ? 'Download and use' : 'Copy and test', isSpecializedGenerator ? 'Export your finished result in the format that fits your project.' : 'Copy your preferred result and test it in the app or field where you plan to use it.'],
+      ];
   const supplement = getPageSupplement(page.slug);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
     const styleId = config.styleIds[index % config.styleIds.length];
@@ -100,7 +112,7 @@ export default function PageTemplate({
           <AsciiGeneratorTool
             pageTitle={page.title}
           />
-        ) : visualConfig?.engine === 'minecraft-renderer' ? (
+        ) : isMinecraftGenerator ? (
           <MinecraftGeneratorTool config={visualConfig} pageTitle={page.title} />
         ) : visualConfig ? (
           <>
@@ -184,11 +196,7 @@ export default function PageTemplate({
                   How to use this generator
                 </h2>
                 <ol className="mt-5 grid gap-4 sm:grid-cols-3">
-                  {[
-                    ['1', 'Enter text', 'Type a name, phrase, caption, or heading in the generator.'],
-                    ['2', 'Compare styles', isSpecializedGenerator ? 'Compare the page-specific rendered presets and adjust the visual controls.' : `Review the ${config.styleIds.length} page-specific recommendations or choose another style family.`],
-                    ['3', isSpecializedGenerator ? 'Download and use' : 'Copy and test', isSpecializedGenerator ? 'Export your finished result in the format that fits your project.' : 'Copy your preferred result and test it in the app or field where you plan to use it.'],
-                  ].map(([number, title, copy]) => (
+                  {workflowSteps.map(([number, title, copy]) => (
                     <li key={number} className="rounded-2xl bg-white p-4 dark:bg-slate-950">
                       <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-sm font-black text-violet-700 dark:bg-violet-950 dark:text-violet-300">
                         {number}
@@ -293,8 +301,10 @@ export default function PageTemplate({
             <div className="rounded-3xl bg-slate-950 p-5 text-white">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-300">{isSpecializedGenerator ? 'Export note' : 'Unicode note'}</p>
               <p className="mt-3 text-sm leading-6 text-slate-300">
-                {isSpecializedGenerator
-                  ? 'PNG preserves the current rendered appearance. SVG keeps editable text, so its font can change when opened on a device without the same typeface.'
+                {isMinecraftGenerator
+                  ? 'PNG and faithful SVG both preserve the exact rendered canvas. Copy formatting-code text separately when the destination supports Minecraft § or & codes.'
+                  : isSpecializedGenerator
+                    ? 'PNG preserves the current rendered appearance. SVG keeps editable text, so its font can change when opened on a device without the same typeface.'
                   : 'Fancy text changes characters, not the installed font. That is why the result can be copied into many apps, but rendering may vary by device.'}
               </p>
               {!isSpecializedGenerator && <Link href="/guides/how-unicode-text-works-guide" className="mt-4 inline-flex text-sm font-bold text-white hover:text-violet-300">

@@ -6,27 +6,27 @@ interface PageSupplement {
 
 const supplements: Record<string, PageSupplement> = {
   'pop-culture-font-generators': {
-    heading: 'Choosing a pop-culture-inspired text direction',
+    heading: 'Choosing a pop-culture-inspired artwork direction',
     paragraphs: [
-      'Pop-culture typography is not one visual category. Retro science-fiction titles often rely on wide spacing and geometric capitals, fantasy references lean toward serif or blackletter shapes, and playful game-inspired text works better with rounded or enclosed characters. Start with the mood of the reference rather than trying to force every title into the same script alphabet.',
-      'Unicode can suggest broad qualities such as blocky, dramatic, futuristic, magical, or nostalgic, but it cannot reproduce a protected logo or a custom commercial typeface. For fan profiles and themed messages, a recognizable mood is usually enough. For merchandise, branding, or public event artwork, use original licensed design assets and review the relevant rights.',
+      'Pop-culture typography is not one visual category. This generator therefore compares genuinely different rendered directions: storybook swashes and sparkles, multicolor arcade letters, pixel game text, glowing 1980s horror serifs, superhero display lettering, and wide science-fiction titles. Choose the direction that matches the project instead of treating every fandom as the same alphabet with a different color.',
+      'The presets use bundled open-source fonts and original browser-rendered effects rather than official franchise logos or proprietary brand fonts. Adjust the composition, colors, outline, shadow, and spacing, then export PNG for a fixed appearance or SVG when you need a scalable result. For merchandise, branding, or public event artwork, review the relevant font and brand rights.',
     ],
     tips: [
-      'Use one style family per title instead of mixing unrelated alphabets.',
-      'Keep franchise names readable and avoid implying official endorsement.',
-      'Test symbols and enclosed letters on the device used by most of your audience.',
+      'Compare the same short phrase across presets before changing detailed controls.',
+      'Use transparent export when the title will be placed over another design.',
+      'Keep franchise references readable and avoid implying official endorsement.',
     ],
   },
   'mario-font-generator': {
-    heading: 'How to create a readable block-game look',
+    heading: 'How to build a playful multicolor game title',
     paragraphs: [
-      'A convincing game-inspired label depends more on proportion and rhythm than on copying a logo. Squared capitals, heavy sans characters, monospace letters, and short pixel-like frames create a block-built feeling while remaining ordinary copy-paste Unicode. Short all-cap phrases usually communicate that mood more clearly than a long paragraph.',
-      'Server names, party labels, fan posts, and video descriptions all have different constraints. A compact squared result may work in a social caption but fail in an in-game field with stricter character support. Keep a plain version of the name, test the exact destination, and remove decorative frames before replacing the core alphabet.',
+      'This generator creates downloadable title artwork, not squared copy-and-paste characters. Its presets use a bundled open-source cartoon display face with rotating per-letter colors, thick outlines, gradients, and offset shadows to produce a lively game-title composition. Rainbow Game Title is the strongest multicolor option, while Red Hero, Green World, and Coin Rush provide more controlled palettes.',
+      'Short uppercase phrases give the chunky letters enough room to stay readable. Adjust letter spacing, outline, shadow, canvas shape, and transparency for a party banner, thumbnail, invitation, or fan graphic, then download PNG to preserve the exact appearance or SVG for scalable artwork.',
     ],
     tips: [
-      'Try short words first; block styles become crowded in long sentences.',
-      'Check capital-only styles for unexpected lowercase fallback.',
-      'This independent tool does not reproduce or distribute an official Nintendo font.',
+      'Use Rainbow Game Title when per-letter color is the main visual requirement.',
+      'Reduce letter spacing before shrinking a long title excessively.',
+      'This independent tool uses no official Nintendo font, logo, or character art.',
     ],
   },
   'tiktok-font-generator': {
@@ -44,13 +44,13 @@ const supplements: Record<string, PageSupplement> = {
   'stranger-things-font-generator': {
     heading: 'Building an atmospheric 1980s title without copying a logo',
     paragraphs: [
-      'The familiar supernatural-drama mood comes from several design cues working together: high-contrast serif shapes, generous tracking, centered composition, dark backgrounds, and restrained red or warm highlights. Unicode can supply serif, double-struck, or dramatic capital characters, but color, layout, and lighting must be added in the design tool or platform where the text is published.',
-      'For a fan event or themed post, use the generated text as a compact title and pair it with ordinary body copy. This keeps dates, locations, and accessibility information readable. Avoid tracing an official wordmark or presenting the result as licensed artwork; this page provides an independent, general-purpose text treatment rather than franchise assets.',
+      'The familiar 1980s supernatural-horror mood comes from several design cues working together: a high-contrast serif face, generous tracking, centered capitals, dark backgrounds, red outlines, glow, and cinematic line decoration. This generator renders those elements together as artwork instead of asking the user to copy unrelated double-struck or fraktur Unicode characters.',
+      'Use Red Outline Horror for the strongest poster treatment, Solid Crimson for better small-size readability, Neon 1984 for a brighter event graphic, or Paperback Horror for a printed retro direction. PNG preserves the exact rendered result; SVG provides a scalable export. The presets use an open-source serif alternative and do not reproduce the official wordmark.',
     ],
     tips: [
       'Use uppercase or title case for a cleaner display rhythm.',
       'Leave event details and safety information in regular text.',
-      'Test ornate capitals at small sizes before using them in a profile image.',
+      'Check the red outline and tracking at the final thumbnail or poster size.',
     ],
   },
   'christmas-font-generator': {

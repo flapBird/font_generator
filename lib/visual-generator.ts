@@ -315,7 +315,7 @@ const configs: Record<string, VisualGeneratorConfig> = {
     engine: 'minecraft-renderer',
     initialText: 'CREEPER CLUB',
     intentLabel: 'Unofficial block game title designer',
-    resultIntro: 'Render variable-width pixel UI text with inline color codes, or build a textured block logo with material inside each letter and adjustable 3D depth.',
+    resultIntro: 'Create crisp pixel Game Text with 16 selectable colors and inline § or & formatting codes, or build a textured Block Logo with adjustable outline and 3D depth.',
     bestFor: ['Signs and MOTDs', 'Server banners', 'Fan thumbnails'],
     compatibilityNote: 'Game Text uses an original bitmap alphabet; Block Logo uses the bundled Pixelify Sans face and procedural textures. No Minecraft font sheet, logo, block texture, or official game asset is included.',
     capabilities: ['game-codes', 'inline-format-codes', 'material-textures', 'extrusion-depth', 'pixel-snap'],
@@ -401,8 +401,9 @@ export const getSpecializedAbout = (slug: string, pageTitle: string): string[] |
   if (slug === 'minecraft-font-generator') {
     return [
       'The Minecraft Font Generator separates two different jobs that are often mixed together. Game Text creates compact pixel UI lettering for signs, server MOTDs, chat-style graphics, and overlays. Block Logo creates larger textured title artwork for thumbnails and banners. Switching modes changes the renderer, not just the background color.',
-      'Game Text draws an original variable-width 5×7 bitmap alphabet directly onto the output pixel grid, so there is no browser font smoothing step. It understands inline § and & color codes plus bold, italic, underline, strikethrough, obfuscated, and reset codes. Every input line remains a single output line and scales down to fit the preview; only manual line breaks add lines and increase the canvas height.',
-      'Block Logo clips procedural grass and dirt, mottled stone, diamond facets, or nether-and-lava patterns inside the letter shapes. Every manual line break is preserved and the logo canvas grows downward with the line count. Outline width and extrusion depth are independent controls, and transparent PNG or faithful SVG preserves the finished composition. Pixelify Sans is a bundled open-source alternative; no official font sheet, logo, block texture, or other Mojang/Microsoft asset is distributed.',
+      'Game Text draws an original variable-width 5×7 bitmap alphabet directly onto the output pixel grid, so there is no browser font-smoothing step. Every input line stays on one line and scales down to fit the preview; only a manual line break adds another output line.',
+      'The labelled palette below the preview contains all 16 standard Minecraft color values. Clicking a card changes the base color, while inline § or & codes can override that base color for individual words and can also apply bold, italic, underline, strikethrough, obfuscated, or reset formatting. Code support varies by edition, server, plugin, command, and input field, so test copied code text in its final destination.',
+      'Block Logo clips procedural grass and dirt, mottled stone, diamond facets, or nether-and-lava patterns inside the letter shapes. Every manual line break is preserved, while outline width and extrusion depth remain independent. PNG and faithful SVG preserve the finished canvas; the SVG embeds the exact rendering rather than editable text. Pixelify Sans is a bundled open-source alternative, and no official font sheet, logo, block texture, or other Mojang/Microsoft asset is distributed.',
     ];
   }
   const config = configs[slug];
@@ -439,7 +440,8 @@ export const getSpecializedFaq = (slug: string, pageTitle: string) => {
   }
   if (slug === 'minecraft-font-generator') {
     return [
-      { q: 'What is the difference between Game Text and Block Logo?', a: 'Game Text is for compact Minecraft-like interface lettering, inline color codes, signs, MOTDs, and transparent overlays. Block Logo is decorative artwork with material inside each glyph, a heavy outline, and adjustable 3D extrusion.' },
+      { q: 'What is the difference between Game Text and Block Logo?', a: 'Game Text is for compact pixel interface lettering, 16 selectable colors, inline formatting codes, signs, MOTDs, and transparent overlays. Block Logo is decorative artwork with procedural material inside each glyph, an adjustable outline, and 3D extrusion.' },
+      { q: 'How do the color cards and inline codes work together?', a: 'A color card sets the base color for text without an inline color code. Add a § or & code before a word to override that base color from that point onward, and use §r or &r to reset subsequent text to the selected base color.' },
       { q: 'Does Game Text use Minecraft’s official bitmap font sheet?', a: 'No. It uses an original 5×7 bitmap alphabet drawn directly as solid pixel cells. This keeps the result sharp without redistributing a proprietary game asset.' },
       { q: 'Why do Grass, Stone, Diamond, and Nether now look different?', a: 'Each material is procedurally rendered and clipped by the text mask. Grass has a green cap and dirt pixels, Stone adds mottling and cracks, Diamond uses cyan facets, and Nether uses dark rock with lava seams.' },
       { q: 'Will formatting codes work everywhere in Minecraft?', a: 'Not necessarily. Java, Bedrock, servers, plugins, MOTDs, signs, commands, and chat fields can apply different rules. The preview parses common § and & codes, but you should test the copied result in the exact target field.' },
@@ -478,7 +480,7 @@ export const getSpecializedHowTo = (slug: string): string | null => {
     return 'Enter one to three short lines, choose an ASCII banner style, and set the alignment and colors. Copy the plain-text result for monospace destinations, or download TXT, PNG, or SVG for a portable layout.';
   }
   if (slug === 'minecraft-font-generator') {
-    return 'Choose Game Text for inline color codes, variable-width pixel lettering, alignment, and a game-style shadow. Choose Block Logo for grass, stone, diamond, or nether material inside the letters, then adjust the outline and 3D depth. Export either result as a transparent PNG or faithful SVG.';
+    return 'Choose Game Text for compact pixel lettering, select one of the 16 base colors, and add § or & codes when individual words need different colors or formatting. Adjust scale, shadow, spacing, and alignment, then copy the formatting-code text for a compatible field or export the exact artwork as PNG or faithful SVG. Switch to Block Logo for grass, stone, diamond, or nether material with adjustable outline and 3D depth.';
   }
   const config = configs[slug];
   if (!config) return null;
@@ -502,7 +504,7 @@ export const getSpecializedFeatureList = (slug: string): string[] | null => {
     return ['ASCII art generation', 'Multiple banner styles', 'Copy text', 'TXT download', 'PNG download', 'SVG download'];
   }
   if (slug === 'minecraft-font-generator') {
-    return ['Game Text and Block Logo modes', 'Variable measured glyph widths', 'Inline § and & formatting codes', '16 Minecraft color values', 'Nearest-neighbor pixel scaling', 'Procedural material inside glyphs', 'Adjustable outline and 3D extrusion', 'Transparent PNG download', 'Faithful SVG download'];
+    return ['Game Text and Block Logo modes', 'Variable measured glyph widths', '16 labelled Minecraft color codes', 'Inline § and & color and style formatting', 'Nearest-neighbor pixel scaling', 'Procedural material inside glyphs', 'Adjustable outline and 3D extrusion', 'Transparent PNG download', 'Faithful SVG download'];
   }
   const config = configs[slug];
   if (!config) return null;

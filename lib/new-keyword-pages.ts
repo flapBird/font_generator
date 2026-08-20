@@ -299,9 +299,9 @@ export const newKeywordFandomPages: PageDefinition[] = [
     slug: 'fortnite-font-generator',
     title: 'Fortnite Font Generator',
     metaTitle: 'Fortnite Font Generator — Unofficial Game Text',
-    metaDescription: 'Create unofficial Fortnite-inspired bold Unicode text for squad names, profiles, party posts, and fan content. Free copy-and-paste alternatives.',
+    metaDescription: 'Create unofficial condensed battle-title artwork with outlines and action colors, export PNG or SVG, and optionally copy a Unicode player-name alternative.',
     category: 'fandom',
-    description: 'Generate unofficial bold, condensed-feeling, game-style Unicode text for Fortnite squad names, profiles, party messages, and fan posts.',
+    description: 'Create rendered squad, stream, and party-title artwork with a bundled condensed display font, plus a separately labelled copyable name alternative.',
     content: 'Fortnite font searches often seek the bold, compact energy of the game\'s promotional headings for thumbnails, party invitations, squad labels, and player profiles. The official wordmark uses custom design treatment, and Unicode cannot reproduce its condensed proportions or logo composition exactly. Heavy sans, squared capitals, wide display characters, and strong frames provide practical copy-paste alternatives.\n\nKeep player names recognizable. A bold sans result works better for a squad list or profile, while squared and framed options can carry more of an arcade or battle-interface mood in short headings. If a game account field refuses the characters, use the result in Discord, a stream description, or a social post instead.\n\nThis independent fan tool does not provide the Fortnite logo or game assets. For thumbnails, merchandise, or commercial artwork, use original design work and confirm all relevant brand and asset permissions.',
     howToUse: 'Enter a squad name, player label, or party message. Compare bold sans, squared, dark-circled, and game-frame outputs, then test your favorite where it will be used.',
     examples: [
