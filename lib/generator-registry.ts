@@ -173,11 +173,18 @@ function hybridIntent(primary: string): GeneratorOverride {
   };
 }
 
-const defaultIntent = (page: PageDefinition): GeneratorIntent => ({
-  primary: `Create copy-and-paste ${page.title.replace(/\s+Generator$/i, '').toLowerCase()} text.`,
-  secondary: ['Compare several relevant Unicode styles before copying.'],
-  expectedOutputs: ['text'],
-});
+const defaultIntent = (page: PageDefinition): GeneratorIntent => {
+  const subject = page.title
+    .replace(/\s+Generator$/i, '')
+    .replace(/\s+(?:Font|Text)$/i, '')
+    .toLowerCase();
+
+  return {
+    primary: `Create copy-and-paste ${subject} text.`,
+    secondary: ['Compare several relevant Unicode styles before copying.'],
+    expectedOutputs: ['text'],
+  };
+};
 
 const defaultAcceptanceCriteria: Record<GeneratorKind, string[]> = {
   unicode: ['Preserve grapheme clusters.', 'Keep unsupported characters unchanged.', 'Provide one-click copy for every result.'],
