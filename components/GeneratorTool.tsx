@@ -33,6 +33,7 @@ interface GeneratorToolProps {
   pageTitle: string;
   enableStyleSearch?: boolean;
   initialResultLimit?: number;
+  mobileInitialResultLimit?: number;
   recommendedLabel?: string;
   compactResults?: boolean;
   enablePopularFilters?: boolean;
@@ -365,6 +366,7 @@ export default function GeneratorTool({
   pageTitle,
   enableStyleSearch = false,
   initialResultLimit = 100,
+  mobileInitialResultLimit = initialResultLimit,
   recommendedLabel,
   compactResults = false,
   enablePopularFilters = false,
@@ -381,6 +383,7 @@ export default function GeneratorTool({
   const [styleQuery, setStyleQuery] = useState('');
   const [generatorQuery, setGeneratorQuery] = useState('');
   const [visibleLimit, setVisibleLimit] = useState(initialResultLimit);
+  const [visibleMobileLimit, setVisibleMobileLimit] = useState(mobileInitialResultLimit);
   const [visibleGeneratorLimit, setVisibleGeneratorLimit] = useState(4);
   const [popularFilterId, setPopularFilterId] = useState('all');
   const [previewStyleId, setPreviewStyleId] = useState<string | null>(null);
@@ -498,6 +501,12 @@ export default function GeneratorTool({
     void copyText(combined, 'all');
   };
 
+  const loadMoreMobileStyles = () => {
+    const nextLimit = visibleMobileLimit + mobileInitialResultLimit;
+    setVisibleMobileLimit(nextLimit);
+    if (nextLimit > visibleLimit) setVisibleLimit(nextLimit);
+  };
+
   const clearInput = () => {
     setInputText('');
     setPreviewStyleId(null);
@@ -613,7 +622,7 @@ export default function GeneratorTool({
                 </div>
 
                 <div id="generated-results" className="mt-4 grid gap-3 scroll-mt-24">
-                  {variants.map((variant) => {
+                  {variants.map((variant, index) => {
                     const isSelected = previewVariant?.id === variant.id;
                     const isCopied = copiedId === variant.id;
 
@@ -628,7 +637,7 @@ export default function GeneratorTool({
                         onFocus={() => setPreviewStyleId(variant.id)}
                         onClick={(event) => copyVariantFromCard(event, variant)}
                         onKeyDown={(event) => copyVariantFromCard(event, variant)}
-                        className={`group cursor-pointer rounded-2xl border bg-white p-4 outline-none transition dark:bg-slate-950 ${
+                        className={`group cursor-pointer rounded-2xl border bg-white p-4 outline-none transition dark:bg-slate-950 ${index >= visibleMobileLimit ? 'hidden sm:block' : ''} ${
                           isSelected
                             ? 'border-violet-400 shadow-[0_16px_40px_-32px_rgba(109,40,217,0.9)] ring-2 ring-violet-500/10 dark:border-violet-600'
                             : 'border-slate-200 hover:border-violet-300 hover:shadow-[0_16px_40px_-32px_rgba(109,40,217,0.8)] focus-visible:border-violet-400 focus-visible:ring-2 focus-visible:ring-violet-500/20 dark:border-slate-800 dark:hover:border-violet-700'
@@ -676,8 +685,20 @@ export default function GeneratorTool({
                   })}
                 </div>
 
+                {visibleMobileLimit < allVariants.length && (
+                  <div className="mt-5 text-center sm:hidden">
+                    <button
+                      type="button"
+                      onClick={loadMoreMobileStyles}
+                      className="rounded-xl border border-violet-300 bg-white px-6 py-3 text-sm font-bold text-violet-700 transition hover:bg-violet-50 dark:border-violet-700 dark:bg-slate-950 dark:text-violet-300 dark:hover:bg-violet-950/30"
+                    >
+                      Load more styles ({allVariants.length - Math.min(visibleMobileLimit, allVariants.length)} remaining)
+                    </button>
+                  </div>
+                )}
+
                 {variants.length < allVariants.length && (
-                  <div className="mt-5 text-center">
+                  <div className="mt-5 hidden text-center sm:block">
                     <button
                       type="button"
                       onClick={() => setVisibleLimit((current) => current + initialResultLimit)}
@@ -767,7 +788,7 @@ export default function GeneratorTool({
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {visibleVisualGeneratorItems.map((item) => (
-                  <Link key={item.id} href={item.href} className="group flex min-h-52 flex-col rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-950 dark:hover:border-violet-700">
+                  <Link key={item.id} href={item.href} scroll className="group flex min-h-52 flex-col rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-950 dark:hover:border-violet-700">
                     <span className="flex items-start justify-between gap-3">
                       <span aria-hidden="true" className="text-2xl">{item.icon}</span>
                       <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:bg-violet-950/50 dark:text-violet-300">
@@ -1189,6 +1210,7 @@ export default function GeneratorTool({
                   <Link
                     key={item.title}
                     href={item.href}
+                    scroll
                     className="group w-60 shrink-0 snap-start rounded-2xl border border-slate-200 bg-white p-3 transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-lg sm:w-auto dark:border-slate-700 dark:bg-slate-950 dark:hover:border-violet-700"
                   >
                     {content}

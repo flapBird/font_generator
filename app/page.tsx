@@ -77,6 +77,7 @@ export default function HomePage() {
             pageTitle="Free Font Generator"
             enableStyleSearch
             initialResultLimit={80}
+            mobileInitialResultLimit={18}
             recommendedLabel="All font styles"
             compactResults
             enablePopularFilters
