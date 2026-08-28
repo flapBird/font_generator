@@ -5,7 +5,7 @@ export function generateStaticParams() {
   return generatorRegistry.map((generator) => ({ slug: generator.slug }));
 }
 
-export default async function LegacyStylePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function LegacySingularStylePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const generator = getGeneratorDefinition(slug);
   if (!generator) notFound();

@@ -251,9 +251,11 @@ const paintMaterial = (
 
 export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftGeneratorToolProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mobileCanvasRef = useRef<HTMLCanvasElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const mobilePreviewRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<MinecraftMode>('game-text');
-  const [gameText, setGameText] = useState('CREEPER CLUB');
+  const [gameText, setGameText] = useState(config.initialText);
   const [logoText, setLogoText] = useState(config.initialText);
   const [baseColor, setBaseColor] = useState('#ffff55');
   const [fillMode, setFillMode] = useState<FillMode>('solid');
@@ -300,12 +302,12 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
   }, [gameText, mode]);
 
   useEffect(() => {
-    const preview = previewRef.current;
-    if (!preview) return;
-    const updateWidth = () => setPreviewWidth(Math.max(280, Math.floor(preview.clientWidth)));
+    const previews = [previewRef.current, mobilePreviewRef.current].filter((item): item is HTMLDivElement => Boolean(item));
+    if (!previews.length) return;
+    const updateWidth = () => setPreviewWidth(Math.max(280, ...previews.map((preview) => Math.floor(preview.clientWidth))));
     updateWidth();
     const observer = new ResizeObserver(updateWidth);
-    observer.observe(preview);
+    previews.forEach((preview) => observer.observe(preview));
     return () => observer.disconnect();
   }, []);
 
@@ -510,10 +512,11 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
   }, [backgroundColor, depth, logoPlainText, logoSize, material, outlineWidth, transparent]);
 
   const drawCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    if (mode === 'game-text') drawGameText(canvas);
-    else drawBlockLogo(canvas);
+    [canvasRef.current, mobileCanvasRef.current].forEach((canvas) => {
+      if (!canvas) return;
+      if (mode === 'game-text') drawGameText(canvas);
+      else drawBlockLogo(canvas);
+    });
   }, [drawBlockLogo, drawGameText, mode]);
 
   useEffect(() => {
@@ -585,11 +588,19 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
             <div className="mt-2 flex justify-between gap-3 text-xs text-slate-500"><span>{mode === 'game-text' ? 'Formatting codes work inline with § or &: &a green, &l bold, &o italic, &n underline, &m strikethrough, &k obfuscated, &r reset.' : 'Logo text has its own clean input without game codes.'}</span><span className="shrink-0">{activeText.length}/120</span></div>
           </div>
 
+          <div className="xl:hidden">
+            <h3 className="mb-3 text-lg font-black text-slate-950 dark:text-white">Live preview</h3>
+            <div ref={mobilePreviewRef} className="min-h-32 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950 bg-[linear-gradient(45deg,#263449_25%,transparent_25%),linear-gradient(-45deg,#263449_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#263449_75%),linear-gradient(-45deg,transparent_75%,#263449_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0]">
+              <canvas ref={mobileCanvasRef} role="img" aria-label={`${mode === 'game-text' ? 'Minecraft game text' : `${materials[material].name} block logo`} mobile preview`} className={`block w-full ${mode === 'game-text' ? '[image-rendering:pixelated]' : 'h-auto max-w-full'}`} />
+            </div>
+            <p className="mt-2 text-xs text-slate-500">The preview updates while you adjust the controls below.</p>
+          </div>
+
           {mode === 'game-text' ? (
             <>
               <div>
                 <p className="text-sm font-bold text-slate-950 dark:text-white">Minecraft colors</p>
-                <div className="mt-2 grid grid-cols-8 gap-1.5">
+                <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-8 sm:gap-1.5">
                   {minecraftColors.map((item) => (
                     <button key={item.code} type="button" title={`${item.name} · &${item.code}`} aria-label={`Use ${item.name} as the base color`} aria-pressed={baseColor === item.color} onClick={() => setBaseColor(item.color)} className={`aspect-square rounded-md border border-black/20 shadow-sm transition hover:scale-105 ${baseColor === item.color ? 'ring-2 ring-lime-500 ring-offset-2' : ''}`} style={{ backgroundColor: item.color }} />
                   ))}
@@ -598,7 +609,7 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
                   <input type="color" value={baseColor} onChange={(event) => setBaseColor(event.target.value)} className="mt-2 h-10 w-full rounded border border-slate-300" />
                 </label>
                 <div className="mt-3 grid grid-cols-3 gap-2 text-xs font-bold">
-                  {(['solid', 'gradient', 'rainbow'] as FillMode[]).map((item) => <button key={item} type="button" aria-pressed={fillMode === item} onClick={() => setFillMode(item)} className={`rounded-lg border px-2 py-2.5 capitalize ${fillMode === item ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700'}`}>{item}</button>)}
+                  {(['solid', 'gradient', 'rainbow'] as FillMode[]).map((item) => <button key={item} type="button" aria-pressed={fillMode === item} onClick={() => setFillMode(item)} className={`min-h-11 rounded-lg border px-2 py-2.5 capitalize sm:min-h-0 ${fillMode === item ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700'}`}>{item}</button>)}
                 </div>
               </div>
 
@@ -614,11 +625,11 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
                     ['Italic', italicText, setItalicText],
                     ['Underline', underlineText, setUnderlineText],
                     ['Strike', strikeText, setStrikeText],
-                  ].map(([label, active, setter]) => <button key={String(label)} type="button" aria-pressed={Boolean(active)} onClick={() => (setter as typeof setBoldText)(!active)} className={`rounded-lg border px-2 py-2.5 ${active ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700'}`}>{label as string}</button>)}
+                  ].map(([label, active, setter]) => <button key={String(label)} type="button" aria-pressed={Boolean(active)} onClick={() => (setter as typeof setBoldText)(!active)} className={`min-h-11 rounded-lg border px-2 py-2.5 sm:min-h-0 ${active ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700'}`}>{label as string}</button>)}
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 text-xs font-bold">
-                  <button type="button" aria-pressed={gameShadow} onClick={() => setGameShadow((value) => !value)} className={`rounded-lg border px-2 py-2.5 ${gameShadow ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700'}`}>Drop shadow</button>
-                  <button type="button" aria-pressed={outlineText} onClick={() => setOutlineText((value) => !value)} className={`rounded-lg border px-2 py-2.5 ${outlineText ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700'}`}>Outline</button>
+                  <button type="button" aria-pressed={gameShadow} onClick={() => setGameShadow((value) => !value)} className={`min-h-11 rounded-lg border px-2 py-2.5 sm:min-h-0 ${gameShadow ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700'}`}>Drop shadow</button>
+                  <button type="button" aria-pressed={outlineText} onClick={() => setOutlineText((value) => !value)} className={`min-h-11 rounded-lg border px-2 py-2.5 sm:min-h-0 ${outlineText ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700'}`}>Outline</button>
                 </div>
                 {gameShadow && <label className="mt-3 block text-xs font-bold text-slate-700 dark:text-slate-300">Shadow distance: {shadowDistance}px
                   <input type="range" min="1" max="4" value={shadowDistance} onChange={(event) => setShadowDistance(Number(event.target.value))} className="mt-2 w-full" />
@@ -637,7 +648,7 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
                   <input type="range" min="0" max="8" value={lineSpacing} onChange={(event) => setLineSpacing(Number(event.target.value))} className="mt-2 w-full" />
                 </label>
                 <div className="mt-3 grid grid-cols-3 gap-2">
-                  {(['left', 'center', 'right'] as Alignment[]).map((item) => <button key={item} type="button" aria-pressed={alignment === item} onClick={() => setAlignment(item)} className={`rounded-lg border px-2 py-2 text-xs font-bold capitalize ${alignment === item ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700'}`}>{item}</button>)}
+                  {(['left', 'center', 'right'] as Alignment[]).map((item) => <button key={item} type="button" aria-pressed={alignment === item} onClick={() => setAlignment(item)} className={`min-h-11 rounded-lg border px-2 py-2 text-xs font-bold capitalize sm:min-h-0 ${alignment === item ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200' : 'border-slate-300 dark:border-slate-700'}`}>{item}</button>)}
                 </div>
               </div>
               <button type="button" onClick={() => void copyCode()} className="w-full rounded-xl bg-lime-700 px-4 py-3 text-sm font-black text-white hover:bg-lime-600">Copy formatting-code text</button>
@@ -669,19 +680,19 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
             </>
           )}
 
-          <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300"><input type="checkbox" checked={transparent} onChange={(event) => setTransparent(event.target.checked)} className="h-4 w-4" /> Transparent background</label>
+          <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-slate-700 sm:min-h-0 dark:text-slate-300"><input type="checkbox" checked={transparent} onChange={(event) => setTransparent(event.target.checked)} className="h-5 w-5 sm:h-4 sm:w-4" /> Transparent background</label>
           {!transparent && <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Background color<input type="color" value={backgroundColor} onChange={(event) => setBackgroundColor(event.target.value)} className="mt-2 h-10 w-full rounded border border-slate-300" /></label>}
         </div>
 
-        <div className="min-w-0">
-          <div className="mb-3">
+        <div className="flex min-w-0 flex-col">
+          <div className="order-1 mb-3 hidden xl:block">
             <h3 className="text-lg font-black text-slate-950 dark:text-white">Preview</h3>
           </div>
-          <div ref={previewRef} className="min-h-32 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950 bg-[linear-gradient(45deg,#263449_25%,transparent_25%),linear-gradient(-45deg,#263449_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#263449_75%),linear-gradient(-45deg,transparent_75%,#263449_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0]">
+          <div ref={previewRef} className="order-1 hidden min-h-32 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950 bg-[linear-gradient(45deg,#263449_25%,transparent_25%),linear-gradient(-45deg,#263449_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#263449_75%),linear-gradient(-45deg,transparent_75%,#263449_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0] xl:block">
             <canvas ref={canvasRef} role="img" aria-label={`${mode === 'game-text' ? 'Minecraft game text' : `${materials[material].name} block logo`} preview`} className={`block w-full ${mode === 'game-text' ? '[image-rendering:pixelated]' : 'h-auto max-w-full'}`} />
           </div>
           {mode === 'game-text' && (
-            <section aria-labelledby="minecraft-color-codes-heading" className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 sm:p-5 dark:border-emerald-900/70 dark:bg-emerald-950/20">
+            <section aria-labelledby="minecraft-color-codes-heading" className="order-5 mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 sm:p-5 xl:order-2 dark:border-emerald-900/70 dark:bg-emerald-950/20">
               <h4 id="minecraft-color-codes-heading" className="text-sm font-black uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">
                 Minecraft color codes
               </h4>
@@ -698,7 +709,7 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
                       className={`flex min-w-0 items-center gap-2 rounded-lg border px-2.5 py-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
                         isSelected
                           ? 'border-emerald-500 bg-white shadow-sm ring-2 ring-emerald-500/20 dark:bg-slate-900'
-                          : 'border-emerald-200 bg-white/70 hover:border-emerald-400 hover:bg-white dark:border-emerald-900/70 dark:bg-slate-950/60 dark:hover:border-emerald-700'
+                          : 'border-emerald-200 bg-white/70 hover:border-emerald-400 hover:bg-white dark:border-emerald-900 dark:bg-slate-950 dark:hover:border-emerald-700'
                       }`}
                     >
                       <span
@@ -719,17 +730,18 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
               </p>
             </section>
           )}
-          <div className={`mt-4 grid gap-3 ${mode === 'game-text' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+          <h3 className="order-2 mt-4 text-lg font-black text-slate-950 xl:hidden dark:text-white">Export artwork</h3>
+          <div className={`order-3 mt-4 grid gap-3 ${mode === 'game-text' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
             {mode === 'game-text' && <button type="button" onClick={copyPng} disabled={!gamePlainText} className="rounded-xl border border-cyan-600 px-4 py-3 text-sm font-black text-cyan-800 hover:bg-cyan-50 disabled:opacity-45 dark:text-cyan-300 dark:hover:bg-cyan-950/30">Copy PNG</button>}
             <button type="button" onClick={exportPng} disabled={mode === 'game-text' ? !gamePlainText : !logoPlainText} className="rounded-xl bg-cyan-600 px-4 py-3 text-sm font-black text-white hover:bg-cyan-500 disabled:opacity-45">Download PNG</button>
             <button type="button" onClick={exportFaithfulSvg} disabled={mode === 'game-text' ? !gamePlainText : !logoPlainText} className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:opacity-45 dark:bg-white dark:text-slate-950">Download faithful SVG</button>
           </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="order-6 mt-4 grid gap-3 sm:grid-cols-2 xl:order-4">
             <div className="rounded-xl border border-lime-200 bg-lime-50 p-4 text-xs leading-5 text-lime-950 dark:border-lime-900/60 dark:bg-lime-950/30 dark:text-lime-200"><strong>Game Text:</strong> uses an original 5×7 bitmap alphabet drawn directly onto the pixel grid. Choose any of the 16 base colors above; inline § or &amp; codes override the base color for individual words. Only a manual line break creates another output line.</div>
             <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-xs leading-5 text-cyan-950 dark:border-cyan-900/60 dark:bg-cyan-950/30 dark:text-cyan-200"><strong>Block Logo:</strong> uses original procedural grass, dirt, stone, diamond, and nether-inspired textures. The textures, depth, and outline are rendered into the letters—not placed behind unchanged text.</div>
           </div>
-          <p className="mt-3 text-xs leading-5 text-slate-500">Unofficial fan tool. No Mojang/Microsoft font sheet, logo, block texture, or game asset is included.</p>
-          {statusMessage && <p aria-live="polite" className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-800 dark:bg-violet-950/40 dark:text-violet-300">{statusMessage}</p>}
+          <p className="order-7 mt-3 text-xs leading-5 text-slate-500 xl:order-5">Unofficial fan tool. No Mojang/Microsoft font sheet, logo, block texture, or game asset is included.</p>
+          {statusMessage && <p aria-live="polite" className="order-8 mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-800 xl:order-6 dark:bg-violet-950/40 dark:text-violet-300">{statusMessage}</p>}
         </div>
       </div>
     </section>

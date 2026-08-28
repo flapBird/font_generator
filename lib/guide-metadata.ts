@@ -30,8 +30,8 @@ const unicodeNormalization: GuideSource = {
 
 const metadataBySlug: Record<string, GuideMetadata> = {
   'reddit-fancy-text-guide': {
-    updatedAt: '2026-08-13',
-    updatedLabel: 'August 13, 2026',
+    updatedAt: '2026-08-27',
+    updatedLabel: 'August 27, 2026',
     sources: [
       {
         title: 'Reddit Help: Formatting Guide',
@@ -45,20 +45,20 @@ const metadataBySlug: Record<string, GuideMetadata> = {
     toolLink: { href: '/', label: 'Try the Fancy Text Generator' },
   },
   'how-unicode-text-works-guide': {
-    updatedAt: '2026-08-13',
-    updatedLabel: 'August 13, 2026',
+    updatedAt: '2026-08-27',
+    updatedLabel: 'August 27, 2026',
     sources: [mathematicalAlphanumerics, unicodeNormalization],
     toolLink: { href: '/', label: 'Try the Fancy Text Generator' },
   },
   'unicode-font-compatibility-guide': {
-    updatedAt: '2026-08-13',
-    updatedLabel: 'August 13, 2026',
+    updatedAt: '2026-08-27',
+    updatedLabel: 'August 27, 2026',
     sources: [mathematicalAlphanumerics],
     toolLink: { href: '/', label: 'Test a Unicode text style' },
   },
   'accessible-fancy-text-guide': {
-    updatedAt: '2026-08-13',
-    updatedLabel: 'August 13, 2026',
+    updatedAt: '2026-08-27',
+    updatedLabel: 'August 27, 2026',
     sources: [
       {
         title: 'W3C WAI: Understanding the Readable guideline',
@@ -68,8 +68,8 @@ const metadataBySlug: Record<string, GuideMetadata> = {
     toolLink: { href: '/', label: 'Create a short text sample' },
   },
   'instagram-bio-font-guide': {
-    updatedAt: '2026-08-13',
-    updatedLabel: 'August 13, 2026',
+    updatedAt: '2026-08-27',
+    updatedLabel: 'August 27, 2026',
     sources: [
       {
         title: 'Instagram Help: Public profile information',
@@ -80,11 +80,11 @@ const metadataBySlug: Record<string, GuideMetadata> = {
         url: 'https://www.facebook.com/help/instagram/583107688369069',
       },
     ],
-    toolLink: { href: '/styles/instagram-font-generator', label: 'Open the Instagram Font Generator' },
+    toolLink: { href: '/instagram-font-generator', label: 'Open the Instagram Font Generator' },
   },
   'discord-font-guide': {
-    updatedAt: '2026-08-13',
-    updatedLabel: 'August 13, 2026',
+    updatedAt: '2026-08-27',
+    updatedLabel: 'August 27, 2026',
     sources: [
       {
         title: 'Discord Support: Markdown Text 101',
@@ -94,22 +94,22 @@ const metadataBySlug: Record<string, GuideMetadata> = {
     toolLink: { href: '/', label: 'Create text to test in Discord' },
   },
   'fancy-text-troubleshooting-guide': {
-    updatedAt: '2026-08-13',
-    updatedLabel: 'August 13, 2026',
+    updatedAt: '2026-08-27',
+    updatedLabel: 'August 27, 2026',
     sources: [],
     toolLink: { href: '/', label: 'Try a simpler text style' },
   },
   'unicode-character-coverage-guide': {
-    updatedAt: '2026-08-13',
-    updatedLabel: 'August 13, 2026',
+    updatedAt: '2026-08-27',
+    updatedLabel: 'August 27, 2026',
     sources: [unicodeCharacterDatabase, mathematicalAlphanumerics],
-    toolLink: { href: '/styles/small-text-generator', label: 'Test superscript and subscript coverage' },
+    toolLink: { href: '/small-text-generator', label: 'Test superscript and subscript coverage' },
   },
 };
 
 const fallbackMetadata: GuideMetadata = {
-  updatedAt: '2026-08-13',
-  updatedLabel: 'August 13, 2026',
+  updatedAt: '2026-08-27',
+  updatedLabel: 'August 27, 2026',
   sources: [],
   toolLink: { href: '/', label: 'Try the Fancy Text Generator' },
 };

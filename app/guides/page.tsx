@@ -28,7 +28,7 @@
              <Link
                key={page.slug}
                href={`/guides/${page.slug}`}
-               className="block p-6 bg-white/50 dark:bg-slate-900/30 backdrop-blur-sm rounded-2xl border border-white/60 dark:border-slate-800/60 hover:bg-white/80 dark:hover:bg-slate-800/40 hover:shadow-lg hover:shadow-indigo-500/5 hover:-translate-y-0.5 transition-all duration-300"
+               className="block rounded-2xl border border-white/60 bg-white/50 p-6 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/80 hover:shadow-lg hover:shadow-indigo-500/5 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
              >
                <div className="flex items-center gap-3 mb-2">
                  <span className="text-2xl">{page.icon}</span>

@@ -61,6 +61,7 @@ export default function VisualGeneratorTool({
   pageTitle,
 }: VisualGeneratorToolProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mobileCanvasRef = useRef<HTMLCanvasElement>(null);
   const [inputText, setInputText] = useState(config.initialText);
   const [presetId, setPresetId] = useState(config.presets[0]?.id ?? '');
   const [fontSize, setFontSize] = useState(112);
@@ -359,6 +360,7 @@ export default function VisualGeneratorTool({
 
   useEffect(() => {
     if (canvasRef.current) drawCanvas(canvasRef.current);
+    if (mobileCanvasRef.current) drawCanvas(mobileCanvasRef.current);
   }, [drawCanvas, fontAvailable]);
 
   const exportPng = () => {
@@ -479,6 +481,27 @@ export default function VisualGeneratorTool({
             <textarea id="visual-text-input" value={inputText} onChange={(event) => setInputText(event.target.value)} rows={3} maxLength={120} placeholder="Type a short title" className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-base outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900" />
             <div className="mt-2 flex justify-between gap-3 text-xs text-slate-500"><span>{hasCapability('meme-layout') ? 'First line goes on top; the final line goes on the bottom.' : 'Canvas grows with additional lines'}</span><span>{inputText.length}/120</span></div>
             <p className="mt-1 text-xs text-slate-500">Rendered locally—your text isn&apos;t uploaded.</p>
+          </div>
+
+          <div className="xl:hidden">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="font-bold text-slate-950 dark:text-white">Live artwork preview</h3>
+                <p className="mt-1 text-xs text-slate-500">Updates as you adjust the controls below.</p>
+              </div>
+              <select aria-label="Canvas format" value={format} onChange={(event) => setFormat(event.target.value as CanvasFormat)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-base dark:border-slate-700 dark:bg-slate-900">
+                {Object.entries(formats).map(([id, item]) => <option key={id} value={id}>{item.label} · {item.width}px wide</option>)}
+              </select>
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%),linear-gradient(-45deg,#e5e7eb_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e5e7eb_75%),linear-gradient(-45deg,transparent_75%,#e5e7eb_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0] p-2 dark:border-slate-700 dark:opacity-95">
+              <canvas ref={mobileCanvasRef} role="img" aria-label={`${currentPreset.name} mobile preview of ${renderedText || 'empty text'}`} className="block h-auto w-full rounded-xl" />
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              <button type="button" onClick={exportPng} disabled={!inputText} className="min-h-11 rounded-xl bg-violet-600 px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-45">Download PNG</button>
+              <button type="button" onClick={exportSvg} disabled={!inputText} className="min-h-11 rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-45 dark:bg-white dark:text-slate-950">Download editable SVG</button>
+              <button type="button" onClick={exportFaithfulSvg} disabled={!inputText} className="min-h-11 rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-800 disabled:cursor-not-allowed disabled:opacity-45 dark:border-slate-700 dark:text-slate-200">Download faithful SVG</button>
+            </div>
+            {statusMessage && <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs font-medium text-violet-800 dark:bg-violet-950/40 dark:text-violet-300" aria-live="polite">{statusMessage}</p>}
           </div>
 
           <div>
@@ -618,14 +641,7 @@ export default function VisualGeneratorTool({
         </div>
 
         <div className="min-w-0">
-          {hasCapability('font-specimen') && (
-            <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-300">Typeface specimen</p>
-              <p className="mt-2 break-words text-3xl leading-tight text-slate-950 dark:text-white" style={{ fontFamily: currentPreset.fontFamily, fontWeight: currentPreset.fontWeight ?? 700, fontStyle: currentPreset.fontStyle ?? 'normal' }}>Aa Bb Cc 0123 &amp;?!</p>
-              <p className="mt-2 text-xs text-slate-500">{currentPreset.sourceLabel}</p>
-            </div>
-          )}
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-3 hidden flex-wrap items-center justify-between gap-3 xl:flex">
             <div>
               <h3 className="font-bold text-slate-950 dark:text-white">Live artwork preview</h3>
               <p className="mt-1 text-xs text-slate-500">The PNG download matches this browser-rendered canvas.</p>
@@ -634,24 +650,54 @@ export default function VisualGeneratorTool({
               {Object.entries(formats).map(([id, item]) => <option key={id} value={id}>{item.label} · {item.width}px wide</option>)}
             </select>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%),linear-gradient(-45deg,#e5e7eb_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e5e7eb_75%),linear-gradient(-45deg,transparent_75%,#e5e7eb_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0] p-2 dark:border-slate-700 dark:opacity-95">
+          <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%),linear-gradient(-45deg,#e5e7eb_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e5e7eb_75%),linear-gradient(-45deg,transparent_75%,#e5e7eb_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0] p-2 xl:block dark:border-slate-700 dark:opacity-95">
             <canvas ref={canvasRef} role="img" aria-label={`${currentPreset.name} preview of ${renderedText || 'empty text'}`} className="block h-auto w-full rounded-xl" />
           </div>
           {!inputText && <p className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">Enter text to create a downloadable design.</p>}
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="mt-4 hidden gap-3 xl:grid xl:grid-cols-3">
             <button type="button" onClick={exportPng} disabled={!inputText} className="rounded-xl bg-violet-600 px-4 py-3 text-sm font-bold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-45">Download PNG</button>
             <button type="button" onClick={exportSvg} disabled={!inputText} className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-45 dark:bg-white dark:text-slate-950">Download editable SVG</button>
             <button type="button" onClick={exportFaithfulSvg} disabled={!inputText} className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-800 hover:border-violet-400 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-45 dark:border-slate-700 dark:text-slate-200">Download faithful SVG</button>
           </div>
           <p className="mt-2 text-xs leading-5 text-slate-500">Editable SVG keeps selectable text and can simplify complex per-letter effects. Faithful SVG embeds the exact canvas appearance.</p>
 
+          {hasCapability('font-specimen') && (
+            <div className="mt-5 space-y-4">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-300">Typeface specimen</p>
+                <p className="mt-2 break-words text-3xl leading-tight text-slate-950 dark:text-white" style={{ fontFamily: currentPreset.fontFamily, fontWeight: currentPreset.fontWeight ?? 700, fontStyle: currentPreset.fontStyle ?? 'normal' }}>Aa Bb Cc 0123 &amp;?!</p>
+                <p className="mt-2 text-xs text-slate-500">{currentPreset.sourceLabel}</p>
+                <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+                  <div><dt className="font-bold text-slate-700 dark:text-slate-300">Requested weight</dt><dd className="mt-1 text-slate-500">{currentPreset.fontWeight ?? 700}</dd></div>
+                  <div><dt className="font-bold text-slate-700 dark:text-slate-300">Requested style</dt><dd className="mt-1 text-slate-500">{currentPreset.fontStyle ?? 'normal'}</dd></div>
+                  <div><dt className="font-bold text-slate-700 dark:text-slate-300">Font stack</dt><dd className="mt-1 break-words text-slate-500">{currentPreset.fontFamily}</dd></div>
+                </dl>
+              </div>
+
+              {config.fontGuide && (
+                <section className="rounded-2xl border border-violet-200 bg-violet-50/70 p-4 dark:border-violet-900/60 dark:bg-violet-950/20">
+                  <h3 className="font-black text-slate-950 dark:text-white">{config.fontGuide.heading}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{config.fontGuide.intro}</p>
+                  <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {config.fontGuide.checks.map((check) => (
+                      <div key={check.label} className="rounded-xl bg-white p-3 dark:bg-slate-950">
+                        <dt className="text-xs font-bold uppercase tracking-wide text-violet-700 dark:text-violet-300">{check.label}</dt>
+                        <dd className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-400">{check.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              )}
+            </div>
+          )}
+
           <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
             <p><strong className="text-slate-800 dark:text-slate-200">Font source:</strong> {currentPreset.sourceLabel}</p>
             <p className="mt-1"><strong className="text-slate-800 dark:text-slate-200">Export note:</strong> {currentPreset.licenseNote}</p>
           </div>
           <p className="mt-3 text-xs leading-5 text-slate-500">{config.compatibilityNote}</p>
-          {statusMessage && <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs font-medium text-violet-800 dark:bg-violet-950/40 dark:text-violet-300" aria-live="polite">{statusMessage}</p>}
+          {statusMessage && <p className="mt-3 hidden rounded-lg bg-violet-50 px-3 py-2 text-xs font-medium text-violet-800 xl:block dark:bg-violet-950/40 dark:text-violet-300" aria-live="polite">{statusMessage}</p>}
         </div>
       </div>
     </section>

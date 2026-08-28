@@ -200,7 +200,7 @@ const defaultAcceptanceCriteria: Record<GeneratorKind, string[]> = {
 const buildDefinition = (page: PageDefinition, priority: number): GeneratorDefinition => {
   const override = overrides[page.slug] ?? {};
   const kind = override.kind ?? 'unicode';
-  const canonicalPath = `/${page.category}/${page.slug}`;
+  const canonicalPath = `/${page.slug}`;
 
   return {
     id: page.slug,
@@ -241,7 +241,7 @@ export const validateGeneratorRegistry = (definitions: GeneratorDefinition[] = g
   definitions.forEach((definition) => {
     if (ids.has(definition.id)) issues.push(`Duplicate generator id: ${definition.id}`);
     if (paths.has(definition.canonicalPath)) issues.push(`Duplicate canonical path: ${definition.canonicalPath}`);
-    if (definition.canonicalPath !== `/${definition.category}/${definition.slug}`) {
+    if (definition.canonicalPath !== `/${definition.slug}`) {
       issues.push(`Canonical path does not match category and slug: ${definition.id}`);
     }
     if (!definition.intent.expectedOutputs.length) issues.push(`No expected output declared: ${definition.id}`);
@@ -273,3 +273,12 @@ export const getGeneratorsByKind = (kind: GeneratorKind) =>
 
 export const getGeneratorsByCategory = (category: 'styles' | 'fandom') =>
   generatorRegistry.filter((definition) => definition.category === category);
+
+export const isFontStyleGenerator = (definition: GeneratorDefinition) =>
+  definition.kind === 'unicode';
+
+export const getFontStyleGenerators = () =>
+  generatorRegistry.filter(isFontStyleGenerator);
+
+export const getVisualArtGenerators = () =>
+  generatorRegistry.filter((definition) => definition.kind !== 'directory' && !isFontStyleGenerator(definition));

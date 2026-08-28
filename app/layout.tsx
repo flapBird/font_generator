@@ -1,5 +1,4 @@
  import type { Metadata } from "next";
- import Script from "next/script";
  import "@fontsource/anton/latin-400.css";
  import "@fontsource/berkshire-swash/latin-400.css";
  import "@fontsource/eb-garamond/latin-700.css";
@@ -8,31 +7,46 @@
  import "./globals.css";
  import { Header, Footer } from "@/components";
  import AdvertisingScripts from "@/components/AdvertisingScripts";
+ import GoogleAnalytics from "@/components/GoogleAnalytics";
  import { guidePages } from "@/lib/data";
- import { generatorRegistry, getGeneratorsByCategory } from "@/lib/generator-registry";
+ import { generatorRegistry, getFontStyleGenerators, getVisualArtGenerators } from "@/lib/generator-registry";
  
  // The core UI uses system fonts; fandom artwork faces above are self-hosted
  // packages, so production still makes zero external font requests.
  const geistSans = { variable: '--font-geist-sans' };
  const geistMono = { variable: '--font-geist-mono' };
  const adsenseClientId = 'ca-pub-4183802444188513';
- const homeMetaTitle = 'Font Generator: Copy & Paste Fancy Text Online';
- const homeMetaDescription = 'Free font generator and text changer. Search bold, cursive, gothic, bubble, tiny and other Unicode fonts, then copy and paste your favorite style.';
+ const homeMetaTitle = 'Free Font Generator – Copy & Paste Stylish Text';
+ const homeMetaDescription = 'Create stylish copy-and-paste text and custom font art for social media, games, usernames, and more with free browser-based generators.';
  const adEligiblePaths = [
    '/',
+   '/visual-art',
    ...generatorRegistry.map((generator) => generator.canonicalPath),
    ...guidePages.map((page) => `/guides/${page.slug}`),
  ];
- const styleNavigationLinks = getGeneratorsByCategory('styles').map((generator) => ({
+ const fontStyleNavigationLinks = getFontStyleGenerators()
+   .map((generator) => ({
    href: generator.canonicalPath,
    label: generator.title,
    icon: generator.icon,
  }));
- const fandomNavigationLinks = getGeneratorsByCategory('fandom').map((generator) => ({
+ const visualArtNavigationLinks = getVisualArtGenerators()
+   .map((generator) => ({
    href: generator.canonicalPath,
    label: generator.title,
    icon: generator.icon,
  }));
+ const themeInitializationScript = `
+   (() => {
+     let savedTheme = null;
+     try {
+       savedTheme = localStorage.getItem('font-generators-theme-v2');
+     } catch {}
+     const useDarkTheme = savedTheme === 'dark';
+     document.documentElement.classList.toggle('dark', useDarkTheme);
+     document.documentElement.style.colorScheme = useDarkTheme ? 'dark' : 'light';
+   })();
+ `;
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://font-generators.org/'),
@@ -55,7 +69,7 @@ export const metadata: Metadata = {
       url: "/og-font-generators.png",
       width: 1731,
       height: 909,
-      alt: "Font Generators — Type it. Style it. Copy it.",
+      alt: "Free Font Generator for copy-and-paste text and custom font art",
     }],
   },
   twitter: {
@@ -81,7 +95,13 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GA_ID || 'G-XZ8VM9EYM9';
  
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          id="theme-initialization"
+          dangerouslySetInnerHTML={{ __html: themeInitializationScript }}
+        />
+      </head>
   <body
     className={`${geistSans.variable} ${geistMono.variable} antialiased`}
   >
@@ -89,26 +109,11 @@ export default function RootLayout({
           clientId={adsenseClientId}
           allowedPaths={adEligiblePaths}
         />
-        {/* Google Analytics */}
-        <Script
-          strategy="afterInteractive"
-          src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-        />
-
-        <Script id="ga-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${gaId}', {
-              send_page_view: true
-            });
-          `}
-        </Script>
+        <GoogleAnalytics measurementId={gaId} />
         
         <Header
-          styleLinks={styleNavigationLinks}
-          fandomLinks={fandomNavigationLinks}
+          fontStyleLinks={fontStyleNavigationLinks}
+          visualArtLinks={visualArtNavigationLinks}
         />
         <div className="flex flex-col min-h-screen">
           <main className="flex-1">

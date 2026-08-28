@@ -4,9 +4,9 @@
    return (
      <footer className="bg-muted/50 border-t border-border">
        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(17rem,1fr)_auto] lg:items-start lg:gap-16">
            {/* Brand */}
-           <div className="sm:col-span-2 md:col-span-1">
+          <div className="max-w-sm">
              <Link href="/" className="text-2xl font-bold gradient-text">
                Font Generators
              </Link>
@@ -15,42 +15,41 @@
              </p>
            </div>
  
-           {/* Text Styles */}
-           <div>
-             <h3 className="font-semibold text-foreground mb-3">Text Styles</h3>
-             <ul className="space-y-2">
-               <li><Link href="/styles" className="text-muted-foreground hover:text-foreground text-sm transition-colors">All Styles</Link></li>
-               <li><Link href="/styles/small-text-generator" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Small Text</Link></li>
-               <li><Link href="/styles/cursive-font-generator" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Cursive</Link></li>
-               <li><Link href="/styles/bubble-font-generator" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Bubble Letters</Link></li>
-               <li><Link href="/styles/fraktur-font-generator" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Fraktur</Link></li>
-             </ul>
-           </div>
- 
-           {/* Fandom */}
-           <div>
-             <h3 className="font-semibold text-foreground mb-3">Fandom</h3>
-             <ul className="space-y-2">
-               <li><Link href="/fandom" className="text-muted-foreground hover:text-foreground text-sm transition-colors">All Fandom Styles</Link></li>
-               <li><Link href="/fandom/pop-culture-font-generators" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Pop Culture Hub</Link></li>
-               <li><Link href="/fandom/disney-font-generator" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Disney</Link></li>
-               <li><Link href="/fandom/mario-font-generator" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Mario</Link></li>
-               <li><Link href="/fandom/stranger-things-font-generator" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Stranger Things</Link></li>
-             </ul>
-           </div>
- 
-           {/* Links */}
-           <div>
-             <h3 className="font-semibold text-foreground mb-3">Links</h3>
-             <ul className="space-y-2">
-               <li><Link href="/" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Fancy Text Generator</Link></li>
-               <li><Link href="/guides" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Guides</Link></li>
-               <li><Link href="/about" className="text-muted-foreground hover:text-foreground text-sm transition-colors">About</Link></li>
-               <li><Link href="/contact" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Contact</Link></li>
-               <li><Link href="/terms" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Terms of Service</Link></li>
-               <li><Link href="/privacy" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Privacy Policy</Link></li>
-             </ul>
-           </div>
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-x-10 lg:justify-self-end lg:gap-x-12">
+            <div className="min-w-36">
+              <h3 className="mb-3 font-semibold text-foreground">Font Styles</h3>
+              <ul className="space-y-2">
+                <li><Link href="/styles" className="text-sm text-muted-foreground transition-colors hover:text-foreground">All Font Styles</Link></li>
+                <li><Link href="/small-text-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Small Text</Link></li>
+                <li><Link href="/cursive-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Cursive</Link></li>
+                <li><Link href="/bubble-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Bubble</Link></li>
+                <li><Link href="/fraktur-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Fraktur</Link></li>
+              </ul>
+            </div>
+
+            <div className="min-w-36">
+              <h3 className="mb-3 font-semibold text-foreground">Visual &amp; Art</h3>
+              <ul className="space-y-2">
+                <li><Link href="/visual-art" className="text-sm text-muted-foreground transition-colors hover:text-foreground">All Visual &amp; Art Generators</Link></li>
+                <li><Link href="/big-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">ASCII Art</Link></li>
+                <li><Link href="/fire-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Fire Text Art</Link></li>
+                <li><Link href="/disney-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Disney</Link></li>
+                <li><Link href="/minecraft-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Minecraft</Link></li>
+              </ul>
+            </div>
+
+            <div className="min-w-36">
+              <h3 className="mb-3 font-semibold text-foreground">Site</h3>
+              <ul className="space-y-2">
+                <li><Link href="/#top" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Home</Link></li>
+                <li><Link href="/guides" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Guides</Link></li>
+                <li><Link href="/about" className="text-sm text-muted-foreground transition-colors hover:text-foreground">About</Link></li>
+                <li><Link href="/contact" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Contact</Link></li>
+                <li><Link href="/terms" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Terms of Service</Link></li>
+                <li><Link href="/privacy" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Privacy Policy</Link></li>
+              </ul>
+            </div>
+          </div>
          </div>
  
          {/* Bottom */}

@@ -65,6 +65,8 @@ export default function StyleDirectory({ cards }: StyleDirectoryProps) {
     });
   }, [activeFilter, cards, normalizedQuery]);
 
+  const availableFilters = filters.filter((filter) => filter.id === 'all' || filterCounts[filter.id] > 0);
+
   const clearDirectoryFilters = () => {
     setQuery('');
     setActiveFilter('all');
@@ -112,7 +114,7 @@ export default function StyleDirectory({ cards }: StyleDirectoryProps) {
         </div>
 
         <div className="mt-4 flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filter generators by output type">
-          {filters.map((filter) => {
+          {availableFilters.map((filter) => {
             const selected = activeFilter === filter.id;
             return (
               <button
@@ -138,7 +140,7 @@ export default function StyleDirectory({ cards }: StyleDirectoryProps) {
           {visibleCards.map((card) => (
             <Link
               key={card.slug}
-              href={`/styles/${card.slug}`}
+              href={`/${card.slug}`}
               className="group flex min-h-56 flex-col rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-42px_rgba(15,23,42,0.5)] transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_24px_60px_-40px_rgba(109,40,217,0.45)] dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700"
             >
               <div className="flex items-start justify-between gap-3">
@@ -159,7 +161,7 @@ export default function StyleDirectory({ cards }: StyleDirectoryProps) {
           ))}
         </div>
       ) : (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center dark:border-slate-700 dark:bg-slate-900/60">
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center dark:border-slate-700 dark:bg-slate-900">
           <p className="text-lg font-bold text-slate-950 dark:text-white">No generators match those filters.</p>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Try a broader term or return to the complete directory.</p>
           <button type="button" onClick={clearDirectoryFilters} className="mt-5 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-500">

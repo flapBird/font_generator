@@ -4,18 +4,21 @@
  import { generateStyleVariants, getGeneratorPageConfig } from '@/lib/generator';
  import { getSpecializedDescription, getVisualGeneratorConfig } from '@/lib/visual-generator';
  import StyleDirectory, { type StyleDirectoryCard, type StyleDirectoryKind } from '@/components/StyleDirectory';
- import { getGeneratorDefinition } from '@/lib/generator-registry';
+ import { getGeneratorDefinition, isFontStyleGenerator } from '@/lib/generator-registry';
  
  export const metadata: Metadata = {
-   title: 'Text Style Generators',
+   title: 'Font Style Generators',
    alternates: {
      canonical: 'https://font-generators.org/styles',
    },
-   description: 'Browse copy-and-paste Unicode styles, rendered text artwork, and ASCII generators. Search cursive, gothic, pixel, social, and other text tools.',
+   description: 'Browse copy-and-paste Unicode font styles for cursive, gothic, tiny, social, aesthetic, and other text uses.',
  };
  
  export default function StylesIndexPage() {
-   const cards: StyleDirectoryCard[] = stylePages.map((page) => {
+   const cards: StyleDirectoryCard[] = stylePages.filter((page) => {
+     const definition = getGeneratorDefinition(page.slug);
+     return definition ? isFontStyleGenerator(definition) : false;
+   }).map((page) => {
      const config = getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds);
      const visualConfig = getVisualGeneratorConfig(page.slug);
      const definition = getGeneratorDefinition(page.slug);
@@ -50,10 +53,10 @@
        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
          <div className="text-center mb-12">
            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-             <span className="gradient-text">Text Style Generators</span>
+             <span className="gradient-text">Font Style Generators</span>
            </h1>
            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-             Browse copy-and-paste Unicode styles, rendered text artwork, and ASCII generators, then choose the output that fits your project.
+             Browse copy-and-paste Unicode styles for names, bios, captions, gaming profiles, and everyday text.
            </p>
          </div>
  

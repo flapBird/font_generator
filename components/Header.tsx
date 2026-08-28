@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState, type FocusEvent } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type FocusEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export interface HeaderLink {
@@ -11,20 +11,22 @@ export interface HeaderLink {
 }
 
 interface HeaderProps {
-  styleLinks: HeaderLink[];
-  fandomLinks: HeaderLink[];
+  fontStyleLinks: HeaderLink[];
+  visualArtLinks: HeaderLink[];
 }
 
-type MenuKey = 'styles' | 'fandom';
+type MenuKey = 'styles' | 'art';
 
 const primaryLinks = [
   { href: '/', label: 'Home' },
   { href: '/guides', label: 'Guides' },
-  { href: '/about', label: 'About' },
 ];
 
 const desktopLinkClass =
-  'flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+  'flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-muted hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200 dark:hover:text-white';
+
+const compactGeneratorLabel = (label: string) =>
+  label.replace(/\s+Generator$/i, '');
 
 function ChevronIcon({ className = '' }: { className?: string }) {
   return (
@@ -40,7 +42,63 @@ function ChevronIcon({ className = '' }: { className?: string }) {
   );
 }
 
-export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
+const themeChangeEvent = 'font-generators-theme-change';
+const themeStorageKey = 'font-generators-theme-v2';
+
+function applyTheme(isDark: boolean) {
+  document.documentElement.classList.toggle('dark', isDark);
+  document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+}
+
+function subscribeToTheme(onStoreChange: () => void) {
+  const handleThemeChange = () => onStoreChange();
+
+  window.addEventListener(themeChangeEvent, handleThemeChange);
+
+  return () => {
+    window.removeEventListener(themeChangeEvent, handleThemeChange);
+  };
+}
+
+function getThemeSnapshot() {
+  return document.documentElement.classList.contains('dark');
+}
+
+function ThemeToggle() {
+  const isDark = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, () => false);
+
+  const toggleTheme = () => {
+    const nextThemeIsDark = !getThemeSnapshot();
+    applyTheme(nextThemeIsDark);
+    try {
+      window.localStorage.setItem(themeStorageKey, nextThemeIsDark ? 'dark' : 'light');
+    } catch {}
+    window.dispatchEvent(new Event(themeChangeEvent));
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-700 transition-colors hover:bg-muted hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200 dark:hover:text-white"
+    >
+      {isDark ? (
+        <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+          <circle cx="12" cy="12" r="4" />
+          <path strokeLinecap="round" d="M12 2.5v2M12 19.5v2M21.5 12h-2M4.5 12h-2M18.72 5.28l-1.42 1.42M6.7 17.3l-1.42 1.42M18.72 18.72l-1.42-1.42M6.7 6.7 5.28 5.28" />
+        </svg>
+      ) : (
+        <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20.4 15.2A8.5 8.5 0 0 1 8.8 3.6 8.5 8.5 0 1 0 20.4 15.2Z" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openMobileSection, setOpenMobileSection] = useState<MenuKey | null>(null);
   const [desktopMenu, setDesktopMenu] = useState<MenuKey | null>(null);
@@ -150,12 +208,12 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
             <ChevronIcon />
           </span>
         </button>
-        <div id={panelId} className="t-acc-panel">
+        <div id={panelId} className="t-acc-panel" aria-hidden={!isOpen} inert={!isOpen}>
           <div className="t-acc-panel-inner">
             <div className="mx-3 mb-2 rounded-2xl border border-border/70 bg-muted/45 p-2">
               <Link
                 href={indexHref}
-                className="mb-1 flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-background"
+                className="mb-1 flex min-h-11 items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-background"
                 onClick={closeAllMenus}
               >
                 View all {label.toLowerCase()}
@@ -166,7 +224,7 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+                      className="flex min-h-11 items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-background hover:text-slate-950 dark:text-slate-200 dark:hover:text-white"
                       onClick={closeAllMenus}
                     >
                       <span aria-hidden="true" className="w-5 text-center">
@@ -184,6 +242,9 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
     );
   };
 
+  const featuredStyleLinks = fontStyleLinks.slice(0, 10);
+  const featuredVisualArtLinks = visualArtLinks.slice(0, 7);
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Primary navigation">
@@ -193,16 +254,17 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
             className="flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={closeAllMenus}
           >
-            <span className="gradient-text text-xl font-bold sm:text-2xl">Font Generators</span>
+            <span className="brand-gradient-text text-xl font-black tracking-[-0.025em] sm:text-2xl">Font Generators</span>
           </Link>
 
+          <div className="flex h-full items-center gap-1">
           <div className="hidden h-full items-center gap-1 md:flex">
             <Link href={primaryLinks[0].href} className={desktopLinkClass}>
               {primaryLinks[0].label}
             </Link>
 
             <div
-              className="flex h-full items-center"
+              className="relative flex h-full items-center"
               onMouseEnter={() => openDropdown('styles', true)}
               onMouseLeave={(event) => {
                 if (!event.currentTarget.contains(document.activeElement)) closeDropdown('styles');
@@ -216,7 +278,7 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
                 aria-expanded={desktopMenu === 'styles'}
                 aria-haspopup="true"
               >
-                Text Styles
+                Font Styles
                 <ChevronIcon
                   className={`transition-transform ${
                     desktopMenu === 'styles' ? 'rotate-180' : ''
@@ -224,38 +286,38 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
                 />
               </Link>
 
-              <div className="pointer-events-none fixed left-1/2 top-16 w-[min(72rem,calc(100vw-2rem))] -translate-x-1/2">
+              <div className="pointer-events-none absolute left-1/2 top-full w-[min(16rem,calc(100vw-2rem))] -translate-x-1/2">
                 <div
                   className={dropdownClass('styles')}
                   data-origin="top-center"
                 >
-                  <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-y-contain rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 lg:p-6 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
-                    <div className="mb-4 flex items-center justify-between gap-6 border-b border-border/70 pb-4">
-                      <p className="font-semibold text-foreground">Text Style Generators</p>
-                      <Link
-                        href="/styles"
-                        className="shrink-0 text-sm font-semibold text-primary hover:underline"
-                        onClick={closeAllMenus}
-                      >
-                        View all styles →
-                      </Link>
-                    </div>
-                    <ul className="grid grid-cols-2 gap-1 lg:grid-cols-3 xl:grid-cols-4">
-                      {styleLinks.map((item) => (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-2.5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
+                    <ul className="mx-auto grid w-[13rem] max-w-full grid-cols-1 gap-1.5">
+                      {featuredStyleLinks.map((item) => (
                         <li key={item.href}>
                           <Link
                             href={item.href}
-                            className="flex min-h-11 items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className="grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-2.5 rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-muted hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200 dark:hover:text-white"
                             onClick={closeAllMenus}
                           >
                             <span aria-hidden="true" className="w-5 shrink-0 text-center">
                               {item.icon}
                             </span>
-                            <span>{item.label}</span>
+                            <span className="truncate" title={item.label}>{compactGeneratorLabel(item.label)}</span>
                           </Link>
                         </li>
                       ))}
                     </ul>
+                    <div className="mt-2 flex justify-center border-t border-border/70 px-2.5 pt-2.5">
+                      <Link
+                        href="/styles"
+                        className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-violet-800 dark:hover:text-violet-300"
+                        onClick={closeAllMenus}
+                      >
+                        <span>View all</span>
+                        <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -263,59 +325,59 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
 
             <div
               className="relative flex h-full items-center"
-              onMouseEnter={() => openDropdown('fandom', true)}
+              onMouseEnter={() => openDropdown('art', true)}
               onMouseLeave={(event) => {
-                if (!event.currentTarget.contains(document.activeElement)) closeDropdown('fandom');
+                if (!event.currentTarget.contains(document.activeElement)) closeDropdown('art');
               }}
-              onFocus={() => openDropdown('fandom')}
-              onBlur={(event) => handleDesktopBlur(event, 'fandom')}
+              onFocus={() => openDropdown('art')}
+              onBlur={(event) => handleDesktopBlur(event, 'art')}
             >
               <Link
-                href="/fandom"
+                href="/visual-art"
                 className={desktopLinkClass}
-                aria-expanded={desktopMenu === 'fandom'}
+                aria-expanded={desktopMenu === 'art'}
                 aria-haspopup="true"
               >
-                Fandom
+                Visual &amp; Art
                 <ChevronIcon
                   className={`transition-transform ${
-                    desktopMenu === 'fandom' ? 'rotate-180' : ''
+                    desktopMenu === 'art' ? 'rotate-180' : ''
                   }`}
                 />
               </Link>
 
-              <div className="pointer-events-none absolute right-0 top-full w-80">
+              <div className="pointer-events-none absolute left-1/2 top-full w-[min(16rem,calc(100vw-2rem))] -translate-x-1/2">
                 <div
-                  className={dropdownClass('fandom')}
+                  className={dropdownClass('art')}
                   data-origin="top-right"
                 >
-                  <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-y-contain rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_24px_65px_-18px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
-                    <div className="mb-2 flex items-center justify-between px-2 py-1">
-                      <p className="text-sm font-semibold text-foreground">Fandom Generators</p>
-                      <Link
-                        href="/fandom"
-                        className="text-xs font-semibold text-primary hover:underline"
-                        onClick={closeAllMenus}
-                      >
-                        View all →
-                      </Link>
-                    </div>
-                    <ul className="space-y-1">
-                      {fandomLinks.map((item) => (
+                  <div className="rounded-2xl border border-slate-200 bg-white p-2.5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
+                    <ul className="mx-auto grid w-[13rem] max-w-full grid-cols-1 gap-1.5">
+                      {featuredVisualArtLinks.map((item) => (
                         <li key={item.href}>
                           <Link
                             href={item.href}
-                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            className="grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-2.5 rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-muted hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200 dark:hover:text-white"
                             onClick={closeAllMenus}
                           >
-                            <span aria-hidden="true" className="w-5 text-center">
+                            <span aria-hidden="true" className="w-5 shrink-0 text-center">
                               {item.icon}
                             </span>
-                            <span>{item.label}</span>
+                            <span className="truncate" title={item.label}>{compactGeneratorLabel(item.label)}</span>
                           </Link>
                         </li>
                       ))}
                     </ul>
+                    <div className="mt-2 flex justify-center border-t border-border/70 px-2.5 pt-2.5">
+                      <Link
+                        href="/visual-art"
+                        className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-violet-800 dark:hover:text-violet-300"
+                        onClick={closeAllMenus}
+                      >
+                        <span>View all</span>
+                        <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -328,8 +390,10 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
             ))}
           </div>
 
+          <ThemeToggle />
+
           <button
-            className="rounded-lg p-2 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-controls="mobile-navigation"
             aria-expanded={isMobileMenuOpen}
@@ -343,6 +407,7 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
               )}
             </svg>
           </button>
+          </div>
         </div>
 
         <AnimatePresence>
@@ -362,8 +427,8 @@ export default function Header({ styleLinks, fandomLinks }: HeaderProps) {
                 >
                   Home
                 </Link>
-                {renderMobileSection('styles', 'Text Styles', '/styles', styleLinks)}
-                {renderMobileSection('fandom', 'Fandom', '/fandom', fandomLinks)}
+                {renderMobileSection('styles', 'Font Styles', '/styles', featuredStyleLinks)}
+                {renderMobileSection('art', 'Visual & Art', '/visual-art', featuredVisualArtLinks)}
                 {primaryLinks.slice(1).map((item) => (
                   <Link
                     key={item.href}

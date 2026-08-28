@@ -51,6 +51,11 @@ export interface VisualGeneratorConfig {
   presets: VisualFontPreset[];
   compatibilityNote: string;
   capabilities?: VisualCapability[];
+  fontGuide?: {
+    heading: string;
+    intro: string;
+    checks: { label: string; value: string }[];
+  };
 }
 
 const system = (name: string) => `${JSON.stringify(name)}, serif`;
@@ -120,6 +125,16 @@ const configs: Record<string, VisualGeneratorConfig> = {
     bestFor: ['Formal headings', 'Document previews', 'Editorial graphics'],
     compatibilityNote: 'PNG preserves the current rendering. SVG keeps editable text and therefore needs the named font on the device where it is opened.',
     capabilities: ['font-specimen'],
+    fontGuide: {
+      heading: 'What this Times New Roman preview tests',
+      intro: 'This page checks for the device-installed Times New Roman family and keeps regular, bold, and italic as separate specimens. Georgia is offered as a named screen-serif alternative, never relabelled as Times New Roman.',
+      checks: [
+        { label: 'Primary source', value: 'Times New Roman installed on the visitor’s device; no font file is served by this site.' },
+        { label: 'Weights and styles', value: 'Regular 400, Bold 700, and true Italic 400 are tested independently.' },
+        { label: 'Explicit fallback', value: 'Georgia is the comparison preset when Times New Roman is unavailable.' },
+        { label: 'Export difference', value: 'PNG fixes the detected rendering; editable SVG may substitute a font on another device.' },
+      ],
+    },
     presets: [
       preset('tnr-regular', 'Times New Roman Regular', 'The installed Times New Roman face with a classic editorial treatment.', system('Times New Roman'), { targetFont: 'Times New Roman', fontWeight: 400, textColor: '#171717', backgroundColor: '#f8f4ea' }),
       preset('tnr-bold', 'Times New Roman Bold', 'A heavier system-font rendering for formal headlines.', system('Times New Roman'), { targetFont: 'Times New Roman', fontWeight: 700, textColor: '#111827', backgroundColor: '#ffffff' }),
@@ -150,6 +165,16 @@ const configs: Record<string, VisualGeneratorConfig> = {
     bestFor: ['Fantasy titles', 'Invitations', 'Ancient themes'],
     compatibilityNote: 'The original Papyrus face is only used from the visitor’s device. Alternatives are identified instead of being presented as Papyrus.',
     capabilities: ['font-specimen'],
+    fontGuide: {
+      heading: 'What this Papyrus preview tests',
+      intro: 'Papyrus is treated as a device font with its own irregular, hand-drawn texture. The dark preset changes color and lighting without pretending to be a separate weight; Georgia Italic and Copperplate are clearly named alternatives.',
+      checks: [
+        { label: 'Primary source', value: 'Papyrus installed on the visitor’s device; the proprietary font is not downloaded or redistributed.' },
+        { label: 'Weight handling', value: 'Papyrus presets stay at Regular 400 instead of synthesizing a misleading heavy family.' },
+        { label: 'Explicit fallbacks', value: 'Georgia Italic provides a readable fantasy serif; Copperplate provides a carved-capital direction.' },
+        { label: 'Rendering difference', value: 'Papyrus texture comes from the installed glyphs; parchment, glow, and spacing are separate canvas effects.' },
+      ],
+    },
     presets: [
       preset('papyrus-system', 'Papyrus', 'The system Papyrus face when available.', system('Papyrus'), { targetFont: 'Papyrus', fontWeight: 400, textColor: '#4a2c16', backgroundColor: '#ead8aa', shadowColor: '#8b5e34', shadowBlur: 2 }),
       preset('papyrus-dark', 'Papyrus Night', 'A dark fantasy treatment using the installed Papyrus face.', system('Papyrus'), { targetFont: 'Papyrus', fontWeight: 400, textColor: '#f4d06f', backgroundColor: '#1c1917', shadowColor: '#000000', shadowBlur: 8 }),
@@ -165,6 +190,16 @@ const configs: Record<string, VisualGeneratorConfig> = {
     bestFor: ['Speech bubbles', 'Classroom cards', 'Casual graphics'],
     compatibilityNote: 'The exact Comic Sans MS face depends on system availability. PNG downloads preserve the browser’s rendered fallback.',
     capabilities: ['font-specimen'],
+    fontGuide: {
+      heading: 'What this Comic Sans preview tests',
+      intro: 'This page separates the installed Comic Sans MS regular and bold faces from a speech-bubble composition. Arial Rounded MT Bold is labelled as an alternative rather than passed off as Comic Sans.',
+      checks: [
+        { label: 'Primary source', value: 'Comic Sans MS installed on the visitor’s device; no Microsoft font file is distributed.' },
+        { label: 'Weights tested', value: 'Regular 400 and Bold 700 are requested separately so the browser can report and render each face.' },
+        { label: 'Explicit fallback', value: 'Arial Rounded MT Bold, then Arial, supplies the labelled rounded-sans alternative.' },
+        { label: 'Composition difference', value: 'Speech Bubble adds a dialogue-card treatment; it is not presented as another font family.' },
+      ],
+    },
     presets: [
       preset('comic-system', 'Comic Sans MS', 'The installed Comic Sans MS face in its familiar friendly style.', sans('Comic Sans MS'), { targetFont: 'Comic Sans MS', fontWeight: 400, textColor: '#1d4ed8', backgroundColor: '#fef9c3' }),
       preset('comic-bold', 'Comic Sans Bold', 'A bold comic caption with a white outline.', sans('Comic Sans MS'), { targetFont: 'Comic Sans MS', fontWeight: 700, textColor: '#ef4444', backgroundColor: '#bfdbfe', strokeColor: '#ffffff', strokeWidth: 3, shadowOffsetX: 4, shadowOffsetY: 4 }),
@@ -195,6 +230,16 @@ const configs: Record<string, VisualGeneratorConfig> = {
     bestFor: ['Server names', 'Pixel signs', 'Achievement cards'],
     compatibilityNote: 'Minecraftia is used only if already installed. The fallback is a labelled monospace pixel direction, not the official game font.',
     capabilities: ['font-specimen', 'pixel-snap'],
+    fontGuide: {
+      heading: 'What this Minecraftia preview tests',
+      intro: 'Minecraftia is checked only as a device-installed face. The canvas snaps the requested size to an eight-pixel step and keeps Courier New as a labelled monospace fallback, separate from the site’s original bitmap Minecraft generator.',
+      checks: [
+        { label: 'Primary source', value: 'Minecraftia installed by the visitor; this site serves no Mojang font sheet or proprietary game asset.' },
+        { label: 'Weight and casing', value: 'The installed-face preset requests Regular 400 and uppercase output instead of synthetic bold.' },
+        { label: 'Explicit fallback', value: 'Courier New provides the Pixel Mono Alternative when Minecraftia is unavailable.' },
+        { label: 'Rendering difference', value: 'Pixel-snap, hard-edged decoration, block shadow, and palette are canvas treatments—not claims about the original font.' },
+      ],
+    },
     presets: [
       preset('minecraftia-system', 'Minecraftia (installed)', 'Uses Minecraftia from the device when available.', 'Minecraftia, "Courier New", monospace', { targetFont: 'Minecraftia', uppercase: true, fontWeight: 400, textColor: '#f8fafc', backgroundColor: '#334155', shadowColor: '#111827', shadowOffsetX: 6, shadowOffsetY: 6, letterSpacing: 2, decoration: 'pixel' }),
       preset('pixel-grass', 'Grass Block', 'Green pixel lettering with a dark block shadow.', 'Minecraftia, "Courier New", monospace', { targetFont: 'Minecraftia', uppercase: true, textColor: '#86efac', backgroundColor: '#3f3f2f', strokeColor: '#14532d', strokeWidth: 2, shadowOffsetX: 6, shadowOffsetY: 6, decoration: 'pixel' }),
@@ -408,6 +453,16 @@ export const getSpecializedAbout = (slug: string, pageTitle: string): string[] |
   }
   const config = configs[slug];
   if (!config) return null;
+  if (config.fontGuide) {
+    const checks = config.fontGuide.checks
+      .map((check) => `${check.label}: ${check.value}`)
+      .join(' ');
+    return [
+      config.fontGuide.intro,
+      checks,
+      `The live detector reports whether the selected device font is available before export. ${config.compatibilityNote}`,
+    ];
+  }
   const presetNames = config.presets.map((item) => item.name).join(', ');
   const bundledFonts = Array.from(new Set(
     config.presets

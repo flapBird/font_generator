@@ -96,7 +96,7 @@ export interface HomepageEntry {
 export const homepageEntries: HomepageEntry[] = [
   { id: 'copy-paste', icon: '✨', title: 'Copy & Paste Text', description: 'Turn plain text into copyable Unicode styles.', preview: 'Hello → 𝐻ℯ𝓁𝓁ℴ', tone: 'violet', linkLabel: 'You are here' },
   { id: 'artwork', icon: '🎨', title: 'Text Artwork', description: 'Design rendered titles and download PNG or SVG.', preview: 'TYPE · COLOR · EXPORT', tone: 'rose', href: '/styles', linkLabel: 'Browse style tools' },
-  { id: 'ascii', icon: '🔠', title: 'ASCII Banners', description: 'Build large multi-line art that remains plain text.', preview: '[ F O N T ]\n== TEXT ==', tone: 'cyan', href: '/styles/big-font-generator', linkLabel: 'Make a banner' },
+  { id: 'ascii', icon: '🔠', title: 'ASCII Banners', description: 'Build large multi-line art that remains plain text.', preview: '[ F O N T ]\n== TEXT ==', tone: 'cyan', href: '/big-font-generator', linkLabel: 'Make a banner' },
   { id: 'fandom', icon: '⭐', title: 'Fandom Styles', description: 'Create unofficial artwork inspired by visual themes.', preview: 'PIXEL · FANTASY · RETRO', tone: 'amber', href: '/fandom', linkLabel: 'Explore fandom tools' },
   { id: 'guides', icon: '📖', title: 'Guides', description: 'Check Unicode, compatibility, and accessibility.', preview: '✓ Unicode  ✓ Compatibility', tone: 'emerald', href: '/guides', linkLabel: 'Read practical guides' },
 ];

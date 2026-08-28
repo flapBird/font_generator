@@ -6,6 +6,7 @@ import {
   type PageDefinition,
 } from '@/lib/data';
 import { getGuideMetadata } from '@/lib/guide-metadata';
+import { getGuideToolGroup } from '@/lib/contextual-links';
 
 interface GuideTemplateProps {
   page: PageDefinition;
@@ -78,6 +79,7 @@ export default function GuideTemplate({
   const paragraphs = page.content.split('\n\n');
   const relatedPages = getRelatedPages(page, guidePages);
   const guideMetadata = getGuideMetadata(page.slug);
+  const guideToolGroup = getGuideToolGroup(page.slug);
 
   return (
     <div className="min-h-screen pb-20 pt-20">
@@ -131,6 +133,29 @@ export default function GuideTemplate({
             return <p key={index}>{renderInlineFormatting(paragraph)}</p>;
           })}
         </article>
+
+        {guideToolGroup && (
+          <section className="mt-10 rounded-3xl border border-violet-200 bg-violet-50/60 p-6 sm:p-8 dark:border-violet-900/60 dark:bg-violet-950/20">
+            <h2 className="text-2xl font-black text-slate-950 dark:text-white">
+              {guideToolGroup.heading}
+            </h2>
+            <p className="mt-3 leading-7 text-slate-600 dark:text-slate-300">
+              {guideToolGroup.intro}
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {guideToolGroup.links.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-2xl bg-white p-4 transition hover:text-violet-700 dark:bg-slate-950 dark:hover:text-violet-300"
+                >
+                  <h3 className="font-bold">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{item.description}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {page.examples.length > 0 && (
           <section className="mt-10">
@@ -188,7 +213,7 @@ export default function GuideTemplate({
         </section>
 
         {guideMetadata.sources.length > 0 && (
-          <section className="mt-12 rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900/60">
+          <section className="mt-12 rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
             <h2 className="text-xl font-black text-slate-950 dark:text-white">Sources and further reading</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
               Primary references used to check the technical and platform-specific details in this guide.

@@ -21,7 +21,7 @@ export default function TermsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="prose prose-neutral dark:prose-invert max-w-none bg-white/50 backdrop-blur-sm rounded-2xl p-8 border border-white/60"
+          className="prose prose-neutral max-w-none rounded-2xl border border-white/60 bg-white/50 p-8 backdrop-blur-sm dark:prose-invert dark:border-slate-800 dark:bg-slate-950"
         >
           <h2>1. Acceptance of Terms</h2>
           <p>

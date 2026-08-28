@@ -5,7 +5,7 @@ import MinecraftGeneratorTool from './MinecraftGeneratorTool';
 import AsciiGeneratorTool from './AsciiGeneratorTool';
 import { fandomPages, guidePages, stylePages, type PageDefinition } from '@/lib/data';
 import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
-import { getGeneratorDefinition } from '@/lib/generator-registry';
+import { generatorRegistry, getGeneratorDefinition, isFontStyleGenerator } from '@/lib/generator-registry';
 import { getPageSupplement } from '@/lib/page-supplements';
 import { getSpecializedAbout, getSpecializedFaq, getSpecializedHowTo, getVisualGeneratorConfig } from '@/lib/visual-generator';
 
@@ -27,28 +27,43 @@ const getRelatedLinks = (slugs: string[]) =>
 
       return {
         slug,
-        href: `/${relatedPage.category}/${relatedPage.slug}`,
+        href: relatedPage.category === 'guides' ? `/guides/${relatedPage.slug}` : `/${relatedPage.slug}`,
+        title: relatedPage.title,
+        description: relatedPage.description,
       };
     })
-    .filter((link): link is { slug: string; href: string } => link !== null);
-
-const relatedLabel = (slug: string) =>
-  slug
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .filter((link): link is { slug: string; href: string; title: string; description: string } => link !== null);
 
 const cleanFaqQuestion = (question: string) =>
   question.replace(/\s+a:\s+.*$/i, '').trim();
+
+const generatorNavigationItems = generatorRegistry
+  .filter((generator) => generator.kind !== 'directory')
+  .map((generator) => ({
+    id: generator.id,
+    title: generator.title,
+    href: generator.canonicalPath,
+    icon: generator.icon,
+    kind: generator.kind,
+    description: generator.intent.primary,
+    collection: isFontStyleGenerator(generator) ? 'font-style' as const : 'visual-art' as const,
+    searchText: `${generator.slug} ${generator.tags.join(' ')} ${generator.intent.primary} ${generator.intent.secondary.join(' ')}`,
+  }));
 
 export default function PageTemplate({
   page,
   categoryPath,
   categoryName,
 }: PageTemplateProps) {
-  const config = getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds);
+  const config = {
+    ...getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds),
+    initialText: page.title,
+  };
   const definition = getGeneratorDefinition(page.slug);
-  const visualConfig = getVisualGeneratorConfig(page.slug);
+  const baseVisualConfig = getVisualGeneratorConfig(page.slug);
+  const visualConfig = baseVisualConfig
+    ? { ...baseVisualConfig, initialText: page.title }
+    : undefined;
   const isAsciiGenerator = definition?.kind === 'ascii';
   const isHybridGenerator = definition?.kind === 'hybrid';
   const isMinecraftGenerator = visualConfig?.engine === 'minecraft-renderer';
@@ -62,6 +77,7 @@ export default function PageTemplate({
     throw new Error(`Generator ${page.slug} has a visual configuration but is still registered as Unicode-only.`);
   }
   const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator;
+  const usesFontWorkspace = !isSpecializedGenerator;
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
@@ -77,6 +93,7 @@ export default function PageTemplate({
         ['3', isSpecializedGenerator ? 'Download and use' : 'Copy and test', isSpecializedGenerator ? 'Export your finished result in the format that fits your project.' : 'Copy your preferred result and test it in the app or field where you plan to use it.'],
       ];
   const supplement = getPageSupplement(page.slug);
+  const relatedLinks = getRelatedLinks(page.relatedSlugs).slice(0, 4);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
     const styleId = config.styleIds[index % config.styleIds.length];
     const style = getStyleDefinition(styleId);
@@ -89,7 +106,7 @@ export default function PageTemplate({
 
   return (
     <div className="min-h-screen pb-20 pt-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${usesFontWorkspace ? 'max-w-7xl' : 'max-w-6xl'}`}>
         <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400 sm:mb-5">
           <Link href="/" className="font-medium hover:text-violet-700 dark:hover:text-violet-300">
             Font Generators
@@ -102,7 +119,7 @@ export default function PageTemplate({
           <span className="text-slate-900 dark:text-slate-100">{page.title}</span>
         </nav>
 
-        <header className="text-center">
+        <header className={`text-center ${usesFontWorkspace ? 'mb-6 sm:mb-8' : ''}`}>
           <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-white">
             {page.title}
           </h1>
@@ -110,18 +127,21 @@ export default function PageTemplate({
 
         {isAsciiGenerator ? (
           <AsciiGeneratorTool
+            key={page.slug}
             pageTitle={page.title}
           />
         ) : isMinecraftGenerator ? (
-          <MinecraftGeneratorTool config={visualConfig} pageTitle={page.title} />
+          <MinecraftGeneratorTool key={page.slug} config={visualConfig} pageTitle={page.title} />
         ) : visualConfig ? (
           <>
             <VisualGeneratorTool
+              key={`${page.slug}-visual`}
               config={visualConfig}
               pageTitle={page.title}
             />
             {isHybridGenerator && (
               <GeneratorTool
+                key={`${page.slug}-copyable`}
                 config={config}
                 pageTitle={`${page.title.replace(/\s+Generator$/i, '')} copyable text`}
                 compactResults
@@ -132,9 +152,16 @@ export default function PageTemplate({
           </>
         ) : (
           <GeneratorTool
+            key={page.slug}
             config={config}
             pageTitle={page.title}
             compactResults
+            workspaceMode
+            enableStyleSearch
+            enablePopularFilters
+            initialResultLimit={18}
+            recommendedLabel="Recommended styles"
+            generatorSearchItems={generatorNavigationItems}
           />
         )}
 
@@ -188,7 +215,7 @@ export default function PageTemplate({
             )}
 
             {page.howToUse && (
-              <section className="mt-12 rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900/60">
+              <section className="mt-12 rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
                   Simple workflow
                 </p>
@@ -259,6 +286,33 @@ export default function PageTemplate({
               </div>
             </section>
 
+            {relatedLinks.length > 0 && (
+              <section className="mt-12">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
+                  Choose by outcome
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-slate-950 dark:text-white">
+                  Compare related generators
+                </h2>
+                <p className="mt-3 leading-7 text-slate-600 dark:text-slate-300">
+                  These tools serve adjacent intents or produce a different kind of output. Compare them when this page is close to—but not exactly—the result you need.
+                </p>
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  {relatedLinks.map((item) => (
+                    <Link
+                      key={item.slug}
+                      href={item.href}
+                      className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-violet-300 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700"
+                    >
+                      <h3 className="font-bold text-slate-950 dark:text-white">{item.title}</h3>
+                      <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600 dark:text-slate-400">{item.description}</p>
+                      <span className="mt-4 inline-flex text-sm font-bold text-violet-700 dark:text-violet-300">Open generator →</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {(page.disclaimer || (!isSpecializedGenerator && page.fontNote)) && (
               <section className="mt-10 space-y-3" aria-label="Important notes">
                 {page.disclaimer && (
@@ -277,19 +331,10 @@ export default function PageTemplate({
 
           <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
-              <h2 className="font-black text-slate-950 dark:text-white">Related generators</h2>
-              <nav className="mt-3 space-y-2" aria-label="Related generators">
-                {getRelatedLinks(page.relatedSlugs).slice(0, 4).map(({ slug, href }) => (
-                  <Link
-                    key={slug}
-                    href={href}
-                    className="flex items-center justify-between gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 transition hover:bg-violet-50 hover:text-violet-700 dark:text-slate-300 dark:hover:bg-violet-950/40 dark:hover:text-violet-300"
-                  >
-                    <span>{relatedLabel(slug)}</span>
-                    <span aria-hidden="true">→</span>
-                  </Link>
-                ))}
-              </nav>
+              <h2 className="font-black text-slate-950 dark:text-white">Explore the directory</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                Search by output type, theme, platform, or visual style when you want to compare the full collection.
+              </p>
               <Link
                 href={categoryPath}
                 className="mt-4 inline-flex text-sm font-bold text-violet-700 hover:text-violet-900 dark:text-violet-300"

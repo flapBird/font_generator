@@ -87,7 +87,7 @@ export default function AboutPage() {
             </div>
           </section>
 
-          <section className="mt-14 rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900/60">
+          <section className="mt-14 rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
             <h2 className="text-2xl font-black text-slate-950 dark:text-white">How the generators work</h2>
             <div className="mt-6 grid gap-6 sm:grid-cols-3">
               <div>

@@ -35,7 +35,7 @@
              return (
                <Link
                  key={page.slug}
-                 href={`/fandom/${page.slug}`}
+                 href={`/${page.slug}`}
                  className="group flex min-h-56 flex-col rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-42px_rgba(15,23,42,0.5)] transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_24px_60px_-40px_rgba(109,40,217,0.45)] dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700"
                >
                  <div className="flex items-start justify-between gap-3">

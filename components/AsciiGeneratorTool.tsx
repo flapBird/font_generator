@@ -20,7 +20,7 @@ const escapeXml = (value: string) =>
   value.replace(/[<>&"']/g, (character) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[character] ?? character);
 
 export default function AsciiGeneratorTool({ pageTitle }: AsciiGeneratorToolProps) {
-  const [inputText, setInputText] = useState('BIG TEXT');
+  const [inputText, setInputText] = useState(pageTitle.toUpperCase());
   const [style, setStyle] = useState<AsciiStyle>('block');
   const [align, setAlign] = useState<'left' | 'center' | 'right'>('left');
   const [foreground, setForeground] = useState('#f8fafc');
@@ -35,7 +35,10 @@ export default function AsciiGeneratorTool({ pageTitle }: AsciiGeneratorToolProp
     setStatus('ASCII art copied.');
   };
 
-  const exportTxt = () => downloadBlob(new Blob([output], { type: 'text/plain;charset=utf-8' }), 'big-font-ascii.txt');
+  const exportTxt = () => {
+    downloadBlob(new Blob([output], { type: 'text/plain;charset=utf-8' }), 'big-font-ascii.txt');
+    setStatus('TXT downloaded.');
+  };
 
   const createCanvas = () => {
     const lines = output.split('\n');
@@ -106,15 +109,16 @@ export default function AsciiGeneratorTool({ pageTitle }: AsciiGeneratorToolProp
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <div className="flex rounded-xl border border-slate-300 p-1 dark:border-slate-700" aria-label="Text alignment">
-            {(['left', 'center', 'right'] as const).map((item) => <button key={item} type="button" aria-pressed={align === item} onClick={() => setAlign(item)} className={`rounded-lg px-3 py-2 text-xs font-semibold capitalize ${align === item ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950' : ''}`}>{item}</button>)}
+            {(['left', 'center', 'right'] as const).map((item) => <button key={item} type="button" aria-pressed={align === item} onClick={() => setAlign(item)} className={`min-h-11 rounded-lg px-3 py-2 text-xs font-semibold capitalize sm:min-h-0 ${align === item ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950' : ''}`}>{item}</button>)}
           </div>
-          <label className="flex items-center gap-2 text-xs font-semibold">Text <input aria-label="ASCII text color" type="color" value={foreground} onChange={(event) => setForeground(event.target.value)} className="h-9 w-12 rounded border border-slate-300" /></label>
-          <label className="flex items-center gap-2 text-xs font-semibold">Background <input aria-label="ASCII background color" type="color" value={background} disabled={transparent} onChange={(event) => setBackground(event.target.value)} className="h-9 w-12 rounded border border-slate-300 disabled:opacity-40" /></label>
-          <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={transparent} onChange={(event) => setTransparent(event.target.checked)} /> Transparent export</label>
-          <button type="button" onClick={() => setInputText('')} className="ml-auto rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold dark:border-slate-700">Clear</button>
+          <label className="flex min-h-11 items-center gap-2 text-xs font-semibold sm:min-h-0">Text <input aria-label="ASCII text color" type="color" value={foreground} onChange={(event) => setForeground(event.target.value)} className="h-11 w-12 rounded border border-slate-300 sm:h-9" /></label>
+          <label className="flex min-h-11 items-center gap-2 text-xs font-semibold sm:min-h-0">Background <input aria-label="ASCII background color" type="color" value={background} disabled={transparent} onChange={(event) => setBackground(event.target.value)} className="h-11 w-12 rounded border border-slate-300 sm:h-9 disabled:opacity-40" /></label>
+          <label className="flex min-h-11 items-center gap-2 text-sm font-medium sm:min-h-0"><input type="checkbox" checked={transparent} onChange={(event) => setTransparent(event.target.checked)} className="h-5 w-5" /> Transparent export</label>
+          <button type="button" onClick={() => setInputText('')} className="ml-auto min-h-11 rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold sm:min-h-0 dark:border-slate-700">Clear</button>
         </div>
 
-        <div className="mt-5 overflow-auto rounded-2xl border border-slate-700 p-5" style={{ backgroundColor: background }}>
+        <p className="mt-5 text-xs font-medium text-slate-500 sm:hidden">Swipe horizontally inside the preview to see the complete ASCII banner.</p>
+        <div className="mt-2 overflow-auto rounded-2xl border border-slate-700 p-5 sm:mt-5" style={{ backgroundColor: background }}>
           {output ? <pre ref={previewRef} className={`min-w-max font-mono text-[10px] leading-[1.08] sm:text-xs lg:text-sm ${align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'}`} style={{ color: foreground }}>{output}</pre> : <p className="py-14 text-center text-sm text-slate-400">Enter text to generate a large ASCII banner.</p>}
         </div>
 

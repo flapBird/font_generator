@@ -1,12 +1,30 @@
 import Link from 'next/link';
 import GeneratorTool from '@/components/GeneratorTool';
 import { generatorStyles, getGeneratorPageConfig } from '@/lib/generator';
-import { homepageEntries } from '@/lib/generator-collections';
+import { generatorRegistry, isFontStyleGenerator } from '@/lib/generator-registry';
+
+const homepageGeneratorSearchItems = generatorRegistry
+  .filter((generator) => generator.homepage.enabled)
+  .map((generator) => ({
+    id: generator.id,
+    title: generator.title,
+    href: generator.canonicalPath,
+    icon: generator.icon,
+    kind: generator.kind,
+    description: generator.intent.primary,
+    collection: isFontStyleGenerator(generator) ? 'font-style' as const : 'visual-art' as const,
+    searchText: [
+      generator.slug,
+      ...generator.tags,
+      generator.intent.primary,
+      ...generator.intent.secondary,
+    ].join(' '),
+  }));
 
 export default function HomePage() {
   const homeConfig = {
     ...getGeneratorPageConfig('fancy-font-generator', 'Fancy Font Generator'),
-    initialText: 'Hello World',
+    initialText: 'Free Font Generator',
     styleIds: generatorStyles.map((style) => style.id),
     resultIntro: 'Type once, search or browse the font styles, then copy and paste the result anywhere that supports Unicode text.',
   };
@@ -22,7 +40,7 @@ export default function HomePage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Font Generator",
+            "name": "Free Font Generator",
             "url": "https://font-generators.org",
             "description": "Create copyable Unicode text, rendered text artwork, and ASCII banners with free browser-based tools.",
             "applicationCategory": "DesignApplication",
@@ -36,28 +54,34 @@ export default function HomePage() {
         }}
       />
 
-      <div className="min-h-screen pt-20 pb-16">
+      <div
+        id="top"
+        className="min-h-screen scroll-mt-20 bg-gradient-to-b from-white/90 via-slate-50/45 to-transparent pb-16 pt-16 dark:bg-none"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-              <span className="gradient-text">Font Generator</span>
+          <div className="relative mx-auto mb-9 max-w-4xl pb-1 pt-9 text-center sm:mb-10 sm:pt-12 lg:pt-14">
+            <div
+              aria-hidden="true"
+              className="absolute left-1/2 top-5 -z-10 h-40 w-[min(38rem,92vw)] -translate-x-1/2 rounded-full bg-violet-300/20 blur-3xl dark:bg-violet-600/10"
+            />
+            <h1 className="gradient-text text-4xl font-black leading-[1.02] tracking-[-0.045em] sm:text-6xl lg:text-[4rem]">
+              Free Font Generator
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Turn ordinary text into fancy, copy-and-paste fonts. Search cursive, bold, gothic, bubble, gaming, and more Unicode styles instantly.
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8 dark:text-slate-300">
+              Create stylish copy-and-paste text and custom font art for social media, games, usernames, and more.
             </p>
           </div>
 
           <GeneratorTool
             config={homeConfig}
-            discoveryItems={homepageEntries}
-            pageTitle="Font Generator"
+            pageTitle="Free Font Generator"
             enableStyleSearch
-            initialResultLimit={18}
+            initialResultLimit={80}
             recommendedLabel="All font styles"
             compactResults
             enablePopularFilters
-            showSocialPreview
+            workspaceMode
+            generatorSearchItems={homepageGeneratorSearchItems}
           />
 
           <div className="mx-auto mt-16 max-w-6xl">
@@ -70,7 +94,7 @@ export default function HomePage() {
                 <ol className="grid gap-4 pl-0 sm:grid-cols-3 [&>li]:m-0 [&>li]:list-none [&>li]:rounded-2xl [&>li]:border [&>li]:border-slate-200 [&>li]:bg-white [&>li]:p-5 dark:[&>li]:border-slate-800 dark:[&>li]:bg-slate-950">
                   <li><strong>1. Enter your text.</strong><br />Type a name, bio, caption, message, or short phrase in the input box.</li>
                   <li><strong>2. Explore the styles.</strong><br />Use popular tags or the broader categories. Open search only when you need a specific look.</li>
-                  <li><strong>3. Preview and copy.</strong><br />Check a style in the social previews, then copy it into the app or document you use.</li>
+                  <li><strong>3. Preview and copy.</strong><br />Tap a style card to preview it and copy the result instantly.</li>
                 </ol>
               </section>
 
@@ -80,7 +104,7 @@ export default function HomePage() {
                   The copyable results are not installed font files. This tool works as a Unicode text changer: it maps ordinary letters to existing characters such as bold 𝐀, script 𝒜, double-struck 𝔸, circled Ⓐ, and fullwidth Ａ. Because those results are characters rather than CSS formatting, their appearance can survive copy and paste in many text fields.
                 </p>
                 <p>
-                  Unicode does not provide a complete styled version of every alphabet, number, accent, or symbol. When a matching character is unavailable, the generator keeps the original character so the message remains readable. This is also why copyable Unicode text is different from the site’s <Link href="/styles">rendered text artwork</Link>, which preserves a visual design in PNG or SVG output.
+                  Unicode does not provide a complete styled version of every alphabet, number, accent, or symbol. When a matching character is unavailable, the generator keeps the original character so the message remains readable. This is also why copyable Unicode text is different from <Link href="/visual-art">rendered text artwork</Link>. When exact layout matters, some visual generators can preserve the finished design in PNG or SVG output.
                 </p>
               </section>
 
@@ -95,7 +119,7 @@ export default function HomePage() {
                     ['Tiny & Aesthetic', 'ᴛɪɴʏ  ＡＥＳＴＨＥＴＩＣ', 'Minimal bios, dividers, vaporwave looks, and compact labels.'],
                     ['Glitch & Weird', 'G̶̈ĺ̷ï̶t̷́c̶̈h̷́', 'Creepy, corrupted, upside-down, experimental, and unusual text.'],
                   ].map(([title, sample, description]) => (
-                    <article key={title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900/60">
+                    <article key={title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900">
                       <h3 className="font-bold text-slate-950 dark:text-white">{title}</h3>
                       <p className="mt-3 break-words text-2xl text-violet-700 dark:text-violet-300">{sample}</p>
                       <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">{description}</p>
@@ -115,7 +139,7 @@ export default function HomePage() {
                   <ul>
                     <li><strong>Creative projects:</strong> invitations, headings, digital notes, and decorative labels.</li>
                     <li><strong>Documents:</strong> short display text in editors that preserve the chosen Unicode characters.</li>
-                    <li><strong>Rendered graphics:</strong> when exact colors, layout, outlines, or downloads matter, use a <Link href="/styles">visual generator</Link> instead.</li>
+                    <li><strong>Rendered graphics:</strong> when exact colors, layout, outlines, or downloads matter, use a <Link href="/visual-art">visual generator</Link> instead.</li>
                   </ul>
                 </div>
                 <p>
@@ -123,7 +147,7 @@ export default function HomePage() {
                 </p>
               </section>
 
-              <section className="mt-14 rounded-3xl border border-amber-200 bg-amber-50/70 p-6 sm:p-8 dark:border-amber-900/60 dark:bg-amber-950/20">
+              <section className="mt-14 rounded-3xl border border-amber-200 bg-amber-50/70 p-6 sm:p-8 dark:border-amber-900 dark:bg-amber-950">
                 <h2 className="mt-0">When Fancy Text Shows as Boxes—or Changes Shape</h2>
                 <p>
                   A box, question mark, or missing character usually means the destination device or app does not have a font that can draw that Unicode symbol. It does not necessarily mean the copied text is broken. Try a broadly supported style such as Bold, Italic, Sans, or Fullwidth, and test it on both mobile and desktop.
