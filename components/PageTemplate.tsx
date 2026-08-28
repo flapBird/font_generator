@@ -3,6 +3,7 @@ import GeneratorTool from './GeneratorTool';
 import VisualGeneratorTool from './VisualGeneratorTool';
 import MinecraftGeneratorTool from './MinecraftGeneratorTool';
 import AsciiGeneratorTool from './AsciiGeneratorTool';
+import ResetPageScroll from './ResetPageScroll';
 import { fandomPages, guidePages, stylePages, type PageDefinition } from '@/lib/data';
 import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
 import { generatorRegistry, getGeneratorDefinition, isFontStyleGenerator } from '@/lib/generator-registry';
@@ -106,6 +107,7 @@ export default function PageTemplate({
 
   return (
     <div className="min-h-screen pb-20 pt-20">
+      <ResetPageScroll routeKey={page.slug} />
       <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${usesFontWorkspace ? 'max-w-7xl' : 'max-w-6xl'}`}>
         <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400 sm:mb-5">
           <Link href="/" className="font-medium hover:text-violet-700 dark:hover:text-violet-300">

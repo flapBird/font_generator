@@ -126,6 +126,7 @@ const getGeneratorDisplayName = (title: string) =>
     .replace(/\s+Generator$/i, '');
 
 const generatorDirectoryScrollKey = 'font-generators-directory-scroll';
+const mobileGeneratorRailScrollKey = 'font-generators-mobile-rail-scroll';
 
 const generatorKindLabels: Record<string, string> = {
   ascii: 'ASCII',
@@ -270,6 +271,89 @@ function GeneratorDirectoryContent({
             Show all generators
           </button>
         </div>
+      )}
+    </div>
+  );
+}
+
+function MobileGeneratorRail({
+  query,
+  onQueryChange,
+  fontItems,
+  visualItems,
+  currentPageTitle,
+}: Omit<GeneratorDirectoryContentProps, 'searchId'>) {
+  const railRef = useRef<HTMLDivElement>(null);
+  const items = [...fontItems, ...visualItems];
+  const isCurrentGenerator = (title: string) => normalizeSearchText(title) === currentPageTitle;
+
+  useLayoutEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    try {
+      const savedScrollLeft = Number(window.sessionStorage.getItem(mobileGeneratorRailScrollKey));
+      if (Number.isFinite(savedScrollLeft) && savedScrollLeft > 0) rail.scrollLeft = savedScrollLeft;
+    } catch {}
+  }, []);
+
+  const preserveScrollPosition = () => {
+    try {
+      window.sessionStorage.setItem(mobileGeneratorRailScrollKey, String(railRef.current?.scrollLeft ?? 0));
+    } catch {}
+  };
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 xl:hidden dark:border-slate-800 dark:bg-slate-900">
+      <div className="relative">
+        <input
+          id="mobile-generator-search"
+          type="search"
+          aria-label="Search generators"
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          placeholder="Search generators…"
+          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 pr-11 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 [&::-webkit-search-cancel-button]:hidden dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+          autoComplete="off"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => onQueryChange('')}
+            aria-label="Clear generator search"
+            className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-lg text-slate-400 transition hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+          >
+            ×
+          </button>
+        )}
+      </div>
+
+      {items.length > 0 ? (
+        <nav aria-label="Choose a generator" className="mt-3">
+          <div ref={railRef} className="mobile-chip-scroll flex snap-x gap-2 overflow-x-auto pb-1">
+            {items.map((item) => {
+              const isCurrent = isCurrentGenerator(item.title);
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  scroll
+                  aria-current={isCurrent ? 'page' : undefined}
+                  onClick={preserveScrollPosition}
+                  className={`flex min-h-11 shrink-0 snap-start items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+                    isCurrent
+                      ? 'border-violet-500 bg-violet-600 text-white shadow-sm dark:border-violet-400 dark:bg-violet-500'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-violet-300 hover:text-violet-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-violet-700 dark:hover:text-violet-300'
+                  }`}
+                >
+                  <span aria-hidden="true">{item.icon}</span>
+                  <span>{getGeneratorDisplayName(item.title)}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      ) : (
+        <p className="px-2 py-4 text-center text-sm font-semibold text-slate-600 dark:text-slate-300">No matching generators</p>
       )}
     </div>
   );
@@ -502,25 +586,13 @@ export default function GeneratorTool({
                 className="order-2 min-w-0 xl:sticky xl:top-24 xl:col-start-1 xl:row-start-1 xl:row-span-2 xl:max-h-[calc(100vh-7rem)] xl:self-start xl:overflow-y-auto xl:pr-1"
                 aria-label="Generator directory"
               >
-                <details className="group rounded-2xl border border-slate-200 bg-slate-50 xl:hidden dark:border-slate-800 dark:bg-slate-900">
-                  <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-bold text-slate-800 marker:content-none xl:hidden dark:text-slate-100">
-                    <span>Browse generators</span>
-                    <span className="text-xs font-semibold text-slate-400">
-                      {fontGeneratorItems.length + visualGeneratorItems.length}
-                      <span aria-hidden="true" className="ml-2 inline-block transition group-open:rotate-180">⌄</span>
-                    </span>
-                  </summary>
-                  <div data-generator-directory-scroll className="hidden max-h-[70vh] overflow-y-auto border-t border-slate-200 p-3 group-open:block dark:border-slate-800">
-                    <GeneratorDirectoryContent
-                      searchId="mobile-generator-search"
-                      query={generatorQuery}
-                      onQueryChange={setGeneratorQuery}
-                      fontItems={filteredFontGeneratorItems}
-                      visualItems={filteredVisualGeneratorItems}
-                      currentPageTitle={normalizedPageTitle}
-                    />
-                  </div>
-                </details>
+                <MobileGeneratorRail
+                  query={generatorQuery}
+                  onQueryChange={setGeneratorQuery}
+                  fontItems={filteredFontGeneratorItems}
+                  visualItems={filteredVisualGeneratorItems}
+                  currentPageTitle={normalizedPageTitle}
+                />
                 <div className="hidden xl:block">
                   <GeneratorDirectoryContent
                     searchId="desktop-generator-search"

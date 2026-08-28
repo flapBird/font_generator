@@ -15,8 +15,8 @@
              </p>
            </div>
  
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-x-10 lg:justify-self-end lg:gap-x-12">
-            <div className="min-w-36">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 sm:gap-x-10 lg:justify-self-end lg:gap-x-12">
+            <div className="min-w-0 sm:min-w-36">
               <h3 className="mb-3 font-semibold text-foreground">Font Styles</h3>
               <ul className="space-y-2">
                 <li><Link href="/styles" className="text-sm text-muted-foreground transition-colors hover:text-foreground">All Font Styles</Link></li>
@@ -27,7 +27,7 @@
               </ul>
             </div>
 
-            <div className="min-w-36">
+            <div className="min-w-0 sm:min-w-36">
               <h3 className="mb-3 font-semibold text-foreground">Visual &amp; Art</h3>
               <ul className="space-y-2">
                 <li><Link href="/visual-art" className="text-sm text-muted-foreground transition-colors hover:text-foreground">All Visual &amp; Art Generators</Link></li>
@@ -38,7 +38,7 @@
               </ul>
             </div>
 
-            <div className="min-w-36">
+            <div className="min-w-0 sm:min-w-36">
               <h3 className="mb-3 font-semibold text-foreground">Site</h3>
               <ul className="space-y-2">
                 <li><Link href="/#top" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Home</Link></li>
