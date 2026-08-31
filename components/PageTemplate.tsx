@@ -3,6 +3,7 @@ import GeneratorTool from './GeneratorTool';
 import VisualGeneratorTool from './VisualGeneratorTool';
 import MinecraftGeneratorTool from './MinecraftGeneratorTool';
 import AsciiGeneratorTool from './AsciiGeneratorTool';
+import ThreeDFontGeneratorTool from './ThreeDFontGeneratorTool';
 import ResetPageScroll from './ResetPageScroll';
 import { fandomPages, guidePages, stylePages, type PageDefinition } from '@/lib/data';
 import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
@@ -66,10 +67,11 @@ export default function PageTemplate({
     ? { ...baseVisualConfig, initialText: page.title }
     : undefined;
   const isAsciiGenerator = definition?.kind === 'ascii';
+  const isThreeDGenerator = page.slug === '3d-font-generator';
   const isHybridGenerator = definition?.kind === 'hybrid';
   const isMinecraftGenerator = visualConfig?.engine === 'minecraft-renderer';
   const requiresVisualConfig = definition
-    ? ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
+    ? !isThreeDGenerator && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
     : false;
   if (requiresVisualConfig && !visualConfig) {
     throw new Error(`Generator ${page.slug} is registered as ${definition?.kind} but has no visual configuration.`);
@@ -77,12 +79,19 @@ export default function PageTemplate({
   if (visualConfig && definition?.kind === 'unicode') {
     throw new Error(`Generator ${page.slug} has a visual configuration but is still registered as Unicode-only.`);
   }
-  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator;
+  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator;
   const usesFontWorkspace = !isSpecializedGenerator;
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
-  const workflowSteps = isMinecraftGenerator
+  const workflowSteps = isThreeDGenerator
+    ? [
+        ['1', 'Enter text', 'Type a short title or up to three manual lines. The 3D preview updates immediately.'],
+        ['2', 'Choose a 3D style', 'Apply a complete preset such as Gold, Chrome, Neon, Gaming, Bubble, or Retro.'],
+        ['3', 'Customize the depth', 'Adjust extrusion, direction, perspective, colors, outline, shadow, font, and background.'],
+        ['4', 'Download PNG', 'Export only the finished artwork at 2× resolution, with a transparent background when selected.'],
+      ]
+    : isMinecraftGenerator
     ? [
         ['1', 'Enter text', 'Type a sign, MOTD, server title, label, or short heading.'],
         ['2', 'Choose mode and color', 'Use Game Text with the 16-color palette and inline codes, or switch to a textured Block Logo.'],
@@ -125,9 +134,16 @@ export default function PageTemplate({
           <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-white">
             {page.title}
           </h1>
+          {isThreeDGenerator && (
+            <p className="mx-auto mt-3 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg dark:text-slate-300">
+              Create 3D text online with customizable depth, colors, shadows and perspective. Design your letters and download a transparent PNG.
+            </p>
+          )}
         </header>
 
-        {isAsciiGenerator ? (
+        {isThreeDGenerator ? (
+          <ThreeDFontGeneratorTool key={page.slug} />
+        ) : isAsciiGenerator ? (
           <AsciiGeneratorTool
             key={page.slug}
             pageTitle={page.title}
@@ -222,9 +238,9 @@ export default function PageTemplate({
                   Simple workflow
                 </p>
                 <h2 className="mt-2 text-2xl font-black text-slate-950 dark:text-white">
-                  How to use this generator
+                  {isThreeDGenerator ? 'How to Use the 3D Font Generator' : 'How to use this generator'}
                 </h2>
-                <ol className="mt-5 grid gap-4 sm:grid-cols-3">
+                <ol className={`mt-5 grid gap-4 ${isThreeDGenerator ? 'sm:grid-cols-2 xl:grid-cols-4' : 'sm:grid-cols-3'}`}>
                   {workflowSteps.map(([number, title, copy]) => (
                     <li key={number} className="rounded-2xl bg-white p-4 dark:bg-slate-950">
                       <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-sm font-black text-violet-700 dark:bg-violet-950 dark:text-violet-300">
@@ -348,7 +364,9 @@ export default function PageTemplate({
             <div className="rounded-3xl bg-slate-950 p-5 text-white">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-300">{isSpecializedGenerator ? 'Export note' : 'Unicode note'}</p>
               <p className="mt-3 text-sm leading-6 text-slate-300">
-                {isMinecraftGenerator
+                {isThreeDGenerator
+                  ? 'PNG export preserves the exact browser-rendered depth, color, outline, highlight, and shadow. Choose Transparent before downloading when you want to place the artwork over another design.'
+                  : isMinecraftGenerator
                   ? 'PNG and faithful SVG both preserve the exact rendered canvas. Copy formatting-code text separately when the destination supports Minecraft § or & codes.'
                   : isSpecializedGenerator
                     ? 'PNG preserves the current rendered appearance. SVG keeps editable text, so its font can change when opened on a device without the same typeface.'

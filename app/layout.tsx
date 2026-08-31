@@ -1,5 +1,10 @@
  import type { Metadata } from "next";
  import "@fontsource/anton/latin-400.css";
+ import "@fontsource/bebas-neue/latin-400.css";
+ import "@fontsource/montserrat/latin-900.css";
+ import "@fontsource/oswald/latin-700.css";
+ import "@fontsource/roboto/latin-900.css";
+ import "@fontsource/poppins/latin-900.css";
  import "@fontsource/berkshire-swash/latin-400.css";
  import "@fontsource/eb-garamond/latin-700.css";
  import "@fontsource/luckiest-guy/latin-400.css";

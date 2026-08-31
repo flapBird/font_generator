@@ -62,6 +62,23 @@ export interface GeneratorDefinition {
 type GeneratorOverride = Partial<Omit<GeneratorDefinition, 'id' | 'slug' | 'title' | 'icon' | 'category' | 'canonicalPath'>>;
 
 const overrides: Record<string, GeneratorOverride> = {
+  '3d-font-generator': {
+    kind: 'theme-logo',
+    tags: ['3d text', '3d letters', '3d lettering', '3d font maker', 'transparent png'],
+    intent: {
+      primary: 'Create dimensional text artwork with adjustable extrusion, direction, perspective, and lighting.',
+      secondary: ['Design 3D letters for logos, thumbnails, banners, gaming graphics, and social media.'],
+      expectedOutputs: ['png'],
+    },
+    capabilities: ['extrusion-depth', 'preset-gallery', 'png-export'],
+    acceptanceCriteria: [
+      'Render a front face, visible extrusion, outline, highlight, and independent shadow on the browser canvas.',
+      'Update the preview immediately when text or a visual control changes.',
+      'Auto-fit long text without overflowing the artwork canvas.',
+      'Export high-resolution transparent PNG artwork without UI, watermark, login, or server processing.',
+    ],
+    homepage: { enabled: true, featured: true, priority: 0 },
+  },
   'big-font-generator': {
     kind: 'ascii',
     intent: {

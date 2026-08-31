@@ -2,6 +2,33 @@ import type { PageDefinition } from './data';
 
 export const newKeywordStylePages: PageDefinition[] = [
   {
+    slug: '3d-font-generator',
+    title: '3D Font Generator',
+    metaTitle: '3D Font Generator — Create 3D Text PNG',
+    metaDescription: 'Create 3D text online with editable depth, direction, colors, outlines, shadows, perspective, and transparent high-resolution PNG download.',
+    category: 'styles',
+    description: 'Create 3D text online with customizable depth, colors, shadows, and perspective. Design 3D letters and download a transparent PNG.',
+    content: 'This 3D font generator renders ordinary text as downloadable visual artwork. It builds a front face, repeated extrusion layers, edge treatment, directional shadow, highlight, and adjustable slant on a browser canvas. The result is an image rather than a set of Unicode lookalikes, so the dimensional appearance stays intact when you download and place it in a design.\n\n**Create 3D Text Online**\n\nA 3D text generator is most useful when depth is part of the composition. Adjusting the extrusion control changes the visible side of every letter, while direction moves that depth around the face. Perspective adds a controlled slant, and separate front, side, outline, and shadow colors make it possible to build a readable effect instead of a single flat text shadow.\n\n**Popular 3D Text Styles**\n\nStart with Gold for warm dimensional lettering, Chrome or Metallic for cool reflective headlines, Neon for luminous titles, Bubble and Cartoon for softer shapes, Gaming for high-contrast thumbnails, or Retro for offset poster lettering. Each preset changes the complete treatment—including font, face, side, depth, direction, outline, shadow, and background—not only one color.\n\n**What Can You Use 3D Text For?**\n\nThe transparent PNG output works well in logo drafts, video thumbnails, banners, social media graphics, gaming graphics, posters, profile images, invitations, and presentation covers. Keep important supporting text in normal readable type, especially when the artwork will be viewed at a small size.',
+    howToUse: 'Enter your text, choose a complete 3D preset, customize the depth, direction, colors, outline, shadow, perspective, and background, then download the finished artwork as a high-resolution PNG.',
+    examples: [
+      { before: 'GOLD', after: 'Gold face with a dark bronze extrusion', note: 'Gold 3D style' },
+      { before: 'PLAY', after: 'Green gaming face with deep angled sides', note: 'Gaming 3D style' },
+      { before: 'NEON', after: 'Cyan and pink glowing dimensional letters', note: 'Neon 3D style' },
+      { before: 'RETRO', after: 'Warm poster lettering with an offset side', note: 'Retro 3D style' },
+    ],
+    faq: [
+      { q: 'What is a 3D font generator?', a: 'It is a design tool that renders typed letters with a visible front face, extruded side, outline, lighting, shadow, and direction. This page creates browser-rendered artwork rather than replacing letters with decorative Unicode characters.' },
+      { q: 'Can I download 3D text with a transparent background?', a: 'Yes. Choose Transparent under Background, then download the PNG. The checkerboard only indicates transparency in the preview and is not included in the exported artwork.' },
+      { q: 'Can I use the generated 3D text for a logo?', a: 'You can use it for logo concepts and ordinary graphics. For a final commercial identity, confirm the chosen typeface license, check trademark conflicts, and refine the artwork for the sizes where it will appear.' },
+      { q: 'What is the difference between a 3D font and 3D text?', a: 'A font is the underlying typeface file and letter design. 3D text is a visual treatment applied to typed letters, including depth, direction, color, outline, light, and shadow. This tool creates the visual treatment.' },
+      { q: 'Can I create 3D text for free?', a: 'Yes. The tool runs in your browser, requires no account, adds no watermark, and downloads the finished PNG without a paywall.' },
+      { q: 'Can I download 3D text as an STL file?', a: 'Not in this version. It creates visual 3D artwork as PNG, not watertight geometry for 3D printing. STL, OBJ, and GLB export are not currently supported.' },
+    ],
+    relatedSlugs: ['impact-font-generator', 'metal-font-generator', 'minecraft-font-generator', 'glitter-font-generator'],
+    icon: '🧊',
+    defaultStyleIds: ['sansBold', 'bold', 'squared'],
+  },
+  {
     slug: 'instagram-font-generator',
     title: 'Instagram Font Generator',
     metaTitle: 'Instagram Font Generator — Copy & Paste',

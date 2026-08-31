@@ -429,6 +429,9 @@ export const getVisualGeneratorConfig = (slug: string) => configs[slug];
 export const isVisualGeneratorSlug = (slug: string) => Boolean(configs[slug]);
 
 export const getSpecializedDescription = (slug: string): string | null => {
+  if (slug === '3d-font-generator') {
+    return 'Create 3D text online with customizable depth, colors, shadows, and perspective, then download the artwork as a transparent high-resolution PNG.';
+  }
   if (slug === 'big-font-generator') {
     return 'Generate genuinely large multi-line ASCII art in six banner styles, then copy it or download TXT, PNG, and SVG files.';
   }
@@ -555,6 +558,9 @@ export const getSpecializedHowTo = (slug: string): string | null => {
 };
 
 export const getSpecializedFeatureList = (slug: string): string[] | null => {
+  if (slug === '3d-font-generator') {
+    return ['15 complete 3D style presets', 'Live browser canvas preview', 'Adjustable extrusion depth and direction', 'Perspective and auto-fit text layout', 'Front, side, outline, and shadow colors', 'Transparent high-resolution PNG download'];
+  }
   if (slug === 'big-font-generator') {
     return ['ASCII art generation', 'Multiple banner styles', 'Copy text', 'TXT download', 'PNG download', 'SVG download'];
   }
