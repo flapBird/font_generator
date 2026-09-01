@@ -45,6 +45,7 @@ export type VisualCapability =
 export interface VisualGeneratorConfig {
   engine: 'font-renderer' | 'theme-renderer' | 'minecraft-renderer';
   initialText: string;
+  fitTextToCanvas?: boolean;
   intentLabel: string;
   resultIntro: string;
   bestFor: string[];
@@ -304,6 +305,7 @@ const configs: Record<string, VisualGeneratorConfig> = {
   'ransom-note-font-generator': {
     engine: 'theme-renderer',
     initialText: 'SECRET MESSAGE',
+    fitTextToCanvas: false,
     intentLabel: 'Cutout artwork and copyable mixed text',
     resultIntro: 'Create deliberately mismatched cutout-style lettering with alternating typefaces, paper tiles, colors, and rotation.',
     bestFor: ['Escape rooms', 'Halloween props', 'Party graphics'],

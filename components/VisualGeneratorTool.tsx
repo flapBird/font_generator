@@ -164,7 +164,7 @@ export default function VisualGeneratorTool({
     const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${size}px ${currentPreset.fontFamily}`;
     let resolvedSize = fontSize;
 
-    while (resolvedSize > MIN_FITTED_FONT_SIZE) {
+    while (config.fitTextToCanvas !== false && resolvedSize > MIN_FITTED_FONT_SIZE) {
       context.font = fontSpec(resolvedSize);
       const exceedsWidth = lines.some((line) => (
         context.measureText(line).width
@@ -182,7 +182,7 @@ export default function VisualGeneratorTool({
       fontSize: resolvedSize,
       height: Math.max(minimumHeight, Math.ceil(textHeight + verticalPadding)),
     };
-  }, [controls.letterSpacing, controls.shadowBlur, controls.shadowOffsetX, controls.shadowOffsetY, controls.strokeWidth, currentPreset, fontSize]);
+  }, [config.fitTextToCanvas, controls.letterSpacing, controls.shadowBlur, controls.shadowOffsetX, controls.shadowOffsetY, controls.strokeWidth, currentPreset, fontSize]);
 
   const drawCanvas = useCallback((canvas: HTMLCanvasElement) => {
     if (!currentPreset) return;

@@ -63,9 +63,7 @@ export default function PageTemplate({
   };
   const definition = getGeneratorDefinition(page.slug);
   const baseVisualConfig = getVisualGeneratorConfig(page.slug);
-  const visualConfig = baseVisualConfig
-    ? { ...baseVisualConfig, initialText: page.title }
-    : undefined;
+  const visualConfig = baseVisualConfig;
   const isAsciiGenerator = definition?.kind === 'ascii';
   const isThreeDGenerator = page.slug === '3d-font-generator';
   const isHybridGenerator = definition?.kind === 'hybrid';

@@ -248,7 +248,7 @@ export const newKeywordStylePages: PageDefinition[] = [
   {
     slug: 'typewriter-font-generator',
     title: 'Typewriter & Old Font Generator',
-    metaTitle: 'Typewriter Font Generator — Old-Style Text',
+    metaTitle: 'Typewriter & Old Font Generator — Old-Style Text',
     metaDescription: 'Create old typewriter-style text with monospace, serif, distressed, and vintage Unicode effects. Copy retro text for bios, captions, and headings.',
     category: 'styles',
     description: 'Generate old typewriter and vintage text with fixed-width letters, serif alternatives, spacing, and restrained worn-document effects.',

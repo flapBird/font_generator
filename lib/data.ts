@@ -72,21 +72,21 @@
    {
      slug: 'upside-down-text-generator',
      title: 'Upside Down Text Generator',
-    metaTitle: 'Upside Down Text — Flip Letters 180°',
+    metaTitle: 'Upside Down Text Generator — Flip Letters 180°',
      metaDescription: 'Flip your text upside down instantly. Turn letters 180° with Unicode. Free upside down text generator for social media bios and funny messages.',
      category: 'styles',
-     description: 'Flip your text upside down and write backwards with this upside down text generator. Every letter gets rotated 180° using special Unicode characters.',
-     content: 'Upside down text works because Unicode includes a set of "turned" letters — characters that are the regular glyph rotated 180 degrees. These were originally added for transliterating languages like African reference alphabets, but the internet repurposed them for something much more fun: writing messages that look like they fell over.\n\nThe mapping is not always symmetrical. Turn an "a" and you get "ɐ" (a turned a). Turn a "b" and you get "q" (because a lowercase b rotated 180 degrees looks like a q). Some letters, like "l" and "x", look the same right-side up and upside down — they are rotationally symmetrical. Others, like "c" turned 180°, become "ɔ" (an open o).\n\nThis upside down text generator handles every letter automatically, so you type normally and get the flipped result instantly. The output looks most convincing in all-lowercase contexts, because the uppercase set has a few letters (B, H, I, N, S, X, Z) that do not change when flipped — they are symmetric. If you want maximum disorientation, type in lowercase.',
-     howToUse: 'Type your text into the box. The generator instantly flips every character. Copy the upside-down output and paste it anywhere — Discord, Twitter, Instagram, or a group chat prank.',
+     description: 'Flip supported letters and punctuation upside down, then reverse each line so the result reads correctly after a 180° rotation.',
+     content: 'Upside down text works because Unicode includes a set of "turned" letters — characters that resemble regular glyphs rotated 180 degrees. These were originally added for transliterating languages like African reference alphabets, but the internet repurposed them for something much more fun: writing messages that look like they fell over.\n\nThe mapping is not always symmetrical. Turn an "a" and you get "ɐ" (a turned a). Turn a "b" and you get "q" (because a lowercase b rotated 180 degrees looks like a q). Some letters, like "l" and "x", look the same right-side up and upside down — they are rotationally symmetrical. Others, like "c" turned 180°, become "ɔ" (an open o).\n\nThis generator maps supported Latin letters and punctuation, then reverses each line so it reads in the intended order after a 180° rotation. Unsupported characters are preserved rather than replaced with unrelated symbols. Lowercase text usually gives the most convincing result because Unicode offers more suitable turned lowercase forms.',
+     howToUse: 'Type your text into the box. The generator substitutes supported characters with turned Unicode forms and reverses each line to complete the 180° effect. Copy either the plain or framed upside-down result.',
      examples: [
-       { before: 'Hello World', after: 'ɥǝlloo ʍoɹlp', note: 'Full text flipped' },
-       { before: 'I am serious', after: 'I ɐɯ sǝɹᴉodns', note: 'Notice "I" stays the same — it is symmetrical' },
-       { before: 'Look at this', after: '˥ooʞ ɐʇ ʇɥᴉs', note: 'Capital L becomes a half-T' },
-       { before: 'Wednesday', after: 'ʎpuǝsǝpɐʍ', note: 'The whole word reverses visually' },
+       { before: 'Hello World', after: 'plɹoM ollǝH', note: 'Turned characters with the full line reversed' },
+       { before: 'I am serious', after: 'snoᴉɹǝs ɯɐ I', note: 'The capital I remains visually symmetrical' },
+       { before: 'Look at this', after: 'sᴉɥʇ ʇɐ ʞoo˥', note: 'Capital L becomes a turned L at the end' },
+       { before: 'Wednesday', after: 'ʎɐpsǝupǝM', note: 'The whole word is mapped and reversed' },
      ],
      faq: [
        { q: 'Can I use upside down text in my Discord username?', a: 'Yes, Discord supports turned Unicode characters in both usernames and regular chat. Some characters may render slightly differently on mobile versus desktop Discord.' },
-       { q: 'Why do some uppercase letters stay the same when flipped?', a: 'Several uppercase letters (B, H, I, N, S, X, Z) are vertically symmetrical — their turned form looks identical to the original. The generator skips the mapping for those characters since there is no distinct upside-down version in Unicode.' },
+       { q: 'Why do some uppercase letters stay the same when flipped?', a: 'Some capitals are rotationally symmetrical in many fonts, while others have no convincing turned Unicode substitute. Those characters stay readable instead of being replaced with an unrelated symbol.' },
        { q: 'Is upside down text readable for people using screen readers?', a: 'Screen readers will typically announce the Unicode character name instead of the intended letter sound, which can make the text confusing. Use upside down text for visual display purposes, not for essential information.' },
      ],
      relatedSlugs: ['weird-text-generator', 'small-text-generator', 'whisper-font-generator'],
@@ -408,7 +408,7 @@
    {
      slug: 'cursive-tattoo-font-generator',
      title: 'Cursive Tattoo Font Generator',
-    metaTitle: 'Cursive Tattoo Font — Ink Style',
+    metaTitle: 'Cursive Tattoo Font Generator — Ink Style',
     metaDescription: 'Find perfect cursive tattoo lettering. Script Unicode for ink inspiration. Free cursive tattoo font generator.',
      category: 'styles',
      description: 'Discover cursive lettering styles for tattoo design inspiration. Bold script, elegant cursive, and calligraphy-style Unicode characters for your next ink idea.',
@@ -528,7 +528,7 @@
    {
      slug: 'ransom-note-font-generator',
      title: 'Ransom Note Font Generator',
-    metaTitle: 'Ransom Note Font Gen — Cutout Style',
+    metaTitle: 'Ransom Note Font Generator — Cutout Style',
      metaDescription: 'Create cutout-style ransom note artwork with mismatched fonts, paper tiles, colors, and rotation. Download PNG or SVG and optionally copy mixed text.',
      category: 'styles',
      description: 'Create rendered cutout lettering with alternating typefaces, paper tiles, colors, and rotation, plus a separate copyable mixed-text option.',
@@ -552,7 +552,7 @@
    {
      slug: 'times-new-roman-font-generator',
      title: 'Times New Roman Font Generator',
-    metaTitle: 'Times New Roman Font — Serif Style',
+    metaTitle: 'Times New Roman Font Generator — Serif Style',
      metaDescription: 'Preview Times New Roman from your device in real weights and styles, compare a labelled Georgia alternative, and export the rendering as PNG or SVG.',
      category: 'styles',
      description: 'Render text with Times New Roman when installed, compare clearly labelled serif alternatives, and download formal heading or specimen artwork.',
@@ -627,7 +627,7 @@
    {
      slug: 'comic-sans-font-generator',
      title: 'Comic Sans Font Generator',
-    metaTitle: 'Comic Sans Font Gen — Casual Style',
+    metaTitle: 'Comic Sans Font Generator — Casual Style',
      metaDescription: 'Preview Comic Sans MS when installed and create friendly rendered captions with casual alternatives, speech-bubble presets, PNG, and SVG export.',
      category: 'styles',
      description: 'Render friendly comic lettering with Comic Sans MS when installed, plus labelled rounded alternatives and speech-bubble treatments.',
@@ -652,7 +652,7 @@
    {
      slug: 'san-francisco-font-generator',
      title: 'San Francisco Font Generator',
-    metaTitle: 'San Francisco Font — Apple Style',
+    metaTitle: 'San Francisco Font Generator — Apple Style',
      metaDescription: 'Preview the Apple system UI font stack in app headings, notifications, and product cards, then export the rendered mockup as PNG or SVG.',
      category: 'styles',
      description: 'Preview real system UI typography for app headings, notifications, and product cards without redistributing Apple’s SF Pro font files.',
@@ -702,7 +702,7 @@
    {
      slug: 'metallica-font-generator',
      title: 'Metallica Font Generator',
-    metaTitle: 'Metallica Font Gen — Heavy Metal',
+    metaTitle: 'Metallica Font Generator — Heavy Metal',
      metaDescription: 'Create original heavy-metal wordmark artwork with metallic gradients, blackletter, outlines, glow, and PNG or SVG export—without copying the official logo.',
      category: 'styles',
      description: 'Build unofficial heavy-metal title artwork with metallic, thrash, gothic, and molten treatments for posters, covers, and band concepts.',
@@ -751,7 +751,7 @@
    {
      slug: 'facebook-font-generator',
      title: 'Facebook Font Generator',
-    metaTitle: 'Facebook Font Gen — FB Style Text',
+    metaTitle: 'Facebook Font Generator — FB Style Text',
      metaDescription: 'Generate stylish text for your Facebook profile and posts. Bold, italic, and fancy Unicode styles for FB bios and comments. Free Facebook font generator.',
      category: 'styles',
      description: 'Make your Facebook profile and posts stand out with stylish Unicode text. Perfect for bios, comments, and status updates on the platform.',
@@ -775,7 +775,7 @@
    {
      slug: 'linkedin-font-generator',
      title: 'LinkedIn Font Generator',
-    metaTitle: 'LinkedIn Font Gen — Professional',
+    metaTitle: 'LinkedIn Font Generator — Professional',
      metaDescription: 'Generate professional text for your LinkedIn profile. Clean, elegant Unicode styles for headlines, summaries and posts. Free LinkedIn font generator.',
      category: 'styles',
      description: 'Polish your LinkedIn profile with clean, professional Unicode text. Subtle serif and modern sans-serif styles for headlines and summaries.',
@@ -799,7 +799,7 @@
    {
      slug: 'chicano-font-generator',
      title: 'Chicano Font Generator',
-    metaTitle: 'Chicano Font Gen — Old English Style',
+    metaTitle: 'Chicano Font Generator — Old English Style',
      metaDescription: 'Generate Chicano-inspired text with ornate Old English Unicode letters. Gothic script and fraktur styles for barrio lettering aesthetics.',
      category: 'styles',
      description: 'Create text inspired by Chicano lettering traditions using ornate gothic and Old English Unicode characters.',
@@ -851,7 +851,7 @@
    {
      slug: 'pop-culture-font-generators',
      title: 'Pop Culture Font Generators',
-    metaTitle: 'Pop Culture Font Styles — Fandom Hub',
+    metaTitle: 'Pop Culture Font Generators — Fandom Hub',
      metaDescription: 'Compare one phrase across six rendered pop-culture title directions, including storybook, arcade, pixel, horror, superhero, and sci-fi artwork.',
      category: 'fandom',
      description: 'Compare rendered storybook, arcade, pixel-game, 80s-horror, superhero, and science-fiction title directions in one visual generator hub.',
@@ -925,7 +925,7 @@
    {
      slug: 'stranger-things-font-generator',
      title: 'Stranger Things Font Generator',
-    metaTitle: 'Stranger Things Font — 80s Style',
+    metaTitle: 'Stranger Things Font Generator — 80s Style',
      metaDescription: 'Create unofficial 80s horror title artwork with a high-contrast serif, red outlines, glow, wide tracking, and PNG or SVG export.',
      category: 'fandom',
      description: 'Create cinematic 80s horror title artwork with red outlines, glow, wide tracking, line decoration, and an open-source serif alternative.',

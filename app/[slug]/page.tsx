@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const description = getSpecializedDescription(page.slug) ?? buildMetaDescription(page);
 
   return {
-    title: buildMetaTitle(page),
+    title: { absolute: buildMetaTitle(page) },
     description,
     alternates: { canonical: canonicalUrl },
     openGraph: {

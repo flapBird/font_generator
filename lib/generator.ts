@@ -397,7 +397,7 @@ export const generateStyleVariants = (text: string, styleIds: string[]) =>
 const packs: Record<string, string[]> = {
   'small-text-generator': ['smallCaps', 'superscript', 'subscript', 'tinyWave', 'wave', 'dotDivider', 'brackets', 'dotted', 'spaced'],
   'weird-text-generator': ['inverted', 'backwards', 'glitch', 'slash', 'wave', 'ransom', 'randomCase', 'parenthesized', 'darkCircled', 'cross'],
-  'upside-down-text-generator': ['inverted', 'upsideFrame', 'backwards', 'wave', 'glitch', 'parenthesized', 'slash', 'angleBrackets'],
+  'upside-down-text-generator': ['inverted', 'upsideFrame'],
   'brat-text-generator': ['sansBold', 'bold', 'fullwidth', 'darkCircled', 'squared', 'sansBoldItalic', 'stars', 'sparkle', 'hearts', 'wideSpaced'],
   'italics-font-generator': ['italic', 'boldItalic', 'sansItalic', 'sansBoldItalic', 'script', 'boldScript', 'underline', 'overline', 'spaced'],
   'serif-font-generator': ['bold', 'italic', 'boldItalic', 'doubleStruck', 'fraktur', 'boldFraktur', 'script', 'boldScript', 'underline'],
