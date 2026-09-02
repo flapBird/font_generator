@@ -52,6 +52,47 @@ const generatorNavigationItems = generatorRegistry
     searchText: `${generator.slug} ${generator.tags.join(' ')} ${generator.intent.primary} ${generator.intent.secondary.join(' ')}`,
   }));
 
+function SanFranciscoContent() {
+  return (
+    <div className="space-y-12">
+      <section>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">About the typeface</p>
+        <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white">What is the San Francisco Font?</h2>
+        <p className="mt-5 text-base leading-8 text-slate-700 dark:text-slate-300">
+          SF Pro is the primary sans-serif member of Apple&apos;s San Francisco system font family for Apple platforms. It is designed for clear interface typography across many sizes and screen densities. This generator requests the Apple system font stack; it does not host or distribute Apple font files.
+        </p>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-950">
+        <h2 className="text-2xl font-black text-slate-950 dark:text-white">SF Display vs SF Text</h2>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <article className="rounded-2xl bg-slate-50 p-5 dark:bg-slate-900">
+            <h3 className="font-bold text-slate-950 dark:text-white">SF Display</h3>
+            <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-400">A display-oriented direction for larger headlines, hero text, and product messaging where letterforms have more room.</p>
+          </article>
+          <article className="rounded-2xl bg-slate-50 p-5 dark:bg-slate-900">
+            <h3 className="font-bold text-slate-950 dark:text-white">SF Text</h3>
+            <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-400">A text-oriented direction for labels, notifications, controls, and smaller interface copy where clarity is the priority.</p>
+          </article>
+        </div>
+        <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400">Modern Apple system fonts can apply optical sizing automatically. These two controls remain useful for comparing familiar display and text design directions in mockups.</p>
+      </section>
+
+      <section>
+        <h2 className="text-2xl font-black text-slate-950 dark:text-white">San Francisco Font Weights</h2>
+        <p className="mt-4 leading-8 text-slate-700 dark:text-slate-300">The comparison tool requests nine CSS weights from Thin 100 through Black 900. A browser or fallback font may map an unavailable weight to its nearest installed face, so the result can differ by device. Selecting a card applies that requested weight to the artwork preview and all exports.</p>
+      </section>
+
+      <section className="rounded-3xl border border-violet-200 bg-violet-50/70 p-6 sm:p-8 dark:border-violet-900/60 dark:bg-violet-950/20">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">Official source</p>
+        <h2 className="mt-2 text-2xl font-black text-slate-950 dark:text-white">Get SF Pro</h2>
+        <p className="mt-3 leading-7 text-slate-700 dark:text-slate-300">Download SF Pro only from Apple and review Apple&apos;s current license before using it. This site does not provide a font download.</p>
+        <a href="https://developer.apple.com/fonts/" target="_blank" rel="noreferrer" className="mt-5 inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white hover:bg-violet-500">Open Apple&apos;s official font page ↗</a>
+      </section>
+    </div>
+  );
+}
+
 export default function PageTemplate({
   page,
   categoryPath,
@@ -66,6 +107,7 @@ export default function PageTemplate({
   const visualConfig = baseVisualConfig;
   const isAsciiGenerator = definition?.kind === 'ascii';
   const isThreeDGenerator = page.slug === '3d-font-generator';
+  const isSanFrancisco = page.slug === 'san-francisco-font-generator';
   const isHybridGenerator = definition?.kind === 'hybrid';
   const isMinecraftGenerator = visualConfig?.engine === 'minecraft-renderer';
   const requiresVisualConfig = definition
@@ -88,6 +130,13 @@ export default function PageTemplate({
         ['2', 'Choose a 3D style', 'Apply a complete preset such as Gold, Chrome, Neon, Gaming, Bubble, or Retro.'],
         ['3', 'Customize the depth', 'Adjust extrusion, direction, perspective, colors, outline, shadow, font, and background.'],
         ['4', 'Download PNG', 'Export only the finished artwork at 2× resolution, with a transparent background when selected.'],
+      ]
+    : isSanFrancisco
+    ? [
+        ['1', 'Enter text', 'Type one phrase and see it update across every weight preview.'],
+        ['2', 'Compare weights', 'Compare Thin through Black, then click the weight you want to use.'],
+        ['3', 'Customize artwork', 'Choose Display or Text, set the size and colors, then open advanced effects if needed.'],
+        ['4', 'Download', 'Export PNG, editable SVG, or faithful SVG from the live canvas.'],
       ]
     : isMinecraftGenerator
     ? [
@@ -137,6 +186,11 @@ export default function PageTemplate({
               Create 3D text online with customizable depth, colors, shadows and perspective. Design your letters and download a transparent PNG.
             </p>
           )}
+          {isSanFrancisco && (
+            <p className="mx-auto mt-3 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg dark:text-slate-300">
+              Type your own text, compare SF Pro-style weights side by side, customize the artwork, and download PNG or SVG—without distributing Apple font files.
+            </p>
+          )}
         </header>
 
         {isThreeDGenerator ? (
@@ -183,7 +237,7 @@ export default function PageTemplate({
 
         <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
           <div className="min-w-0">
-            <section>
+            {isSanFrancisco ? <SanFranciscoContent /> : <section>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
                 About this generator
               </p>
@@ -202,7 +256,7 @@ export default function PageTemplate({
                   return <p key={index}>{paragraph}</p>;
                 })}
               </div>
-            </section>
+            </section>}
 
             {supplement && (
               <section className="mt-12 rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-950">
@@ -238,7 +292,7 @@ export default function PageTemplate({
                 <h2 className="mt-2 text-2xl font-black text-slate-950 dark:text-white">
                   {isThreeDGenerator ? 'How to Use the 3D Font Generator' : 'How to use this generator'}
                 </h2>
-                <ol className={`mt-5 grid gap-4 ${isThreeDGenerator ? 'sm:grid-cols-2 xl:grid-cols-4' : 'sm:grid-cols-3'}`}>
+                <ol className={`mt-5 grid gap-4 ${isThreeDGenerator || isSanFrancisco ? 'sm:grid-cols-2 xl:grid-cols-4' : 'sm:grid-cols-3'}`}>
                   {workflowSteps.map(([number, title, copy]) => (
                     <li key={number} className="rounded-2xl bg-white p-4 dark:bg-slate-950">
                       <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-sm font-black text-violet-700 dark:bg-violet-950 dark:text-violet-300">

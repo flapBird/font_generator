@@ -24,6 +24,18 @@ const TEXT_AREA_RATIO = 0.84;
 
 const palette = ['#ef4444', '#3b82f6', '#facc15', '#22c55e', '#a855f7', '#f97316'];
 
+const sfWeights = [
+  { label: 'Thin', value: 100 },
+  { label: 'Ultralight', value: 200 },
+  { label: 'Light', value: 300 },
+  { label: 'Regular', value: 400 },
+  { label: 'Medium', value: 500 },
+  { label: 'Semibold', value: 600 },
+  { label: 'Bold', value: 700 },
+  { label: 'Heavy', value: 800 },
+  { label: 'Black', value: 900 },
+] as const;
+
 const fileSlug = (value: string) =>
   value.trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'text-design';
 
@@ -60,6 +72,7 @@ export default function VisualGeneratorTool({
   config,
   pageTitle,
 }: VisualGeneratorToolProps) {
+  const isSanFrancisco = pageTitle === 'San Francisco Font Generator';
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mobileCanvasRef = useRef<HTMLCanvasElement>(null);
   const [inputText, setInputText] = useState(config.initialText);
@@ -74,11 +87,14 @@ export default function VisualGeneratorTool({
   const [minecraftColorCode, setMinecraftColorCode] = useState('a');
   const [minecraftBold, setMinecraftBold] = useState(false);
   const [controls, setControls] = useState(() => applyPreset(config.presets[0]));
+  const [selectedFontWeight, setSelectedFontWeight] = useState(config.presets[0]?.fontWeight ?? 400);
+  const [isApplePlatform, setIsApplePlatform] = useState<boolean | null>(null);
 
   const currentPreset = useMemo(
     () => config.presets.find((item) => item.id === presetId) ?? config.presets[0],
     [config.presets, presetId],
   );
+  const activeFontWeight = isSanFrancisco ? selectedFontWeight : (currentPreset?.fontWeight ?? 700);
   const dimensions = formats[format];
   const renderedText = currentPreset?.uppercase ? inputText.toUpperCase() : inputText;
   const hasCapability = useCallback(
@@ -88,10 +104,20 @@ export default function VisualGeneratorTool({
   const minecraftCode = `§${minecraftColorCode}${minecraftBold ? '§l' : ''}${inputText}`;
   const fortniteNameAlternative = convertToFancyText(inputText, 'bold');
 
-  const selectPreset = (preset: VisualFontPreset) => {
+  const selectPreset = (preset: VisualFontPreset, preserveWeight = false) => {
     setPresetId(preset.id);
     setControls(applyPreset(preset));
+    if (isSanFrancisco && !preserveWeight) setSelectedFontWeight(preset.fontWeight ?? 400);
   };
+
+  useEffect(() => {
+    if (!isSanFrancisco) return;
+    const timer = window.setTimeout(() => {
+      const platform = `${navigator.platform ?? ''} ${navigator.userAgent ?? ''}`;
+      setIsApplePlatform(/Mac|iPhone|iPad|iPod/i.test(platform));
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [isSanFrancisco]);
 
   const loadBackgroundImage = (file: File | undefined) => {
     if (!file) return;
@@ -119,7 +145,7 @@ export default function VisualGeneratorTool({
       if (active) setFontAvailable(null);
       try {
         const fontStyle = currentPreset.fontStyle ?? 'normal';
-        const fontWeight = currentPreset.fontWeight ?? 700;
+        const fontWeight = activeFontWeight;
         const testString = 'mmmmmmmmmmlliWW@#';
         await document.fonts.load(
           `${fontStyle} ${fontWeight} 72px ${JSON.stringify(currentPreset.targetFont)}`,
@@ -146,7 +172,7 @@ export default function VisualGeneratorTool({
     };
     void checkFont();
     return () => { active = false; };
-  }, [currentPreset]);
+  }, [activeFontWeight, currentPreset]);
 
   const resolveTextLayout = useCallback((
     context: CanvasRenderingContext2D,
@@ -161,7 +187,7 @@ export default function VisualGeneratorTool({
       controls.shadowBlur + Math.max(Math.abs(controls.shadowOffsetX), Math.abs(controls.shadowOffsetY)),
     );
     const maxWidth = Math.max(1, width * TEXT_AREA_RATIO - effectPadding * 2);
-    const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${size}px ${currentPreset.fontFamily}`;
+    const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${activeFontWeight} ${size}px ${currentPreset.fontFamily}`;
     let resolvedSize = fontSize;
 
     while (config.fitTextToCanvas !== false && resolvedSize > MIN_FITTED_FONT_SIZE) {
@@ -182,7 +208,7 @@ export default function VisualGeneratorTool({
       fontSize: resolvedSize,
       height: Math.max(minimumHeight, Math.ceil(textHeight + verticalPadding)),
     };
-  }, [config.fitTextToCanvas, controls.letterSpacing, controls.shadowBlur, controls.shadowOffsetX, controls.shadowOffsetY, controls.strokeWidth, currentPreset, fontSize]);
+  }, [activeFontWeight, config.fitTextToCanvas, controls.letterSpacing, controls.shadowBlur, controls.shadowOffsetX, controls.shadowOffsetY, controls.strokeWidth, currentPreset, fontSize]);
 
   const drawCanvas = useCallback((canvas: HTMLCanvasElement) => {
     if (!currentPreset) return;
@@ -220,7 +246,7 @@ export default function VisualGeneratorTool({
       context.globalAlpha = 1;
     }
 
-    const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${size}px ${currentPreset.fontFamily}`;
+    const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${activeFontWeight} ${size}px ${currentPreset.fontFamily}`;
     const resolvedSize = hasCapability('pixel-snap')
       ? Math.max(MIN_FITTED_FONT_SIZE, Math.round(layout.fontSize / 8) * 8)
       : layout.fontSize;
@@ -299,14 +325,14 @@ export default function VisualGeneratorTool({
       const characters = segmentGraphemes(line);
       const fontForIndex = (index: number) => currentPreset.fontAlternates?.[index % currentPreset.fontAlternates.length] ?? currentPreset.fontFamily;
       const widths = characters.map((character, index) => {
-        context.font = `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${resolvedSize}px ${fontForIndex(index)}`;
+        context.font = `${currentPreset.fontStyle ?? 'normal'} ${activeFontWeight} ${resolvedSize}px ${fontForIndex(index)}`;
         return context.measureText(character).width;
       });
       const totalWidth = widths.reduce((sum, width) => sum + width, 0) + Math.max(0, characters.length - 1) * controls.letterSpacing;
       let cursor = x - totalWidth / 2;
       context.textAlign = 'left';
       characters.forEach((character, index) => {
-        context.font = `${currentPreset.fontStyle ?? 'normal'} ${currentPreset.fontWeight ?? 700} ${resolvedSize}px ${fontForIndex(index)}`;
+        context.font = `${currentPreset.fontStyle ?? 'normal'} ${activeFontWeight} ${resolvedSize}px ${fontForIndex(index)}`;
         if (mode === 'fill' && currentPreset.multicolor) context.fillStyle = palette[index % palette.length];
         if (mode === 'fill' && currentPreset.decoration === 'ransom' && !/\s/u.test(character)) {
           const centerX = cursor + widths[index] / 2;
@@ -356,7 +382,7 @@ export default function VisualGeneratorTool({
       }
       drawSpacedText(line, canvas.width / 2, y, 'fill');
     });
-  }, [backgroundImage, controls, currentPreset, dimensions, hasCapability, renderedText, resolveTextLayout, transparent]);
+  }, [activeFontWeight, backgroundImage, controls, currentPreset, dimensions, hasCapability, renderedText, resolveTextLayout, transparent]);
 
   useEffect(() => {
     if (canvasRef.current) drawCanvas(canvasRef.current);
@@ -390,7 +416,7 @@ export default function VisualGeneratorTool({
     const gradientId = `gradient-${currentPreset.id}`;
     const filterId = `shadow-${currentPreset.id}`;
     const fill = currentPreset.gradient ? `url(#${gradientId})` : controls.textColor;
-    const textAttributes = `font-family="${escapeXml(currentPreset.fontFamily)}" font-size="${resolvedSize}" font-weight="${currentPreset.fontWeight ?? 700}" font-style="${currentPreset.fontStyle ?? 'normal'}" letter-spacing="${controls.letterSpacing}" fill="${fill}" stroke="${controls.strokeWidth ? controls.strokeColor : 'none'}" stroke-width="${controls.strokeWidth * 2}" paint-order="stroke fill" filter="url(#${filterId})"`;
+    const textAttributes = `font-family="${escapeXml(currentPreset.fontFamily)}" font-size="${resolvedSize}" font-weight="${activeFontWeight}" font-style="${currentPreset.fontStyle ?? 'normal'}" letter-spacing="${controls.letterSpacing}" fill="${fill}" stroke="${controls.strokeWidth ? controls.strokeColor : 'none'}" stroke-width="${controls.strokeWidth * 2}" paint-order="stroke fill" filter="url(#${filterId})"`;
     const textElements = lines.map((line, lineIndex) => {
       const centeredY = startY + lineIndex * lineHeight;
       const y = hasCapability('meme-layout') && lines.length > 1
@@ -466,6 +492,230 @@ export default function VisualGeneratorTool({
       setStatusMessage('Copy was blocked by the browser. Select the value and copy it manually.');
     }
   };
+
+  if (isSanFrancisco) {
+    const fontPresetId = currentPreset.targetFont === 'SF Pro Text' ? 'sf-text' : 'sf-display';
+    const fontPresets = config.presets.filter((preset) => preset.id === 'sf-display' || preset.id === 'sf-text');
+    const designPresets = config.presets.filter((preset) => preset.id !== 'sf-display' && preset.id !== 'sf-text');
+    const previewText = renderedText || 'Type your text above';
+
+    return (
+      <section id="generator" aria-labelledby="visual-generator-heading" className="mt-8 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-950">
+        <div className="bg-slate-950 px-5 py-4 text-white sm:px-8 sm:py-5">
+          <h2 id="visual-generator-heading" className="text-xl font-bold sm:text-2xl">Create San Francisco-style artwork</h2>
+          <p className="mt-1.5 max-w-4xl text-sm leading-5 text-slate-300 sm:leading-6">Enter your text, compare the same phrase across SF Pro weights, then refine and download the artwork.</p>
+        </div>
+
+        <div className="space-y-8 p-5 sm:p-8">
+          <div>
+            <label htmlFor="visual-text-input" className="text-sm font-semibold text-slate-900 dark:text-white">Your text</label>
+            <textarea
+              id="visual-text-input"
+              value={inputText}
+              onChange={(event) => setInputText(event.target.value)}
+              rows={2}
+              maxLength={120}
+              placeholder="Type a short title"
+              className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-lg outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900"
+            />
+            <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-slate-500">
+              <span>Every weight preview updates as you type. Your text stays in this browser.</span>
+              <span>{inputText.length}/120</span>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="text-sm font-semibold text-slate-900 dark:text-white">
+              Font / Style
+              <select
+                aria-label="Font or style"
+                value={fontPresetId}
+                onChange={(event) => {
+                  const next = fontPresets.find((preset) => preset.id === event.target.value);
+                  if (next) selectPreset(next, true);
+                }}
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-normal dark:border-slate-700 dark:bg-slate-900"
+              >
+                {fontPresets.map((preset) => <option key={preset.id} value={preset.id}>{preset.name}</option>)}
+              </select>
+            </label>
+
+            <label className="text-sm font-semibold text-slate-900 dark:text-white">
+              Weight
+              <select
+                aria-label="Font weight"
+                value={selectedFontWeight}
+                onChange={(event) => setSelectedFontWeight(Number(event.target.value))}
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-normal dark:border-slate-700 dark:bg-slate-900"
+              >
+                {sfWeights.map((weight) => <option key={weight.value} value={weight.value}>{weight.label} {weight.value}</option>)}
+              </select>
+            </label>
+
+            <label className="text-sm font-semibold text-slate-900 dark:text-white">
+              Font size
+              <span className="float-right font-normal text-slate-500">{fontSize}px</span>
+              <input aria-label="Font size" type="range" min="44" max="180" value={fontSize} onChange={(event) => setFontSize(Number(event.target.value))} className="mt-3 block w-full" />
+            </label>
+          </div>
+
+          <p className={`rounded-xl border px-4 py-3 text-sm leading-6 ${isApplePlatform === false ? 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200' : 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200'}`}>
+            {isApplePlatform === null
+              ? 'Checking the system font environment…'
+              : isApplePlatform
+                ? 'SF Pro / San Francisco is available through the Apple system font stack.'
+                : 'San Francisco may not be installed on this device. A system UI fallback may be shown, and is not represented as SF Pro.'}
+          </p>
+
+          <section aria-labelledby="compare-sf-styles-heading">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <h3 id="compare-sf-styles-heading" className="text-xl font-black text-slate-950 dark:text-white">Compare SF Pro Styles</h3>
+                <p className="mt-1 text-sm text-slate-500">Choose a card to apply that weight to the live artwork.</p>
+              </div>
+              <p className="text-xs font-semibold text-violet-700 dark:text-violet-300">Selected: {sfWeights.find((weight) => weight.value === selectedFontWeight)?.label} {selectedFontWeight}</p>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="San Francisco font weight comparison">
+              {sfWeights.map((weight) => {
+                const selected = weight.value === selectedFontWeight;
+                return (
+                  <button
+                    key={weight.value}
+                    type="button"
+                    onClick={() => setSelectedFontWeight(weight.value)}
+                    aria-pressed={selected}
+                    className={`min-w-0 rounded-2xl border p-4 text-left transition ${selected ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-500/20 dark:bg-violet-950/30' : 'border-slate-200 bg-slate-50 hover:border-violet-300 hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:hover:border-violet-700'}`}
+                  >
+                    <span className="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                      <span>{weight.label} {weight.value}</span>
+                      {selected && <span className="rounded-full bg-violet-600 px-2 py-0.5 text-[10px] tracking-normal text-white">Selected</span>}
+                    </span>
+                    <span className="mt-3 block truncate text-2xl leading-tight text-slate-950 dark:text-white" style={{ fontFamily: currentPreset.fontFamily, fontWeight: weight.value }}>{previewText}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section aria-labelledby="sf-live-preview-heading">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 id="sf-live-preview-heading" className="text-xl font-black text-slate-950 dark:text-white">Live Artwork Preview</h3>
+                <p className="mt-1 text-xs text-slate-500">The PNG download matches this browser-rendered canvas.</p>
+              </div>
+              <select aria-label="Canvas format" value={format} onChange={(event) => setFormat(event.target.value as CanvasFormat)} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+                {Object.entries(formats).map(([id, item]) => <option key={id} value={id}>{item.label} · {item.width} × {item.height}</option>)}
+              </select>
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%),linear-gradient(-45deg,#e5e7eb_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#e5e7eb_75%),linear-gradient(-45deg,transparent_75%,#e5e7eb_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0] p-2 dark:border-slate-700 dark:opacity-95">
+              <canvas ref={canvasRef} role="img" aria-label={`${currentPreset.name} ${activeFontWeight} preview of ${renderedText || 'empty text'}`} className="block h-auto w-full rounded-xl" />
+            </div>
+            {!inputText && <p className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">Enter text to create a downloadable design.</p>}
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <button type="button" onClick={exportPng} disabled={!inputText} className="min-h-11 rounded-xl bg-violet-600 px-4 py-3 text-sm font-bold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-45">Download PNG</button>
+              <button type="button" onClick={exportSvg} disabled={!inputText} className="min-h-11 rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-45 dark:bg-white dark:text-slate-950">Download editable SVG</button>
+              <button type="button" onClick={exportFaithfulSvg} disabled={!inputText} className="min-h-11 rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-800 hover:border-violet-400 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-45 dark:border-slate-700 dark:text-slate-200">Download faithful SVG</button>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-slate-500">Editable SVG keeps selectable text and may use a fallback on another device. Faithful SVG embeds the exact canvas appearance.</p>
+            {statusMessage && <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs font-medium text-violet-800 dark:bg-violet-950/40 dark:text-violet-300" aria-live="polite">{statusMessage}</p>}
+          </section>
+
+          <section aria-labelledby="sf-customize-heading" className="grid items-start gap-4 lg:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
+              <h3 id="sf-customize-heading" className="font-black text-slate-950 dark:text-white">Basic customization</h3>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Text color
+                  <input aria-label="Text color" type="color" value={controls.textColor} onChange={(event) => setControls((value) => ({ ...value, textColor: event.target.value }))} className="mt-2 h-11 w-full rounded border border-slate-300" />
+                </label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Background color
+                  <input aria-label="Background color" type="color" value={controls.backgroundColor} disabled={transparent} onChange={(event) => setControls((value) => ({ ...value, backgroundColor: event.target.value }))} className="mt-2 h-11 w-full rounded border border-slate-300 disabled:opacity-40" />
+                </label>
+              </div>
+
+              <div className="mt-5 border-t border-slate-200 pt-4 dark:border-slate-800">
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Design presets</p>
+                <p className="mt-1 text-xs text-slate-500">These change the artwork treatment, not the font family.</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {designPresets.map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => selectPreset(preset)}
+                      aria-pressed={preset.id === presetId}
+                      className={`rounded-xl border p-3 text-left ${preset.id === presetId ? 'border-violet-500 ring-2 ring-violet-500/20' : 'border-slate-200 hover:border-violet-300 dark:border-slate-700'}`}
+                    >
+                      <span className="block font-bold text-slate-950 dark:text-white">{preset.name}</span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-500">{preset.description}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <details className="group rounded-2xl border border-slate-200 p-5 open:border-violet-300 dark:border-slate-800 dark:open:border-violet-700">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-black text-slate-950 dark:text-white">
+                Advanced customization
+                <span aria-hidden="true" className="text-xl text-violet-600 transition group-open:rotate-45">+</span>
+              </summary>
+              <p className="mt-1 text-xs text-slate-500">Spacing, outline, shadow, and transparency.</p>
+              <div className="mt-5 grid grid-cols-2 gap-4">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Letter spacing
+                  <input aria-label="Letter spacing" type="range" min="-3" max="16" value={controls.letterSpacing} onChange={(event) => setControls((value) => ({ ...value, letterSpacing: Number(event.target.value) }))} className="mt-2 w-full" />
+                  <span className="mt-1 block font-normal text-slate-500">{controls.letterSpacing}px</span>
+                </label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Outline width
+                  <input aria-label="Outline width" type="range" min="0" max="8" value={controls.strokeWidth} onChange={(event) => setControls((value) => ({ ...value, strokeWidth: Number(event.target.value) }))} className="mt-2 w-full" />
+                  <span className="mt-1 block font-normal text-slate-500">{controls.strokeWidth}px</span>
+                </label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow X
+                  <input aria-label="Horizontal shadow offset" type="range" min="-24" max="24" value={controls.shadowOffsetX} onChange={(event) => setControls((value) => ({ ...value, shadowOffsetX: Number(event.target.value) }))} className="mt-2 w-full" />
+                  <span className="mt-1 block font-normal text-slate-500">{controls.shadowOffsetX}px</span>
+                </label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow Y
+                  <input aria-label="Vertical shadow offset" type="range" min="-24" max="24" value={controls.shadowOffsetY} onChange={(event) => setControls((value) => ({ ...value, shadowOffsetY: Number(event.target.value) }))} className="mt-2 w-full" />
+                  <span className="mt-1 block font-normal text-slate-500">{controls.shadowOffsetY}px</span>
+                </label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow blur
+                  <input aria-label="Shadow blur" type="range" min="0" max="30" value={controls.shadowBlur} onChange={(event) => setControls((value) => ({ ...value, shadowBlur: Number(event.target.value) }))} className="mt-2 w-full" />
+                  <span className="mt-1 block font-normal text-slate-500">{controls.shadowBlur}px</span>
+                </label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Outline color
+                  <input aria-label="Outline color" type="color" value={controls.strokeColor} onChange={(event) => setControls((value) => ({ ...value, strokeColor: event.target.value }))} className="mt-2 h-10 w-full rounded border border-slate-300" />
+                </label>
+              </div>
+              <label className="mt-5 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                <input type="checkbox" checked={transparent} onChange={(event) => setTransparent(event.target.checked)} className="h-4 w-4 rounded border-slate-300 text-violet-600" />
+                Transparent background
+              </label>
+              <button type="button" onClick={() => { setInputText(''); setStatusMessage('Canvas cleared.'); }} className="mt-5 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-semibold hover:border-violet-400 dark:border-slate-700">Clear text</button>
+            </details>
+          </section>
+
+          <section aria-labelledby="sf-typeface-preview-heading" className="rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-300">Typeface specimen</p>
+            <h3 id="sf-typeface-preview-heading" className="mt-1 text-xl font-black text-slate-950 dark:text-white">Typeface Preview</h3>
+            <div className="mt-4 space-y-2 break-words text-2xl leading-snug text-slate-950 sm:text-3xl dark:text-white" style={{ fontFamily: currentPreset.fontFamily, fontWeight: activeFontWeight }}>
+              <p>ABCDEFGHIJKLMNOPQRSTUVWXYZ</p>
+              <p>abcdefghijklmnopqrstuvwxyz</p>
+              <p>0123456789</p>
+              <p>! ? @ # $ % &amp;</p>
+              <p className="pt-2 text-xl sm:text-2xl">The quick brown fox jumps over the lazy dog.</p>
+            </div>
+            <dl className="mt-5 grid gap-2 text-xs sm:grid-cols-3">
+              <div><dt className="font-bold text-slate-700 dark:text-slate-300">Requested weight</dt><dd className="mt-1 text-slate-500">{activeFontWeight}</dd></div>
+              <div><dt className="font-bold text-slate-700 dark:text-slate-300">Font style</dt><dd className="mt-1 text-slate-500">{fontPresetId === 'sf-text' ? 'SF Text / System UI' : 'SF Display / System UI'}</dd></div>
+              <div><dt className="font-bold text-slate-700 dark:text-slate-300">Font stack</dt><dd className="mt-1 break-words text-slate-500">{currentPreset.fontFamily}</dd></div>
+            </dl>
+          </section>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+            <p><strong className="text-slate-800 dark:text-slate-200">Font source:</strong> Apple system UI stack when available; otherwise the device&apos;s system UI fallback.</p>
+            <p className="mt-1"><strong className="text-slate-800 dark:text-slate-200">Licensing:</strong> No Apple SF Pro font files are uploaded, bundled, or redistributed by this site.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="generator" aria-labelledby="visual-generator-heading" className="mt-8 rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-950">

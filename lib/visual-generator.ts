@@ -212,12 +212,12 @@ const configs: Record<string, VisualGeneratorConfig> = {
     engine: 'font-renderer',
     initialText: 'Designed for clarity',
     intentLabel: 'Apple-style UI preview',
-    resultIntro: 'Preview text through the Apple system UI font stack and test app-header, notification, and product-card typography.',
+    resultIntro: 'Type your text, compare SF Pro-style weights through the Apple system UI stack, customize the artwork, and export PNG or SVG.',
     bestFor: ['UI mockups', 'Product cards', 'App headings'],
     compatibilityNote: 'Apple platforms resolve -apple-system to San Francisco. Other platforms use their native UI sans; SF Pro files are not redistributed.',
     capabilities: ['font-specimen'],
     presets: [
-      preset('sf-display', 'SF Display / System UI', 'A large Apple system heading when viewed on an Apple device.', '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', { targetFont: 'SF Pro Display', fontWeight: 700, textColor: '#111827', backgroundColor: '#f8fafc', letterSpacing: -2 }),
+      preset('sf-display', 'SF Display / System UI', 'A large Apple system heading when viewed on an Apple device.', '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', { targetFont: 'SF Pro Display', fontWeight: 400, textColor: '#111827', backgroundColor: '#f8fafc', letterSpacing: -2 }),
       preset('sf-text', 'SF Text / System UI', 'A medium-weight interface label optimized for clarity.', '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', { targetFont: 'SF Pro Text', fontWeight: 500, textColor: '#1f2937', backgroundColor: '#ffffff' }),
       preset('sf-notification', 'Notification', 'Compact white interface text on a translucent dark card.', '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', { targetFont: 'SF Pro Text', fontWeight: 600, textColor: '#ffffff', backgroundColor: '#334155', letterSpacing: -1, decoration: 'badge' }),
       preset('sf-product', 'Product Headline', 'A restrained product-marketing headline.', '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', { targetFont: 'SF Pro Display', fontWeight: 800, textColor: '#030712', backgroundColor: '#e5e7eb', letterSpacing: -3 }),
@@ -541,6 +541,9 @@ export const getSpecializedHowTo = (slug: string): string | null => {
   }
   if (slug === 'minecraft-font-generator') {
     return 'Choose Game Text for compact pixel lettering, select one of the 16 base colors, and add § or & codes when individual words need different colors or formatting. Adjust scale, shadow, spacing, and alignment, then copy the formatting-code text for a compatible field or export the exact artwork as PNG or faithful SVG. Switch to Block Logo for grass, stone, diamond, or nether material with adjustable outline and 3D depth.';
+  }
+  if (slug === 'san-francisco-font-generator') {
+    return 'Enter one phrase, choose SF Display or SF Text, and compare it across nine requested weights. Click a weight card to apply it to the live canvas, adjust the basic colors or optional advanced effects, then export PNG, editable SVG, or faithful SVG.';
   }
   const config = configs[slug];
   if (!config) return null;
