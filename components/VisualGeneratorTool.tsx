@@ -507,6 +507,8 @@ export default function VisualGeneratorTool({
         </div>
 
         <div className="space-y-8 p-5 sm:p-8">
+          <div className="grid items-start gap-7 xl:grid-cols-[320px_minmax(0,1fr)]">
+            <div className="space-y-5">
           <div>
             <label htmlFor="visual-text-input" className="text-sm font-semibold text-slate-900 dark:text-white">Your text</label>
             <textarea
@@ -516,7 +518,7 @@ export default function VisualGeneratorTool({
               rows={2}
               maxLength={120}
               placeholder="Type a short title"
-              className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-lg outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900"
+              className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-lg outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900"
             />
             <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-slate-500">
               <span>Every weight preview updates as you type. Your text stays in this browser.</span>
@@ -524,7 +526,7 @@ export default function VisualGeneratorTool({
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="space-y-4">
             <label className="text-sm font-semibold text-slate-900 dark:text-white">
               Font / Style
               <select
@@ -559,19 +561,20 @@ export default function VisualGeneratorTool({
             </label>
           </div>
 
-          <p className={`rounded-xl border px-4 py-3 text-sm leading-6 ${isApplePlatform === false ? 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200' : 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200'}`}>
+          <p className={`text-xs leading-5 ${isApplePlatform === false ? 'text-amber-700 dark:text-amber-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
             {isApplePlatform === null
               ? 'Checking the system font environment…'
               : isApplePlatform
                 ? 'SF Pro / San Francisco is available through the Apple system font stack.'
                 : 'San Francisco may not be installed on this device. A system UI fallback may be shown, and is not represented as SF Pro.'}
           </p>
+            </div>
 
-          <section aria-labelledby="compare-sf-styles-heading">
+          <section aria-labelledby="compare-sf-styles-heading" className="order-3 border-t border-slate-200 pt-6 xl:col-span-2 dark:border-slate-800">
             <div className="flex flex-wrap items-end justify-between gap-2">
               <div>
-                <h3 id="compare-sf-styles-heading" className="text-xl font-black text-slate-950 dark:text-white">Compare SF Pro Styles</h3>
-                <p className="mt-1 text-sm text-slate-500">Choose a card to apply that weight to the live artwork.</p>
+                <h3 id="compare-sf-styles-heading" className="text-lg font-black text-slate-950 dark:text-white">Compare weights</h3>
+                <p className="mt-1 text-xs text-slate-500">Same text, nine requested weights. Click one to apply it.</p>
               </div>
               <p className="text-xs font-semibold text-violet-700 dark:text-violet-300">Selected: {sfWeights.find((weight) => weight.value === selectedFontWeight)?.label} {selectedFontWeight}</p>
             </div>
@@ -584,20 +587,20 @@ export default function VisualGeneratorTool({
                     type="button"
                     onClick={() => setSelectedFontWeight(weight.value)}
                     aria-pressed={selected}
-                    className={`min-w-0 rounded-2xl border p-4 text-left transition ${selected ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-500/20 dark:bg-violet-950/30' : 'border-slate-200 bg-slate-50 hover:border-violet-300 hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:hover:border-violet-700'}`}
+                    className={`min-w-0 rounded-xl border px-3 py-2.5 text-left transition ${selected ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-500/15 dark:bg-violet-950/30' : 'border-slate-200 hover:border-violet-300 dark:border-slate-800 dark:hover:border-violet-700'}`}
                   >
                     <span className="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-wide text-slate-500">
                       <span>{weight.label} {weight.value}</span>
                       {selected && <span className="rounded-full bg-violet-600 px-2 py-0.5 text-[10px] tracking-normal text-white">Selected</span>}
                     </span>
-                    <span className="mt-3 block truncate text-2xl leading-tight text-slate-950 dark:text-white" style={{ fontFamily: currentPreset.fontFamily, fontWeight: weight.value }}>{previewText}</span>
+                    <span className="mt-2 block truncate text-lg leading-tight text-slate-950 dark:text-white" style={{ fontFamily: currentPreset.fontFamily, fontWeight: weight.value }}>{previewText}</span>
                   </button>
                 );
               })}
             </div>
           </section>
 
-          <section aria-labelledby="sf-live-preview-heading">
+          <section aria-labelledby="sf-live-preview-heading" className="order-2 min-w-0">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 id="sf-live-preview-heading" className="text-xl font-black text-slate-950 dark:text-white">Live Artwork Preview</h3>
@@ -619,99 +622,106 @@ export default function VisualGeneratorTool({
             <p className="mt-2 text-xs leading-5 text-slate-500">Editable SVG keeps selectable text and may use a fallback on another device. Faithful SVG embeds the exact canvas appearance.</p>
             {statusMessage && <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs font-medium text-violet-800 dark:bg-violet-950/40 dark:text-violet-300" aria-live="polite">{statusMessage}</p>}
           </section>
+          </div>
 
-          <section aria-labelledby="sf-customize-heading" className="grid items-start gap-4 lg:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 p-5 dark:border-slate-800">
-              <h3 id="sf-customize-heading" className="font-black text-slate-950 dark:text-white">Basic customization</h3>
-              <div className="mt-4 grid grid-cols-2 gap-4">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Text color
-                  <input aria-label="Text color" type="color" value={controls.textColor} onChange={(event) => setControls((value) => ({ ...value, textColor: event.target.value }))} className="mt-2 h-11 w-full rounded border border-slate-300" />
-                </label>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Background color
-                  <input aria-label="Background color" type="color" value={controls.backgroundColor} disabled={transparent} onChange={(event) => setControls((value) => ({ ...value, backgroundColor: event.target.value }))} className="mt-2 h-11 w-full rounded border border-slate-300 disabled:opacity-40" />
-                </label>
-              </div>
+          <details aria-labelledby="sf-customize-heading" className="group border-t border-slate-200 pt-5 dark:border-slate-800">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+              <span>
+                <span id="sf-customize-heading" className="block font-black text-slate-950 dark:text-white">Customize colors &amp; effects</span>
+                <span className="mt-1 block text-xs text-slate-500">Optional presets, colors, spacing, outline, shadow, and transparency.</span>
+              </span>
+              <span aria-hidden="true" className="text-xl text-violet-600 transition group-open:rotate-45">+</span>
+            </summary>
 
-              <div className="mt-5 border-t border-slate-200 pt-4 dark:border-slate-800">
-                <p className="text-sm font-bold text-slate-900 dark:text-white">Design presets</p>
-                <p className="mt-1 text-xs text-slate-500">These change the artwork treatment, not the font family.</p>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <div className="mt-6 grid gap-8 lg:grid-cols-2">
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Colors &amp; scene presets</h4>
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Text color
+                    <input aria-label="Text color" type="color" value={controls.textColor} onChange={(event) => setControls((value) => ({ ...value, textColor: event.target.value }))} className="mt-2 h-11 w-full rounded border border-slate-300" />
+                  </label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Background color
+                    <input aria-label="Background color" type="color" value={controls.backgroundColor} disabled={transparent} onChange={(event) => setControls((value) => ({ ...value, backgroundColor: event.target.value }))} className="mt-2 h-11 w-full rounded border border-slate-300 disabled:opacity-40" />
+                  </label>
+                </div>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
                   {designPresets.map((preset) => (
                     <button
                       key={preset.id}
                       type="button"
                       onClick={() => selectPreset(preset)}
                       aria-pressed={preset.id === presetId}
-                      className={`rounded-xl border p-3 text-left ${preset.id === presetId ? 'border-violet-500 ring-2 ring-violet-500/20' : 'border-slate-200 hover:border-violet-300 dark:border-slate-700'}`}
+                      className={`rounded-xl border px-3 py-2 text-left ${preset.id === presetId ? 'border-violet-500 ring-2 ring-violet-500/15' : 'border-slate-200 hover:border-violet-300 dark:border-slate-700'}`}
                     >
-                      <span className="block font-bold text-slate-950 dark:text-white">{preset.name}</span>
-                      <span className="mt-1 block text-xs leading-5 text-slate-500">{preset.description}</span>
+                      <span className="block text-sm font-bold text-slate-950 dark:text-white">{preset.name}</span>
+                      <span className="mt-0.5 block text-[11px] leading-4 text-slate-500">{preset.description}</span>
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
 
-            <details className="group rounded-2xl border border-slate-200 p-5 open:border-violet-300 dark:border-slate-800 dark:open:border-violet-700">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-black text-slate-950 dark:text-white">
-                Advanced customization
-                <span aria-hidden="true" className="text-xl text-violet-600 transition group-open:rotate-45">+</span>
-              </summary>
-              <p className="mt-1 text-xs text-slate-500">Spacing, outline, shadow, and transparency.</p>
-              <div className="mt-5 grid grid-cols-2 gap-4">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Letter spacing
-                  <input aria-label="Letter spacing" type="range" min="-3" max="16" value={controls.letterSpacing} onChange={(event) => setControls((value) => ({ ...value, letterSpacing: Number(event.target.value) }))} className="mt-2 w-full" />
-                  <span className="mt-1 block font-normal text-slate-500">{controls.letterSpacing}px</span>
-                </label>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Outline width
-                  <input aria-label="Outline width" type="range" min="0" max="8" value={controls.strokeWidth} onChange={(event) => setControls((value) => ({ ...value, strokeWidth: Number(event.target.value) }))} className="mt-2 w-full" />
-                  <span className="mt-1 block font-normal text-slate-500">{controls.strokeWidth}px</span>
-                </label>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow X
-                  <input aria-label="Horizontal shadow offset" type="range" min="-24" max="24" value={controls.shadowOffsetX} onChange={(event) => setControls((value) => ({ ...value, shadowOffsetX: Number(event.target.value) }))} className="mt-2 w-full" />
-                  <span className="mt-1 block font-normal text-slate-500">{controls.shadowOffsetX}px</span>
-                </label>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow Y
-                  <input aria-label="Vertical shadow offset" type="range" min="-24" max="24" value={controls.shadowOffsetY} onChange={(event) => setControls((value) => ({ ...value, shadowOffsetY: Number(event.target.value) }))} className="mt-2 w-full" />
-                  <span className="mt-1 block font-normal text-slate-500">{controls.shadowOffsetY}px</span>
-                </label>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow blur
-                  <input aria-label="Shadow blur" type="range" min="0" max="30" value={controls.shadowBlur} onChange={(event) => setControls((value) => ({ ...value, shadowBlur: Number(event.target.value) }))} className="mt-2 w-full" />
-                  <span className="mt-1 block font-normal text-slate-500">{controls.shadowBlur}px</span>
-                </label>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Outline color
-                  <input aria-label="Outline color" type="color" value={controls.strokeColor} onChange={(event) => setControls((value) => ({ ...value, strokeColor: event.target.value }))} className="mt-2 h-10 w-full rounded border border-slate-300" />
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Spacing &amp; effects</h4>
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Letter spacing
+                    <input aria-label="Letter spacing" type="range" min="-3" max="16" value={controls.letterSpacing} onChange={(event) => setControls((value) => ({ ...value, letterSpacing: Number(event.target.value) }))} className="mt-2 w-full" />
+                    <span className="mt-1 block font-normal text-slate-500">{controls.letterSpacing}px</span>
+                  </label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Outline width
+                    <input aria-label="Outline width" type="range" min="0" max="8" value={controls.strokeWidth} onChange={(event) => setControls((value) => ({ ...value, strokeWidth: Number(event.target.value) }))} className="mt-2 w-full" />
+                    <span className="mt-1 block font-normal text-slate-500">{controls.strokeWidth}px</span>
+                  </label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow X
+                    <input aria-label="Horizontal shadow offset" type="range" min="-24" max="24" value={controls.shadowOffsetX} onChange={(event) => setControls((value) => ({ ...value, shadowOffsetX: Number(event.target.value) }))} className="mt-2 w-full" />
+                    <span className="mt-1 block font-normal text-slate-500">{controls.shadowOffsetX}px</span>
+                  </label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow Y
+                    <input aria-label="Vertical shadow offset" type="range" min="-24" max="24" value={controls.shadowOffsetY} onChange={(event) => setControls((value) => ({ ...value, shadowOffsetY: Number(event.target.value) }))} className="mt-2 w-full" />
+                    <span className="mt-1 block font-normal text-slate-500">{controls.shadowOffsetY}px</span>
+                  </label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Shadow blur
+                    <input aria-label="Shadow blur" type="range" min="0" max="30" value={controls.shadowBlur} onChange={(event) => setControls((value) => ({ ...value, shadowBlur: Number(event.target.value) }))} className="mt-2 w-full" />
+                    <span className="mt-1 block font-normal text-slate-500">{controls.shadowBlur}px</span>
+                  </label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Outline color
+                    <input aria-label="Outline color" type="color" value={controls.strokeColor} onChange={(event) => setControls((value) => ({ ...value, strokeColor: event.target.value }))} className="mt-2 h-10 w-full rounded border border-slate-300" />
+                  </label>
+                </div>
+                <label className="mt-5 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <input type="checkbox" checked={transparent} onChange={(event) => setTransparent(event.target.checked)} className="h-4 w-4 rounded border-slate-300 text-violet-600" />
+                  Transparent background
                 </label>
               </div>
-              <label className="mt-5 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                <input type="checkbox" checked={transparent} onChange={(event) => setTransparent(event.target.checked)} className="h-4 w-4 rounded border-slate-300 text-violet-600" />
-                Transparent background
-              </label>
-              <button type="button" onClick={() => { setInputText(''); setStatusMessage('Canvas cleared.'); }} className="mt-5 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-semibold hover:border-violet-400 dark:border-slate-700">Clear text</button>
-            </details>
-          </section>
-
-          <section aria-labelledby="sf-typeface-preview-heading" className="rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6 dark:border-slate-800 dark:bg-slate-900">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-300">Typeface specimen</p>
-            <h3 id="sf-typeface-preview-heading" className="mt-1 text-xl font-black text-slate-950 dark:text-white">Typeface Preview</h3>
-            <div className="mt-4 space-y-2 break-words text-2xl leading-snug text-slate-950 sm:text-3xl dark:text-white" style={{ fontFamily: currentPreset.fontFamily, fontWeight: activeFontWeight }}>
-              <p>ABCDEFGHIJKLMNOPQRSTUVWXYZ</p>
-              <p>abcdefghijklmnopqrstuvwxyz</p>
-              <p>0123456789</p>
-              <p>! ? @ # $ % &amp;</p>
-              <p className="pt-2 text-xl sm:text-2xl">The quick brown fox jumps over the lazy dog.</p>
             </div>
-            <dl className="mt-5 grid gap-2 text-xs sm:grid-cols-3">
-              <div><dt className="font-bold text-slate-700 dark:text-slate-300">Requested weight</dt><dd className="mt-1 text-slate-500">{activeFontWeight}</dd></div>
-              <div><dt className="font-bold text-slate-700 dark:text-slate-300">Font style</dt><dd className="mt-1 text-slate-500">{fontPresetId === 'sf-text' ? 'SF Text / System UI' : 'SF Display / System UI'}</dd></div>
-              <div><dt className="font-bold text-slate-700 dark:text-slate-300">Font stack</dt><dd className="mt-1 break-words text-slate-500">{currentPreset.fontFamily}</dd></div>
-            </dl>
-          </section>
+            <button type="button" onClick={() => { setInputText(''); setStatusMessage('Canvas cleared.'); }} className="mt-6 text-xs font-semibold text-slate-500 hover:text-violet-700 dark:hover:text-violet-300">Clear text</button>
+          </details>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-            <p><strong className="text-slate-800 dark:text-slate-200">Font source:</strong> Apple system UI stack when available; otherwise the device&apos;s system UI fallback.</p>
-            <p className="mt-1"><strong className="text-slate-800 dark:text-slate-200">Licensing:</strong> No Apple SF Pro font files are uploaded, bundled, or redistributed by this site.</p>
-          </div>
+          <details aria-labelledby="sf-typeface-preview-heading" className="group border-t border-slate-200 pt-5 dark:border-slate-800">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+              <span>
+                <span id="sf-typeface-preview-heading" className="block font-black text-slate-950 dark:text-white">Typeface Preview</span>
+                <span className="mt-1 block text-xs leading-5 text-slate-500">Optional character-set reference for the selected style and weight—not the generated artwork.</span>
+              </span>
+              <span aria-hidden="true" className="text-xl text-violet-600 transition group-open:rotate-45">+</span>
+            </summary>
+            <div className="mt-5">
+              <div className="space-y-1 break-words text-xl leading-snug text-slate-950 sm:text-2xl dark:text-white" style={{ fontFamily: currentPreset.fontFamily, fontWeight: activeFontWeight }}>
+                <p>ABCDEFGHIJKLMNOPQRSTUVWXYZ</p>
+                <p>abcdefghijklmnopqrstuvwxyz</p>
+                <p>0123456789 · ! ? @ # $ % &amp;</p>
+                <p className="pt-2 text-lg">The quick brown fox jumps over the lazy dog.</p>
+              </div>
+              <dl className="mt-5 grid gap-3 text-xs sm:grid-cols-3">
+                <div><dt className="font-bold text-slate-700 dark:text-slate-300">Requested weight</dt><dd className="mt-1 text-slate-500">{activeFontWeight}</dd></div>
+                <div><dt className="font-bold text-slate-700 dark:text-slate-300">Font style</dt><dd className="mt-1 text-slate-500">{fontPresetId === 'sf-text' ? 'SF Text / System UI' : 'SF Display / System UI'}</dd></div>
+                <div><dt className="font-bold text-slate-700 dark:text-slate-300">Font stack</dt><dd className="mt-1 break-words text-slate-500">{currentPreset.fontFamily}</dd></div>
+              </dl>
+              <div className="mt-5 border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500 dark:border-slate-800">
+                <p><strong className="text-slate-700 dark:text-slate-300">Font source:</strong> Apple system UI stack when available; otherwise the device&apos;s system UI fallback.</p>
+                <p className="mt-1"><strong className="text-slate-700 dark:text-slate-300">Licensing:</strong> No Apple SF Pro font files are uploaded, bundled, or redistributed by this site.</p>
+              </div>
+            </div>
+          </details>
         </div>
       </section>
     );

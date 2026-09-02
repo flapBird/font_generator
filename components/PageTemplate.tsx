@@ -83,11 +83,11 @@ function SanFranciscoContent() {
         <p className="mt-4 leading-8 text-slate-700 dark:text-slate-300">The comparison tool requests nine CSS weights from Thin 100 through Black 900. A browser or fallback font may map an unavailable weight to its nearest installed face, so the result can differ by device. Selecting a card applies that requested weight to the artwork preview and all exports.</p>
       </section>
 
-      <section className="rounded-3xl border border-violet-200 bg-violet-50/70 p-6 sm:p-8 dark:border-violet-900/60 dark:bg-violet-950/20">
+      <section className="border-t border-slate-200 pt-8 dark:border-slate-800">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">Official source</p>
         <h2 className="mt-2 text-2xl font-black text-slate-950 dark:text-white">Get SF Pro</h2>
         <p className="mt-3 leading-7 text-slate-700 dark:text-slate-300">Download SF Pro only from Apple and review Apple&apos;s current license before using it. This site does not provide a font download.</p>
-        <a href="https://developer.apple.com/fonts/" target="_blank" rel="noreferrer" className="mt-5 inline-flex rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white hover:bg-violet-500">Open Apple&apos;s official font page ↗</a>
+        <a href="https://developer.apple.com/fonts/" target="_blank" rel="noreferrer" className="mt-3 inline-flex text-sm font-bold text-violet-700 hover:text-violet-900 dark:text-violet-300 dark:hover:text-violet-200">Apple&apos;s official SF Pro page →</a>
       </section>
     </div>
   );
