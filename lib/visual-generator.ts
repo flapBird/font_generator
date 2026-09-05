@@ -305,7 +305,7 @@ const configs: Record<string, VisualGeneratorConfig> = {
   'ransom-note-font-generator': {
     engine: 'theme-renderer',
     initialText: 'SECRET MESSAGE',
-    fitTextToCanvas: false,
+    fitTextToCanvas: true,
     intentLabel: 'Cutout artwork and copyable mixed text',
     resultIntro: 'Create deliberately mismatched cutout-style lettering with alternating typefaces, paper tiles, colors, and rotation.',
     bestFor: ['Escape rooms', 'Halloween props', 'Party graphics'],
@@ -537,7 +537,7 @@ export const getSpecializedFaq = (slug: string, pageTitle: string) => {
 
 export const getSpecializedHowTo = (slug: string): string | null => {
   if (slug === 'big-font-generator') {
-    return 'Enter one to three short lines, choose an ASCII banner style, and set the alignment and colors. Copy the plain-text result for monospace destinations, or download TXT, PNG, or SVG for a portable layout.';
+    return 'Enter up to 72 characters with manual line breaks, choose an ASCII banner style, and set the alignment and colors. Copy the plain-text result for monospace destinations, or download TXT, PNG, or SVG for a portable layout.';
   }
   if (slug === 'minecraft-font-generator') {
     return 'Choose Game Text for compact pixel lettering, select one of the 16 base colors, and add § or & codes when individual words need different colors or formatting. Adjust scale, shadow, spacing, and alignment, then copy the formatting-code text for a compatible field or export the exact artwork as PNG or faithful SVG. Switch to Block Logo for grass, stone, diamond, or nether material with adjustable outline and 3D depth.';

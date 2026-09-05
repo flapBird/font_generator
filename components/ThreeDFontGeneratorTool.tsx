@@ -170,11 +170,12 @@ const drawArtwork = (canvas: HTMLCanvasElement, config: ThreeDTextConfig, render
   const font = (size: number) => `900 ${size}px ${config.fontFamily}`;
   context.font = font(fittedSize);
   const maxLineWidth = () => Math.max(...lines.map((line) => measureSpacedText(context, line, config.letterSpacing)), 1);
-  while ((maxLineWidth() > availableWidth || fittedSize * 1.08 * lines.length > availableHeight) && fittedSize > 42) {
+  while ((maxLineWidth() > availableWidth || fittedSize * 1.08 * lines.length > availableHeight) && fittedSize > 12) {
     fittedSize -= 4;
     context.font = font(fittedSize);
   }
 
+  const horizontalScale = Math.min(1, availableWidth / maxLineWidth());
   const lineHeight = fittedSize * 1.08;
   const totalTextHeight = lineHeight * lines.length;
   const centerY = CANVAS_HEIGHT / 2 - depthY * 0.32;
@@ -190,7 +191,9 @@ const drawArtwork = (canvas: HTMLCanvasElement, config: ThreeDTextConfig, render
       const baseline = firstBaseline + index * lineHeight;
       context.save();
       context.transform(1, 0, shear, 1, offsetX - shear * centerY, offsetY);
-      drawSpacedText(context, line, anchorX, baseline, config.letterSpacing, config.alignment, mode);
+      context.translate(anchorX, 0);
+      context.scale(horizontalScale, 1);
+      drawSpacedText(context, line, 0, baseline, config.letterSpacing, config.alignment, mode);
       context.restore();
     });
   };
@@ -365,7 +368,7 @@ export default function ThreeDFontGeneratorTool() {
     <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_28px_80px_-56px_rgba(15,23,42,0.65)] sm:p-6 dark:border-slate-800 dark:bg-slate-950" aria-label="3D text design tool">
       <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-900">
         <label htmlFor="three-d-text" className="text-sm font-black text-slate-950 dark:text-white">Enter your text</label>
-        <textarea id="three-d-text" value={config.text} maxLength={80} rows={2} onChange={(event) => update('text', event.target.value.split('\n').slice(0, 3).join('\n'))} placeholder="Type up to three short lines" className="mt-2 w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-xl font-bold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white" />
+        <textarea id="three-d-text" value={config.text} maxLength={80} rows={2} onChange={(event) => update('text', event.target.value.split('\n').slice(0, 3).join('\n'))} placeholder="3D Font Generator" className="mt-2 w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-xl font-bold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white" />
         <div className="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500">
           <span>Updates instantly—no Generate button.</span>
           <span>{config.text.length}/80</span>

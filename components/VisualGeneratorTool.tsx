@@ -1,5 +1,7 @@
 'use client';
 
+import { useGeneratorText } from '@/lib/use-generator-text';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { VisualFontPreset, VisualGeneratorConfig } from '@/lib/visual-generator';
 import { convertToFancyText } from '@/lib/fonts';
@@ -19,7 +21,7 @@ const formats: Record<CanvasFormat, { label: string; width: number; height: numb
 };
 
 const LINE_HEIGHT_RATIO = 1.18;
-const MIN_FITTED_FONT_SIZE = 24;
+const MIN_FITTED_FONT_SIZE = 1;
 const TEXT_AREA_RATIO = 0.84;
 
 const palette = ['#ef4444', '#3b82f6', '#facc15', '#22c55e', '#a855f7', '#f97316'];
@@ -58,7 +60,8 @@ const downloadBlob = (blob: Blob, filename: string) => {
 };
 
 const applyPreset = (preset: VisualFontPreset) => ({
-  textColor: preset.textColor,
+  textColor: preset.gradient?.[0] ?? preset.textColor,
+  gradientEnd: preset.gradient?.[1] ?? preset.textColor,
   backgroundColor: preset.backgroundColor,
   strokeColor: preset.strokeColor ?? '#000000',
   strokeWidth: preset.strokeWidth ?? 0,
@@ -75,7 +78,7 @@ export default function VisualGeneratorTool({
   const isSanFrancisco = pageTitle === 'San Francisco Font Generator';
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mobileCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [inputText, setInputText] = useState(config.initialText);
+  const [inputText, setInputText] = useGeneratorText(pageTitle);
   const [presetId, setPresetId] = useState(config.presets[0]?.id ?? '');
   const [fontSize, setFontSize] = useState(112);
   const [format, setFormat] = useState<CanvasFormat>('banner');
@@ -190,15 +193,23 @@ export default function VisualGeneratorTool({
     const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${activeFontWeight} ${size}px ${currentPreset.fontFamily}`;
     let resolvedSize = fontSize;
 
-    while (config.fitTextToCanvas !== false && resolvedSize > MIN_FITTED_FONT_SIZE) {
-      context.font = fontSpec(resolvedSize);
-      const exceedsWidth = lines.some((line) => (
-        context.measureText(line).width
-        + Math.max(0, segmentGraphemes(line).length - 1) * controls.letterSpacing
-        > maxWidth
-      ));
-      if (!exceedsWidth) break;
-      resolvedSize = Math.max(MIN_FITTED_FONT_SIZE, resolvedSize - 2);
+    const measureLine = (line: string, size: number) => {
+      const characters = segmentGraphemes(line);
+      const spacing = controls.letterSpacing * size / fontSize;
+      if (!spacing && !currentPreset.multicolor && currentPreset.decoration !== 'ransom') {
+        context.font = fontSpec(size);
+        return context.measureText(line).width;
+      }
+      return characters.reduce((total, character, index) => {
+        const family = currentPreset.fontAlternates?.[index % currentPreset.fontAlternates.length] ?? currentPreset.fontFamily;
+        context.font = `${currentPreset.fontStyle ?? 'normal'} ${activeFontWeight} ${size}px ${family}`;
+        return total + context.measureText(character).width;
+      }, 0) + Math.max(0, characters.length - 1) * spacing
+        + (currentPreset.decoration === 'ransom' ? size * 0.6 : 0);
+    };
+    while (resolvedSize > MIN_FITTED_FONT_SIZE) {
+      if (lines.every((line) => measureLine(line, resolvedSize) <= maxWidth)) break;
+      resolvedSize = Math.max(MIN_FITTED_FONT_SIZE, resolvedSize - 1);
     }
 
     context.font = fontSpec(resolvedSize);
@@ -208,7 +219,7 @@ export default function VisualGeneratorTool({
       fontSize: resolvedSize,
       height: Math.max(minimumHeight, Math.ceil(textHeight + verticalPadding)),
     };
-  }, [activeFontWeight, config.fitTextToCanvas, controls.letterSpacing, controls.shadowBlur, controls.shadowOffsetX, controls.shadowOffsetY, controls.strokeWidth, currentPreset, fontSize]);
+  }, [activeFontWeight, controls.letterSpacing, controls.shadowBlur, controls.shadowOffsetX, controls.shadowOffsetY, controls.strokeWidth, currentPreset, fontSize]);
 
   const drawCanvas = useCallback((canvas: HTMLCanvasElement) => {
     if (!currentPreset) return;
@@ -248,8 +259,9 @@ export default function VisualGeneratorTool({
 
     const fontSpec = (size: number) => `${currentPreset.fontStyle ?? 'normal'} ${activeFontWeight} ${size}px ${currentPreset.fontFamily}`;
     const resolvedSize = hasCapability('pixel-snap')
-      ? Math.max(MIN_FITTED_FONT_SIZE, Math.round(layout.fontSize / 8) * 8)
+      ? layout.fontSize >= 8 ? Math.floor(layout.fontSize / 8) * 8 : layout.fontSize
       : layout.fontSize;
+    const resolvedSpacing = controls.letterSpacing * resolvedSize / fontSize;
     const lineHeight = resolvedSize * LINE_HEIGHT_RATIO;
     const totalHeight = lineHeight * lines.length;
     const startY = (canvas.height - totalHeight) / 2 + resolvedSize * 0.92;
@@ -317,7 +329,7 @@ export default function VisualGeneratorTool({
     }
 
     const drawSpacedText = (line: string, x: number, y: number, mode: 'fill' | 'stroke') => {
-      if (!controls.letterSpacing && !currentPreset.multicolor && currentPreset.decoration !== 'ransom') {
+      if (!resolvedSpacing && !currentPreset.multicolor && currentPreset.decoration !== 'ransom') {
         if (mode === 'stroke') context.strokeText(line, x, y);
         else context.fillText(line, x, y);
         return;
@@ -328,7 +340,7 @@ export default function VisualGeneratorTool({
         context.font = `${currentPreset.fontStyle ?? 'normal'} ${activeFontWeight} ${resolvedSize}px ${fontForIndex(index)}`;
         return context.measureText(character).width;
       });
-      const totalWidth = widths.reduce((sum, width) => sum + width, 0) + Math.max(0, characters.length - 1) * controls.letterSpacing;
+      const totalWidth = widths.reduce((sum, width) => sum + width, 0) + Math.max(0, characters.length - 1) * resolvedSpacing;
       let cursor = x - totalWidth / 2;
       context.textAlign = 'left';
       characters.forEach((character, index) => {
@@ -351,7 +363,7 @@ export default function VisualGeneratorTool({
           context.restore();
         } else if (mode === 'stroke') context.strokeText(character, cursor, y);
         else context.fillText(character, cursor, y);
-        cursor += widths[index] + controls.letterSpacing;
+        cursor += widths[index] + resolvedSpacing;
       });
       context.textAlign = 'center';
       context.font = fontSpec(resolvedSize);
@@ -374,15 +386,15 @@ export default function VisualGeneratorTool({
       }
       if (currentPreset.gradient) {
         const gradient = context.createLinearGradient(0, y - resolvedSize, 0, y + resolvedSize * 0.2);
-        gradient.addColorStop(0, currentPreset.gradient[0]);
-        gradient.addColorStop(1, currentPreset.gradient[1]);
+        gradient.addColorStop(0, controls.textColor);
+        gradient.addColorStop(1, controls.gradientEnd);
         context.fillStyle = gradient;
       } else {
         context.fillStyle = controls.textColor;
       }
       drawSpacedText(line, canvas.width / 2, y, 'fill');
     });
-  }, [activeFontWeight, backgroundImage, controls, currentPreset, dimensions, hasCapability, renderedText, resolveTextLayout, transparent]);
+  }, [activeFontWeight, backgroundImage, controls, currentPreset, dimensions, fontSize, hasCapability, renderedText, resolveTextLayout, transparent]);
 
   useEffect(() => {
     if (canvasRef.current) drawCanvas(canvasRef.current);
@@ -408,15 +420,16 @@ export default function VisualGeneratorTool({
       ? resolveTextLayout(measureContext, lines, width, dimensions.height)
       : { fontSize, height: dimensions.height };
     const resolvedSize = hasCapability('pixel-snap')
-      ? Math.max(MIN_FITTED_FONT_SIZE, Math.round(layout.fontSize / 8) * 8)
+      ? layout.fontSize >= 8 ? Math.floor(layout.fontSize / 8) * 8 : layout.fontSize
       : layout.fontSize;
     const height = layout.height;
+    const resolvedSpacing = controls.letterSpacing * resolvedSize / fontSize;
     const lineHeight = resolvedSize * LINE_HEIGHT_RATIO;
     const startY = (height - lineHeight * lines.length) / 2 + resolvedSize * 0.92;
     const gradientId = `gradient-${currentPreset.id}`;
     const filterId = `shadow-${currentPreset.id}`;
     const fill = currentPreset.gradient ? `url(#${gradientId})` : controls.textColor;
-    const textAttributes = `font-family="${escapeXml(currentPreset.fontFamily)}" font-size="${resolvedSize}" font-weight="${activeFontWeight}" font-style="${currentPreset.fontStyle ?? 'normal'}" letter-spacing="${controls.letterSpacing}" fill="${fill}" stroke="${controls.strokeWidth ? controls.strokeColor : 'none'}" stroke-width="${controls.strokeWidth * 2}" paint-order="stroke fill" filter="url(#${filterId})"`;
+    const textAttributes = `font-family="${escapeXml(currentPreset.fontFamily)}" font-size="${resolvedSize}" font-weight="${activeFontWeight}" font-style="${currentPreset.fontStyle ?? 'normal'}" letter-spacing="${resolvedSpacing}" fill="${fill}" stroke="${controls.strokeWidth ? controls.strokeColor : 'none'}" stroke-width="${controls.strokeWidth * 2}" paint-order="stroke fill" filter="url(#${filterId})"`;
     const textElements = lines.map((line, lineIndex) => {
       const centeredY = startY + lineIndex * lineHeight;
       const y = hasCapability('meme-layout') && lines.length > 1
@@ -439,7 +452,7 @@ export default function VisualGeneratorTool({
       ? `<image href="${escapeXml(backgroundImageDataUrl)}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>`
       : '';
     const gradient = currentPreset.gradient
-      ? `<linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${currentPreset.gradient[0]}"/><stop offset="1" stop-color="${currentPreset.gradient[1]}"/></linearGradient>`
+      ? `<linearGradient id="${gradientId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${controls.textColor}"/><stop offset="1" stop-color="${controls.gradientEnd}"/></linearGradient>`
       : '';
     const pixelPattern = currentPreset.decoration === 'pixel' && !transparent
       ? '<pattern id="pixel-grid" width="96" height="96" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="#ffffff" opacity=".12"/><rect x="48" y="48" width="24" height="24" fill="#ffffff" opacity=".12"/></pattern>'
@@ -517,7 +530,7 @@ export default function VisualGeneratorTool({
               onChange={(event) => setInputText(event.target.value)}
               rows={2}
               maxLength={120}
-              placeholder="Type a short title"
+              placeholder={pageTitle}
               className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-lg outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900"
             />
             <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-slate-500">
@@ -638,7 +651,7 @@ export default function VisualGeneratorTool({
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white">Colors &amp; scene presets</h4>
                 <div className="mt-4 grid grid-cols-2 gap-4">
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Text color
-                    <input aria-label="Text color" type="color" value={controls.textColor} onChange={(event) => setControls((value) => ({ ...value, textColor: event.target.value }))} className="mt-2 h-11 w-full rounded border border-slate-300" />
+                    <input aria-label="Text color" disabled={currentPreset.multicolor} type="color" value={controls.textColor} onChange={(event) => setControls((value) => ({ ...value, textColor: event.target.value }))} className="mt-2 h-11 w-full rounded border border-slate-300" />
                   </label>
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Background color
                     <input aria-label="Background color" type="color" value={controls.backgroundColor} disabled={transparent} onChange={(event) => setControls((value) => ({ ...value, backgroundColor: event.target.value }))} className="mt-2 h-11 w-full rounded border border-slate-300 disabled:opacity-40" />
@@ -738,7 +751,7 @@ export default function VisualGeneratorTool({
         <div className="space-y-5">
           <div>
             <label htmlFor="visual-text-input" className="text-sm font-semibold text-slate-900 dark:text-white">Your text</label>
-            <textarea id="visual-text-input" value={inputText} onChange={(event) => setInputText(event.target.value)} rows={3} maxLength={120} placeholder="Type a short title" className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-base outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900" />
+            <textarea id="visual-text-input" value={inputText} onChange={(event) => setInputText(event.target.value)} rows={3} maxLength={120} placeholder={pageTitle} className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-base outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900" />
             <div className="mt-2 flex justify-between gap-3 text-xs text-slate-500"><span>{hasCapability('meme-layout') ? 'First line goes on top; the final line goes on the bottom.' : 'Canvas grows with additional lines'}</span><span>{inputText.length}/120</span></div>
             <p className="mt-1 text-xs text-slate-500">Rendered locally—your text isn&apos;t uploaded.</p>
           </div>
@@ -839,7 +852,7 @@ export default function VisualGeneratorTool({
 
           <div className="grid grid-cols-3 gap-3">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Text
-              <input aria-label="Text color" type="color" value={controls.textColor} onChange={(event) => setControls((value) => ({ ...value, textColor: event.target.value }))} className="mt-2 h-10 w-full rounded border border-slate-300" />
+              <input aria-label="Text color" disabled={currentPreset.multicolor} type="color" value={controls.textColor} onChange={(event) => setControls((value) => ({ ...value, textColor: event.target.value }))} className="mt-2 h-10 w-full rounded border border-slate-300" />
             </label>
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Outline
               <input aria-label="Outline color" type="color" value={controls.strokeColor} onChange={(event) => setControls((value) => ({ ...value, strokeColor: event.target.value }))} className="mt-2 h-10 w-full rounded border border-slate-300" />
@@ -848,6 +861,12 @@ export default function VisualGeneratorTool({
               <input aria-label="Background color" type="color" value={controls.backgroundColor} disabled={transparent} onChange={(event) => setControls((value) => ({ ...value, backgroundColor: event.target.value }))} className="mt-2 h-10 w-full rounded border border-slate-300 disabled:opacity-40" />
             </label>
           </div>
+
+          {currentPreset.gradient && <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Gradient end color
+            <input aria-label="Gradient end color" type="color" value={controls.gradientEnd} onChange={(event) => setControls((value) => ({ ...value, gradientEnd: event.target.value }))} className="mt-2 h-10 w-full rounded border border-slate-300" />
+            <span className="mt-1 block">Text color sets the gradient start.</span>
+          </label>}
+          {currentPreset.multicolor && <p className="text-xs text-slate-500">This preset uses a multicolor palette, so the single text color control is disabled.</p>}
 
           {hasCapability('background-image') && (
             <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">

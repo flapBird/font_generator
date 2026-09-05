@@ -1,3 +1,5 @@
+import { segmentGraphemes } from './unicode';
+
 export type AsciiStyle = 'block' | 'outline' | 'banner' | 'dots' | 'shadow' | 'slant';
 
 const glyphs: Record<string, string[]> = {
@@ -62,15 +64,15 @@ const tokens: Record<Exclude<AsciiStyle, 'shadow' | 'slant'>, { on: string; off:
 
 const glyphFor = (character: string) => glyphs[character] ?? glyphs['?'];
 
-export function generateAsciiArt(text: string, style: AsciiStyle): string {
-  const lines = text.toUpperCase().split('\n').slice(0, 3);
-  return lines.map((sourceLine) => {
-    const characters = Array.from(sourceLine.slice(0, 24));
+export function generateAsciiArt(text: string, style: AsciiStyle, align: 'left' | 'center' | 'right' = 'left'): string {
+  const lines = text.toUpperCase().split('\n');
+  const blocks = lines.map((sourceLine) => {
+    const characters = segmentGraphemes(sourceLine);
     const token = style === 'shadow' || style === 'slant' ? tokens.block : tokens[style];
     const rows = Array.from({ length: 7 }, (_, rowIndex) => {
       const content = characters.map((character) =>
         glyphFor(character)[rowIndex].split('').map((cell) => cell === '1' ? token.on : token.off).join(''),
-      ).join('  ').replace(/\s+$/g, '');
+      ).join('  ');
       if (style === 'slant') return `${' '.repeat(6 - rowIndex)}${content}`;
       return content;
     });
@@ -79,5 +81,12 @@ export function generateAsciiArt(text: string, style: AsciiStyle): string {
       return rows.map((row, index) => `${row}\n${shadowRows[index]}`).join('\n');
     }
     return rows.join('\n');
+  }).map((block) => block.split('\n'));
+  const widths = blocks.map((rows) => Math.max(...rows.map((row) => row.length)));
+  const width = Math.max(...widths);
+  return blocks.map((rows, index) => {
+    const gap = width - widths[index];
+    const left = align === 'right' ? gap : align === 'center' ? Math.floor(gap / 2) : 0;
+    return rows.map((row) => (' '.repeat(left) + row.padEnd(widths[index])).padEnd(width)).join('\n');
   }).join('\n\n');
 }

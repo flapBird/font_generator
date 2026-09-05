@@ -33,12 +33,15 @@ const alphaNumericTransform = (
 ) =>
   segmentGraphemes(text)
     .map((char) => {
-      const code = char.codePointAt(0) ?? 0;
+      const normalized = char.normalize('NFD');
+      const latin = /^([a-zA-Z])(\p{Mark}*)$/u.exec(normalized);
+      const marks = latin?.[2] ?? '';
+      const code = latin ? latin[1].codePointAt(0)! : (/^[0-9]$/.test(char) ? char.codePointAt(0)! : 0);
       if (code >= 65 && code <= 90) {
-        return String.fromCodePoint(upperStart + code - 65);
+        return String.fromCodePoint(upperStart + code - 65) + marks;
       }
       if (code >= 97 && code <= 122) {
-        return String.fromCodePoint(lowerStart + code - 97);
+        return String.fromCodePoint(lowerStart + code - 97) + marks;
       }
       if (digitStart !== undefined && code >= 48 && code <= 57) {
         return String.fromCodePoint(digitStart + code - 48);

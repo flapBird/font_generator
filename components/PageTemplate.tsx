@@ -212,7 +212,7 @@ export default function PageTemplate({
             {isHybridGenerator && (
               <GeneratorTool
                 key={`${page.slug}-copyable`}
-                config={config}
+                config={{ ...config, initialText: visualConfig.initialText }}
                 pageTitle={`${page.title.replace(/\s+Generator$/i, '')} copyable text`}
                 compactResults
                 sectionId="copyable-styles"

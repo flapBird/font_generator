@@ -1,5 +1,7 @@
 'use client';
 
+import { useGeneratorText } from '@/lib/use-generator-text';
+
 import Link from 'next/link';
 import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import type { GeneratorPageConfig, GeneratorStyleCategory } from '@/lib/generator';
@@ -376,7 +378,7 @@ export default function GeneratorTool({
   sectionId = 'generator',
 }: GeneratorToolProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [inputText, setInputText] = useState(config.initialText);
+  const [inputText, setInputText] = useGeneratorText(pageTitle.replace(/ copyable text$/, ' Generator'));
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>('recommended');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
@@ -568,7 +570,7 @@ export default function GeneratorTool({
                     }}
                     rows={3}
                     maxLength={240}
-                    placeholder="Type or paste text here"
+                    placeholder={pageTitle.replace(/ copyable text$/, ' Generator')}
                     className="h-28 min-h-28 w-full resize-y rounded-2xl border border-slate-300 bg-white px-4 py-4 pr-16 text-lg leading-7 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-violet-400"
                     autoComplete="off"
                   />
@@ -654,7 +656,7 @@ export default function GeneratorTool({
                             {isCopied ? 'Copied' : inputText ? 'Click to copy' : 'Enter text'}
                           </span>
                         </div>
-                        <p className={`mt-4 min-h-8 select-text break-words text-xl leading-8 sm:text-2xl ${
+                        <p className={`mt-4 min-h-8 select-text whitespace-pre-wrap break-words text-xl leading-8 sm:text-2xl ${
                           inputText
                             ? 'text-slate-950 dark:text-white'
                             : 'italic text-slate-400 dark:text-slate-500'
@@ -825,7 +827,7 @@ export default function GeneratorTool({
               )}
             </nav>
           ) : null}
-          <p className="sr-only" aria-live="polite">{statusMessage}</p>
+          <p className="mt-3 rounded-lg bg-violet-50 p-3 text-sm text-violet-800 empty:hidden dark:bg-violet-950 dark:text-violet-200" aria-live="polite">{statusMessage}</p>
         </div>
       </section>
     );
@@ -858,7 +860,7 @@ export default function GeneratorTool({
               onChange={(event) => setInputText(event.target.value)}
               rows={3}
               maxLength={240}
-              placeholder="Type or paste text here"
+              placeholder={pageTitle.replace(/ copyable text$/, ' Generator')}
               className="mt-2 h-28 min-h-28 w-full resize-y rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-lg leading-7 text-slate-950 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-violet-400"
               autoComplete="off"
             />
@@ -1228,7 +1230,7 @@ export default function GeneratorTool({
             </div>
           </nav>
         ) : null}
-        <p className="sr-only" aria-live="polite">{statusMessage}</p>
+        <p className="mt-3 rounded-lg bg-violet-50 p-3 text-sm text-violet-800 empty:hidden dark:bg-violet-950 dark:text-violet-200" aria-live="polite">{statusMessage}</p>
       </div>
     </section>
   );

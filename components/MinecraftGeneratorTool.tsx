@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { VisualGeneratorConfig, VisualMaterial } from '@/lib/visual-generator';
+import { minecraftColors, parseFormattingLine, serializeMinecraftText, type FormattingRun } from '@/lib/minecraft-formatting';
 import { getPixelGlyph } from '@/lib/pixel-font';
 
 interface MinecraftGeneratorToolProps {
@@ -12,38 +13,6 @@ interface MinecraftGeneratorToolProps {
 type MinecraftMode = 'game-text' | 'block-logo';
 type Alignment = 'left' | 'center' | 'right';
 type FillMode = 'solid' | 'gradient' | 'rainbow';
-
-interface FormattingRun {
-  text: string;
-  color: string;
-  bold: boolean;
-  italic: boolean;
-  underline: boolean;
-  strike: boolean;
-  obfuscated: boolean;
-  usesBaseColor: boolean;
-}
-
-const minecraftColors = [
-  { code: '0', name: 'Black', color: '#000000' },
-  { code: '1', name: 'Dark Blue', color: '#0000aa' },
-  { code: '2', name: 'Dark Green', color: '#00aa00' },
-  { code: '3', name: 'Dark Aqua', color: '#00aaaa' },
-  { code: '4', name: 'Dark Red', color: '#aa0000' },
-  { code: '5', name: 'Dark Purple', color: '#aa00aa' },
-  { code: '6', name: 'Gold', color: '#ffaa00' },
-  { code: '7', name: 'Gray', color: '#aaaaaa' },
-  { code: '8', name: 'Dark Gray', color: '#555555' },
-  { code: '9', name: 'Blue', color: '#5555ff' },
-  { code: 'a', name: 'Green', color: '#55ff55' },
-  { code: 'b', name: 'Aqua', color: '#55ffff' },
-  { code: 'c', name: 'Red', color: '#ff5555' },
-  { code: 'd', name: 'Light Purple', color: '#ff55ff' },
-  { code: 'e', name: 'Yellow', color: '#ffff55' },
-  { code: 'f', name: 'White', color: '#ffffff' },
-] as const;
-
-const colorByCode = new Map<string, string>(minecraftColors.map((item) => [item.code, item.color]));
 
 const materials: Record<VisualMaterial, {
   name: string;
@@ -102,38 +71,6 @@ const darkenToGameShadow = (color: string) => {
   return `rgb(${channels.join(',')})`;
 };
 
-const parseFormattingLine = (line: string, baseColor: string): FormattingRun[] => {
-  const runs: FormattingRun[] = [];
-  let buffer = '';
-  let state = { color: baseColor, bold: false, italic: false, underline: false, strike: false, obfuscated: false, usesBaseColor: true };
-  const flush = () => {
-    if (!buffer) return;
-    runs.push({ text: buffer, ...state });
-    buffer = '';
-  };
-
-  for (let index = 0; index < line.length; index += 1) {
-    const character = line[index];
-    const code = line[index + 1]?.toLowerCase();
-    if ((character === '§' || character === '&') && code && /[0-9a-fklmnor]/.test(code)) {
-      flush();
-      if (colorByCode.has(code)) {
-        state = { color: colorByCode.get(code) ?? baseColor, bold: false, italic: false, underline: false, strike: false, obfuscated: false, usesBaseColor: false };
-      } else if (code === 'r') {
-        state = { color: baseColor, bold: false, italic: false, underline: false, strike: false, obfuscated: false, usesBaseColor: true };
-      } else if (code === 'l') state = { ...state, bold: true };
-      else if (code === 'o') state = { ...state, italic: true };
-      else if (code === 'n') state = { ...state, underline: true };
-      else if (code === 'm') state = { ...state, strike: true };
-      else if (code === 'k') state = { ...state, obfuscated: true };
-      index += 1;
-      continue;
-    }
-    buffer += character;
-  }
-  flush();
-  return runs;
-};
 
 const mixHex = (from: string, to: string, amount: number) => {
   const channel = (value: string, index: number) => parseInt(value.slice(index, index + 2), 16);
@@ -304,7 +241,7 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
   useEffect(() => {
     const previews = [previewRef.current, mobilePreviewRef.current].filter((item): item is HTMLDivElement => Boolean(item));
     if (!previews.length) return;
-    const updateWidth = () => setPreviewWidth(Math.max(280, ...previews.map((preview) => Math.floor(preview.clientWidth))));
+    const updateWidth = () => setPreviewWidth(Math.max(280, ...previews.filter((preview) => preview.getClientRects().length > 0).map((preview) => Math.floor(preview.clientWidth))));
     updateWidth();
     const observer = new ResizeObserver(updateWidth);
     previews.forEach((preview) => observer.observe(preview));
@@ -313,8 +250,8 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
 
   const drawGameText = useCallback((canvas: HTMLCanvasElement) => {
     type PixelToken = Omit<FormattingRun, 'text'> & { character: string; index: number };
-    const canvasWidth = Math.max(280, previewWidth);
-    const sourceLines = gameText.split('\n').slice(0, 16);
+    let canvasWidth = Math.max(280, previewWidth);
+    const sourceLines = gameText.split('\n');
     let tokenIndex = 0;
 
     const tokenWidth = (token: PixelToken) => {
@@ -330,18 +267,19 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
     );
 
     const widestLineUnits = Math.max(1, ...visualLines.map((line) => line.reduce((sum, token) => sum + tokenWidth(token), 0)));
-    const horizontalEffectUnits = (outlineText ? 2 : 0) + (gameShadow ? shadowDistance : 0);
+    const horizontalEffectUnits = 4 + (outlineText ? 2 : 0) + (gameShadow ? shadowDistance : 0);
+    canvasWidth = Math.max(canvasWidth, widestLineUnits + padding * 2 + horizontalEffectUnits);
     const fittedScale = Math.floor(canvasWidth / (widestLineUnits + padding * 2 + horizontalEffectUnits));
     const renderScale = Math.max(1, Math.min(scale, fittedScale));
-    const pixelPadding = padding * renderScale;
+    const pixelPadding = (padding + (outlineText ? 1 : 0)) * renderScale;
     const lineHeightUnits = 8 + lineSpacing;
     const contentHeight = Math.max(1, visualLines.length) * lineHeightUnits * renderScale;
     const effectOverflow = (outlineText ? renderScale : 0) + (gameShadow ? shadowDistance * renderScale : 0);
     const naturalHeight = pixelPadding * 2 + contentHeight + effectOverflow;
     canvas.width = canvasWidth;
     canvas.height = Math.max(128, naturalHeight);
-    canvas.style.width = `${canvas.width}px`;
-    canvas.style.height = `${canvas.height}px`;
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
     canvas.dataset.renderScale = String(renderScale);
     canvas.dataset.obfuscationFrame = String(obfuscationFrame);
     const context = canvas.getContext('2d');
@@ -398,7 +336,7 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
       let cursor = alignment === 'center'
         ? (canvas.width - lineWidth) / 2
         : alignment === 'right'
-          ? canvas.width - pixelPadding - lineWidth
+          ? canvas.width - pixelPadding - lineWidth - (2 + (gameShadow ? shadowDistance : 0)) * renderScale
           : pixelPadding;
       const y = verticalOffset + pixelPadding + lineIndex * lineHeightUnits * renderScale;
       line.forEach((token) => {
@@ -420,10 +358,10 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
     const measureCanvas = document.createElement('canvas');
     const measure = measureCanvas.getContext('2d');
     if (!measure) return;
-    while (fittedSize > 48) {
+    while (fittedSize > 4) {
       measure.font = fontSpec(fittedSize);
       if (lines.every((line) => measure.measureText(line).width <= width * 0.82)) break;
-      fittedSize -= 4;
+      fittedSize = Math.max(4, fittedSize - 4);
     }
     const lineHeight = fittedSize * 1.08;
     const textBlockHeight = fittedSize + Math.max(0, lines.length - 1) * lineHeight;
@@ -556,9 +494,13 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
     setStatusMessage('Faithful SVG downloaded with the exact pixel rendering embedded.');
   };
 
+  const codeOutput = serializeMinecraftText(gameText, baseColor, {
+    bold: boldText, italic: italicText, underline: underlineText, strike: strikeText,
+  });
+
   const copyCode = async () => {
     try {
-      await navigator.clipboard.writeText(gameText);
+      await navigator.clipboard.writeText(codeOutput);
       setStatusMessage('Formatting-code text copied.');
     } catch {
       setStatusMessage('Copy was blocked. Select the input text and copy it manually.');
@@ -580,17 +522,17 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
         </div>
       </div>
 
-      <div className="grid items-start gap-7 p-5 sm:p-8 xl:grid-cols-[340px_minmax(0,1fr)]">
-        <div className="space-y-5">
+      <div className="grid min-w-0 grid-cols-1 items-start gap-7 p-5 sm:p-8 xl:grid-cols-[340px_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-5">
           <div>
             <label htmlFor="minecraft-text-input" className="text-sm font-bold text-slate-950 dark:text-white">Your text</label>
-            <textarea id="minecraft-text-input" value={activeText} onChange={(event) => mode === 'game-text' ? setGameText(event.target.value.slice(0, 120)) : setLogoText(event.target.value.slice(0, 120))} rows={mode === 'game-text' ? 5 : 6} className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 font-mono text-base outline-none focus:border-lime-500 focus:ring-4 focus:ring-lime-500/10 dark:border-slate-700 dark:bg-slate-900" />
+            <textarea id="minecraft-text-input" placeholder={pageTitle} value={activeText} onChange={(event) => mode === 'game-text' ? setGameText(event.target.value.slice(0, 120)) : setLogoText(event.target.value.slice(0, 120))} rows={mode === 'game-text' ? 5 : 6} className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 font-mono text-base outline-none focus:border-lime-500 focus:ring-4 focus:ring-lime-500/10 dark:border-slate-700 dark:bg-slate-900" />
             <div className="mt-2 flex justify-between gap-3 text-xs text-slate-500"><span>{mode === 'game-text' ? 'Formatting codes work inline with § or &: &a green, &l bold, &o italic, &n underline, &m strikethrough, &k obfuscated, &r reset.' : 'Logo text has its own clean input without game codes.'}</span><span className="shrink-0">{activeText.length}/120</span></div>
           </div>
 
           <div className="xl:hidden">
             <h3 className="mb-3 text-lg font-black text-slate-950 dark:text-white">Live preview</h3>
-            <div ref={mobilePreviewRef} className="min-h-32 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950 bg-[linear-gradient(45deg,#263449_25%,transparent_25%),linear-gradient(-45deg,#263449_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#263449_75%),linear-gradient(-45deg,transparent_75%,#263449_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0]">
+            <div ref={mobilePreviewRef} className="min-w-0 min-h-32 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950 bg-[linear-gradient(45deg,#263449_25%,transparent_25%),linear-gradient(-45deg,#263449_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#263449_75%),linear-gradient(-45deg,transparent_75%,#263449_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0]">
               <canvas ref={mobileCanvasRef} role="img" aria-label={`${mode === 'game-text' ? 'Minecraft game text' : `${materials[material].name} block logo`} mobile preview`} className={`block w-full ${mode === 'game-text' ? '[image-rendering:pixelated]' : 'h-auto max-w-full'}`} />
             </div>
             <p className="mt-2 text-xs text-slate-500">The preview updates while you adjust the controls below.</p>
@@ -652,6 +594,8 @@ export default function MinecraftGeneratorTool({ config, pageTitle }: MinecraftG
                 </div>
               </div>
               <button type="button" onClick={() => void copyCode()} className="w-full rounded-xl bg-lime-700 px-4 py-3 text-sm font-black text-white hover:bg-lime-600">Copy formatting-code text</button>
+              <p className="text-xs text-slate-500">Copied codes include standard colors and text formatting. Custom colors, gradients, shadows and layout apply to images only.</p>
+              <pre aria-label="Formatting-code output" className="max-h-32 overflow-auto whitespace-pre-wrap break-all rounded-lg border border-slate-300 p-2 text-xs">{codeOutput}</pre>
             </>
           ) : (
             <>
