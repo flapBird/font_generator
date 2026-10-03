@@ -7,7 +7,9 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test:generators": "node scripts/check-generators.cjs"
+    "test:generators": "node scripts/check-generators.cjs",
+    "test:ai-font": "node --conditions=react-server --import tsx --test tests/ai-font/*.test.ts",
+    "test:ai-font:browser": "playwright test --config tests/ai-font/playwright.config.ts"
   },
   "dependencies": {
     "@fontsource/anton": "^5.3.0",
@@ -21,21 +23,27 @@
     "@fontsource/poppins": "^5.3.0",
     "@fontsource/roboto": "^5.3.0",
     "@next/third-parties": "^16.0.7",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.2",
     "@tailwindcss/typography": "^0.5.20",
     "autoprefixer": "^10.5.4",
     "framer-motion": "^12.23.25",
     "next": "16.0.7",
     "postcss": "^8.5.20",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
     "tailwindcss": "^3.4.19",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
