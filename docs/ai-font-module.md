@@ -1,9 +1,10 @@
 # AI font module
 
-The first version is isolated at `/ai-font-generator`. Existing generators,
-shared navigation, global styles, root layout and advertising allowlist are
-unchanged. The new page is intentionally not in the sitemap/navigation and has
-`noindex` while being reviewed. It uses existing bundled fonts for free style
+The first version is isolated at `/ai-font-generator`, accessible through the
+**AI Font** link in the desktop navigation and mobile menu. Existing generators,
+global styles, root layout and advertising allowlist are unchanged. The new page
+is intentionally not in the sitemap and has `noindex` while being reviewed.
+It uses existing bundled fonts for free style
 references; no generation request is made by previewing or signing in.
 
 ## Local preview and configuration

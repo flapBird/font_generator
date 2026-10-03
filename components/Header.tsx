@@ -19,6 +19,7 @@ type MenuKey = 'styles' | 'art';
 
 const primaryLinks = [
   { href: '/', label: 'Home' },
+  { href: '/ai-font-generator', label: 'AI Font' },
   { href: '/guides', label: 'Guides' },
 ];
 
