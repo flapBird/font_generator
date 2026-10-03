@@ -21,7 +21,7 @@ test('free AI references require no account, payment or generation API', async (
   await page.screenshot({ path: '/tmp/font-generator-ai-font-mobile.png', fullPage: true });
 });
 
-test('existing tools remain public and do not load the new account API', async ({ page }) => {
+test('existing tools remain public and skip account calls when auth is unconfigured', async ({ page }) => {
   const aiCalls: string[] = [];
   page.on('request', (request) => { if (request.url().includes('/api/ai-font/')) aiCalls.push(request.url()); });
   for (const path of ['/', '/small-text-generator', '/3d-font-generator', '/minecraft-font-generator']) {
@@ -35,6 +35,24 @@ test('existing tools remain public and do not load the new account API', async (
     expect(page.url()).not.toContain('auth');
   }
   expect(aiCalls).toEqual([]);
+});
+
+test('header login remains visible at desktop and mobile sizes without gating free tools', async ({ page }) => {
+  for (const width of [1280, 1024, 768, 390, 320]) {
+    await page.setViewportSize({ width, height: 850 });
+    await page.goto('/');
+    const nav = page.getByRole('navigation', { name: 'Primary navigation' });
+    const login = nav.getByRole('link', { name: 'Log in', exact: true });
+    await expect(login).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await login.click();
+    await expect(page).toHaveURL(/\/login\?next=%2F$/);
+    await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeDisabled();
+    await expect(page.getByText('Google sign-in is not available yet.', { exact: false })).toBeVisible();
+    await page.getByRole('link', { name: 'Continue with free tools' }).click();
+    await expect(page).toHaveURL('http://localhost:3211/');
+  }
 });
 
 test('paid routes reject unauthenticated and cross-origin requests', async ({ request }) => {

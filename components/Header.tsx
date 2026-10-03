@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState, useSyncExternalStore, type FocusEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AccountMenu from '@/components/AccountMenu';
 
 export interface HeaderLink {
   href: string;
@@ -255,11 +256,11 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
             className="flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={closeAllMenus}
           >
-            <span className="brand-gradient-text text-xl font-black tracking-[-0.025em] sm:text-2xl">Font Generators</span>
+            <span className="brand-gradient-text text-lg font-black tracking-[-0.025em] sm:text-2xl">Font Generators</span>
           </Link>
 
           <div className="flex h-full items-center gap-1">
-          <div className="hidden h-full items-center gap-1 md:flex">
+          <div className="hidden h-full items-center gap-1 lg:flex">
             <Link href={primaryLinks[0].href} className={desktopLinkClass}>
               {primaryLinks[0].label}
             </Link>
@@ -392,9 +393,10 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
           </div>
 
           <ThemeToggle />
+          <AccountMenu />
 
           <button
-            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-controls="mobile-navigation"
             aria-expanded={isMobileMenuOpen}
@@ -418,7 +420,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden border-t border-slate-200 bg-white shadow-xl md:hidden dark:border-slate-700 dark:bg-slate-950"
+              className="overflow-hidden border-t border-slate-200 bg-white shadow-xl lg:hidden dark:border-slate-700 dark:bg-slate-950"
             >
               <div className="max-h-[calc(100vh-4rem)] space-y-1 overflow-y-auto overscroll-y-contain py-3">
                 <Link

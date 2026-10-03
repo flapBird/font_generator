@@ -7,6 +7,15 @@ is intentionally not in the sitemap and has `noindex` while being reviewed.
 It uses existing bundled fonts for free style
 references; no generation request is made by previewing or signing in.
 
+The header has an optional **Log in** link (an account icon on small screens)
+leading to `/login`. Google login is available as soon as auth is configured,
+without requiring PayPal or Mixfont configuration. When configured, the header
+uses the lightweight `/api/ai-font/auth/session` endpoint; it does not query
+orders or font history on free pages. That request is skipped entirely when
+public auth configuration is absent. Signed-in users get an account menu with
+font/purchase access and sign-out. No free tool is gated behind login.
+The full desktop menu begins at 1024px so the account control fits on tablets.
+
 ## Local preview and configuration
 
 Run `npm run dev` and open `/ai-font-generator`. Without credentials, sample
@@ -33,6 +42,10 @@ Restart Next after changing them. Never send service secrets to the browser.
    production redirect URLs. Supabase handles Google OAuth/PKCE; route handlers
    validate users with `getUser()` and refresh cookies. No root auth provider,
    global proxy or login requirement is added to free tools.
+   Login returns to the initiating local page via a validated, short-lived
+   callback-scoped cookie. External URLs and API/auth routes are rejected; the
+   Supabase callback URL stays exact. Auth failures return to `/login` with a
+   retry message. Sign-out updates the header and an open font studio together.
 4. Configure a Mixfont API key and prepaid API balance. This version supports
    prompt-to-standard-English-TTF only (72 glyphs). API keys stay server-side.
 5. Create a PayPal Sandbox REST application. Use its client ID and secret,

@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FONT_PACK, FONT_SAMPLES, isUuid, type FontJob } from '@/lib/ai-font/catalog';
+import { signInWithGoogle } from '@/lib/ai-font/auth-browser';
+import { authChangedEvent } from '@/lib/ai-font/auth-navigation';
 
 type Services = { auth: boolean; generation: boolean; checkout: boolean; sandbox: boolean };
 type Order = { id: string; provider: string; amount_minor: number; currency: string; credits: number; status: string; created_at: string };
@@ -99,6 +101,12 @@ export default function AiFontStudio({ services: initialServices }: { services: 
   }, [refresh]);
 
   useEffect(() => {
+    const update = () => { void refresh().catch(() => {}); };
+    window.addEventListener(authChangedEvent, update);
+    return () => window.removeEventListener(authChangedEvent, update);
+  }, [refresh]);
+
+  useEffect(() => {
     if (!active) return;
     let stopped = false;
     let timer: ReturnType<typeof setTimeout>;
@@ -121,13 +129,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
 
   async function signIn() {
     save(draftKey, prompt);
-    const { createBrowserClient } = await import('@supabase/ssr');
-    const client = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!);
-    const { data, error } = await client.auth.signInWithOAuth({ provider: 'google', options: {
-      redirectTo: `${window.location.origin}/ai-font-generator/auth/callback`, skipBrowserRedirect: true,
-    } });
-    if (error || !data.url) throw new Error('Google sign-in is temporarily unavailable.');
-    window.location.assign(data.url);
+    await signInWithGoogle();
   }
 
   async function buy() {
@@ -170,7 +172,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
     <div className="mx-auto max-w-6xl px-4 pb-20 pt-28 sm:px-6">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4 text-sm">
         <Link href="/" className="text-muted-foreground hover:text-primary">← Free font tools</Link>
-        {account?.user && <div className="flex max-w-full items-center gap-3"><span className="truncate text-muted-foreground">{account.user.email}</span><button className={secondary} disabled={Boolean(busy)} onClick={() => act('signout', async () => { await api('auth/signout', 'POST'); save(checkoutKey, null); save(pendingJobKey, null); await refresh(); })}>Sign out</button></div>}
+        {account?.user && <div className="flex max-w-full items-center gap-3"><span className="truncate text-muted-foreground">{account.user.email}</span><button className={secondary} disabled={Boolean(busy)} onClick={() => act('signout', async () => { await api('auth/signout', 'POST'); save(checkoutKey, null); save(pendingJobKey, null); window.dispatchEvent(new Event(authChangedEvent)); await refresh(); })}>Sign out</button></div>}
       </div>
       <div className="mb-10 max-w-3xl">
         <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">A font of your own</p>

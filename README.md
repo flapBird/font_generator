@@ -18,6 +18,8 @@ The existing free tools process user-entered text and image composition in the b
 
 Open `/ai-font-generator` through the **AI Font** link in the desktop navigation or mobile menu. Free style references work without any service credentials. Custom generation requires Google sign-in and purchased generations; there are no free API generations or sign-up credits. Existing generator functionality is unchanged.
 
+The header also provides an optional **Log in** entry at `/login`, with Google sign-in independent of payment configuration. Signed-in users can open **My fonts & purchases** or sign out from the account menu. Free tools never require login; unconfigured authentication shows an availability notice rather than a fake login.
+
 The module uses Supabase for Google authentication, a private credit/order ledger and font storage, Mixfont for standard English TTF generation, and a payment-provider interface with PayPal as its first implementation. Missing configuration disables checkout without affecting the free site. See [setup, architecture and verification](docs/ai-font-module.md) and [environment variable template](docs/ai-font.env.example). Real Google and PayPal Sandbox integration requires configured accounts; local provider tests use mocked HTTP.
 
 ## Features
