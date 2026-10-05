@@ -58,13 +58,15 @@ Restart Next after changing them. Never send service secrets to the browser.
    merchant. Real and Sandbox credentials/webhooks must not be mixed.
 6. Schedule an authenticated GET to `/api/ai-font/reconcile` every five minutes,
    with `Authorization: Bearer <AI_FONT_CRON_SECRET>`. Use your deployment
-   platform's scheduler. If using Vercel Cron, configure the same value as
+   platform's scheduler. On Cloudflare Workers, the included custom Worker and
+   `wrangler.jsonc` run this through a self service binding every five minutes;
+   see [Cloudflare deployment](cloudflare-deployment.md). If using Vercel Cron, configure the same value as
    Vercel's `CRON_SECRET` and add this path/schedule in deployment configuration
-   (plan-dependent scheduling limits apply). This repository does not change
-   your deployment configuration automatically. Verify it executes before
+   (plan-dependent scheduling limits apply). Verify it executes before
    enabling purchases. It saves completed fonts even after users close the tab;
    Mixfont's temporary output expires after 24 hours. The worker handles ten
-   active jobs per pass; monitor backlog and increase worker capacity before
+   active jobs sequentially per pass to bound font-buffer memory on Cloudflare;
+   monitor backlog and increase worker capacity before
    allowing higher volume. Alert on nonzero `errors`, old active jobs and
    `needs_review` jobs.
 

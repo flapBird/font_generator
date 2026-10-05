@@ -1,0 +1,3 @@
+# Optional local Workers preview configuration. Copy to .dev.vars.
+# Application values go in .env.local (see docs/ai-font.env.example).
+NEXTJS_ENV=development

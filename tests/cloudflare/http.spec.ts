@@ -1,0 +1,43 @@
+import { test, expect } from '@playwright/test';
+
+test('Cloudflare scheduled entry runs safely without AI credentials', async ({ request }) => {
+  const response = await request.get('/__scheduled?cron=*/5%20*%20*%20*%20*');
+  expect(response.status()).toBe(200);
+});
+
+test('legacy URLs keep permanent canonical redirects in Workers', async ({ request }) => {
+  for (const [source, target] of [
+    ['/style', '/styles'],
+    ['/style/small-text-generator', '/small-text-generator'],
+    ['/styles/small-text-generator', '/small-text-generator'],
+    ['/fandom/minecraft-font-generator', '/minecraft-font-generator'],
+  ]) {
+    const response = await request.get(source, { maxRedirects: 0 });
+    expect(response.status(), source).toBe(301);
+    expect(new URL(response.headers().location, response.url()).pathname).toBe(target);
+  }
+});
+
+test('SEO endpoints, public assets and unknown routes work in Workers', async ({ request }) => {
+  for (const [path, content] of [
+    ['/sitemap.xml', 'https://font-generators.org/'],
+    ['/robots.txt', 'Sitemap:'],
+    ['/llms.txt', 'Font Generators'],
+    ['/ads.txt', 'google.com'],
+  ]) {
+    const response = await request.get(path);
+    expect(response.status(), path).toBe(200);
+    expect(await response.text()).toContain(content);
+  }
+  expect((await request.get('/og-font-generators.png')).status()).toBe(200);
+  expect((await request.get('/this-generator-does-not-exist')).status()).toBe(404);
+});
+
+test('hashed static assets receive immutable browser caching', async ({ request }) => {
+  const html = await (await request.get('/')).text();
+  const asset = html.match(/(?:src|href)="([^"\s]*\/_next\/static\/[^"\s]+)"/)?.[1];
+  expect(asset).toBeTruthy();
+  const response = await request.get(asset!);
+  expect(response.status()).toBe(200);
+  expect(response.headers()['cache-control']).toContain('immutable');
+});

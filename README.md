@@ -58,7 +58,7 @@ Rendered artwork behaves differently: the browser draws the selected typeface an
 
 ### Prerequisites
 
-- Node.js 20.9 or newer
+- Node.js 22 or newer (`nvm use` selects the version in `.nvmrc`)
 - npm
 
 ### Installation
@@ -83,6 +83,14 @@ The environment file is optional for local development. If you do not need a cus
 | `npm run build` | Create an optimized production build with webpack |
 | `npm run start` | Serve the production build |
 | `npm run lint` | Run the Next.js ESLint configuration |
+| `npm run build:cloudflare` | Build Next.js and adapt its output for Cloudflare Workers |
+| `npm run preview` | Build and preview locally in the Workers runtime |
+| `npm run preview:cloudflare` | Preview the existing Cloudflare build |
+| `npm run deploy` | Build and deploy to Cloudflare Workers |
+| `npm run deploy:cloudflare` | Deploy the existing Cloudflare build |
+| `npm run cf-typegen` | Generate local Cloudflare binding types |
+| `npm run test:cloudflare` | Verify scheduled job authentication and error handling |
+| `npm run test:cloudflare:browser` | Verify routes and existing UI in the Workers runtime |
 
 Run a production build locally with:
 
@@ -175,9 +183,19 @@ When adding a page, keep its slug, category, canonical path, default style IDs, 
 
 ## Deployment
 
-The repository uses the standard Next.js production runtime and can be deployed to Vercel or another Node.js platform that supports Next.js 16. Use `npm run build` during deployment and `npm run start` for a self-hosted Node.js process.
+Cloudflare Workers deployment is configured using the OpenNext adapter. It retains the Next.js App Router, server-side login/payment APIs, permanent redirects and prebuilt content pages. See [the Cloudflare deployment guide](docs/cloudflare-deployment.md) for CLI deployment, Workers Builds, environment variables, custom domains and the AI font cron trigger.
 
-No `output: 'export'` setting is currently enabled, so do not treat the `.next` directory as a standalone static-site bundle. If you add static export later, verify dynamic routes, metadata routes, image handling, analytics, and advertising behavior against that deployment mode.
+```bash
+npm ci
+npm run preview
+# After configuring your Cloudflare account and runtime variables:
+npx wrangler login
+npm run deploy
+```
+
+Use **Workers**, with build command `npm run build:cloudflare` and deploy command `npm run deploy:cloudflare`, when connecting this Git repository in Cloudflare. The static-asset directory is `.open-next/assets`; the Worker entry is `cloudflare/worker.js`. Content uses the adapter's read-only static-assets cache, so no R2, KV or Durable Object provisioning is needed for this site's current caching behavior.
+
+`npm run build` and `npm run start` still support ordinary Node.js hosting. No `output: 'export'` setting is enabled: the login/payment APIs require a server runtime, and neither `.next` nor `.open-next/assets` alone is a complete site deployment.
 
 Before publishing a fork, review the production domain in metadata, canonical URLs, sitemap, robots rules, analytics, AdSense client ID, `public/ads.txt`, contact information, privacy policy, and terms.
 

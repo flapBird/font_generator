@@ -96,6 +96,11 @@ export async function reconcileJobs(userId?: string) {
   if (userId) query = query.eq('user_id', userId);
   const { data, error } = await query;
   if (error) throw error;
-  const outcomes = await Promise.allSettled((data as StoredJob[]).map(reconcileJob));
-  return { checked: outcomes.length, errors: outcomes.filter((result) => result.status === 'rejected').length };
+  // Workers have 128 MB per isolate. Each font can occupy multiple 20 MB
+  // buffers during validation/upload; do not buffer ten completed fonts at once.
+  let errors = 0;
+  for (const job of data as StoredJob[]) {
+    try { await reconcileJob(job); } catch { errors++; }
+  }
+  return { checked: data.length, errors };
 }
