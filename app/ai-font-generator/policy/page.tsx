@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { FONT_PACK, STANDARD_FONT_CREDITS, availableGenerations } from '@/lib/ai-font/catalog';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -12,10 +13,10 @@ export default function AiFontPolicy() {
     <h1>AI font purchase terms & privacy</h1>
     <p>These details apply to the paid AI Font Generator. Our existing free text and artwork tools remain available without an account.</p>
     <h2>What you purchase</h2>
-    <p>The English font pack includes three standard font generations for a one-time price of US $4.99. There is no recurring subscription. Each generation creates a single-style TTF with 72 English letters, digits and basic punctuation. It does not include all languages, every symbol, or a family of weights.</p>
+    <p>The AI Font Starter Pack includes {FONT_PACK.credits} credits, enough for {availableGenerations(FONT_PACK.credits)} standard font generations, for a one-time price of US ${(FONT_PACK.amountMinor / 100).toFixed(2)}. Each standard generation costs {STANDARD_FONT_CREDITS} credits. There is no recurring subscription. Each generation creates a single-style TTF with 72 English letters, digits and basic punctuation. It does not include all languages, every symbol, or a family of weights.</p>
     <p>Free previews use existing open-source typefaces as style references. They are not custom AI results and do not promise an exact match. Generated fonts are intended primarily for creative titles and display lettering. Check readability, character coverage and spacing in your intended application.</p>
     <h2>Generations and technical failures</h2>
-    <p>One generation is reserved when a request starts. A confirmed technical failure restores it once. If the provider response is uncertain, the request is held for review to avoid duplicate charges. A successful result that you would like to redesign uses another generation. Purchased generations do not expire while your account and this service remain active.</p>
+    <p>The required credits are reserved when a request starts. A confirmed technical failure restores the exact credits charged for that request once. If the provider response is uncertain, the request is held for review to avoid duplicate charges. A successful result that you would like to redesign uses another generation. Purchased generations do not expire while your account and this service remain active.</p>
     <p>If payment or delivery fails, contact us with your order or font reference so we can resolve it or arrange an appropriate refund. Refunds are reviewed through support; statutory consumer rights are unaffected. Refunded or reversed packs have their associated generations withdrawn. Partial refunds are reviewed manually and may suspend the entire pack pending resolution.</p>
     <h2>Using your font</h2>
     <p>Generated fonts use Mixfont’s generated-font licence, which permits commercial use, editing, embedding, redistribution and resale. A subscription is not required to keep using a delivered font. This permission does not guarantee exclusivity, copyright protection, or clearance of third-party rights. Only submit descriptions and references you are entitled to use.</p>

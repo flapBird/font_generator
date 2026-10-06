@@ -210,3 +210,12 @@ Before publishing a fork, review the production domain in metadata, canonical UR
 ## License
 
 This repository does not currently include a standalone license file. Add an appropriate `LICENSE` before redistributing the project or accepting external contributions.
+
+
+The **Pricing** page at `/pricing` compares free tools and the one-time AI Font
+Starter Pack: $4.99 buys 300 customer credits, enough for three English font
+generations at 100 credits each. A local keyword matcher offers free reference
+style suggestions without AI API calls. Account credit activity shows purchases,
+generation charges, failure restorations and reversals. Apply both AI font SQL
+migrations in order; existing deployments must follow the coordinated credit
+upgrade procedure in `docs/ai-font-module.md` before deploying this version.

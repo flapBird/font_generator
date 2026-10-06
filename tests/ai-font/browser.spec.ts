@@ -107,17 +107,17 @@ test('signed-in UI purchases only after agreement and spends a generation explic
   await buy.click();
   await expect(page.getByRole('heading', { name: 'Mock PayPal approval' })).toBeVisible();
   expect(checkoutIds[0]).not.toBe(checkoutIds[1]);
-  credits = 3;
+  credits = 300;
   await page.route('**/api/ai-font/orders/complete', (route) => route.fulfill({ json: { status: 'paid' } }));
   await page.route('**/api/ai-font/jobs', async (route) => {
-    submitted = route.request().postDataJSON(); credits = 2;
+    submitted = route.request().postDataJSON(); credits = 200;
     await route.fulfill({ status: 202, json: { id: submitted?.id } });
   });
   await page.goto('/ai-font-generator?checkout=return&order=10000000-0000-4000-8000-000000000001');
   await expect(page.getByText('3 generations available')).toBeVisible();
   expect(submitted).toBeUndefined();
   await page.getByLabel('Font description').fill('A friendly rounded display font for a cafe');
-  await page.getByRole('button', { name: 'Generate font · 1 generation' }).click();
+  await page.getByRole('button', { name: 'Generate font · 100 credits' }).click();
   await expect(page.getByText('2 generations available')).toBeVisible();
   expect(submitted?.prompt).toBe('A friendly rounded display font for a cafe');
   expect(submitted?.id).toMatch(/^[a-f0-9-]{36}$/);
@@ -128,7 +128,7 @@ test('artwork export uses the selected generated font without spending credits (
   page.on('request', request => { if (request.method() === 'POST' && /\/api\/ai-font\/(jobs|orders)/.test(request.url())) paidCalls.push(request.url()); });
   const id = '10000000-0000-4000-8000-000000000002';
   await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
-    user: { email: 'test@example.com' }, credits: 2, orders: [],
+    user: { email: 'test@example.com' }, credits: 200, orders: [],
     jobs: [{ id, name: 'Test display font', prompt: 'A bold display font', status: 'succeeded', created_at: '2026-10-06T00:00:00Z' }],
     services: { auth: true, generation: true, checkout: true, sandbox: true },
   } }));
@@ -172,4 +172,52 @@ test('artwork export uses the selected generated font without spending credits (
   await expect(downloadButton).toBeDisabled();
   await expect(page.getByText('2 generations available')).toBeVisible();
   expect(paidCalls).toEqual([]);
+});
+
+test('pricing is public, uses the same credit allowance, and links to the studio', async ({ page }) => {
+  for (const width of [1280, 1024, 768, 390, 320]) {
+    await page.setViewportSize({ width, height: 850 });
+    await page.goto('/pricing');
+    await expect(page.getByRole('heading', { name: 'Free to explore. Pay to create a font.' })).toBeVisible();
+    await expect(page.getByText('300 credits · 100 per basic English font', { exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await page.getByText('How do credits work?', { exact: true }).click();
+  await expect(page.getByText('One basic English font costs 100 credits.', { exact: false })).toBeVisible();
+  await page.getByRole('link', { name: 'Explore AI Font Studio', exact: true }).click();
+  await expect(page).toHaveURL(/\/ai-font-generator#create-title$/);
+  await page.goto('/pricing');
+  await page.getByRole('link', { name: 'Use free tools', exact: true }).click();
+  await expect(page).toHaveURL('http://localhost:3211/');
+});
+
+test('local matching preserves the paid prompt and never starts a generation', async ({ page }) => {
+  const paid: string[] = [];
+  page.on('request', request => { if (request.method() === 'POST') paid.push(request.url()); });
+  await page.goto('/ai-font-generator');
+  const draft = 'A custom serif for my book cover';
+  await page.getByLabel('Font description', { exact: true }).fill(draft);
+  await page.getByLabel('Describe a style to try for free').fill('retro pixel game');
+  await page.getByRole('button', { name: 'Match a reference style', exact: true }).click();
+  await expect(page.getByText('Matched Arcade, an existing reference font.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Arcade', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByLabel('Font description', { exact: true })).toHaveValue(draft);
+  await page.getByLabel('Describe a style to try for free').fill('something utterly different');
+  await page.getByRole('button', { name: 'Match a reference style', exact: true }).click();
+  await expect(page.getByText('No close match in our reference set.', { exact: false })).toBeVisible();
+  expect(paid).toEqual([]);
+});
+
+test('partial credits cannot generate; credit history shows charged and restored amounts', async ({ page }) => {
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'test@example.com' }, credits: 99, jobs: [], orders: [],
+    creditEvents: [{ id: 2, kind: 'restore', delta: 100, created_at: '2026-10-06T00:00:00Z' }, { id: 1, kind: 'job', delta: -100, created_at: '2026-10-06T00:00:00Z' }],
+    services: { auth: true, generation: true, checkout: true, sandbox: true },
+  } }));
+  await page.goto('/ai-font-generator');
+  await expect(page.getByText('0 generations available', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Generate font · 100 credits' })).toHaveCount(0);
+  await page.getByText('Credit activity', { exact: true }).click();
+  await expect(page.getByText('+100 credits', { exact: true })).toBeVisible();
+  await expect(page.getByText('-100 credits', { exact: true })).toBeVisible();
 });

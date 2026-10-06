@@ -2,14 +2,15 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FONT_PACK, FONT_SAMPLES, isUuid, type FontJob } from '@/lib/ai-font/catalog';
+import { FONT_PACK, FONT_SAMPLES, STANDARD_FONT_CREDITS, availableGenerations, isUuid, type FontJob } from '@/lib/ai-font/catalog';
 import { signInWithGoogle } from '@/lib/ai-font/auth-browser';
 import { authChangedEvent } from '@/lib/ai-font/auth-navigation';
 import FontArtwork from './FontArtwork';
+import { matchFontStyle } from '@/lib/ai-font/style-match';
 
 type Services = { auth: boolean; generation: boolean; checkout: boolean; sandbox: boolean };
 type Order = { id: string; provider: string; amount_minor: number; currency: string; credits: number; status: string; created_at: string };
-type Account = { user: { email: string } | null; credits: number; jobs: FontJob[]; orders: Order[]; services: Services };
+type Account = { user: { email: string } | null; credits: number; jobs: FontJob[]; orders: Order[]; creditEvents?: { id: number; kind: string; delta: number; created_at: string }[]; services: Services };
 const button = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 const secondary = 'inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 const field = 'w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-ring';
@@ -40,6 +41,8 @@ const jobLabels: Record<FontJob['status'], string> = {
 
 export default function AiFontStudio({ services: initialServices }: { services: Services }) {
   const [sample, setSample] = useState<(typeof FONT_SAMPLES)[number]>(FONT_SAMPLES[0]);
+  const [styleDescription, setStyleDescription] = useState('');
+  const [matchNotice, setMatchNotice] = useState('');
   const [preview, setPreview] = useState('Make something yours');
   const [prompt, setPrompt] = useState<string>(FONT_SAMPLES[0].prompt);
   const [account, setAccount] = useState<Account | null>(null);
@@ -201,8 +204,17 @@ export default function AiFontStudio({ services: initialServices }: { services: 
 
       <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
         <section aria-labelledby="preview-title" className="min-w-0 rounded-2xl border border-border bg-background p-5 sm:p-7">
-          <div className="flex items-center justify-between gap-2"><h2 id="preview-title" className="text-xl font-bold">Find your direction</h2><span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Free preview</span></div>
+          <div className="flex items-center justify-between gap-2"><h2 id="preview-title" className="scroll-mt-24 text-xl font-bold">Find your direction</h2><span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Free preview</span></div>
           <p className="mt-2 text-sm text-muted-foreground">Type your words and explore a few starting points.</p>
+          <label htmlFor="style-description" className="mb-2 mt-5 block text-sm font-semibold">Describe a style to try for free</label>
+          <input id="style-description" className={field} maxLength={240} value={styleDescription} placeholder="e.g. a retro pixel font for a game" onChange={(event) => setStyleDescription(event.target.value)} />
+          <button className={`${secondary} mt-3`} disabled={!styleDescription.trim()} onClick={() => {
+            const match = matchFontStyle(styleDescription);
+            if (match) { setSample(match); setMatchNotice(`Matched ${match.name}, an existing reference font. Your custom font description below has not changed.`); }
+            else setMatchNotice('No close match in our reference set. Try words such as rounded, elegant, pixel or bold, or choose a style below.');
+          }}>Match a reference style</button>
+          <p className="mt-2 text-xs text-muted-foreground">Local keyword matching · No AI generation or credits used</p>
+          <p role="status" className="mt-2 text-sm text-muted-foreground">{matchNotice}</p>
           <div className="my-5 flex flex-wrap gap-2" aria-label="Style references">
             {FONT_SAMPLES.map((item) => <button key={item.id} aria-pressed={sample.id === item.id} className={`${secondary} ${sample.id === item.id ? 'border-primary text-primary ring-1 ring-primary' : ''}`} onClick={() => { setSample(item); setPrompt(item.prompt); save(draftKey, item.prompt); }}>{item.name}</button>)}
           </div>
@@ -215,24 +227,26 @@ export default function AiFontStudio({ services: initialServices }: { services: 
         </section>
 
         <section aria-labelledby="create-title" className="min-w-0 rounded-2xl border border-border bg-background p-5 sm:p-7">
-          <h2 id="create-title" className="text-xl font-bold">Create your custom font</h2>
+          <h2 id="create-title" className="scroll-mt-24 text-xl font-bold">Create your custom font</h2>
           <p className="mt-2 text-sm text-muted-foreground">Describe the shapes, mood, and project you have in mind.</p>
           <label htmlFor="ai-font-prompt" className="mb-2 mt-5 block text-sm font-semibold">Font description</label>
           <textarea id="ai-font-prompt" className={`${field} min-h-36 resize-y`} value={prompt} maxLength={1000} onChange={(event) => { setPrompt(event.target.value); save(draftKey, event.target.value); }} aria-describedby="ai-prompt-help" />
           <p id="ai-prompt-help" className="mt-2 text-xs text-muted-foreground">English letters, numbers and basic punctuation · 72 characters · One style · TTF</p>
           <div className="my-5 rounded-xl bg-muted p-4">
             <div className="flex items-baseline justify-between gap-3"><span className="font-semibold">AI Font Starter Pack</span><span className="text-2xl font-bold">${(FONT_PACK.amountMinor / 100).toFixed(2)} <span className="text-xs font-normal">USD</span></span></div>
-            <p className="mt-2 text-sm text-muted-foreground">{FONT_PACK.credits} custom font generations · One-time purchase. Each generation creates one English font style. Includes TTF downloads and unlimited layout edits and PNG exports. Commercial use is subject to the purchase terms.</p>
+            <p className="mt-2 text-sm text-muted-foreground">{availableGenerations(FONT_PACK.credits)} custom font generations · One-time purchase. Each generation creates one English font style. Includes TTF downloads and unlimited layout edits and PNG exports. Commercial use is subject to the purchase terms.</p>
           </div>
+          <Link href="/pricing" className="mb-4 inline-block text-sm text-primary underline">View pricing & credit details</Link>
           {!account?.user ? <>
             <button className={`${button} w-full`} disabled={!loaded || !services.checkout || Boolean(busy)} onClick={() => act('signin', signIn)}>{busy === 'signin' ? 'Opening Google…' : !loaded ? 'Loading…' : !services.checkout ? 'Paid generation coming soon' : 'Continue with Google'}</button>
             <p className="mt-3 text-center text-xs text-muted-foreground">Sign in only when you want to purchase or use paid generations.</p>
           </> : <>
-            <p className="mb-4 text-sm font-semibold">{Math.max(0, account.credits)} generation{account.credits === 1 ? '' : 's'} available</p>
+            <p className="mb-4 text-sm font-semibold">{availableGenerations(account.credits)} generation{availableGenerations(account.credits) === 1 ? '' : 's'} available</p>
+            <p className="mb-4 text-xs text-muted-foreground">Balance: {account.credits} credits · {STANDARD_FONT_CREDITS} credits per basic English font</p>
             {account.credits < 0 && <p className="mb-3 text-sm text-red-700 dark:text-red-300">Your balance was adjusted after a payment refund or reversal. Contact support before purchasing again.</p>}
-            {account.credits > 0 && <button className={`${button} mb-4 w-full`} disabled={Boolean(busy) || blocked || !services.generation || prompt.trim().length < 10} onClick={() => act('generate', generate)}>{busy === 'generate' ? 'Starting your font…' : blocked ? 'A generation is already in progress' : 'Generate font · 1 generation'}</button>}
+            {account.credits >= STANDARD_FONT_CREDITS && <button className={`${button} mb-4 w-full`} disabled={Boolean(busy) || blocked || !services.generation || prompt.trim().length < 10} onClick={() => act('generate', generate)}>{busy === 'generate' ? 'Starting your font…' : blocked ? 'A generation is already in progress' : `Generate font · ${STANDARD_FONT_CREDITS} credits`}</button>}
             <label className="mb-4 flex items-start gap-3 text-sm leading-relaxed"><input type="checkbox" className="mt-1 h-4 w-4 accent-violet-600" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} /><span>I agree to the <Link className="text-primary underline" href="/ai-font-generator/policy" target="_blank" rel="noopener noreferrer">purchase terms and privacy details</Link>.</span></label>
-            <button className={`${secondary} w-full`} disabled={Boolean(busy) || !accepted || !services.checkout || account.credits < 0} onClick={() => act('checkout', buy)}>{busy === 'checkout' ? 'Opening PayPal…' : `Buy ${FONT_PACK.credits} generations with PayPal`}</button>
+            <button className={`${secondary} w-full`} disabled={Boolean(busy) || !accepted || !services.checkout || account.credits < 0} onClick={() => act('checkout', buy)}>{busy === 'checkout' ? 'Opening PayPal…' : `Buy ${availableGenerations(FONT_PACK.credits)} generations with PayPal`}</button>
           </>}
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">AI results vary. Best for creative titles and display lettering. Confirmed technical failures restore your generation; changing a successful design uses another generation.</p>
         </section>
@@ -255,7 +269,8 @@ export default function AiFontStudio({ services: initialServices }: { services: 
             {job.status === 'succeeded' && <div className="mt-4 flex flex-wrap gap-2"><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`preview-${job.id}`, () => previewFont(job.id, job.name || 'Custom English font'))}>Preview & create artwork</button><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`download-${job.id}`, async () => { const result = await api<{ url: string }>(`jobs/${job.id}/download`); window.location.assign(result.url); })}>Download TTF ↓</button></div>}
           </article>)}
         </div>}
-        {account.orders.length > 0 && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Your orders</summary><ul className="mt-4 divide-y divide-border">{account.orders.map((order) => <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><span>{order.credits} generations · ${(order.amount_minor / 100).toFixed(2)} {order.currency} · {order.status}</span>{order.status === 'pending' && <button className={secondary} disabled={Boolean(busy)} onClick={() => act(`order-${order.id}`, async () => { const result = await api<{ status: string }>('orders/complete', 'POST', { id: order.id }); setNotice(result.status === 'paid' ? 'Payment confirmed. Your generations are ready.' : 'Payment has not completed.'); if (result.status === 'paid') save(checkoutKey, null); await refresh(); })}>Check payment</button>}</li>)}</ul></details>}
+        {Boolean(account.creditEvents?.length) && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Credit activity</summary><p className="mt-2 text-xs text-muted-foreground">Your 30 most recent balance changes. Layout edits and exports are free.</p><ul className="mt-3 divide-y divide-border">{account.creditEvents?.map(event => <li key={event.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span>{{ order: 'Pack purchase', job: 'Font generation', restore: 'Failed generation restored', revoke: 'Payment refund or reversal' }[event.kind] || 'Credit adjustment'} · {new Date(event.created_at).toLocaleDateString()}</span><span>{event.delta > 0 ? '+' : ''}{event.delta} credits</span></li>)}</ul></details>}
+        {account.orders.length > 0 && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Your orders</summary><ul className="mt-4 divide-y divide-border">{account.orders.map((order) => <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><span>{order.credits} credits · ${(order.amount_minor / 100).toFixed(2)} {order.currency} · {order.status}</span>{order.status === 'pending' && <button className={secondary} disabled={Boolean(busy)} onClick={() => act(`order-${order.id}`, async () => { const result = await api<{ status: string }>('orders/complete', 'POST', { id: order.id }); setNotice(result.status === 'paid' ? 'Payment confirmed. Your generations are ready.' : 'Payment has not completed.'); if (result.status === 'paid') save(checkoutKey, null); await refresh(); })}>Check payment</button>}</li>)}</ul></details>}
       </section>}
 
       <section className="mt-12 grid gap-6 border-t border-border pt-8 sm:grid-cols-3" aria-label="How it works">

@@ -56,7 +56,7 @@ export class PayPalProvider implements PaymentProvider {
   async createCheckout(order: PaymentOrder) {
     const response = await this.call('/v2/checkout/orders', 'POST', {
       intent: 'CAPTURE',
-      purchase_units: [{ custom_id: order.id, description: `${order.credits} English font generations`,
+      purchase_units: [{ custom_id: order.id, description: `${order.credits} AI font credits`,
         amount: { currency_code: order.currency, value: (order.amount_minor / 100).toFixed(2) } }],
       payment_source: { paypal: { experience_context: {
         brand_name: 'Font Generators', shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW',

@@ -1,9 +1,15 @@
+// Customer credits are independent of the upstream provider's billing units.
+export const STANDARD_FONT_CREDITS = 100;
+export function availableGenerations(credits: number) {
+  return Math.max(0, Math.floor(credits / STANDARD_FONT_CREDITS));
+}
+
 export const FONT_PACK = {
   id: 'english-starter',
-  name: 'English font pack',
+  name: 'AI Font Starter Pack',
   amountMinor: 499,
   currency: 'USD',
-  credits: 3,
+  credits: 300,
 } as const;
 
 export const FONT_SAMPLES = [

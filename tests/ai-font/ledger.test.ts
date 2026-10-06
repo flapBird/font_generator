@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
+import { STANDARD_FONT_CREDITS } from '../../lib/ai-font/catalog';
 
 const user = '00000000-0000-4000-8000-000000000001';
 const other = '00000000-0000-4000-8000-000000000002';
@@ -9,7 +10,7 @@ const order = '10000000-0000-4000-8000-000000000001';
 const job = '20000000-0000-4000-8000-000000000001';
 const secondJob = '20000000-0000-4000-8000-000000000002';
 
-async function database() {
+async function database(migrate = true) {
   const db = new PGlite();
   await db.exec(`
     create role anon; create role authenticated; create role service_role bypassrls;
@@ -20,6 +21,7 @@ async function database() {
   await db.exec(await readFile(new URL('../../supabase/migrations/202610030001_ai_fonts.sql', import.meta.url), 'utf8'));
   await db.query(`insert into ai_font_orders(id,user_id,provider,package_id,amount_minor,currency,credits,external_id)
     values($1,$2,'paypal','english-starter',499,'USD',3,'PAYPAL-ORDER')`, [order, user]);
+  if (migrate) await db.exec(await readFile(new URL('../../supabase/migrations/202610060001_ai_font_credits.sql', import.meta.url), 'utf8'));
   return db;
 }
 
@@ -31,29 +33,30 @@ test('payment callbacks are idempotent; jobs reserve atomically and restore once
   const db = await database();
   try {
     assert.equal(await balance(db), 0, 'no sign-up credits');
-    await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3)', [user, job, 'a bold display font']), /NO_CREDITS/);
+    assert.equal((await db.query<{ credits: number }>("select credits from ai_font_operation_costs where operation='standard'")).rows[0].credits, STANDARD_FONT_CREDITS);
+    await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3,100)', [user, job, 'a bold display font']), /NO_CREDITS/);
     await assert.rejects(db.query('select ai_font_settle_order($1,$2,$3)', [order, 'WRONG', 'CAPTURE']), /ORDER_MISMATCH/);
     await Promise.all(Array.from({ length: 5 }, () => db.query('select ai_font_settle_order($1,$2,$3)', [order, 'PAYPAL-ORDER', 'CAPTURE'])));
-    assert.equal(await balance(db), 3);
+    assert.equal(await balance(db), 300);
     await assert.rejects(db.query('select ai_font_settle_order($1,$2,$3)', [order, 'PAYPAL-ORDER', 'OTHER-CAPTURE']), /CAPTURE_MISMATCH/);
-    await Promise.all(Array.from({ length: 5 }, () => db.query('select ai_font_reserve_job($1,$2,$3)', [user, job, 'a bold display font'])));
-    assert.equal(await balance(db), 2);
-    await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3)', [other, job, 'a bold display font']), /REQUEST_MISMATCH/);
-    await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3)', [user, job, 'a different display font']), /REQUEST_MISMATCH/);
-    await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3)', [user, secondJob, 'a bold display font']), /ACTIVE_JOB/);
+    await Promise.all(Array.from({ length: 5 }, () => db.query('select ai_font_reserve_job($1,$2,$3,100)', [user, job, 'a bold display font'])));
+    assert.equal(await balance(db), 200);
+    await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3,100)', [other, job, 'a bold display font']), /REQUEST_MISMATCH/);
+    await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3,100)', [user, job, 'a different display font']), /REQUEST_MISMATCH/);
+    await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3,100)', [user, secondJob, 'a bold display font']), /ACTIVE_JOB/);
     const claims = await Promise.all(Array.from({ length: 5 }, () => db.query<{ ai_font_claim_job: boolean }>('select ai_font_claim_job($1)', [job])));
     assert.equal(claims.filter((r) => r.rows[0].ai_font_claim_job).length, 1, 'only one upstream POST owner');
     await Promise.all(Array.from({ length: 3 }, () => db.query('select ai_font_finish_job($1,$2)', [job, 'failed'])));
-    assert.equal(await balance(db), 3);
-    await db.query('select ai_font_reserve_job($1,$2,$3)', [user, secondJob, 'a bold display font']);
+    assert.equal(await balance(db), 300);
+    await db.query('select ai_font_reserve_job($1,$2,$3,100)', [user, secondJob, 'a bold display font']);
     await assert.rejects(db.query('select ai_font_finish_job($1,$2,$3)', [secondJob, 'succeeded', `${other}/${secondJob}.ttf`]), /INVALID_PATH/);
     await db.query('select ai_font_finish_job($1,$2,$3,$4)', [secondJob, 'succeeded', `${user}/${secondJob}.ttf`, 'Test Font']);
     await db.query('select ai_font_finish_job($1,$2)', [secondJob, 'failed']);
-    assert.equal(await balance(db), 2, 'late failed callback cannot refund a delivered font');
+    assert.equal(await balance(db), 200, 'late failed callback cannot refund a delivered font');
     await Promise.all(Array.from({ length: 3 }, () => db.query('select ai_font_revoke_order($1)', [order])));
-    assert.equal(await balance(db), -1, 'refund withdraws pack including already spent credits');
+    assert.equal(await balance(db), -100, 'refund withdraws pack including already spent credits');
     await db.query('select ai_font_settle_order($1,$2,$3)', [order, 'PAYPAL-ORDER', 'CAPTURE']);
-    assert.equal(await balance(db), -1, 'late payment callback cannot re-grant revoked pack');
+    assert.equal(await balance(db), -100, 'late payment callback cannot re-grant revoked pack');
   } finally { await db.close(); }
 });
 
@@ -71,5 +74,54 @@ test('refund before completion never grants credits; browsers cannot mutate the 
       await db.exec('reset role');
     }
     assert.equal((await db.query<{ public: boolean }>("select public from storage.buckets where id='ai-fonts'")).rows[0].public, false);
+  } finally { await db.close(); }
+});
+
+
+test('migration preserves legacy paid, pending, active and negative balances', async () => {
+  const db = await database(false);
+  try {
+    await db.query('select ai_font_settle_order($1,$2,$3)', [order, 'PAYPAL-ORDER', 'CAPTURE']);
+    await db.query('select ai_font_reserve_job($1,$2,$3)', [user, job, 'a bold display font']);
+    await db.query('select ai_font_credit_once($1,$2,$3)', [other, 'legacy-refund', -1]);
+    const pending = '10000000-0000-4000-8000-000000000002';
+    await db.query("insert into ai_font_orders(id,user_id,provider,package_id,amount_minor,currency,credits,external_id) values($1,$2,'paypal','english-starter',499,'USD',3,'PENDING')", [pending, user]);
+    await db.exec(await readFile(new URL('../../supabase/migrations/202610060001_ai_font_credits.sql', import.meta.url), 'utf8'));
+    assert.equal(await balance(db), 200);
+    assert.equal((await db.query<{ balance: number }>('select balance from ai_font_wallets where user_id=$1', [other])).rows[0].balance, -100);
+    await db.query('select ai_font_finish_job($1,$2)', [job, 'failed']);
+    assert.equal(await balance(db), 300, 'legacy active job restores 100 credits');
+    await db.query('select ai_font_settle_order($1,$2,$3)', [pending, 'PENDING', 'PENDING-CAPTURE']);
+    assert.equal(await balance(db), 600, 'legacy pending checkout grants its original three generations');
+    await db.query('select ai_font_revoke_order($1)', [order]);
+    assert.equal(await balance(db), 300);
+    const sum = (await db.query<{ total: number }>('select sum(delta)::integer as total from ai_font_credit_events where user_id=$1', [user])).rows[0].total;
+    assert.equal(sum, await balance(db));
+    await assert.rejects(db.query("insert into ai_font_orders(id,user_id,provider,package_id,amount_minor,currency,credits) values($1,$2,'paypal','english-starter',499,'USD',3)", ['10000000-0000-4000-8000-000000000003', user]), /ai_font_credit_version/);
+  } finally { await db.close(); }
+});
+
+test('server pricing is checked and failed jobs restore their original cost after price changes', async () => {
+  const db = await database();
+  try {
+    await db.query('select ai_font_settle_order($1,$2,$3)', [order, 'PAYPAL-ORDER', 'CAPTURE']);
+    await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3,1)', [user, job, 'a bold display font']), /COST_CHANGED/);
+    assert.equal(await balance(db), 300);
+    await db.query('select ai_font_reserve_job($1,$2,$3,100)', [user, job, 'a bold display font']);
+    await db.exec("update ai_font_operation_costs set credits=150 where operation='standard'");
+    await db.query('select ai_font_finish_job($1,$2)', [job, 'failed']);
+    assert.equal(await balance(db), 300, 'refund uses reserved cost, not current price');
+    await db.query('select ai_font_reserve_job($1,$2,$3,150)', [user, secondJob, 'a bold display font']);
+    assert.equal(await balance(db), 150);
+    await db.query('select ai_font_finish_job($1,$2)', [secondJob, 'failed']);
+    assert.equal(await balance(db), 300);
+    await db.query('select ai_font_credit_once($1,$2,$3)', [user, 'adjust-test', -201]);
+    await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3,150)', [user, '20000000-0000-4000-8000-000000000003', 'a bold display font']), /NO_CREDITS/);
+    for (const role of ['anon', 'authenticated']) {
+      await db.exec(`set role ${role}`);
+      await assert.rejects(db.query("update ai_font_operation_costs set credits=1"), /permission denied/);
+      await assert.rejects(db.query('select ai_font_reserve_job($1,$2,$3,100)', [user, job, 'a bold display font']), /permission denied/);
+      await db.exec('reset role');
+    }
   } finally { await db.close(); }
 });

@@ -26,8 +26,9 @@ Copy the entries from `docs/ai-font.env.example` into your untracked `.env.local
 Restart Next after changing them. Never send service secrets to the browser.
 
 1. Create a Supabase project. Apply
-   `supabase/migrations/202610030001_ai_fonts.sql` with the SQL editor or Supabase
-   CLI. It creates private tables and the private `ai-fonts` bucket. All ledger
+   `supabase/migrations/202610030001_ai_fonts.sql`, then
+   `supabase/migrations/202610060001_ai_font_credits.sql` with the SQL editor or
+   Supabase CLI. It creates private tables and the private `ai-fonts` bucket. All ledger
    writes require the service role; anonymous and authenticated client roles
    have no direct access.
 2. In Google Cloud create a web OAuth client. Configure the redirect URI shown
@@ -186,3 +187,43 @@ explained next to the text field. The artwork editor does not edit font glyphs.
 Price and generation allowance remain $4.99 for three generations. Waffo is not
 connected by this UI change. No real AI result examples are fabricated; reference
 fonts remain labelled, and production quality needs real generation samples.
+
+
+## Pricing, customer credits and upgrade procedure
+
+`/pricing` is accessible through Pricing in both header menus. Like the AI studio,
+it remains noindex and outside the sitemap during the preview phase. It compares
+free tools with a one-time pack and explains credit usage, scope, expiry and
+failures. It does not offer recurring subscriptions. Availability is read at
+request time and a not-yet-configured checkout is clearly labelled.
+
+Customer credits are separate from Mixfont API credits. The $4.99 pack grants
+300 customer credits; standard English generation costs 100, preserving the
+original three-generation entitlement. The UI also shows the equivalent number
+of full generations, rounded down, including for partial/negative balances.
+The account endpoint returns only the signed-in user's 30 latest ledger entries.
+
+The new migration must be applied once, in sequence, before using this app:
+
+1. Pause checkout creation, generation requests and the reconciliation scheduler;
+   stop old application instances and drain requests. Take a database backup.
+2. Apply `202610060001_ai_font_credits.sql`. Its transaction locks the ledger
+   tables, multiplies every wallet balance, order allowance (including pending
+   orders), and historical event delta by 100. Existing jobs receive a 100-credit
+   cost snapshot. Prices, captures, IDs and idempotency keys are unchanged.
+3. Deploy this application and resume the scheduler and requests. Do not roll
+   the app back independently of the credit migration: the old reservation RPC
+   is intentionally removed, and old-version order inserts fail a constraint.
+4. Verify balances against the ledger and exercise settlement, generation and
+   failure restoration in Sandbox before enabling real checkout.
+
+The migration adds a server-only operation-price table. The reservation RPC
+checks the server's expected cost, atomically debits it and records `credit_cost`
+on the job. A confirmed failure restores that snapshot once even if the rate
+later changes. Clients cannot set the charge. Changing a rate requires a
+coordinated database and catalog update; stale server prices fail closed.
+
+The free style matcher runs locally against a small, explicitly labelled set
+of existing reference fonts. It supports English and Chinese keywords, reports
+when no match is available, and does not overwrite the paid generation prompt.
+It uses no LLM, paid generation API or credits. Waffo integration is still pending.

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       if ((count ?? 0) >= 10) throw new HttpError(429, 'Please use an existing order or try again later.');
       const { data, error } = await db.from('ai_font_orders').upsert({
         id: input.id, user_id: user.id, provider: 'paypal', package_id: FONT_PACK.id,
-        amount_minor: FONT_PACK.amountMinor, currency: FONT_PACK.currency, credits: FONT_PACK.credits,
+        amount_minor: FONT_PACK.amountMinor, currency: FONT_PACK.currency, credits: FONT_PACK.credits, credit_version: 2,
       }, { onConflict: 'id', ignoreDuplicates: true }).select('*').maybeSingle();
       if (error) throw error;
       if (!data) throw new HttpError(409, 'Checkout is already starting. Please try again.');

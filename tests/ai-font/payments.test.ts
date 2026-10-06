@@ -5,7 +5,7 @@ import { safeFontUrl } from '../../lib/ai-font/generation';
 import { validatePrompt } from '../../lib/ai-font/catalog';
 import type { PaymentOrder } from '../../lib/ai-font/payments/types';
 
-const order: PaymentOrder = { id: '10000000-0000-4000-8000-000000000001', user_id: 'user', provider: 'paypal', external_id: 'ORDER', capture_id: null, amount_minor: 499, currency: 'USD', credits: 3, status: 'pending' };
+const order: PaymentOrder = { id: '10000000-0000-4000-8000-000000000001', user_id: 'user', provider: 'paypal', external_id: 'ORDER', capture_id: null, amount_minor: 499, currency: 'USD', credits: 300, status: 'pending' };
 function receipt() { return { id: 'ORDER', status: 'COMPLETED', purchase_units: [{ custom_id: order.id, payments: { captures: [{ id: 'CAPTURE', status: 'COMPLETED', amount: { currency_code: 'USD', value: '4.99' } }] } }] }; }
 
 test('only exact completed payments for the stored order grant credit', () => {
@@ -48,6 +48,7 @@ test('PayPal checkout/capture uses stored prices and stable idempotency keys', a
     assert.deepEqual(await provider.complete(order), { externalId: 'ORDER', captureId: 'CAPTURE' });
     const create = calls.find((c) => c.url.endsWith('/v2/checkout/orders'))!;
     assert.equal(JSON.parse(String(create.init?.body)).purchase_units[0].amount.value, '4.99');
+    assert.equal(JSON.parse(String(create.init?.body)).purchase_units[0].description, '300 AI font credits');
     assert.equal(new Headers(create.init?.headers).get('PayPal-Request-Id'), order.id);
     const capture = calls.find((c) => c.url.endsWith('/capture'))!;
     assert.equal(new Headers(capture.init?.headers).get('PayPal-Request-Id'), order.id);
