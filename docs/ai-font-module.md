@@ -168,3 +168,21 @@ Official references:
 - https://developer.paypal.com/api/webhooks/v1
 - https://www.mixfont.com/docs/guides/font-generation
 - https://www.mixfont.com/license
+
+
+## Artwork editor
+
+The AI page includes a client-side canvas editor, available without login using
+clearly labelled existing reference fonts. A succeeded job's **Preview & create
+artwork** button loads the authenticated signed font URL into a FontFace and
+selects that font in the same editor. It supports custom multiline text, size,
+colors, alignment, square posts (1080×1080), wide banners (1600×900), and transparent
+lettering (1600×600). PNG exports have no watermark. Layout changes and exports
+never call the generation or payment endpoints and do not consume generations.
+Font downloads still use the existing authenticated, ownership-checked endpoint.
+Non-English or unsupported characters can fall back to a system font; this is
+explained next to the text field. The artwork editor does not edit font glyphs.
+
+Price and generation allowance remain $4.99 for three generations. Waffo is not
+connected by this UI change. No real AI result examples are fabricated; reference
+fonts remain labelled, and production quality needs real generation samples.

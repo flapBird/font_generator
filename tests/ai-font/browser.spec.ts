@@ -12,6 +12,10 @@ test('free AI references require no account, payment or generation API', async (
   await expect(page.getByLabel('Font description')).toHaveValue(/retro pixel/);
   await expect(page.getByText('My weekend project', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Paid generation coming soon' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Download PNG', exact: true })).toBeEnabled();
+  const freeExport = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download PNG', exact: true }).click();
+  expect((await freeExport).suggestedFilename()).toBe('Arcade-square.png');
   expect(paidCalls).toEqual([]);
   expect(await page.locator('script[src*="supabase"],script[src*="paypal.com/sdk"]').count()).toBe(0);
   await page.screenshot({ path: '/tmp/font-generator-ai-font-desktop.png', fullPage: true });
@@ -117,4 +121,55 @@ test('signed-in UI purchases only after agreement and spends a generation explic
   await expect(page.getByText('2 generations available')).toBeVisible();
   expect(submitted?.prompt).toBe('A friendly rounded display font for a cafe');
   expect(submitted?.id).toMatch(/^[a-f0-9-]{36}$/);
+});
+
+test('artwork export uses the selected generated font without spending credits (mocked account)', async ({ page }) => {
+  const paidCalls: string[] = [];
+  page.on('request', request => { if (request.method() === 'POST' && /\/api\/ai-font\/(jobs|orders)/.test(request.url())) paidCalls.push(request.url()); });
+  const id = '10000000-0000-4000-8000-000000000002';
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'test@example.com' }, credits: 2, orders: [],
+    jobs: [{ id, name: 'Test display font', prompt: 'A bold display font', status: 'succeeded', created_at: '2026-10-06T00:00:00Z' }],
+    services: { auth: true, generation: true, checkout: true, sandbox: true },
+  } }));
+  await page.route(`**/api/ai-font/jobs/${id}/download`, route => route.fulfill({ json: { url: 'http://localhost:3211/test-font.woff2' } }));
+  await page.route('**/test-font.woff2', route => route.fulfill({ path: 'node_modules/@fontsource/anton/files/anton-latin-400-normal.woff2', contentType: 'font/woff2' }));
+  await page.goto('/ai-font-generator');
+  await expect(page.getByRole('button', { name: 'Download PNG', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Preview & create artwork' }).click();
+  await expect(page.getByText('Editing with your generated font:', { exact: false })).toBeVisible();
+  await page.getByLabel('Artwork text', { exact: true }).fill('MY POSTER');
+  await page.getByLabel('Image format', { exact: true }).selectOption('transparent');
+  const downloadButton = page.getByRole('button', { name: 'Download PNG', exact: true });
+  await expect(downloadButton).toBeEnabled();
+  expect(await page.locator('canvas').evaluate((c: HTMLCanvasElement) => c.getContext('2d')!.font)).toContain(`generated-${id}`);
+  const downloadEvent = page.waitForEvent('download');
+  await downloadButton.click();
+  const download = await downloadEvent;
+  expect(download.suggestedFilename()).toBe('Test-display-font-transparent.png');
+  const stream = await download.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
+  const png = Buffer.concat(chunks);
+  expect(png.subarray(1, 4).toString()).toBe('PNG');
+  expect(png.readUInt32BE(16)).toBe(1600);
+  expect(png.readUInt32BE(20)).toBe(600);
+  const pixels = await page.evaluate(async (base64) => {
+    const img = new Image(); img.src = `data:image/png;base64,${base64}`; await img.decode();
+    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+    const ctx = c.getContext('2d')!; ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, c.width, c.height).data;
+    return { cornerAlpha: data[3], hasText: data.some((value, index) => index % 4 === 3 && value > 0) };
+  }, png.toString('base64'));
+  expect(pixels).toEqual({ cornerAlpha: 0, hasText: true });
+  await page.getByLabel('Image format', { exact: true }).selectOption('wide');
+  await expect(downloadButton).toBeEnabled();
+  expect(await page.locator('canvas').evaluate((c: HTMLCanvasElement) => c.getContext('2d')!.getImageData(0, 0, 1, 1).data[3])).toBe(255);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.locator('#font-artwork').screenshot({ path: '/tmp/font-artwork-mobile.png' });
+  await page.getByLabel('Artwork text', { exact: true }).fill('');
+  await expect(downloadButton).toBeDisabled();
+  await expect(page.getByText('2 generations available')).toBeVisible();
+  expect(paidCalls).toEqual([]);
 });

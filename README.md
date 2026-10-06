@@ -16,7 +16,7 @@ The existing free tools process user-entered text and image composition in the b
 
 ## Optional AI Font Module
 
-Open `/ai-font-generator` through the **AI Font** link in the desktop navigation or mobile menu. Free style references work without any service credentials. Custom generation requires Google sign-in and purchased generations; there are no free API generations or sign-up credits. Existing generator functionality is unchanged.
+Open `/ai-font-generator` through the **AI Font** link in the desktop navigation or mobile menu. Free style references work without any service credentials. The included artwork editor lets visitors try reference fonts for free and lets purchasers turn generated fonts into square posts, wide banners, or transparent PNG lettering without spending more generation credits. Custom generation requires Google sign-in and purchased generations; there are no free API generations or sign-up credits. Existing generator functionality is unchanged.
 
 The header also provides an optional **Log in** entry at `/login`, with Google sign-in independent of payment configuration. Signed-in users can open **My fonts & purchases** or sign out from the account menu. Free tools never require login; unconfigured authentication shows an availability notice rather than a fake login.
 
