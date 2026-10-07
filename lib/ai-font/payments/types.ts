@@ -1,5 +1,8 @@
 export type PaymentOrder = {
   id: string;
+  created_at?: string;
+  checkout_url?: string | null;
+  checkout_expires_at?: string | null;
   user_id: string;
   provider: string;
   external_id: string | null;
@@ -20,7 +23,7 @@ export type PaymentEvent =
 // and the transactional credit ledger. Add a provider without changing jobs.
 export interface PaymentProvider {
   id: string;
-  createCheckout(order: PaymentOrder): Promise<{ externalId: string; approvalUrl: string }>;
+  createCheckout(order: PaymentOrder): Promise<{ externalId: string; approvalUrl: string; expiresAt?: string }>;
   complete(order: PaymentOrder): Promise<PaymentReceipt | null>;
   verifyWebhook(request: Request): Promise<PaymentEvent>;
 }

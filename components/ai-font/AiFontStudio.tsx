@@ -8,7 +8,7 @@ import { authChangedEvent } from '@/lib/ai-font/auth-navigation';
 import FontArtwork from './FontArtwork';
 import { matchFontStyle } from '@/lib/ai-font/style-match';
 
-type Services = { auth: boolean; generation: boolean; checkout: boolean; sandbox: boolean };
+type Services = { auth: boolean; generation: boolean; checkout: boolean; sandbox: boolean; provider?: 'paypal' | 'waffo' };
 type Order = { id: string; provider: string; amount_minor: number; currency: string; credits: number; status: string; created_at: string };
 type Account = { user: { email: string } | null; credits: number; jobs: FontJob[]; orders: Order[]; creditEvents?: { id: number; kind: string; delta: number; created_at: string }[]; services: Services };
 const button = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
@@ -55,6 +55,8 @@ export default function AiFontStudio({ services: initialServices }: { services: 
   const [artworkFont, setArtworkFont] = useState<{ id: string; family: string; name: string } | null>(null);
   const actionLock = useRef(false);
   const services = account?.services ?? initialServices;
+  const provider = services.provider || 'paypal';
+  const providerName = provider === 'waffo' ? 'Waffo' : 'PayPal';
   const active = Boolean(account?.jobs.some((job) => ['reserved', 'starting', 'processing'].includes(job.status)));
   const blocked = Boolean(account?.jobs.some((job) => ['reserved', 'starting', 'processing', 'needs_review'].includes(job.status)));
 
@@ -142,7 +144,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
     const id = saved(checkoutKey) || crypto.randomUUID();
     save(checkoutKey, id);
     try {
-      const result = await api<{ approvalUrl: string }>('orders', 'POST', { id, provider: 'paypal', packageId: FONT_PACK.id, acceptedTerms: accepted });
+      const result = await api<{ approvalUrl: string }>('orders', 'POST', { id, provider, packageId: FONT_PACK.id, acceptedTerms: accepted });
       window.location.assign(result.approvalUrl);
     } catch (error) {
       if (error instanceof ApiError && error.status === 410) save(checkoutKey, null);
@@ -196,7 +198,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
         {[['No subscription', 'Buy a small pack for your next project.'], ['Private font library', 'Your generated files are not listed in a public gallery.'], ['Ready for your design', 'Download TTF fonts and export PNG artwork without a watermark.']].map(([title, copy]) => <div key={title} className="rounded-xl border border-border p-4"><h2 className="text-sm font-bold">{title}</h2><p className="mt-2 text-sm text-muted-foreground">{copy}</p></div>)}
       </div>
       {!services.checkout && <p className="mb-6 rounded-xl border border-border bg-muted p-4 text-sm">Custom font purchases are coming soon. You can explore the free style references below — no account needed.</p>}
-      {services.checkout && services.sandbox && <p className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">Preview checkout · PayPal Sandbox only. Use a PayPal test account; no real payment will be taken.</p>}
+      {services.checkout && services.sandbox && <p className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">Preview checkout · {providerName} test mode. Use test payment details only.</p>}
       <div aria-live="polite" aria-atomic="true">
         {notice && <p className="mb-5 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-950">{notice}</p>}
         {error && <p role="alert" className="mb-5 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-950">{error}</p>}
@@ -246,7 +248,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
             {account.credits < 0 && <p className="mb-3 text-sm text-red-700 dark:text-red-300">Your balance was adjusted after a payment refund or reversal. Contact support before purchasing again.</p>}
             {account.credits >= STANDARD_FONT_CREDITS && <button className={`${button} mb-4 w-full`} disabled={Boolean(busy) || blocked || !services.generation || prompt.trim().length < 10} onClick={() => act('generate', generate)}>{busy === 'generate' ? 'Starting your font…' : blocked ? 'A generation is already in progress' : `Generate font · ${STANDARD_FONT_CREDITS} credits`}</button>}
             <label className="mb-4 flex items-start gap-3 text-sm leading-relaxed"><input type="checkbox" className="mt-1 h-4 w-4 accent-violet-600" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} /><span>I agree to the <Link className="text-primary underline" href="/ai-font-generator/policy" target="_blank" rel="noopener noreferrer">purchase terms and privacy details</Link>.</span></label>
-            <button className={`${secondary} w-full`} disabled={Boolean(busy) || !accepted || !services.checkout || account.credits < 0} onClick={() => act('checkout', buy)}>{busy === 'checkout' ? 'Opening PayPal…' : `Buy ${availableGenerations(FONT_PACK.credits)} generations with PayPal`}</button>
+            <button className={`${secondary} w-full`} disabled={Boolean(busy) || !accepted || !services.checkout || account.credits < 0} onClick={() => act('checkout', buy)}>{busy === 'checkout' ? `Opening ${providerName}…` : `Buy ${availableGenerations(FONT_PACK.credits)} generations with ${providerName}`}</button>
           </>}
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">AI results vary. Best for creative titles and display lettering. Confirmed technical failures restore your generation; changing a successful design uses another generation.</p>
         </section>
@@ -269,7 +271,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
             {job.status === 'succeeded' && <div className="mt-4 flex flex-wrap gap-2"><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`preview-${job.id}`, () => previewFont(job.id, job.name || 'Custom English font'))}>Preview & create artwork</button><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`download-${job.id}`, async () => { const result = await api<{ url: string }>(`jobs/${job.id}/download`); window.location.assign(result.url); })}>Download TTF ↓</button></div>}
           </article>)}
         </div>}
-        {Boolean(account.creditEvents?.length) && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Credit activity</summary><p className="mt-2 text-xs text-muted-foreground">Your 30 most recent balance changes. Layout edits and exports are free.</p><ul className="mt-3 divide-y divide-border">{account.creditEvents?.map(event => <li key={event.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span>{{ order: 'Pack purchase', job: 'Font generation', restore: 'Failed generation restored', revoke: 'Payment refund or reversal' }[event.kind] || 'Credit adjustment'} · {new Date(event.created_at).toLocaleDateString()}</span><span>{event.delta > 0 ? '+' : ''}{event.delta} credits</span></li>)}</ul></details>}
+        {Boolean(account.creditEvents?.length) && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Credit activity</summary><p className="mt-2 text-xs text-muted-foreground">Your 30 most recent balance changes. Layout edits and exports are free.</p><ul className="mt-3 divide-y divide-border">{account.creditEvents?.map(event => <li key={event.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span>{{ order: 'Pack purchase', job: 'Font generation', restore: 'Failed generation restored', revoke: 'Payment refund or reversal', billing: 'Payment credits', 'billing-refund': 'Payment refund or reversal' }[event.kind] || 'Credit adjustment'} · {new Date(event.created_at).toLocaleDateString()}</span><span>{event.delta > 0 ? '+' : ''}{event.delta} credits</span></li>)}</ul></details>}
         {account.orders.length > 0 && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Your orders</summary><ul className="mt-4 divide-y divide-border">{account.orders.map((order) => <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><span>{order.credits} credits · ${(order.amount_minor / 100).toFixed(2)} {order.currency} · {order.status}</span>{order.status === 'pending' && <button className={secondary} disabled={Boolean(busy)} onClick={() => act(`order-${order.id}`, async () => { const result = await api<{ status: string }>('orders/complete', 'POST', { id: order.id }); setNotice(result.status === 'paid' ? 'Payment confirmed. Your generations are ready.' : 'Payment has not completed.'); if (result.status === 'paid') save(checkoutKey, null); await refresh(); })}>Check payment</button>}</li>)}</ul></details>}
       </section>}
 

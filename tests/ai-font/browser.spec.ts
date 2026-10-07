@@ -64,7 +64,7 @@ test('paid routes reject unauthenticated and cross-origin requests', async ({ re
   expect(account.status()).toBe(200);
   expect((await account.json()).user).toBeNull();
   expect(account.headers()['cache-control']).toContain('no-store');
-  for (const path of ['jobs', 'orders', 'orders/complete']) {
+  for (const path of ['jobs', 'orders', 'orders/complete', 'subscriptions/cancel']) {
     const response = await request.post(`/api/ai-font/${path}`, {
       headers: { origin: 'http://localhost:3211' }, data: { id: '10000000-0000-4000-8000-000000000001' },
     });
@@ -220,4 +220,37 @@ test('partial credits cannot generate; credit history shows charged and restored
   await page.getByText('Credit activity', { exact: true }).click();
   await expect(page.getByText('+100 credits', { exact: true })).toBeVisible();
   await expect(page.getByText('-100 credits', { exact: true })).toBeVisible();
+});
+
+test('account page edits profile and shows credits and subscription cancellation (mocked)', async ({ page }) => {
+  let displayName = 'Font User', cancelRequested: string | null = null;
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'user@example.com', displayName, avatarUrl: null, provider: 'Google', createdAt: '2026-10-01T00:00:00Z' }, credits: 300,
+    orders: [], creditEvents: [{ id: 1, kind: 'billing', delta: 300, created_at: '2026-10-01T00:00:00Z' }],
+    subscriptions: [{ id: '10000000-0000-4000-8000-000000000001', plan_id: 'Test monthly', status: 'active', billing_interval: 'monthly', credits_per_period: 300, current_period_end: '2026-11-01T00:00:00Z', cancel_requested_at: cancelRequested }],
+  } }));
+  await page.route('**/api/ai-font/profile', async route => { displayName = route.request().postDataJSON().displayName; await route.fulfill({ json: { ok: true } }); });
+  await page.route('**/api/ai-font/subscriptions/cancel', async route => { cancelRequested = new Date().toISOString(); await route.fulfill({ json: { status: 'requested' } }); });
+  await page.goto('/account');
+  await expect(page.getByText('300 credits', { exact: true })).toBeVisible();
+  await page.getByLabel('Display name').fill('New name');
+  await page.getByRole('button', { name: 'Save name' }).click();
+  await expect(page.getByRole('status')).toHaveText('Display name saved.');
+  await page.reload(); await expect(page.getByLabel('Display name')).toHaveValue('New name');
+  await page.getByRole('button', { name: 'Cancel subscription', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirm cancellation' }).click();
+  await expect(page.getByText('Cancellation requested. Refresh to check the latest status.')).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: '/tmp/font-account-mobile.png', fullPage: true });
+});
+
+test('Waffo checkout uses the selected provider (mocked)', async ({ page }) => {
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: { user: { email: 'test@example.com' }, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], services: { auth: true, generation: true, checkout: true, provider: 'waffo', sandbox: true } } }));
+  await page.route('**/api/ai-font/orders', async route => { expect(route.request().postDataJSON().provider).toBe('waffo'); await route.fulfill({ json: { approvalUrl: 'https://checkout.waffo.ai/test' } }); });
+  await page.route('https://checkout.waffo.ai/test', route => route.fulfill({ contentType: 'text/html', body: '<h1>Mock Waffo checkout</h1>' }));
+  await page.goto('/ai-font-generator'); await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Buy 3 generations with Waffo' }).click();
+  await expect(page.getByRole('heading', { name: 'Mock Waffo checkout' })).toBeVisible();
 });

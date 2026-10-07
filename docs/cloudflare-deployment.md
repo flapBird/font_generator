@@ -2,7 +2,7 @@
 
 This project deploys the existing Next.js application to **Cloudflare Workers**
 using `@opennextjs/cloudflare`. Choose Workers when importing the repository in
-the dashboard. Login, account APIs, PayPal callbacks and AI font jobs need a
+the dashboard. Login, account APIs, payment callbacks and AI font jobs need a
 server runtime, so a static Cloudflare Pages upload cannot run the full site.
 
 The adapter requires the included Next.js 16.3.8 or a compatible newer release.
@@ -88,6 +88,11 @@ Build variables and runtime variables are separate settings in Cloudflare.
 | `NEXT_PUBLIC_SUPABASE_URL` | Required for client auth | Required for server auth and cron |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Required for client auth | Required for server auth |
 | `AI_FONT_APP_URL` | Not needed | Actual HTTPS origin, e.g. `https://font-generators.org` |
+| `AI_FONT_PAYMENT_PROVIDER` | Not needed | `waffo` or `paypal` |
+| `WAFFO_ENVIRONMENT` | Not needed | `test` initially; `prod` after verification |
+| `WAFFO_MERCHANT_ID`, `WAFFO_STORE_ID`, `WAFFO_PRODUCT_ID` | Not needed | Waffo merchant, expected store and one-time product IDs |
+| `WAFFO_PRIVATE_KEY` | Not needed | Secret: merchant RSA private key (PEM) |
+| `WAFFO_WEBHOOK_PUBLIC_KEY` | Not needed | Waffo webhook verification public key (PEM) |
 | `PAYPAL_ENVIRONMENT` | Not needed | `sandbox` initially; `live` only after verification |
 | `SUPABASE_SERVICE_ROLE_KEY` | Not needed | Secret |
 | `MIXFONT_API_KEY` | Not needed | Secret |
@@ -103,9 +108,11 @@ cannot enable the browser's Supabase client. Server secrets belong in **Settings
 → Variables and Secrets**, not in public build variables. Login and studio pages
 render dynamically so server service availability follows runtime configuration.
 
-See [AI font setup](ai-font-module.md) for Google OAuth, PayPal and Mixfont. Allow
+See [AI font setup](ai-font-module.md) for Google OAuth, Waffo/PayPal and Mixfont. Only the selected payment provider needs credentials. Allow
 the exact Supabase callback `https://<your-domain>/ai-font-generator/auth/callback`,
-register PayPal's webhook `https://<your-domain>/api/ai-font/webhooks/paypal`, and
+register the selected provider webhook at
+`https://<your-domain>/api/ai-font/webhooks/waffo` or
+`https://<your-domain>/api/ai-font/webhooks/paypal`, and
 ensure both use the same origin as `AI_FONT_APP_URL`. Preview origins need their
 own explicit callback allowlist and Sandbox settings if testing auth there.
 

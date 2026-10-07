@@ -14,7 +14,7 @@ function AccountIcon() {
 
 export default function AccountMenu() {
   const pathname = usePathname();
-  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [user, setUser] = useState<{ email?: string; displayName?: string; avatarUrl?: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const menu = useRef<HTMLDetailsElement>(null);
@@ -67,6 +67,8 @@ export default function AccountMenu() {
   return <details ref={menu} className="relative">
     <summary aria-label="Account" className={`${control} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}><AccountIcon /><span className="hidden sm:inline">Account</span></summary>
     <div className="absolute right-0 top-full mt-2 w-60 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-background p-3 shadow-xl">
+      {user.displayName && <p className="truncate px-2 pt-2 text-sm font-semibold">{user.displayName}</p>}
+      <Link href="/account" className="block rounded-lg px-2 py-3 text-sm font-semibold hover:bg-muted" onClick={() => { if (menu.current) menu.current.open = false; }}>Account & billing</Link>
       <p className="truncate px-2 py-2 text-xs text-muted-foreground">{user.email}</p>
       <Link href="/ai-font-generator#my-fonts-title" className="block rounded-lg px-2 py-3 text-sm font-semibold hover:bg-muted" onClick={() => { if (menu.current) menu.current.open = false; }}>My fonts & purchases</Link>
       <button className="w-full rounded-lg px-2 py-3 text-left text-sm hover:bg-muted disabled:opacity-50" disabled={busy} onClick={signOut}>{busy ? 'Signing out…' : 'Sign out'}</button>
