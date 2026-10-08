@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FONT_PACK, FONT_SAMPLES, STANDARD_FONT_CREDITS, availableGenerations, isUuid, type FontJob } from '@/lib/ai-font/catalog';
-import { signInWithGoogle } from '@/lib/ai-font/auth-browser';
+import { FONT_SAMPLES, STANDARD_FONT_CREDITS, availableGenerations, isUuid, type FontJob } from '@/lib/ai-font/catalog';
 import { authChangedEvent } from '@/lib/ai-font/auth-navigation';
 import FontArtwork from './FontArtwork';
 import { matchFontStyle } from '@/lib/ai-font/style-match';
@@ -45,10 +44,9 @@ export default function AiFontStudio({ services: initialServices }: { services: 
   const [styleDescription, setStyleDescription] = useState('');
   const [matchNotice, setMatchNotice] = useState('');
   const [preview, setPreview] = useState('Make something yours');
-  const [prompt, setPrompt] = useState<string>(FONT_SAMPLES[0].prompt);
+  const [prompt, setPrompt] = useState<string>('');
   const [account, setAccount] = useState<Account | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [accepted, setAccepted] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
@@ -56,8 +54,6 @@ export default function AiFontStudio({ services: initialServices }: { services: 
   const [artworkFont, setArtworkFont] = useState<{ id: string; family: string; name: string } | null>(null);
   const actionLock = useRef(false);
   const services = account?.services ?? initialServices;
-  const provider = services.provider || 'paypal';
-  const providerName = provider === 'waffo' ? 'Waffo' : 'PayPal';
   const active = Boolean(account?.jobs.some((job) => ['reserved', 'starting', 'processing'].includes(job.status)));
   const blocked = Boolean(account?.jobs.some((job) => ['reserved', 'starting', 'processing', 'needs_review'].includes(job.status)));
 
@@ -131,26 +127,8 @@ export default function AiFontStudio({ services: initialServices }: { services: 
     if (actionLock.current) return;
     actionLock.current = true;
     setBusy(name); setError(''); setNotice('');
-    try { await action(); } catch (err) { setError((err as Error).message); }
+    try { await action(); } catch (err) { setError((err as Error).message); if (err instanceof ApiError && [401, 402, 409].includes(err.status)) await refresh().catch(() => {}); }
     finally { actionLock.current = false; setBusy(null); }
-  }
-
-  async function signIn() {
-    save(draftKey, prompt);
-    await signInWithGoogle();
-  }
-
-  async function buy() {
-    save(draftKey, prompt);
-    const id = saved(checkoutKey) || crypto.randomUUID();
-    save(checkoutKey, id);
-    try {
-      const result = await api<{ approvalUrl: string }>('orders', 'POST', { id, provider, packageId: FONT_PACK.id, acceptedTerms: accepted });
-      window.location.assign(result.approvalUrl);
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 410) save(checkoutKey, null);
-      throw error;
-    }
   }
 
   async function generate() {
@@ -183,42 +161,44 @@ export default function AiFontStudio({ services: initialServices }: { services: 
     document.getElementById('font-artwork')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  const canGenerate = loaded && Boolean(account?.user) && (account?.credits ?? 0) >= STANDARD_FONT_CREDITS && services.generation && !blocked && !busy && prompt.trim().length >= 10;
+
   return (
-    <div className={styles.studio}>
-    <div className="mx-auto max-w-6xl px-4 pb-20 pt-24 sm:px-6">
-      <div className="mb-7 flex flex-wrap items-center justify-between gap-4 text-sm">
-        <Link href="/" className="text-muted-foreground hover:text-primary">← Free font tools</Link>
-        {account?.user && <div className="flex max-w-full items-center gap-3"><span className="truncate text-muted-foreground">{account.user.email}</span><button className={secondary} disabled={Boolean(busy)} onClick={() => act('signout', async () => { await api('auth/signout', 'POST'); save(checkoutKey, null); save(pendingJobKey, null); window.dispatchEvent(new Event(authChangedEvent)); await refresh(); })}>Sign out</button></div>}
-      </div>
-      <div className={styles.hero}>
-        <div>
-          <p className={styles.eyebrow}>A font of your own</p>
-          <h1 className={styles.title}>AI Font Generator</h1>
-          <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">Create an English font, then turn it into a poster, a banner or transparent lettering. One-time payment for generation; keep experimenting with layouts at no extra generation cost.</p>
-          <div className={styles.heroMeta}><span>English · 72 characters</span><span>TTF fonts & PNG artwork</span></div>
+    <main className="mx-auto max-w-5xl px-4 pb-20 pt-24 sm:px-6">
+      <header className="mb-6 text-center">
+        <h1 className="brand-gradient-text text-3xl font-bold tracking-tight sm:text-4xl">AI Font Generator</h1>
+        <p className="mt-3 text-sm text-muted-foreground sm:text-base">Describe your idea. Create an English font you can download and use.</p>
+      </header>
+      <section aria-labelledby="create-title" className="rounded-3xl border border-border bg-background p-5 shadow-sm sm:p-7">
+        <h2 id="create-title" className="sr-only scroll-mt-24">Create your custom font</h2>
+        <label htmlFor="ai-font-prompt" className="mb-3 block text-sm font-semibold">Font description</label>
+        <textarea id="ai-font-prompt" className={`${field} min-h-44 resize-y bg-muted/30 text-base leading-relaxed sm:min-h-52`} value={prompt} maxLength={1000} placeholder="A rounded, friendly font for a neighborhood coffee shop…" onChange={(event) => { setPrompt(event.target.value); save(draftKey, event.target.value); }} aria-describedby="ai-prompt-help" />
+        <div className="mt-3 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground"><p id="ai-prompt-help">English · 72 characters · One style · TTF</p><span>{prompt.length}/1000</span></div>
+        <button className={`${button} mt-5 w-full`} disabled={!canGenerate} onClick={() => act('generate', generate)}>{busy === 'generate' ? 'Starting your font…' : `Generate font · ${STANDARD_FONT_CREDITS} credits`}</button>
+        {account?.user && <p className="mt-3 text-center text-xs text-muted-foreground">{availableGenerations(account.credits)} generations available · {account.credits} credits</p>}
+        <div className="mt-3 text-center text-sm" aria-live="polite">
+          {!loaded ? <p className="text-muted-foreground">Checking your account…</p> : !account ? <p className="text-muted-foreground">Account unavailable. <button className="text-primary underline" onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p> : !account.user ? <p><Link href="/login?next=%2Fai-font-generator" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>Log in</Link> <span className="text-muted-foreground">to generate your font.</span></p> : blocked ? <p className="text-muted-foreground">{active ? 'Your font is being generated. Check My fonts below.' : 'Your previous generation needs review. Check My fonts below.'}</p> : account.credits < 0 ? <p className="text-muted-foreground">Your balance needs review. <Link href="/contact" className="text-primary underline">Contact support</Link></p> : account.credits < STANDARD_FONT_CREDITS ? <p><span className="text-muted-foreground">Not enough credits. </span><Link href="/pricing" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>View plans & credits</Link></p> : !services.generation ? <p className="text-muted-foreground">Font generation is temporarily unavailable.</p> : <p className="text-muted-foreground">{prompt.trim().length < 10 ? 'Enter at least 10 characters.' : 'Ready to create your font.'}</p>}
         </div>
-        <div className={styles.specimens} aria-hidden="true">
-          {FONT_SAMPLES.map((item) => <div key={item.id}><span style={{ fontFamily: item.family }}>Aa</span><small>{item.name}</small></div>)}
-        </div>
+      </section>
+      <div aria-live="polite" aria-atomic="true" className="mt-4">
+        {notice && <p className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{notice}</p>}
+        {error && <p role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">{error}</p>}
       </div>
-
-      {!services.checkout && <p className={styles.availability}><span aria-hidden="true" />Custom font purchases are coming soon. You can explore the free style references below — no account needed.</p>}
-      {services.checkout && services.sandbox && <p className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">Preview checkout · {providerName} test mode. Use test payment details only.</p>}
-      <div aria-live="polite" aria-atomic="true">
-        {notice && <p className="mb-5 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-950">{notice}</p>}
-        {error && <p role="alert" className="mb-5 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-950">{error}</p>}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
+      <nav className="mb-8 flex flex-wrap justify-center gap-2" aria-label="Font tools">
+        <a href="#preview-title" className={secondary}>Style references</a>
+        <a href="#font-artwork" className={secondary}>Create artwork</a>
+        {account?.user && <a href="#my-fonts-title" className={secondary}>My fonts</a>}
+      </nav>
+      <div className="mt-8">
         <section aria-labelledby="preview-title" className={`${styles.panel} min-w-0 p-5 sm:p-7`}>
-          <p className={styles.eyebrow}>01 / Explore</p>
+
           <div className="flex items-center justify-between gap-2"><h2 id="preview-title" className="scroll-mt-24 text-xl font-bold">Find your direction</h2><span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Free preview</span></div>
           <p className="mt-2 text-sm text-muted-foreground">Type your words and explore a few starting points.</p>
           <label htmlFor="style-description" className="mb-2 mt-5 block text-sm font-semibold">Describe a style to try for free</label>
           <input id="style-description" className={field} maxLength={240} value={styleDescription} placeholder="e.g. a retro pixel font for a game" onChange={(event) => setStyleDescription(event.target.value)} />
           <button className={`${secondary} mt-3`} disabled={!styleDescription.trim()} onClick={() => {
             const match = matchFontStyle(styleDescription);
-            if (match) { setSample(match); setMatchNotice(`Matched ${match.name}, an existing reference font. Your custom font description below has not changed.`); }
+            if (match) { setSample(match); setMatchNotice(`Matched ${match.name}, an existing reference font. Your custom font description has not changed.`); }
             else setMatchNotice('No close match in our reference set. Try words such as rounded, elegant, pixel or bold, or choose a style below.');
           }}>Match a reference style</button>
           <p className="mt-2 text-xs text-muted-foreground">Local keyword matching · No AI generation or credits used</p>
@@ -236,31 +216,6 @@ export default function AiFontStudio({ services: initialServices }: { services: 
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">Style references use existing open-source fonts, not a live AI generation. Your custom result will be different. The preview text does not limit the characters in your font.</p>
         </section>
 
-        <section aria-labelledby="create-title" className={`${styles.panel} ${styles.createPanel} min-w-0 p-5 sm:p-7`}>
-          <p className={styles.eyebrow}>02 / Create</p>
-          <h2 id="create-title" className="scroll-mt-24 text-xl font-bold">Create your custom font</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Describe the shapes, mood, and project you have in mind.</p>
-          <label htmlFor="ai-font-prompt" className="mb-2 mt-5 block text-sm font-semibold">Font description</label>
-          <textarea id="ai-font-prompt" className={`${field} min-h-52 resize-y leading-relaxed`} value={prompt} maxLength={1000} onChange={(event) => { setPrompt(event.target.value); save(draftKey, event.target.value); }} aria-describedby="ai-prompt-help" />
-          <p id="ai-prompt-help" className="mt-2 text-xs text-muted-foreground">English letters, numbers and basic punctuation · 72 characters · One style · TTF</p>
-          <div className={`${styles.pack} my-5 rounded-xl p-4`}>
-            <div className="flex items-baseline justify-between gap-3"><span className="font-semibold">AI Font Starter Pack</span><span className="text-2xl font-bold">${(FONT_PACK.amountMinor / 100).toFixed(2)} <span className="text-xs font-normal">USD</span></span></div>
-            <p className="mt-2 text-sm text-muted-foreground">{availableGenerations(FONT_PACK.credits)} custom font generations · One-time purchase. Each generation creates one English font style. Includes TTF downloads and unlimited layout edits and PNG exports. Commercial use is subject to the purchase terms.</p>
-          </div>
-          <Link href="/pricing" className="mb-4 inline-block text-sm text-primary underline">View pricing & credit details</Link>
-          {!account?.user ? <>
-            <button className={`${button} w-full`} disabled={!loaded || !services.checkout || Boolean(busy)} onClick={() => act('signin', signIn)}>{busy === 'signin' ? 'Opening Google…' : !loaded ? 'Loading…' : !services.checkout ? 'Paid generation coming soon' : 'Continue with Google'}</button>
-            <p className="mt-3 text-center text-xs text-muted-foreground">Sign in only when you want to purchase or use paid generations.</p>
-          </> : <>
-            <p className="mb-4 text-sm font-semibold">{availableGenerations(account.credits)} generation{availableGenerations(account.credits) === 1 ? '' : 's'} available</p>
-            <p className="mb-4 text-xs text-muted-foreground">Balance: {account.credits} credits · {STANDARD_FONT_CREDITS} credits per basic English font</p>
-            {account.credits < 0 && <p className="mb-3 text-sm text-red-700 dark:text-red-300">Your balance was adjusted after a payment refund or reversal. Contact support before purchasing again.</p>}
-            {account.credits >= STANDARD_FONT_CREDITS && <button className={`${button} mb-4 w-full`} disabled={Boolean(busy) || blocked || !services.generation || prompt.trim().length < 10} onClick={() => act('generate', generate)}>{busy === 'generate' ? 'Starting your font…' : blocked ? 'A generation is already in progress' : `Generate font · ${STANDARD_FONT_CREDITS} credits`}</button>}
-            <label className="mb-4 flex items-start gap-3 text-sm leading-relaxed"><input type="checkbox" className="mt-1 h-4 w-4 accent-violet-600" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} /><span>I agree to the <Link className="text-primary underline" href="/ai-font-generator/policy" target="_blank" rel="noopener noreferrer">purchase terms and privacy details</Link>.</span></label>
-            <button className={`${secondary} w-full`} disabled={Boolean(busy) || !accepted || !services.checkout || account.credits < 0} onClick={() => act('checkout', buy)}>{busy === 'checkout' ? `Opening ${providerName}…` : `Buy ${availableGenerations(FONT_PACK.credits)} generations with ${providerName}`}</button>
-          </>}
-          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">AI results vary. Best for creative titles and display lettering. Confirmed technical failures restore your generation; changing a successful design uses another generation.</p>
-        </section>
       </div>
 
       <div id="font-artwork" className="scroll-mt-24">
@@ -289,10 +244,9 @@ export default function AiFontStudio({ services: initialServices }: { services: 
       </section>}
 
       <section className="mt-12 grid gap-6 border-t border-border pt-8 sm:grid-cols-3" aria-label="How it works">
-        {[['01', 'Explore a style', 'Try your words in our free style references. No account or generation credits needed.'], ['02', 'Make it your own', 'Describe your font, sign in with Google, and buy a one-time generation pack.'], ['03', 'Download and create', 'Download your TTF, or use the artwork editor to create PNG posters and transparent lettering. Layout edits do not use generations.']].map(([number, title, copy]) => <div key={number}><p className="text-sm font-semibold text-primary">{number}</p><h2 className="mt-2 font-bold">{title}</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{copy}</p></div>)}
+        {[['01', 'Explore a style', 'Try your words in our free style references. No account or generation credits needed.'], ['02', 'Make it your own', 'Describe your font and sign in. Choose a credit pack on the Pricing page if you need credits.'], ['03', 'Download and create', 'Download your TTF, or use the artwork editor to create PNG posters and transparent lettering. Layout edits do not use generations.']].map(([number, title, copy]) => <div key={number}><p className="text-sm font-semibold text-primary">{number}</p><h2 className="mt-2 font-bold">{title}</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{copy}</p></div>)}
       </section>
       <p className="mt-8 text-sm text-muted-foreground">Just need copy-and-paste text? <Link href="/" className="text-primary underline">Use our free font generator</Link>. <Link href="/ai-font-generator/policy" className="ml-2 underline">AI font purchase terms & privacy</Link></p>
-    </div>
-    </div>
+    </main>
   );
 }

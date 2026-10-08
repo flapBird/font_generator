@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { FONT_PACK, STANDARD_FONT_CREDITS, availableGenerations } from '@/lib/ai-font/catalog';
+import PricingCheckout from '@/components/ai-font/PricingCheckout';
 import { availability } from '@/lib/ai-font/config';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +14,8 @@ export const metadata: Metadata = {
 const action = 'mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-primary px-5 py-3 font-semibold text-primary-foreground';
 
 export default function PricingPage() {
-  const enabled = availability().checkout;
+  const services = availability();
+  const enabled = services.checkout;
   return <main className="mx-auto max-w-5xl px-5 pb-24 pt-28">
     <p className="text-sm font-semibold uppercase tracking-widest text-primary">Simple, one-time pricing</p>
     <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">Free to explore. Pay to create a font.</h1>
@@ -32,7 +34,7 @@ export default function PricingPage() {
         <div><h2 className="text-xl font-bold">{FONT_PACK.name}</h2><p className="mt-4 text-4xl font-bold">${(FONT_PACK.amountMinor / 100).toFixed(2)} <span className="text-sm font-normal">USD / pack</span></p>
         <p className="mt-2 text-sm text-muted-foreground">One-time payment · {availableGenerations(FONT_PACK.credits)} custom font generations</p></div>
         <ul className="mt-6 space-y-3 text-sm"><li>{FONT_PACK.credits} credits · {STANDARD_FONT_CREDITS} per basic English font</li><li>72 characters · One font style per generation</li><li>Downloadable, installable TTF files</li><li>Private font library and repeat downloads</li><li>Unlimited layout edits and PNG exports</li><li>Commercial use under the <Link href="/ai-font-generator/policy" className="underline">purchase terms</Link></li></ul>
-        <Link className={action} href="/ai-font-generator#create-title">{enabled ? 'Get the starter pack' : 'Explore AI Font Studio'}</Link>
+        <PricingCheckout services={services} />
         <p className="mt-5 text-xs leading-relaxed text-muted-foreground">{enabled ? 'Sign in with Google to purchase and use your pack.' : 'Purchases are not available yet. You can try the free reference previews now.'} Any applicable taxes are shown at checkout.</p>
       </section>
     </div>

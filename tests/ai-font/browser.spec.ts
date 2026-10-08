@@ -11,7 +11,7 @@ test('free AI references require no account, payment or generation API', async (
   await page.getByRole('button', { name: 'Arcade', exact: true }).click();
   await expect(page.getByLabel('Font description')).toHaveValue(/retro pixel/);
   await expect(page.getByText('My weekend project', { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Paid generation coming soon' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Generate font · 100 credits' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Download PNG', exact: true })).toBeEnabled();
   const freeExport = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download PNG', exact: true }).click();
@@ -59,10 +59,11 @@ test('header login remains visible at desktop and mobile sizes without gating fr
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await login.click();
     await expect(page).toHaveURL(/\/login\?next=%2F$/);
-    await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Welcome' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeDisabled();
     await expect(page.getByText('Google sign-in is not available yet.', { exact: false })).toBeVisible();
-    await page.getByRole('link', { name: 'Continue with free tools' }).click();
+    await expect(page.getByRole('link', { name: 'Continue with free tools' })).toHaveCount(0);
+    await page.goto('/');
     await expect(page).toHaveURL('http://localhost:3211/');
   }
 });
@@ -106,7 +107,7 @@ test('signed-in UI purchases only after agreement and spends a generation explic
     await route.fulfill({ json: { approvalUrl: 'https://www.sandbox.paypal.com/checkoutnow?token=TEST' } });
   });
   await page.route('https://www.sandbox.paypal.com/**', (route) => route.fulfill({ contentType: 'text/html', body: '<h1>Mock PayPal approval</h1>' }));
-  await page.goto('/ai-font-generator');
+  await page.goto('/pricing');
   const buy = page.getByRole('button', { name: 'Buy 3 generations with PayPal' });
   await expect(buy).toBeDisabled();
   await page.getByRole('checkbox').check();
@@ -193,15 +194,15 @@ test('pricing is public, uses the same credit allowance, and links to the studio
     const previewLink = await page.getByRole('link', { name: 'Try a style preview', exact: true }).boundingBox();
     expect(previewLink!.y + previewLink!.height).toBeLessThan(freeAction!.y);
     if (width >= 768) {
-      const paidAction = await page.getByRole('link', { name: 'Explore AI Font Studio', exact: true }).boundingBox();
+      const paidAction = await page.getByRole('link', { name: 'Log in to purchase', exact: true }).boundingBox();
       expect(Math.abs(freeAction!.y - paidAction!.y)).toBeLessThanOrEqual(1);
     }
     if (width === 1280) await page.screenshot({ path: '/tmp/font-generator-pricing-aligned.png', fullPage: true });
   }
   await page.getByText('How do credits work?', { exact: true }).click();
   await expect(page.getByText('One basic English font costs 100 credits.', { exact: false })).toBeVisible();
-  await page.getByRole('link', { name: 'Explore AI Font Studio', exact: true }).click();
-  await expect(page).toHaveURL(/\/ai-font-generator#create-title$/);
+  await page.getByRole('link', { name: 'Log in to purchase', exact: true }).click();
+  await expect(page).toHaveURL(/\/login\?next=%2Fpricing$/);
   await page.goto('/pricing');
   await page.getByRole('link', { name: 'Use free tools', exact: true }).click();
   await expect(page).toHaveURL('http://localhost:3211/');
@@ -231,8 +232,9 @@ test('partial credits cannot generate; credit history shows charged and restored
     services: { auth: true, generation: true, checkout: true, sandbox: true },
   } }));
   await page.goto('/ai-font-generator');
-  await expect(page.getByText('0 generations available', { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Generate font · 100 credits' })).toHaveCount(0);
+  await expect(page.getByText('0 generations available', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Generate font · 100 credits' })).toBeDisabled();
+  await expect(page.getByRole('link', { name: 'View plans & credits' })).toHaveAttribute('href', '/pricing');
   await page.getByText('Credit activity', { exact: true }).click();
   await expect(page.getByText('+100 credits', { exact: true })).toBeVisible();
   await expect(page.getByText('-100 credits', { exact: true })).toBeVisible();
@@ -266,7 +268,42 @@ test('Waffo checkout uses the selected provider (mocked)', async ({ page }) => {
   await page.route('**/api/ai-font/account', route => route.fulfill({ json: { user: { email: 'test@example.com' }, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], services: { auth: true, generation: true, checkout: true, provider: 'waffo', sandbox: true } } }));
   await page.route('**/api/ai-font/orders', async route => { expect(route.request().postDataJSON().provider).toBe('waffo'); await route.fulfill({ json: { approvalUrl: 'https://checkout.waffo.ai/test' } }); });
   await page.route('https://checkout.waffo.ai/test', route => route.fulfill({ contentType: 'text/html', body: '<h1>Mock Waffo checkout</h1>' }));
-  await page.goto('/ai-font-generator'); await page.getByRole('checkbox').check();
+  await page.goto('/pricing'); await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Buy 3 generations with Waffo' }).click();
   await expect(page.getByRole('heading', { name: 'Mock Waffo checkout' })).toBeVisible();
+});
+
+test('generator comes first and gates login, credits, service availability and active jobs', async ({ page }) => {
+  let state: Record<string, unknown> = {};
+  const paidCalls: string[] = [];
+  page.on('request', request => { if (request.method() === 'POST' && /\/api\/ai-font\/(jobs|orders)/.test(request.url())) paidCalls.push(request.url()); });
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: { credits: 300, jobs: [], orders: [], creditEvents: [], subscriptions: [], services: { auth: true, generation: true, checkout: true }, ...state } }));
+  for (const scenario of [
+    { user: null, credits: 300, enabled: false },
+    { user: { email: 'test@example.com' }, credits: 0, subscriptions: [{ status: 'active' }], enabled: false },
+    { user: { email: 'test@example.com' }, credits: 99, enabled: false },
+    { user: { email: 'test@example.com' }, credits: 100, enabled: true },
+    { user: { email: 'test@example.com' }, credits: 100, services: { auth: true, generation: false, checkout: true }, enabled: false },
+    { user: { email: 'test@example.com' }, credits: 100, jobs: [{ id: 'test', status: 'needs_review', created_at: '2026-10-01' }], enabled: false },
+  ]) {
+    state = scenario;
+    await page.goto('/ai-font-generator');
+    const input = page.getByLabel('Font description', { exact: true });
+    await input.fill('A friendly rounded typeface for a cafe');
+    const generate = page.getByRole('button', { name: 'Generate font · 100 credits' });
+    if (scenario.enabled) await expect(generate).toBeEnabled(); else await expect(generate).toBeDisabled();
+    await expect(page.getByRole('button', { name: /Buy .* generations/ })).toHaveCount(0);
+    const inputBox = await input.boundingBox();
+    const tools = await page.getByRole('navigation', { name: 'Font tools' }).boundingBox();
+    expect(inputBox!.y + inputBox!.height).toBeLessThan(tools!.y);
+    expect(inputBox!.y).toBeLessThan(350);
+  }
+  state = { user: null };
+  await page.goto('/ai-font-generator');
+  const login = page.locator('main').getByRole('link', { name: 'Log in', exact: true });
+  await expect(login).toHaveAttribute('href', '/login?next=%2Fai-font-generator');
+  await login.click();
+  await expect(page.getByRole('heading', { name: 'Welcome', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Continue with free tools' })).toHaveCount(0);
+  expect(paidCalls).toEqual([]);
 });
