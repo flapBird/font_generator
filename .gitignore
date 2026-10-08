@@ -48,3 +48,7 @@ next-env.d.ts
 # local artifact-tool runtime links
 /.artifact-runtime/
 /scripts/node_modules
+
+# 仅本地使用的 AI 字体接入说明与配置模板
+/docs/ai-font-module.md
+/docs/ai-font.env.example
