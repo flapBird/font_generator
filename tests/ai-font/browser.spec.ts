@@ -307,3 +307,28 @@ test('generator comes first and gates login, credits, service availability and a
   await expect(page.getByRole('link', { name: 'Continue with free tools' })).toHaveCount(0);
   expect(paidCalls).toEqual([]);
 });
+
+test('signed-in pricing keeps compact aligned actions and explains unavailable checkout', async ({ page }) => {
+  let checkout = false;
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: { user: { email: 'test@example.com' }, credits: 0, services: { checkout, sandbox: true, provider: 'waffo' } } }));
+  for (const enabled of [false, true]) {
+    checkout = enabled;
+    for (const width of [1280, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/pricing');
+      const buy = page.getByRole('button', { name: enabled ? 'Buy 3 generations with Waffo' : 'Purchases unavailable' });
+      await expect(buy).toBeDisabled();
+      if (enabled) {
+        await page.getByRole('checkbox').check();
+        await expect(buy).toBeEnabled();
+      } else {
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
+        await expect(page.getByRole('status')).toContainText('Paid font generation is not available yet');
+      }
+      const freeBounds = await page.getByRole('link', { name: 'Use free tools', exact: true }).boundingBox();
+      const buyBounds = await buy.boundingBox();
+      expect(freeBounds!.height).toBeLessThanOrEqual(52);
+      if (width === 1280) expect(Math.abs(freeBounds!.y + freeBounds!.height - buyBounds!.y - buyBounds!.height)).toBeLessThanOrEqual(1);
+    }
+  }
+});
