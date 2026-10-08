@@ -18,17 +18,19 @@ export default function PricingPage() {
     <p className="text-sm font-semibold uppercase tracking-widest text-primary">Simple, one-time pricing</p>
     <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">Free to explore. Pay to create a font.</h1>
     <p className="mt-5 max-w-2xl text-lg text-muted-foreground">Use our free tools for as long as you like. Buy a small pack when you want a custom English font. No subscription or automatic renewal.</p>
-    <div className="mt-10 grid gap-6 md:grid-cols-2">
-      <section className="rounded-2xl border border-border bg-background p-6 sm:p-8">
-        <h2 className="text-xl font-bold">Free tools</h2><p className="mt-4 text-4xl font-bold">$0</p><p className="mt-2 text-sm text-muted-foreground">No account needed</p>
-        <ul className="mt-6 space-y-3 text-sm"><li>Copy-and-paste font generators</li><li>Local style matching with existing reference fonts</li><li>Text, color, size and layout controls</li><li>PNG artwork exports without watermarks</li></ul>
+    <div className="mt-10 grid gap-x-6 md:grid-cols-2">
+      <section className="mb-6 grid grid-rows-[auto_1fr_auto_auto] rounded-2xl border border-border bg-background p-6 md:row-span-4 md:grid-rows-subgrid sm:p-8">
+        <div><h2 className="text-xl font-bold">Free tools</h2><p className="mt-4 text-4xl font-bold">$0</p><p className="mt-2 text-sm text-muted-foreground">No account needed</p></div>
+        <div>
+          <ul className="mt-6 space-y-3 text-sm"><li>Copy-and-paste font generators</li><li>Local style matching with existing reference fonts</li><li>Text, color, size and layout controls</li><li>PNG artwork exports without watermarks</li></ul>
+          <Link className="mt-4 block text-center text-sm text-primary underline" href="/ai-font-generator#preview-title">Try a style preview</Link>
+        </div>
         <Link className={action} href="/">Use free tools</Link>
-        <Link className="mt-4 block text-center text-sm text-primary underline" href="/ai-font-generator#preview-title">Try a style preview</Link>
         <p className="mt-5 text-xs leading-relaxed text-muted-foreground">Reference previews use existing fonts. Free tools do not generate a new custom font file or include paid generation credits.</p>
       </section>
-      <section className="rounded-2xl border-2 border-primary bg-background p-6 sm:p-8">
-        <h2 className="text-xl font-bold">{FONT_PACK.name}</h2><p className="mt-4 text-4xl font-bold">${(FONT_PACK.amountMinor / 100).toFixed(2)} <span className="text-sm font-normal">USD / pack</span></p>
-        <p className="mt-2 text-sm text-muted-foreground">One-time payment · {availableGenerations(FONT_PACK.credits)} custom font generations</p>
+      <section className="mb-6 grid grid-rows-[auto_1fr_auto_auto] rounded-2xl border-2 border-primary bg-background p-6 md:row-span-4 md:grid-rows-subgrid sm:p-8">
+        <div><h2 className="text-xl font-bold">{FONT_PACK.name}</h2><p className="mt-4 text-4xl font-bold">${(FONT_PACK.amountMinor / 100).toFixed(2)} <span className="text-sm font-normal">USD / pack</span></p>
+        <p className="mt-2 text-sm text-muted-foreground">One-time payment · {availableGenerations(FONT_PACK.credits)} custom font generations</p></div>
         <ul className="mt-6 space-y-3 text-sm"><li>{FONT_PACK.credits} credits · {STANDARD_FONT_CREDITS} per basic English font</li><li>72 characters · One font style per generation</li><li>Downloadable, installable TTF files</li><li>Private font library and repeat downloads</li><li>Unlimited layout edits and PNG exports</li><li>Commercial use under the <Link href="/ai-font-generator/policy" className="underline">purchase terms</Link></li></ul>
         <Link className={action} href="/ai-font-generator#create-title">{enabled ? 'Get the starter pack' : 'Explore AI Font Studio'}</Link>
         <p className="mt-5 text-xs leading-relaxed text-muted-foreground">{enabled ? 'Sign in with Google to purchase and use your pack.' : 'Purchases are not available yet. You can try the free reference previews now.'} Any applicable taxes are shown at checkout.</p>

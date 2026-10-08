@@ -18,11 +18,21 @@ test('free AI references require no account, payment or generation API', async (
   expect((await freeExport).suggestedFilename()).toBe('Arcade-square.png');
   expect(paidCalls).toEqual([]);
   expect(await page.locator('script[src*="supabase"],script[src*="paypal.com/sdk"]').count()).toBe(0);
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.screenshot({ path: '/tmp/font-generator-ai-font-desktop.png', fullPage: true });
+  await page.screenshot({ path: '/tmp/font-generator-ai-font-preview.png' });
+  await page.getByRole('button', { name: 'Switch to dark mode' }).click();
+  await expect(page.locator('html')).toHaveClass(/dark/);
+  await expect(page.getByRole('button', { name: 'Playful', exact: true })).toHaveCSS('background-color', 'rgb(34, 34, 31)');
+  await expect(page.getByRole('button', { name: 'Arcade', exact: true })).toHaveCSS('background-color', 'rgb(245, 241, 232)');
+  await page.screenshot({ path: '/tmp/font-generator-ai-font-dark.png', fullPage: true });
+  await page.getByRole('button', { name: 'Switch to light mode' }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByLabel('Font description')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: '/tmp/font-generator-ai-font-mobile.png', fullPage: true });
+  await page.setViewportSize({ width: 320, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
 test('existing tools remain public and skip account calls when auth is unconfigured', async ({ page }) => {
@@ -181,6 +191,14 @@ test('pricing is public, uses the same credit allowance, and links to the studio
     await expect(page.getByRole('heading', { name: 'Free to explore. Pay to create a font.' })).toBeVisible();
     await expect(page.getByText('300 credits · 100 per basic English font', { exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const freeAction = await page.getByRole('link', { name: 'Use free tools', exact: true }).boundingBox();
+    const previewLink = await page.getByRole('link', { name: 'Try a style preview', exact: true }).boundingBox();
+    expect(previewLink!.y + previewLink!.height).toBeLessThan(freeAction!.y);
+    if (width >= 768) {
+      const paidAction = await page.getByRole('link', { name: 'Explore AI Font Studio', exact: true }).boundingBox();
+      expect(Math.abs(freeAction!.y - paidAction!.y)).toBeLessThanOrEqual(1);
+    }
+    if (width === 1280) await page.screenshot({ path: '/tmp/font-generator-pricing-aligned.png', fullPage: true });
   }
   await page.getByText('How do credits work?', { exact: true }).click();
   await expect(page.getByText('One basic English font costs 100 credits.', { exact: false })).toBeVisible();

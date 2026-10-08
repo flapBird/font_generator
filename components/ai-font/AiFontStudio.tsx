@@ -7,6 +7,7 @@ import { signInWithGoogle } from '@/lib/ai-font/auth-browser';
 import { authChangedEvent } from '@/lib/ai-font/auth-navigation';
 import FontArtwork from './FontArtwork';
 import { matchFontStyle } from '@/lib/ai-font/style-match';
+import styles from './AiFontStudio.module.css';
 
 type Services = { auth: boolean; generation: boolean; checkout: boolean; sandbox: boolean; provider?: 'paypal' | 'waffo' };
 type Order = { id: string; provider: string; amount_minor: number; currency: string; credits: number; status: string; created_at: string };
@@ -183,21 +184,25 @@ export default function AiFontStudio({ services: initialServices }: { services: 
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-20 pt-28 sm:px-6">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4 text-sm">
+    <div className={styles.studio}>
+    <div className="mx-auto max-w-6xl px-4 pb-20 pt-24 sm:px-6">
+      <div className="mb-7 flex flex-wrap items-center justify-between gap-4 text-sm">
         <Link href="/" className="text-muted-foreground hover:text-primary">← Free font tools</Link>
         {account?.user && <div className="flex max-w-full items-center gap-3"><span className="truncate text-muted-foreground">{account.user.email}</span><button className={secondary} disabled={Boolean(busy)} onClick={() => act('signout', async () => { await api('auth/signout', 'POST'); save(checkoutKey, null); save(pendingJobKey, null); window.dispatchEvent(new Event(authChangedEvent)); await refresh(); })}>Sign out</button></div>}
       </div>
-      <div className="mb-10 max-w-3xl">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">A font of your own</p>
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">AI Font Generator</h1>
-        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">Create an English font, then turn it into a poster, a banner or transparent lettering. One-time payment for generation; keep experimenting with layouts at no extra generation cost.</p>
+      <div className={styles.hero}>
+        <div>
+          <p className={styles.eyebrow}>A font of your own</p>
+          <h1 className={styles.title}>AI Font Generator</h1>
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">Create an English font, then turn it into a poster, a banner or transparent lettering. One-time payment for generation; keep experimenting with layouts at no extra generation cost.</p>
+          <div className={styles.heroMeta}><span>English · 72 characters</span><span>TTF fonts & PNG artwork</span></div>
+        </div>
+        <div className={styles.specimens} aria-hidden="true">
+          {FONT_SAMPLES.map((item) => <div key={item.id}><span style={{ fontFamily: item.family }}>Aa</span><small>{item.name}</small></div>)}
+        </div>
       </div>
 
-      <div className="mb-8 grid gap-3 sm:grid-cols-3">
-        {[['No subscription', 'Buy a small pack for your next project.'], ['Private font library', 'Your generated files are not listed in a public gallery.'], ['Ready for your design', 'Download TTF fonts and export PNG artwork without a watermark.']].map(([title, copy]) => <div key={title} className="rounded-xl border border-border p-4"><h2 className="text-sm font-bold">{title}</h2><p className="mt-2 text-sm text-muted-foreground">{copy}</p></div>)}
-      </div>
-      {!services.checkout && <p className="mb-6 rounded-xl border border-border bg-muted p-4 text-sm">Custom font purchases are coming soon. You can explore the free style references below — no account needed.</p>}
+      {!services.checkout && <p className={styles.availability}><span aria-hidden="true" />Custom font purchases are coming soon. You can explore the free style references below — no account needed.</p>}
       {services.checkout && services.sandbox && <p className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">Preview checkout · {providerName} test mode. Use test payment details only.</p>}
       <div aria-live="polite" aria-atomic="true">
         {notice && <p className="mb-5 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-950">{notice}</p>}
@@ -205,7 +210,8 @@ export default function AiFontStudio({ services: initialServices }: { services: 
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
-        <section aria-labelledby="preview-title" className="min-w-0 rounded-2xl border border-border bg-background p-5 sm:p-7">
+        <section aria-labelledby="preview-title" className={`${styles.panel} min-w-0 p-5 sm:p-7`}>
+          <p className={styles.eyebrow}>01 / Explore</p>
           <div className="flex items-center justify-between gap-2"><h2 id="preview-title" className="scroll-mt-24 text-xl font-bold">Find your direction</h2><span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">Free preview</span></div>
           <p className="mt-2 text-sm text-muted-foreground">Type your words and explore a few starting points.</p>
           <label htmlFor="style-description" className="mb-2 mt-5 block text-sm font-semibold">Describe a style to try for free</label>
@@ -217,24 +223,27 @@ export default function AiFontStudio({ services: initialServices }: { services: 
           }}>Match a reference style</button>
           <p className="mt-2 text-xs text-muted-foreground">Local keyword matching · No AI generation or credits used</p>
           <p role="status" className="mt-2 text-sm text-muted-foreground">{matchNotice}</p>
-          <div className="my-5 flex flex-wrap gap-2" aria-label="Style references">
-            {FONT_SAMPLES.map((item) => <button key={item.id} aria-pressed={sample.id === item.id} className={`${secondary} ${sample.id === item.id ? 'border-primary text-primary ring-1 ring-primary' : ''}`} onClick={() => { setSample(item); setPrompt(item.prompt); save(draftKey, item.prompt); }}>{item.name}</button>)}
+          <div className={styles.styleOptions} aria-label="Style references">
+            {FONT_SAMPLES.map((item) => <button key={item.id} aria-pressed={sample.id === item.id} onClick={() => { setSample(item); setPrompt(item.prompt); save(draftKey, item.prompt); }}><span aria-hidden="true" style={{ fontFamily: item.family }}>Aa</span>{item.name}</button>)}
           </div>
           <label htmlFor="ai-preview-text" className="mb-2 block text-sm font-semibold">Your preview text</label>
           <input id="ai-preview-text" className={field} value={preview} maxLength={100} onChange={(event) => setPreview(event.target.value)} />
-          <div className="mt-5 flex min-h-60 items-center justify-center overflow-hidden rounded-xl bg-violet-50 p-6 text-center text-violet-950 dark:bg-violet-950/40 dark:text-violet-100">
+          <div className={styles.previewPaper}>
+            <div className={styles.previewCaption}><span>{sample.name}</span><span>Reference specimen</span></div>
             <p className="break-words text-4xl leading-tight sm:text-5xl" style={{ fontFamily: sample.family, overflowWrap: 'anywhere' }}>{preview || 'Your words here'}</p>
+            <div className={styles.previewAlphabet} aria-hidden="true" style={{ fontFamily: sample.family }}>Aa Bb Cc Dd Ee Ff Gg · 0123456789</div>
           </div>
           <p className="mt-4 text-xs leading-relaxed text-muted-foreground">Style references use existing open-source fonts, not a live AI generation. Your custom result will be different. The preview text does not limit the characters in your font.</p>
         </section>
 
-        <section aria-labelledby="create-title" className="min-w-0 rounded-2xl border border-border bg-background p-5 sm:p-7">
+        <section aria-labelledby="create-title" className={`${styles.panel} ${styles.createPanel} min-w-0 p-5 sm:p-7`}>
+          <p className={styles.eyebrow}>02 / Create</p>
           <h2 id="create-title" className="scroll-mt-24 text-xl font-bold">Create your custom font</h2>
           <p className="mt-2 text-sm text-muted-foreground">Describe the shapes, mood, and project you have in mind.</p>
           <label htmlFor="ai-font-prompt" className="mb-2 mt-5 block text-sm font-semibold">Font description</label>
-          <textarea id="ai-font-prompt" className={`${field} min-h-36 resize-y`} value={prompt} maxLength={1000} onChange={(event) => { setPrompt(event.target.value); save(draftKey, event.target.value); }} aria-describedby="ai-prompt-help" />
+          <textarea id="ai-font-prompt" className={`${field} min-h-52 resize-y leading-relaxed`} value={prompt} maxLength={1000} onChange={(event) => { setPrompt(event.target.value); save(draftKey, event.target.value); }} aria-describedby="ai-prompt-help" />
           <p id="ai-prompt-help" className="mt-2 text-xs text-muted-foreground">English letters, numbers and basic punctuation · 72 characters · One style · TTF</p>
-          <div className="my-5 rounded-xl bg-muted p-4">
+          <div className={`${styles.pack} my-5 rounded-xl p-4`}>
             <div className="flex items-baseline justify-between gap-3"><span className="font-semibold">AI Font Starter Pack</span><span className="text-2xl font-bold">${(FONT_PACK.amountMinor / 100).toFixed(2)} <span className="text-xs font-normal">USD</span></span></div>
             <p className="mt-2 text-sm text-muted-foreground">{availableGenerations(FONT_PACK.credits)} custom font generations · One-time purchase. Each generation creates one English font style. Includes TTF downloads and unlimited layout edits and PNG exports. Commercial use is subject to the purchase terms.</p>
           </div>
@@ -259,6 +268,10 @@ export default function AiFontStudio({ services: initialServices }: { services: 
         {account?.user && artworkFont && <button className={`${secondary} mt-3`} onClick={() => setArtworkFont(null)}>Back to reference font</button>}
       </div>
 
+      <div className="mt-10 grid gap-6 border-t border-border pt-7 sm:grid-cols-3">
+        {[['No subscription', 'Buy a small pack for your next project.'], ['Private font library', 'Your generated files are not listed in a public gallery.'], ['Ready for your design', 'Download TTF fonts and export PNG artwork without a watermark.']].map(([title, copy]) => <div key={title}><h2 className="text-sm font-bold">{title}</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{copy}</p></div>)}
+      </div>
+
       {account?.user && <section className="mt-10" aria-labelledby="my-fonts-title">
         <div className="mb-5 flex items-center justify-between gap-3"><h2 id="my-fonts-title" className="text-2xl font-bold">My fonts</h2><button className={secondary} disabled={Boolean(busy)} onClick={() => act('refresh', async () => { await api('jobs', 'PATCH'); await refresh(); })}>Refresh</button></div>
         {account.jobs.length === 0 ? <p className="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">Your custom fonts will be saved here. Use a paid generation whenever you are ready.</p> : <div className="grid gap-4 sm:grid-cols-2">
@@ -279,6 +292,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
         {[['01', 'Explore a style', 'Try your words in our free style references. No account or generation credits needed.'], ['02', 'Make it your own', 'Describe your font, sign in with Google, and buy a one-time generation pack.'], ['03', 'Download and create', 'Download your TTF, or use the artwork editor to create PNG posters and transparent lettering. Layout edits do not use generations.']].map(([number, title, copy]) => <div key={number}><p className="text-sm font-semibold text-primary">{number}</p><h2 className="mt-2 font-bold">{title}</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{copy}</p></div>)}
       </section>
       <p className="mt-8 text-sm text-muted-foreground">Just need copy-and-paste text? <Link href="/" className="text-primary underline">Use our free font generator</Link>. <Link href="/ai-font-generator/policy" className="ml-2 underline">AI font purchase terms & privacy</Link></p>
+    </div>
     </div>
   );
 }
