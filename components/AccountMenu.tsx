@@ -64,8 +64,10 @@ export default function AccountMenu() {
 
   if (!user) return <Link href={`/login?next=${encodeURIComponent(authReturnPath(pathname))}`} className={control} aria-label="Log in" title="Log in"><AccountIcon /><span className="hidden sm:inline">Log in</span></Link>;
 
+  const initial = Array.from(user.displayName?.trim() || user.email?.trim() || 'U')[0].toLocaleUpperCase();
+
   return <details ref={menu} className="relative">
-    <summary aria-label="Account" className={`${control} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}><AccountIcon /><span className="hidden sm:inline">Account</span></summary>
+    <summary aria-label="Account" title={user.displayName || user.email || 'Account'} className="flex h-11 w-11 shrink-0 cursor-pointer list-none items-center justify-center rounded-full border border-violet-200 bg-violet-100 text-sm font-bold text-violet-800 transition-colors hover:bg-violet-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-violet-700 dark:bg-violet-950 dark:text-violet-200 dark:hover:bg-violet-900 [&::-webkit-details-marker]:hidden"><span aria-hidden="true">{initial}</span></summary>
     <div className="absolute right-0 top-full mt-2 w-60 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-background p-3 shadow-xl">
       {user.displayName && <p className="truncate px-2 pt-2 text-sm font-semibold">{user.displayName}</p>}
       <Link href="/account" className="block rounded-lg px-2 py-3 text-sm font-semibold hover:bg-muted" onClick={() => { if (menu.current) menu.current.open = false; }}>Account & billing</Link>

@@ -393,9 +393,6 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
             ))}
           </div>
 
-          <ThemeToggle />
-          <AccountMenu />
-
           <button
             className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -411,6 +408,8 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
               )}
             </svg>
           </button>
+          <AccountMenu />
+          <ThemeToggle />
           </div>
         </div>
 
