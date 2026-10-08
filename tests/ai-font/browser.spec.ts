@@ -21,12 +21,10 @@ test('free AI references require no account, payment or generation API', async (
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await page.screenshot({ path: '/tmp/font-generator-ai-font-desktop.png', fullPage: true });
   await page.screenshot({ path: '/tmp/font-generator-ai-font-preview.png' });
-  await page.getByRole('button', { name: 'Switch to dark mode' }).click();
-  await expect(page.locator('html')).toHaveClass(/dark/);
-  await expect(page.getByRole('button', { name: 'Playful', exact: true })).toHaveCSS('background-color', 'rgb(34, 34, 31)');
-  await expect(page.getByRole('button', { name: 'Arcade', exact: true })).toHaveCSS('background-color', 'rgb(245, 241, 232)');
-  await page.screenshot({ path: '/tmp/font-generator-ai-font-dark.png', fullPage: true });
-  await page.getByRole('button', { name: 'Switch to light mode' }).click();
+  await page.evaluate(() => localStorage.setItem('font-generators-theme-v2', 'dark'));
+  await page.reload();
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
+  await expect(page.getByRole('button', { name: /Switch to .* mode/ })).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByLabel('Font description')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

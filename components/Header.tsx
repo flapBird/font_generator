@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState, useSyncExternalStore, type FocusEvent } from 'react';
+import { useEffect, useRef, useState, type FocusEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AccountMenu from '@/components/AccountMenu';
 
@@ -42,62 +42,6 @@ function ChevronIcon({ className = '' }: { className?: string }) {
     >
       <path d="M4 6.5L8 10.5L12 6.5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
     </svg>
-  );
-}
-
-const themeChangeEvent = 'font-generators-theme-change';
-const themeStorageKey = 'font-generators-theme-v2';
-
-function applyTheme(isDark: boolean) {
-  document.documentElement.classList.toggle('dark', isDark);
-  document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
-}
-
-function subscribeToTheme(onStoreChange: () => void) {
-  const handleThemeChange = () => onStoreChange();
-
-  window.addEventListener(themeChangeEvent, handleThemeChange);
-
-  return () => {
-    window.removeEventListener(themeChangeEvent, handleThemeChange);
-  };
-}
-
-function getThemeSnapshot() {
-  return document.documentElement.classList.contains('dark');
-}
-
-function ThemeToggle() {
-  const isDark = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, () => false);
-
-  const toggleTheme = () => {
-    const nextThemeIsDark = !getThemeSnapshot();
-    applyTheme(nextThemeIsDark);
-    try {
-      window.localStorage.setItem(themeStorageKey, nextThemeIsDark ? 'dark' : 'light');
-    } catch {}
-    window.dispatchEvent(new Event(themeChangeEvent));
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={toggleTheme}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-700 transition-colors hover:bg-muted hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200 dark:hover:text-white"
-    >
-      {isDark ? (
-        <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-          <circle cx="12" cy="12" r="4" />
-          <path strokeLinecap="round" d="M12 2.5v2M12 19.5v2M21.5 12h-2M4.5 12h-2M18.72 5.28l-1.42 1.42M6.7 17.3l-1.42 1.42M18.72 18.72l-1.42-1.42M6.7 6.7 5.28 5.28" />
-        </svg>
-      ) : (
-        <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M20.4 15.2A8.5 8.5 0 0 1 8.8 3.6 8.5 8.5 0 1 0 20.4 15.2Z" />
-        </svg>
-      )}
-    </button>
   );
 }
 
@@ -409,7 +353,6 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
             </svg>
           </button>
           <AccountMenu />
-          <ThemeToggle />
           </div>
         </div>
 

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { authChangedEvent, authReturnPath } from '@/lib/ai-font/auth-navigation';
 
 const authConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
-const control = 'flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-border px-2 text-sm font-semibold transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-3';
+const control = 'flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-5';
 
 function AccountIcon() {
   return <svg aria-hidden="true" className="h-5 w-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5" /><path strokeLinecap="round" d="M4.5 21v-2a7.5 7.5 0 0 1 15 0v2" /></svg>;
@@ -67,7 +67,7 @@ export default function AccountMenu() {
   const initial = Array.from(user.displayName?.trim() || user.email?.trim() || 'U')[0].toLocaleUpperCase();
 
   return <details ref={menu} className="relative">
-    <summary aria-label="Account" title={user.displayName || user.email || 'Account'} className="flex h-11 w-11 shrink-0 cursor-pointer list-none items-center justify-center rounded-full border border-violet-200 bg-violet-100 text-sm font-bold text-violet-800 transition-colors hover:bg-violet-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-violet-700 dark:bg-violet-950 dark:text-violet-200 dark:hover:bg-violet-900 [&::-webkit-details-marker]:hidden"><span aria-hidden="true">{initial}</span></summary>
+    <summary aria-label="Account" title={user.displayName || user.email || 'Account'} className="flex h-11 w-11 shrink-0 cursor-pointer list-none items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 [&::-webkit-details-marker]:hidden"><span aria-hidden="true">{initial}</span></summary>
     <div className="absolute right-0 top-full mt-2 w-60 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-background p-3 shadow-xl">
       {user.displayName && <p className="truncate px-2 pt-2 text-sm font-semibold">{user.displayName}</p>}
       <Link href="/account" className="block rounded-lg px-2 py-3 text-sm font-semibold hover:bg-muted" onClick={() => { if (menu.current) menu.current.open = false; }}>Account & billing</Link>

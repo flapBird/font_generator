@@ -44,13 +44,10 @@
  }));
  const themeInitializationScript = `
    (() => {
-     let savedTheme = null;
-     try {
-       savedTheme = localStorage.getItem('font-generators-theme-v2');
-     } catch {}
-     const useDarkTheme = savedTheme === 'dark';
-     document.documentElement.classList.toggle('dark', useDarkTheme);
-     document.documentElement.style.colorScheme = useDarkTheme ? 'dark' : 'light';
+     // Keep the site light while the theme switch is unavailable, including
+     // browsers that saved a dark preference before the switch was removed.
+     document.documentElement.classList.remove('dark');
+     document.documentElement.style.colorScheme = 'light';
    })();
  `;
 
