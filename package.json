@@ -7,7 +7,14 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test:generators": "node scripts/check-generators.cjs"
+    "test:generators": "node scripts/check-generators.cjs",
+    "build:cloudflare": "opennextjs-cloudflare build",
+    "preview:cloudflare": "opennextjs-cloudflare preview",
+    "deploy:cloudflare": "opennextjs-cloudflare deploy",
+    "preview": "npm run build:cloudflare && npm run preview:cloudflare",
+    "deploy": "npm run build:cloudflare && npm run deploy:cloudflare",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "test:cloudflare:browser": "playwright test --config tests/cloudflare/playwright.config.ts"
   },
   "dependencies": {
     "@fontsource/anton": "^5.3.0",
@@ -20,22 +27,29 @@
     "@fontsource/pixelify-sans": "^5.3.0",
     "@fontsource/poppins": "^5.3.0",
     "@fontsource/roboto": "^5.3.0",
-    "@next/third-parties": "^16.0.7",
+    "@next/third-parties": "16.3.8",
+    "@opennextjs/cloudflare": "^1.20.8",
     "@tailwindcss/typography": "^0.5.20",
     "autoprefixer": "^10.5.4",
     "framer-motion": "^12.23.25",
-    "next": "16.0.7",
+    "next": "16.3.8",
     "postcss": "^8.5.20",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "0.25.4",
     "eslint": "^9",
-    "eslint-config-next": "16.0.7",
+    "eslint-config-next": "16.3.8",
     "tailwindcss": "^3.4.19",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.147.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }
