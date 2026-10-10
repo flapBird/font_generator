@@ -98,7 +98,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const gaId = process.env.NEXT_PUBLIC_GA_ID || 'G-XZ8VM9EYM9';
+  const gaId = 'G-P3P9SJKZEG';
  
   return (
     <html lang="en" suppressHydrationWarning>

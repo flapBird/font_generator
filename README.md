@@ -59,13 +59,12 @@ Rendered artwork behaves differently: the browser draws the selected typeface an
 git clone <repository-url>
 cd font_generator
 npm ci
-cp .env.local.example .env.local
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). Changes under `app`, `components`, and `lib` are reflected by the development server.
 
-The environment file is optional for local development. If you do not need a custom Google Analytics property, you can skip the copy step.
+No environment file is required for local development.
 
 ## Available Scripts
 
@@ -90,13 +89,9 @@ npm run build
 npm run start
 ```
 
-## Environment Variables
+## Analytics
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `NEXT_PUBLIC_GA_ID` | No | Overrides the GA4 measurement ID used on the production site |
-
-Variables prefixed with `NEXT_PUBLIC_` are embedded in the browser bundle. Do not place secrets in them. Google Analytics is loaded only when the browser hostname is `font-generators.org` or `www.font-generators.org`, so local and preview traffic is not reported. The site also loads Google AdSense on eligible content routes; update those integrations when adapting the project for another deployment or production domain.
+Google Analytics uses the fixed measurement ID `G-P3P9SJKZEG` and is loaded only when the browser hostname is `font-generators.org` or `www.font-generators.org`, so local and preview traffic is not reported. The site also loads Google AdSense on eligible content routes; update those integrations when adapting the project for another deployment or production domain.
 
 ## Project Structure
 

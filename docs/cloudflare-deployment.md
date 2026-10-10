@@ -61,10 +61,6 @@ The separate commands avoid building twice. Install dev dependencies too, since
 Wrangler is a dev dependency. Do not use `next start`, a Pages output-directory
 upload or plain `wrangler deploy` without first running the OpenNext build.
 
-`NEXT_PUBLIC_GA_ID` is an optional build variable for overriding the production
-Google Analytics property. Public variables are compiled into browser assets;
-changing them requires another build and deployment.
-
 ## Caching and custom domains
 
 Prebuilt public content uses Workers Static Assets as the read-only incremental
