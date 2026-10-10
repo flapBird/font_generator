@@ -53,6 +53,17 @@ and `services[0].service` in `wrangler.jsonc`; the self binding must target the
 same Worker. CLI deploy requires a Cloudflare account with Workers enabled.
 These commands publish the application; they are separate from local preview.
 
+For local Waffo checkout testing, expose port 3000 through an HTTPS tunnel
+(for example, `ngrok http 3000`) and set `AI_FONT_APP_URL` in `.env.local` to
+that HTTPS origin. The Next.js development configuration uses its exact hostname
+as an `allowedDevOrigins` entry so tunnel requests can load development resources
+and connect to HMR. Restart `npm run dev` after changing the origin, add
+`<tunnel-origin>/ai-font-generator/auth/callback` to Supabase's redirect allowlist,
+and register `<tunnel-origin>/api/ai-font/webhooks/waffo` as a test webhook.
+Open the app and sign in through the tunnel URL. If the tunnel hostname changes,
+update those settings together. The tunnel only forwards HTTP; it does not run
+the Cloudflare scheduled handler locally.
+
 After the first deployment, configure runtime variables/secrets in the Worker
 dashboard, then deploy again if public build values changed. `keep_vars: true`
 preserves dashboard-managed ordinary variables on subsequent CLI deployments.
