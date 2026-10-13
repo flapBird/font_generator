@@ -64,6 +64,17 @@ Open the app and sign in through the tunnel URL. If the tunnel hostname changes,
 update those settings together. The tunnel only forwards HTTP; it does not run
 the Cloudflare scheduled handler locally.
 
+If the purchase button stays on `Loading…` and Google sign-in does nothing,
+check whether the browser's `/_next/` scripts return `403 Unauthorized`. A changed
+tunnel hostname can leave `AI_FONT_APP_URL` and the development resource allowlist
+pointing at the previous tunnel: the server-rendered page still appears, but
+client-side actions cannot initialize. Copy the current forwarding origin from
+ngrok's local dashboard at `http://127.0.0.1:4040` into `.env.local`, restart the
+Next.js development server, then reload the page through that same HTTPS origin.
+Supabase's redirect allowlist and Waffo's test webhook must use the current
+tunnel too. Sessions are separate for localhost and each tunnel hostname; sign
+in again after changing hosts.
+
 After the first deployment, configure runtime variables/secrets in the Worker
 dashboard, then deploy again if public build values changed. `keep_vars: true`
 preserves dashboard-managed ordinary variables on subsequent CLI deployments.
