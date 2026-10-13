@@ -201,7 +201,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
             className="flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={closeAllMenus}
           >
-            <span className="brand-gradient-text text-lg font-semibold tracking-[-0.04em] sm:text-2xl">Font Generators</span>
+            <span className="brand-gradient-text text-lg font-black tracking-[-0.025em] sm:text-2xl">Font Generators</span>
           </Link>
 
           <div className="flex h-full items-center gap-1">
@@ -238,7 +238,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
                   className={dropdownClass('styles')}
                   data-origin="top-center"
                 >
-                  <div className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-lg dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-2.5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
                     <ul className="mx-auto grid w-[13rem] max-w-full grid-cols-1 gap-1.5">
                       {featuredStyleLinks.map((item) => (
                         <li key={item.href}>
@@ -298,7 +298,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
                   className={dropdownClass('art')}
                   data-origin="top-right"
                 >
-                  <div className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-lg dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-2.5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950 dark:ring-white/10">
                     <ul className="mx-auto grid w-[13rem] max-w-full grid-cols-1 gap-1.5">
                       {featuredVisualArtLinks.map((item) => (
                         <li key={item.href}>

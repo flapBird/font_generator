@@ -9,7 +9,7 @@ final result: passed
 Selected direction: the second displayed design, “Describe a font. Make it real.”
 Reference: `/Users/admin/.codex/generated_images/01a13496-fda4-78e3-aeaa-cb68adca0836/exec-7716c9e5-a1d5-468b-8ad0-38d30a3d478e.png`.
 Implementation: `http://localhost:3000/ai-font-generator`.
-Shared changes cover the neutral page surface, headline/brand color, navigation shadows and homepage workspace styling. Individual generator layouts and generation/payment behavior are retained.
+After user review, the shared purple brand palette, gradient headings, homepage specimen and card depth are restored to the pre-redesign appearance. The white surface and neutral tokens are scoped to the AI Font page. Individual generator layouts and generation/payment behavior are retained.
 
 ## Evidence and comparison
 
@@ -28,7 +28,7 @@ Shared changes cover the neutral page surface, headline/brand color, navigation 
 
 - Typography: neutral system UI face, clear display hierarchy, live bundled Luckiest Guy and EB Garamond specimens. The generated mock's invented letterforms are deliberately replaced with identified real reference fonts, not images masquerading as downloadable AI results.
 - Spacing: compact prompt surface, alternating use-case rows, lightly separated output explanations. Additional anchors preserve access to existing tools.
-- Colors: white base, dark headings, restrained purple actions/selection; lavender and warm cream are confined to specimens. Heavy homepage gradient and decorative glow removed.
+- Colors: the AI Font page retains its white base, dark headings and purple actions/selection. The shared site retains purple gradient branding and the homepage retains its saturated purple specimen and soft card shadows.
 - Image quality: specimens are native font rendering, so remain crisp and selectable. No raster asset is needed for these font UI previews.
 - Copy: prompt, example use and file output are connected. TTF, 72 English glyphs, PNG export and reference-vs-AI distinction are explicit. Actual navigation and authentication controls are retained instead of the mock's generic Get started button.
 
@@ -46,4 +46,14 @@ Shared changes cover the neutral page surface, headline/brand color, navigation 
 
 ## Limits and follow-up
 
-No paid generation, purchase or signed-in account flow was performed in the browser. Real generated-font quality and a publishable sample library remain outside this visual change. Existing AI backend tests cover credit, generation and payment safeguards. The standalone Playwright browser suite was not run; interaction checks used the in-app browser. P3 follow-up: extend this visual treatment to the remaining individual tool panels after reviewing this first pass.
+No paid generation, purchase or signed-in account flow was performed in the browser. Real generated-font quality and a publishable sample library remain outside this visual change. Existing AI backend tests cover credit, generation and payment safeguards. The standalone Playwright browser suite was not run; interaction checks used the in-app browser.
+
+## Follow-up: restore shared brand presence
+
+The user found the neutral shared UI too plain and supplied the earlier homepage screenshot. Restored the shared colors, brand weight, gradient headings, background treatment, homepage workspace/preview styling and navigation depth. Kept the selected AI Font layout and reference examples, with a page wrapper isolating its colors from global tokens. Reduced-motion scrolling support remains.
+
+- Desktop homepage (1280 CSS px): `/tmp/font-home-brand-restored.jpg`; purple headline, saturated specimen and elevated cards visually checked against the user's screenshot.
+- AI Font full page: `/tmp/ai-font-brand-isolated.jpg`; white content surface and selected layout retained.
+- Mobile homepage: `/tmp/font-home-brand-mobile.jpg`; homepage and AI page inspected at 390 CSS px, neither has horizontal overflow.
+- ESLint, TypeScript and production build passed again for this correction. Final homepage console check showed no errors.
+- Reviewed the generated `/llms.txt` source and build output; functionality, routes and output formats are unchanged, so no content update is needed.

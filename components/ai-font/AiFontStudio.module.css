@@ -1,3 +1,18 @@
+.page {
+  --background: #ffffff;
+  --foreground: #18181f;
+  --muted: #f7f7f9;
+  --muted-foreground: #626574;
+  --primary: #6350df;
+  --primary-foreground: #ffffff;
+  --secondary: #eeebfc;
+  --accent: #6350df;
+  --border: #e2e2e8;
+  --ring: #6350df;
+  background: var(--background);
+  color: var(--foreground);
+}
+
 .studio { max-width: 1320px; margin: 0 auto; padding: 116px 40px 80px; }
 .hero { text-align: center; margin-bottom: 32px; }
 .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--muted-foreground); }

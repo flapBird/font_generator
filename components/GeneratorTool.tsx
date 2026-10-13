@@ -543,15 +543,19 @@ export default function GeneratorTool({
       <section
         id={sectionId}
         aria-labelledby={headingId}
-        className="relative border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+        className="relative rounded-[2rem] border border-slate-200/80 bg-white/95 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.38)] dark:border-slate-800 dark:bg-slate-950"
       >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-10 top-[-1px] h-px bg-gradient-to-r from-transparent via-violet-500/70 to-transparent"
+        />
         <h2 id={headingId} className="sr-only">
           Generate {pageTitle.replace(/\s+Generator$/i, '')}
         </h2>
 
         <div className="p-3 sm:p-5 lg:p-6">
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[220px_minmax(0,1fr)_300px]">
-              <div className="order-1 min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5 xl:col-start-2 xl:row-start-1 dark:border-slate-800 dark:bg-slate-900">
+              <div className="order-1 min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.5)] sm:p-5 xl:col-start-2 xl:row-start-1 dark:border-slate-800 dark:bg-slate-900">
                 <label htmlFor={inputId} className="block text-sm font-semibold text-slate-900 dark:text-white">
                   Enter your text
                 </label>
@@ -637,8 +641,8 @@ export default function GeneratorTool({
                         onKeyDown={(event) => copyVariantFromCard(event, variant)}
                         className={`group cursor-pointer rounded-2xl border bg-white p-4 outline-none transition dark:bg-slate-950 ${index >= visibleMobileLimit ? 'hidden sm:block' : ''} ${
                           isSelected
-                            ? 'border-violet-400 ring-1 ring-violet-500/10 dark:border-violet-600'
-                            : 'border-slate-200 hover:border-violet-300 focus-visible:border-violet-400 focus-visible:ring-2 focus-visible:ring-violet-500/20 dark:border-slate-800 dark:hover:border-violet-700'
+                            ? 'border-violet-400 shadow-[0_16px_40px_-32px_rgba(109,40,217,0.9)] ring-2 ring-violet-500/10 dark:border-violet-600'
+                            : 'border-slate-200 hover:border-violet-300 hover:shadow-[0_16px_40px_-32px_rgba(109,40,217,0.8)] focus-visible:border-violet-400 focus-visible:ring-2 focus-visible:ring-violet-500/20 dark:border-slate-800 dark:hover:border-violet-700'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -709,7 +713,7 @@ export default function GeneratorTool({
               </div>
 
               <aside className="hidden xl:sticky xl:top-24 xl:col-start-3 xl:row-start-1 xl:row-span-2 xl:block xl:self-start" aria-label="Selected font preview">
-                <div className="border-l border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_24px_70px_-46px_rgba(91,33,182,0.65)] dark:border-slate-800 dark:bg-slate-950">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">Font Studio</p>
@@ -722,22 +726,24 @@ export default function GeneratorTool({
                     </span>
                   </div>
 
-                  <div className="relative mt-4 min-h-80 overflow-hidden rounded-lg bg-[#f1eef9] p-5 text-slate-950">
+                  <div className="relative mt-4 min-h-80 overflow-hidden rounded-[2rem] bg-gradient-to-br from-violet-700 via-purple-600 to-fuchsia-500 p-5 text-white shadow-[0_24px_50px_-28px_rgba(109,40,217,0.95)]">
+                    <span aria-hidden="true" className="absolute -right-12 -top-14 h-40 w-40 rounded-full border-[24px] border-white/10" />
+                    <span aria-hidden="true" className="absolute -bottom-20 -left-14 h-48 w-48 rounded-full bg-white/10 blur-sm" />
                     <div className="relative flex items-center justify-between">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/70 text-sm font-black italic ring-1 ring-black/5">Fg</span>
-                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Live type specimen</span>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-sm font-black italic ring-1 ring-white/25">Fg</span>
+                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/70">Live type specimen</span>
                     </div>
 
                     <div className="relative flex min-h-48 flex-col justify-center py-6">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-100">
                         {previewVariant ? categoryLabels[previewVariant.category] : 'Preview'} collection
                       </p>
-                      <p className={`mt-3 break-words text-3xl leading-[1.25] ${inputText && previewVariant?.text ? '' : 'text-slate-500'}`}>
+                      <p className={`mt-3 break-words text-3xl leading-[1.25] ${inputText && previewVariant?.text ? '' : 'text-white/65'}`}>
                         {inputText && previewVariant?.text ? previewVariant.text : 'Your text, your style.'}
                       </p>
                     </div>
 
-                    <div className="relative flex items-end justify-between gap-3 border-t border-slate-300/60 pt-4 text-[9px] uppercase tracking-[0.14em] text-slate-500">
+                    <div className="relative flex items-end justify-between gap-3 border-t border-white/20 pt-4 text-[9px] uppercase tracking-[0.14em] text-white/70">
                       <span>font-generators.org</span>
                       <span>Unicode / 2026</span>
                     </div>
@@ -1021,7 +1027,7 @@ export default function GeneratorTool({
           {variants.map((variant) => (
             <div key={variant.id} className="grid gap-3">
               <article
-                className={`group rounded-2xl border border-slate-200 bg-white transition hover:border-violet-300 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700 ${compactResults ? 'p-4' : 'p-4 sm:p-5'}`}
+                className={`group rounded-2xl border border-slate-200 bg-white transition hover:border-violet-300 hover:shadow-[0_16px_40px_-32px_rgba(109,40,217,0.8)] dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700 ${compactResults ? 'p-4' : 'p-4 sm:p-5'}`}
               >
                 <div className={compactResults ? 'grid gap-3 sm:grid-cols-[250px_minmax(0,1fr)_auto] sm:items-center' : 'flex flex-col gap-4 sm:flex-row sm:items-center'}>
                   <div className={compactResults ? 'min-w-0' : 'min-w-0 flex-1'}>

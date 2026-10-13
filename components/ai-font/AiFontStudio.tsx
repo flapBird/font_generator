@@ -165,6 +165,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
   const canGenerate = loaded && Boolean(account?.user) && (account?.credits ?? 0) >= STANDARD_FONT_CREDITS && services.generation && !blocked && !busy && prompt.trim().length >= 10;
 
   return (
+    <div className={styles.page}>
     <div className={styles.studio}>
       <header className={styles.hero}>
         <h1 className={styles.eyebrow}>AI Font Generator</h1>
@@ -266,6 +267,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
         {[['01', 'Explore a style', 'Try your words in our free style references. No account or generation credits needed.'], ['02', 'Make it your own', 'Describe your font and sign in. Choose a credit pack on the Pricing page if you need credits.'], ['03', 'Download and create', 'Download your TTF, or use the artwork editor to create PNG posters and transparent lettering. Layout edits do not use generations.']].map(([number, title, copy]) => <div key={number}><p className="text-sm font-semibold text-primary">{number}</p><h2 className="mt-2 font-bold">{title}</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{copy}</p></div>)}
       </section>
       <p className="mt-8 text-sm text-muted-foreground">Just need copy-and-paste text? <Link href="/" className="text-primary underline">Use our free font generator</Link>. <Link href="/ai-font-generator/policy" className="ml-2 underline">AI font purchase terms & privacy</Link></p>
+    </div>
     </div>
   );
 }
