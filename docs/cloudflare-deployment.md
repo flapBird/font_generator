@@ -53,7 +53,8 @@ and `services[0].service` in `wrangler.jsonc`; the self binding must target the
 same Worker. CLI deploy requires a Cloudflare account with Workers enabled.
 These commands publish the application; they are separate from local preview.
 
-For local Waffo checkout testing, expose port 3000 through an HTTPS tunnel
+For local Waffo checkout testing, keep `npm run dev` running on port 3000 and
+expose that port through an HTTPS tunnel in another terminal
 (for example, `ngrok http 3000`) and set `AI_FONT_APP_URL` in `.env.local` to
 that HTTPS origin. The Next.js development configuration uses its exact hostname
 as an `allowedDevOrigins` entry so tunnel requests can load development resources
@@ -74,6 +75,16 @@ Next.js development server, then reload the page through that same HTTPS origin.
 Supabase's redirect allowlist and Waffo's test webhook must use the current
 tunnel too. Sessions are separate for localhost and each tunnel hostname; sign
 in again after changing hosts.
+
+If Google sign-in runs but returns to the production homepage instead of the
+tunnel callback, check Supabase's **Authentication → URL Configuration → Redirect
+URLs**. The requested `redirectTo` must match an allowed URL. Add the current
+`<tunnel-origin>/ai-font-generator/auth/callback` there and save, then start a new
+sign-in from the tunnel. The existing production Site URL remains the default;
+adding a development callback belongs in Redirect URLs. A login that returned to
+the production homepage cannot establish the local session, because the tunnel's
+callback never exchanged its code. See Supabase's
+[redirect troubleshooting](https://supabase.com/docs/guides/troubleshooting/why-am-i-being-redirected-to-the-wrong-url-when-using-auth-redirectto-option-_vqIeO).
 
 After the first deployment, configure runtime variables/secrets in the Worker
 dashboard, then deploy again if public build values changed. `keep_vars: true`
