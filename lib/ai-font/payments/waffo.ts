@@ -1,16 +1,49 @@
 import 'server-only';
-import { createHash, sign, verify } from 'node:crypto';
+import { createHash, createPrivateKey, createPublicKey, sign, verify } from 'node:crypto';
 import { appOrigin, requiredEnv } from '../config';
 import { HttpError } from '../http';
 import { isUuid } from '../catalog';
 import type { PaymentOrder, PaymentProvider } from './types';
 
 export function waffoMode() { return process.env.WAFFO_ENVIRONMENT === 'prod' ? 'prod' : 'test'; }
+
+// Dashboard keys may be bare Base64 DER; environment files also support PEM
+// with quoted multiline content or literal \n separators.
+function rsaKey(name: 'WAFFO_PRIVATE_KEY' | 'WAFFO_WEBHOOK_PUBLIC_KEY') {
+  const value = requiredEnv(name).replace(/\\n/g, '\n');
+  const privateKey = name === 'WAFFO_PRIVATE_KEY';
+  try {
+    let key;
+    if (value.startsWith('-----BEGIN ')) {
+      key = privateKey ? createPrivateKey(value) : createPublicKey(value);
+    } else {
+      const base64 = value.replace(/\s/g, '');
+      if (!/^[A-Za-z0-9+/]+={0,2}$/.test(base64)) throw new Error();
+      const der = Buffer.from(base64, 'base64');
+      try {
+        key = privateKey
+          ? createPrivateKey({ key: der, format: 'der', type: 'pkcs8' })
+          : createPublicKey({ key: der, format: 'der', type: 'spki' });
+      } catch {
+        key = privateKey
+          ? createPrivateKey({ key: der, format: 'der', type: 'pkcs1' })
+          : createPublicKey({ key: der, format: 'der', type: 'pkcs1' });
+      }
+    }
+    if (key.asymmetricKeyType !== 'rsa') throw new Error();
+    return key;
+  } catch {
+    const error = new Error(`Invalid configuration: ${name}`);
+    error.name = 'WaffoKeyConfigurationError';
+    throw error;
+  }
+}
+
 export async function waffoRequest(path: string, payload: unknown, idempotencyKey?: string) {
   const body = JSON.stringify(payload);
   const timestamp = String(Math.floor(Date.now() / 1000));
   const canonical = `POST\n${path}\n${timestamp}\n${createHash('sha256').update(body).digest('base64')}`;
-  const signature = sign('sha256', Buffer.from(canonical), requiredEnv('WAFFO_PRIVATE_KEY').replace(/\\n/g, '\n')).toString('base64');
+  const signature = sign('sha256', Buffer.from(canonical), rsaKey('WAFFO_PRIVATE_KEY')).toString('base64');
   const response = await fetch(`https://api.waffo.ai${path}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Merchant-Id': requiredEnv('WAFFO_MERCHANT_ID'), 'X-Timestamp': timestamp, 'X-Signature': signature,
       ...(idempotencyKey ? { 'X-Idempotency-Key': idempotencyKey } : {}) },
@@ -71,7 +104,7 @@ export async function verifyWaffoEvent(request: Request) {
   const header = request.headers.get('x-waffo-signature') || '';
   const parts = Object.fromEntries(header.split(',').map(part => { const i = part.indexOf('='); return [part.slice(0,i).trim(),part.slice(i+1).trim()]; }));
   if (!/^\d{13}$/.test(parts.t || '') || Math.abs(Date.now() - Number(parts.t)) > 45 * 60 * 1000 || !parts.v1) throw new HttpError(401, 'Invalid signature.');
-  if (!verify('RSA-SHA256', Buffer.from(`${parts.t}.${raw}`), requiredEnv('WAFFO_WEBHOOK_PUBLIC_KEY').replace(/\\n/g, '\n'), Buffer.from(parts.v1, 'base64'))) throw new HttpError(401, 'Invalid signature.');
+  if (!verify('RSA-SHA256', Buffer.from(`${parts.t}.${raw}`), rsaKey('WAFFO_WEBHOOK_PUBLIC_KEY'), Buffer.from(parts.v1, 'base64'))) throw new HttpError(401, 'Invalid signature.');
   const event = object(JSON.parse(raw));
   if (event.storeId !== requiredEnv('WAFFO_STORE_ID') || event.mode !== waffoMode()) throw new HttpError(403, 'Wrong store or environment.');
   const type = text(event.eventType);

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, sign, verify, createHash } from 'node:crypto';
-import { verifyWaffoEvent, WaffoProvider } from '../../lib/ai-font/payments/waffo';
+import { verifyWaffoEvent, waffoRequest, WaffoProvider } from '../../lib/ai-font/payments/waffo';
 
 const keys = generateKeyPairSync('rsa', { modulusLength: 2048 });
 process.env.WAFFO_PRIVATE_KEY = keys.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
@@ -60,4 +60,67 @@ test('Waffo checkout signs the exact request and preserves server price and idem
     assert.equal(seen[0], seen[1]); assert.equal(await provider.complete(), null);
     await assert.rejects(provider.createCheckout({ ...order, created_at: '2020-01-01T00:00:00Z' }));
   } finally { global.fetch = original; }
+});
+
+test('Waffo signs and verifies with PEM, escaped PEM, and Base64 DER RSA keys', async () => {
+  const originalFetch = global.fetch;
+  const originalPrivate = process.env.WAFFO_PRIVATE_KEY;
+  const originalPublic = process.env.WAFFO_WEBHOOK_PUBLIC_KEY;
+  global.fetch = async (_url, init) => {
+    const headers = new Headers(init?.headers);
+    const canonical = `POST\n/v1/graphql\n${headers.get('X-Timestamp')}\n${createHash('sha256').update(String(init?.body)).digest('base64')}`;
+    assert.ok(verify('sha256', Buffer.from(canonical), keys.publicKey, Buffer.from(headers.get('X-Signature')!, 'base64')));
+    return Response.json({ data: { valid: true } });
+  };
+  try {
+    for (const privateKey of [
+      originalPrivate!,
+      originalPrivate!.replace(/\n/g, '\\n'),
+      keys.privateKey.export({ format: 'der', type: 'pkcs8' }).toString('base64'),
+      keys.privateKey.export({ format: 'der', type: 'pkcs1' }).toString('base64'),
+    ]) {
+      process.env.WAFFO_PRIVATE_KEY = privateKey;
+      assert.deepEqual(await waffoRequest('/v1/graphql', { query: '{ __typename }' }), { valid: true });
+    }
+    for (const publicKey of [
+      originalPublic!,
+      originalPublic!.replace(/\n/g, '\\n'),
+      keys.publicKey.export({ format: 'der', type: 'spki' }).toString('base64'),
+      keys.publicKey.export({ format: 'der', type: 'pkcs1' }).toString('base64'),
+    ]) {
+      process.env.WAFFO_WEBHOOK_PUBLIC_KEY = publicKey;
+      assert.equal((await verifyWaffoEvent(request(event())))?.paymentId, 'PAY_1');
+      await assert.rejects(verifyWaffoEvent(request(event(), 0, true)), /Invalid signature/);
+    }
+  } finally {
+    global.fetch = originalFetch;
+    process.env.WAFFO_PRIVATE_KEY = originalPrivate;
+    process.env.WAFFO_WEBHOOK_PUBLIC_KEY = originalPublic;
+  }
+});
+
+test('invalid Waffo keys fail before API calls or webhook acceptance without exposing their value', async () => {
+  const originalFetch = global.fetch;
+  const originalPrivate = process.env.WAFFO_PRIVATE_KEY;
+  const originalPublic = process.env.WAFFO_WEBHOOK_PUBLIC_KEY;
+  let calls = 0;
+  global.fetch = async () => { calls++; return Response.json({ data: {} }); };
+  const invalid = 'invalid-secret-key-value';
+  const configurationError = (error: unknown) => {
+    assert.ok(error instanceof Error);
+    assert.equal(error.name, 'WaffoKeyConfigurationError');
+    assert.ok(!error.message.includes(invalid));
+    return true;
+  };
+  try {
+    process.env.WAFFO_PRIVATE_KEY = invalid;
+    await assert.rejects(waffoRequest('/v1/graphql', { query: '{ __typename }' }), configurationError);
+    assert.equal(calls, 0);
+    process.env.WAFFO_WEBHOOK_PUBLIC_KEY = '-----BEGIN PUBLIC KEY-----';
+    await assert.rejects(verifyWaffoEvent(request(event())), configurationError);
+  } finally {
+    global.fetch = originalFetch;
+    process.env.WAFFO_PRIVATE_KEY = originalPrivate;
+    process.env.WAFFO_WEBHOOK_PUBLIC_KEY = originalPublic;
+  }
 });

@@ -124,8 +124,8 @@ Build variables and runtime variables are separate settings in Cloudflare.
 | `AI_FONT_PAYMENT_PROVIDER` | Not needed | `waffo` or `paypal` |
 | `WAFFO_ENVIRONMENT` | Not needed | `test` initially; `prod` after verification |
 | `WAFFO_MERCHANT_ID`, `WAFFO_STORE_ID`, `WAFFO_PRODUCT_ID` | Not needed | Waffo merchant, expected store and one-time product IDs |
-| `WAFFO_PRIVATE_KEY` | Not needed | Secret: merchant RSA private key (PEM) |
-| `WAFFO_WEBHOOK_PUBLIC_KEY` | Not needed | Waffo webhook verification public key (PEM) |
+| `WAFFO_PRIVATE_KEY` | Not needed | Secret: merchant RSA private key (PEM or Base64 DER) |
+| `WAFFO_WEBHOOK_PUBLIC_KEY` | Not needed | Waffo webhook verification public key (PEM or Base64 DER) |
 | `PAYPAL_ENVIRONMENT` | Not needed | `sandbox` initially; `live` only after verification |
 | `SUPABASE_SERVICE_ROLE_KEY` | Not needed | Secret |
 | `MIXFONT_API_KEY` | Not needed | Secret |
@@ -141,6 +141,12 @@ cannot enable the browser's Supabase client. Server secrets belong in **Settings
 → Variables and Secrets**, not in public build variables. Login and studio pages
 render dynamically so server service availability follows runtime configuration.
 
+For Waffo, copy the complete signing and webhook verification keys. In local
+`.env.local` files, wrap a multiline PEM value in quotes so the environment loader
+reads the whole block; an unquoted `-----BEGIN PUBLIC KEY-----` line alone is not
+a usable key. Literal `\n` separators and bare Base64 DER keys are also supported.
+The merchant signing key and Waffo webhook verification key have different roles.
+
 See [AI font setup](ai-font-module.md) for Google OAuth, Waffo/PayPal and Mixfont. Only the selected payment provider needs credentials. Allow
 the exact Supabase callback `https://<your-domain>/ai-font-generator/auth/callback`,
 register the selected provider webhook at
@@ -148,6 +154,15 @@ register the selected provider webhook at
 `https://<your-domain>/api/ai-font/webhooks/paypal`, and
 ensure both use the same origin as `AI_FONT_APP_URL`. Preview origins need their
 own explicit callback allowlist and Sandbox settings if testing auth there.
+
+For Waffo, configure an `http` webhook on the actual store with `testMode: true`
+for testing, and subscribe to `order.completed` and `refund.succeeded`. Its URL
+must match the current app origin and `/api/ai-font/webhooks/waffo` path. Checkout
+credentials alone do not register that notification endpoint. Verified payment
+notifications settle the stored user order and grant its credits once; the
+browser's success redirect only reads the resulting status. Verify credit
+delivery using a test purchase started on this site so the payment carries its
+order reference and metadata.
 
 ## Scheduled font reconciliation
 
