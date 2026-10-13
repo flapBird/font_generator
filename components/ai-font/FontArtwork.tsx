@@ -78,11 +78,11 @@ export default function FontArtwork({ family, name, reference = false }: { famil
     finally { setExporting(false); }
   }
 
-  return <section aria-label="Font artwork editor" className="mt-8 rounded-2xl border border-border bg-background p-5 sm:p-7">
-    <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-bold">Make something with your font</h2><span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">No generation credits used</span></div>
+  return <section aria-label="Font artwork editor" className="mt-12 border-t border-border bg-background pt-8">
+    <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-bold">Make artwork with your font</h2><span className="rounded-md bg-muted px-3 py-1 text-xs font-semibold">No generation credits used</span></div>
     <p className="mt-2 text-sm text-muted-foreground">{reference ? `Try the editor for free with ${name}, an existing reference font. This is not an AI-generated result.` : `Editing with your generated font: ${name}.`} Change the layout and export as often as you like.</p>
     <div className="mt-6 grid gap-6 md:grid-cols-2">
-      <div className="min-w-0 space-y-4">
+      <div className="order-2 min-w-0 space-y-4 md:order-1">
         <label className="block text-sm font-semibold" htmlFor={`${id}-text`}>Artwork text</label>
         <textarea id={`${id}-text`} value={text} maxLength={240} rows={3} className={`${control} w-full`} onChange={(event) => setText(event.target.value)} />
         <p className="text-xs text-muted-foreground">Up to 240 characters. Text wraps and scales to fit. English letters, numbers and basic punctuation work best; other characters may use a fallback font.</p>
@@ -95,11 +95,11 @@ export default function FontArtwork({ family, name, reference = false }: { famil
           {format !== 'transparent' && <label className="text-sm">Background color<input aria-label="Background color" className="mt-2 block h-11 w-14" type="color" value={paper} onChange={(event) => setPaper(event.target.value)} /></label>}
           <label className="text-sm">Alignment<select aria-label="Alignment" className={`${control} mt-2 block`} value={align} onChange={(event) => setAlign(event.target.value as CanvasTextAlign)}><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label>
         </div>
-        <button onClick={download} disabled={!ready || !text.trim() || exporting} className="min-h-11 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50">{exporting ? 'Exporting…' : 'Download PNG'}</button>
+        <button onClick={download} disabled={!ready || !text.trim() || exporting} className="min-h-11 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50">{exporting ? 'Exporting…' : 'Download PNG'}</button>
         <p className="text-xs text-muted-foreground">{dimensions.width} × {dimensions.height} PNG · {format === 'transparent' ? 'Transparent background' : 'Solid background'} · No watermark</p>
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       </div>
-      <div className="flex min-w-0 items-center justify-center rounded-xl border border-border p-3" style={{ background: 'repeating-conic-gradient(#e2e8f0 0% 25%, #f8fafc 0% 50%) 0 / 20px 20px' }}>
+      <div className="order-1 flex min-w-0 items-center justify-center self-start rounded-lg border border-border p-3 md:order-2" style={{ background: 'repeating-conic-gradient(#e2e8f0 0% 25%, #f8fafc 0% 50%) 0 / 20px 20px' }}>
         <canvas ref={canvas} aria-label={`${reference ? 'Reference' : 'Generated'} font artwork preview`} className="h-auto w-full" style={{ aspectRatio: `${dimensions.width}/${dimensions.height}` }} />
       </div>
     </div>

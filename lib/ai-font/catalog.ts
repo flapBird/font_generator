@@ -13,8 +13,8 @@ export const FONT_PACK = {
 } as const;
 
 export const FONT_SAMPLES = [
-  { id: 'playful', name: 'Playful', family: '"Luckiest Guy", cursive', prompt: 'A playful, chunky display typeface with rounded corners for party invitations. Clear, readable English letters.' },
-  { id: 'editorial', name: 'Editorial', family: '"EB Garamond", serif', prompt: 'An elegant editorial display serif with high stroke contrast for magazine headlines. Clear, readable English letters.' },
+  { id: 'playful', name: 'Playful', family: '"Luckiest Guy", cursive', prompt: 'A playful, chunky font with rounded corners for a neighborhood bakery.' },
+  { id: 'editorial', name: 'Editorial', family: '"EB Garamond", serif', prompt: 'An elegant high-contrast serif for book covers and editorial headlines.' },
   { id: 'arcade', name: 'Arcade', family: '"Pixelify Sans", monospace', prompt: 'A retro pixel display typeface for arcade game titles, with a consistent square grid and readable English letters.' },
   { id: 'bold', name: 'Bold', family: '"Anton", sans-serif', prompt: 'A bold condensed sans serif for poster headlines with strong vertical strokes and readable English letters.' },
 ] as const;

@@ -214,6 +214,7 @@ test('local matching preserves the paid prompt and never starts a generation', a
   await page.goto('/ai-font-generator');
   const draft = 'A custom serif for my book cover';
   await page.getByLabel('Font description', { exact: true }).fill(draft);
+  await page.getByText('Find a reference by description', { exact: true }).click();
   await page.getByLabel('Describe a style to try for free').fill('retro pixel game');
   await page.getByRole('button', { name: 'Match a reference style', exact: true }).click();
   await expect(page.getByText('Matched Arcade, an existing reference font.', { exact: false })).toBeVisible();

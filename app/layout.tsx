@@ -7,6 +7,7 @@
  import "@fontsource/roboto/latin-900.css";
  import "@fontsource/poppins/latin-900.css";
  import "@fontsource/berkshire-swash/latin-400.css";
+ import "@fontsource/eb-garamond/latin-400.css";
  import "@fontsource/eb-garamond/latin-700.css";
  import "@fontsource/luckiest-guy/latin-400.css";
  import "@fontsource/pixelify-sans/latin-700.css";

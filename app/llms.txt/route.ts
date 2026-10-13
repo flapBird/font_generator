@@ -92,7 +92,7 @@ const body = [
   '## Optional account and AI features',
   '',
   'The AI font studio starts with a description input. Custom generation requires sign-in and sufficient purchased or subscription-funded credits; availability depends on service configuration. Purchases take place on the Pricing page. Current sales are one-time credit packs, not recurring subscriptions. Existing free generators remain available without an account.',
-  'Free style references and PNG artwork tools appear below the custom generator. Reference previews use existing fonts and do not generate a new font file or spend credits.',
+  'Below the custom generator, use-case examples pair font descriptions with clearly labelled existing reference typefaces for branding and editorial titles. Use this prompt fills the description without starting or charging for a generation. Custom generation currently produces one standard English TTF with 72 glyphs; image-to-font and extended character sets are not offered. Free reference previews and the artwork editor let visitors try their own text and export square, wide, or transparent PNG artwork. Reference previews use existing fonts, not AI-generated results. Layout edits and PNG exports do not spend credits.',
   '',
   '## Site information',
   '',

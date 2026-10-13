@@ -4,20 +4,20 @@
  
  :root {
    color-scheme: light;
-   --background: #f4f6f8;
-   --foreground: #0f172a;
-   --muted: #edf1f4;
-   --muted-foreground: #64748b;
-   --primary: #6366f1;
+   --background: #ffffff;
+   --foreground: #18181f;
+   --muted: #f7f7f9;
+   --muted-foreground: #626574;
+   --primary: #6350df;
    --primary-foreground: #ffffff;
-   --secondary: #e0e7ff;
-   --accent: #8b5cf6;
-   --border: #dce3e8;
-   --ring: #6366f1;
+   --secondary: #eeebfc;
+   --accent: #6350df;
+   --border: #e2e2e8;
+   --ring: #6350df;
    --gradient-start: #6366f1;
    --gradient-end: #a855f7;
-   --card-bg: rgba(255, 255, 255, 0.82);
-   --card-hover: rgba(255, 255, 255, 0.96);
+   --card-bg: #ffffff;
+   --card-hover: #fafafa;
    --dropdown-open-delay: 260ms;
    --dropdown-open-dur: 360ms;
    --dropdown-close-dur: 150ms;
@@ -68,15 +68,7 @@ html {
 }
 
 body {
-  background-color: #f4f6f8;
-  background-image:
-    radial-gradient(ellipse 52rem 34rem at 8% -8%, rgba(255, 255, 255, 0.98), transparent 72%),
-    radial-gradient(ellipse 42rem 30rem at 96% 4%, rgba(188, 207, 219, 0.32), transparent 74%),
-    radial-gradient(ellipse 38rem 28rem at 12% 92%, rgba(207, 217, 221, 0.24), transparent 76%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.56) 0%, transparent 42%),
-    linear-gradient(180deg, #f6f7f8 0%, #edf1f4 52%, #f7f7f5 100%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   min-height: 100vh;
@@ -106,27 +98,14 @@ body {
   background: var(--foreground);
 }
 
-/* Gradient text utility */
- @layer utilities {
-   .gradient-text {
-    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-   }
+/* Neutral display type keeps the accent reserved for actions and selection. */
+@layer utilities {
+  .gradient-text, .brand-gradient-text { color: var(--foreground); }
+}
 
-   .brand-gradient-text {
-    background: linear-gradient(135deg, #4338ca, #7e22ce);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-   }
-
-   .dark .brand-gradient-text {
-    background-image: linear-gradient(135deg, #c4b5fd, #f0abfc);
-   }
-
- }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
 
 /* Card styles */
 .card {

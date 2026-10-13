@@ -56,14 +56,10 @@ export default function HomePage() {
 
       <div
         id="top"
-        className="min-h-screen scroll-mt-20 bg-gradient-to-b from-white/90 via-slate-50/45 to-transparent pb-16 pt-16 dark:bg-none"
+        className="min-h-screen scroll-mt-20 bg-background pb-16 pt-16 dark:bg-none"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative mx-auto mb-9 max-w-4xl pb-1 pt-9 text-center sm:mb-10 sm:pt-12 lg:pt-14">
-            <div
-              aria-hidden="true"
-              className="absolute left-1/2 top-5 -z-10 h-40 w-[min(38rem,92vw)] -translate-x-1/2 rounded-full bg-violet-300/20 blur-3xl dark:bg-violet-600/10"
-            />
             <h1 className="gradient-text text-4xl font-black leading-[1.02] tracking-[-0.045em] sm:text-6xl lg:text-[4rem]">
               Free Font Generator
             </h1>
