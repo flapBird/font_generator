@@ -5,6 +5,9 @@ export type PaymentOrder = {
   checkout_expires_at?: string | null;
   user_id: string;
   provider: string;
+  provider_environment?: string | null;
+  provider_order_id?: string | null;
+  billing_claim_token?: string | null;
   external_id: string | null;
   capture_id: string | null;
   amount_minor: number;

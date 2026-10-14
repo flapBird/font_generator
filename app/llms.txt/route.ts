@@ -93,6 +93,7 @@ const body = [
   '',
   'The AI font studio starts with a description input. Custom generation requires sign-in and sufficient purchased or subscription-funded credits; availability depends on service configuration. Purchases take place on the Pricing page. Current sales are one-time credit packs, not recurring subscriptions. Existing free generators remain available without an account.',
   'Below the custom generator, use-case examples pair font descriptions with clearly labelled existing reference typefaces for branding and editorial titles. Use this prompt fills the description without starting or charging for a generation. Custom generation currently produces one standard English TTF with 72 glyphs; image-to-font and extended character sets are not offered. Free reference previews and the artwork editor let visitors try their own text and export square, wide, or transparent PNG artwork. Reference previews use existing fonts, not AI-generated results. Layout edits and PNG exports do not spend credits.',
+  'Confirmed Waffo refunds withdraw credits in proportion to the refunded payment, with full refunds withdrawing all credits from that payment. Already spent credits can result in a negative balance. Negative balances and Waffo payment disputes pause new generation and purchases pending support review; previously delivered fonts remain available. Transaction email for Waffo purchases is optional and depends on mail service configuration; credit delivery does not depend on email delivery.',
   '',
   '## Site information',
   '',

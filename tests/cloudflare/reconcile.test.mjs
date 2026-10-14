@@ -34,6 +34,20 @@ test('cron authenticates to the existing route through the self service binding'
   assert.equal(calls, 1);
 });
 
+test('billing and mail can run without enabling paid font generation', async () => {
+  for (const config of [
+    { WAFFO_MERCHANT_ID: 'merchant', WAFFO_PRIVATE_KEY: 'key', WAFFO_STORE_ID: 'store', WAFFO_PRODUCT_ID: 'product' },
+    { FREEMAIL_API_CONTRACT: 'idinging-send-v1', FREEMAIL_API_URL: 'https://mail.example.com/api/send', FREEMAIL_API_TOKEN: 'token', FREEMAIL_FROM_EMAIL: 'receipts@example.com' },
+  ]) {
+    let calls = 0;
+    const env = configuredEnv(async () => { calls++; return Response.json({ errors: 0 }); });
+    delete env.MIXFONT_API_KEY;
+    Object.assign(env, config);
+    await scheduled({}, env);
+    assert.equal(calls, 1);
+  }
+});
+
 test('cron surfaces HTTP, partial job and network failures to Cloudflare monitoring', async () => {
   for (const response of [new Response(null, { status: 401 }), Response.json({ checked: 2, errors: 1 }), Response.json({})]) {
     await assert.rejects(scheduled({}, configuredEnv(async () => response)), /reconciliation/);

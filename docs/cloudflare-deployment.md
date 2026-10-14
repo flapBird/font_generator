@@ -133,6 +133,9 @@ Build variables and runtime variables are separate settings in Cloudflare.
 | `PAYPAL_CLIENT_SECRET` | Not needed | Secret |
 | `PAYPAL_WEBHOOK_ID` | Not needed | Server variable or secret |
 | `AI_FONT_CRON_SECRET` | Not needed | Long random secret |
+| `FREEMAIL_API_CONTRACT` | Not needed | Optional: `idinging-send-v1` |
+| `FREEMAIL_API_URL`, `FREEMAIL_FROM_EMAIL`, `FREEMAIL_FROM_NAME` | Not needed | Optional full HTTPS send endpoint and sender settings |
+| `FREEMAIL_API_TOKEN` | Not needed | Optional secret: Freemail Bearer token |
 
 Only `NEXT_PUBLIC_*` values are browser-visible and compiled into client assets.
 Set them **before building**, including a local CLI build in `.env.local` if
@@ -159,29 +162,38 @@ For Waffo, configure an `http` webhook on the actual store with `testMode: true`
 for testing, and subscribe to `order.completed` and `refund.succeeded`. Its URL
 must match the current app origin and `/api/ai-font/webhooks/waffo` path. Checkout
 credentials alone do not register that notification endpoint. Verified payment
-notifications settle the stored user order and grant its credits once; the
-browser's success redirect only reads the resulting status. Verify credit
+notifications settle the stored user order and grant its credits once. The
+browser return checks authoritative provider records through the same ledger;
+the success URL itself grants no credits. Verify credit
 delivery using a test purchase started on this site so the payment carries its
 order reference and metadata.
 
-## Scheduled font reconciliation
+## Scheduled font, billing and mail reconciliation
 
 `wrangler.jsonc` registers `*/5 * * * *`. The custom Worker uses
 `WORKER_SELF_REFERENCE` to issue an authenticated GET to the existing
 `/api/ai-font/reconcile` route, so completed fonts persist when users close the
-browser. It reuses the existing database job claims and does not add a second
-generation/payment implementation. No external scheduler is necessary on Workers.
+browser. The same route also checks Waffo payments/refunds/disputes and delivers
+queued transaction email through Freemail. These queues have independent database
+leases and errors. No external scheduler is necessary on Workers. Apply
+`202610140001_billing_reconciliation_outbox.sql` before deploying this version;
+see [billing operations](ai-font-billing.md) for refund rules, dispute review,
+Freemail configuration and rollout checks.
 
 Reconciliation handles up to ten jobs sequentially per pass, avoiding simultaneous
-large TTF buffers in Workers' 128 MB isolate memory. The cron's internal request
+large TTF buffers in Workers' 128 MB isolate memory. Billing and mail each claim
+up to three items per pass, so backlog affects per-order notification latency.
+The cron's internal request
 has a ten-minute timeout within Cloudflare's fifteen-minute scheduled wall limit.
 Monitor batch duration and backlog as volume grows. This bounds memory within a
 batch; it is not a guarantee for arbitrary concurrent traffic or provider load.
 
-Without the app URL, cron secret, Supabase URL/service key or Mixfont key, the
-scheduled handler skips work. Once configured, HTTP errors, transport failures
-and nonzero reconciliation errors fail the scheduled event and appear in Worker
-observability. Monitor Cron execution and old `processing`/`needs_review` jobs
+Without the app URL, cron secret or Supabase URL/service key, the scheduled
+handler skips work. It also skips when none of Mixfont, Waffo reconciliation or
+Freemail is configured. Billing and mail can run without the Mixfont key; font
+generation remains disabled in that case. Once configured, HTTP errors, transport
+failures and nonzero reconciliation errors fail the scheduled event and appear
+in Worker observability. Monitor Cron execution and old `processing`/`needs_review` jobs
 before enabling purchases. Do not keep another scheduler running unnecessarily.
 
 For local cron testing, run

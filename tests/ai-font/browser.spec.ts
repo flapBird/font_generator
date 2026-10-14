@@ -284,6 +284,7 @@ test('generator comes first and gates login, credits, service availability and a
     { user: { email: 'test@example.com' }, credits: 0, subscriptions: [{ status: 'active' }], enabled: false },
     { user: { email: 'test@example.com' }, credits: 99, enabled: false },
     { user: { email: 'test@example.com' }, credits: 100, enabled: true },
+    { user: { email: 'test@example.com' }, credits: 300, billingRestricted: true, enabled: false },
     { user: { email: 'test@example.com' }, credits: 100, services: { auth: true, generation: false, checkout: true }, enabled: false },
     { user: { email: 'test@example.com' }, credits: 100, jobs: [{ id: 'test', status: 'needs_review', created_at: '2026-10-01' }], enabled: false },
   ]) {
@@ -307,6 +308,32 @@ test('generator comes first and gates login, credits, service availability and a
   await expect(page.getByRole('heading', { name: 'Welcome', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Continue with free tools' })).toHaveCount(0);
   expect(paidCalls).toEqual([]);
+});
+
+test('billing restrictions pause purchases even with a positive balance', async ({ page }) => {
+  const paidCalls: string[] = [];
+  page.on('request', request => { if (request.method() === 'POST' && request.url().includes('/api/ai-font/orders')) paidCalls.push(request.url()); });
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'test@example.com' }, credits: 300, billingRestricted: true,
+    services: { checkout: true, sandbox: true, provider: 'waffo' },
+  } }));
+  await page.goto('/pricing');
+  await expect(page.getByRole('button', { name: 'Buy 3 generations with Waffo' })).toBeDisabled();
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await expect(page.getByText('Your payment or balance needs review.', { exact: false })).toBeVisible();
+  expect(paidCalls).toEqual([]);
+});
+
+test('a confirmed checkout under dispute does not promise usable generations', async ({ page }) => {
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'test@example.com' }, credits: 300, billingRestricted: true, jobs: [], orders: [],
+    services: { auth: true, generation: true, checkout: true, provider: 'waffo', sandbox: true },
+  } }));
+  await page.route('**/api/ai-font/orders/complete', route => route.fulfill({ json: { status: 'paid' } }));
+  await page.goto('/ai-font-generator?checkout=return&order=10000000-0000-4000-8000-000000000001');
+  await expect(page.getByText('Your payment or balance needs review. Contact support before generating another font.')).toBeVisible();
+  await expect(page.getByText(/Your (font )?generations are ready/)).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Generate font · 100 credits' })).toBeDisabled();
 });
 
 test('signed-in pricing keeps compact aligned actions and explains unavailable checkout', async ({ page }) => {

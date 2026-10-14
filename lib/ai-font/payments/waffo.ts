@@ -5,7 +5,7 @@ import { HttpError } from '../http';
 import { isUuid } from '../catalog';
 import type { PaymentOrder, PaymentProvider } from './types';
 
-export function waffoMode() { return process.env.WAFFO_ENVIRONMENT === 'prod' ? 'prod' : 'test'; }
+export function waffoMode(): 'prod' | 'test' { return process.env.WAFFO_ENVIRONMENT === 'prod' ? 'prod' : 'test'; }
 
 // Dashboard keys may be bare Base64 DER; environment files also support PEM
 // with quoted multiline content or literal \n separators.
@@ -83,6 +83,31 @@ export class WaffoProvider implements PaymentProvider {
 }
 
 type Obj = Record<string, unknown>;
+export type WaffoNormalizedEvent = {
+  key: string;
+  kind: 'paid' | 'revoked' | 'subscription' | 'review' | 'restored';
+  orderId: string;
+  providerOrderId: string;
+  mode: 'test' | 'prod';
+  amountMinor: number;
+  currency: string;
+  timestamp: string;
+  paymentId?: string;
+  paymentTotalMinor?: number;
+  refundAmountMinor?: number;
+  chargebackAmountMinor?: number;
+  adjustmentId?: string;
+  reason?: 'refund' | 'chargeback' | 'chargeback_reversed';
+  chargebackStatus?: string;
+  reviewRequired?: boolean;
+  source?: 'webhook' | 'reconciliation';
+  businessReferenceVerified?: boolean;
+  periodNumber?: number;
+  status?: string;
+  cancellationWithdrawn?: boolean;
+  periodStart?: string;
+  periodEnd?: string;
+};
 function object(value: unknown): Obj {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new HttpError(400, 'Invalid event.');
   return value as Obj;
@@ -98,7 +123,7 @@ export function moneyMinor(value: unknown) {
   return Number(whole) * 100 + Number(decimals.padEnd(2, '0'));
 }
 function date(value: unknown) { const result = text(value); if (!Number.isFinite(Date.parse(result))) throw new HttpError(400, 'Invalid date.'); return result; }
-export async function verifyWaffoEvent(request: Request) {
+export async function verifyWaffoEvent(request: Request): Promise<WaffoNormalizedEvent | null> {
   const raw = await request.text();
   if (raw.length > 65536) throw new HttpError(413, 'Event too large.');
   const header = request.headers.get('x-waffo-signature') || '';
@@ -120,14 +145,25 @@ export async function verifyWaffoEvent(request: Request) {
   if (kind === 'revoked' && (data.refundStatus !== 'succeeded' || moneyMinor(data.refundedAmount) <= 0)) throw new HttpError(400, 'Refund is not complete.');
   const price = object(kind === 'subscription' ? data.planPrice : kind === 'revoked' ? data.originalPayment : data.listPrice);
   if (kind === 'paid' && moneyMinor(data.chargedAmount) !== moneyMinor(price.total)) throw new HttpError(400, 'Unexpected discounted payment.');
+  const paymentTotalMinor = kind === 'paid' ? moneyMinor(data.chargedAmount)
+    : kind === 'revoked' ? moneyMinor(data.originalChargedAmount) : undefined;
+  const refundAmountMinor = kind === 'revoked' ? moneyMinor(data.refundedAmount) : undefined;
+  if (paymentTotalMinor !== undefined && (paymentTotalMinor < moneyMinor(price.subtotal) || paymentTotalMinor !== moneyMinor(price.total))) throw new HttpError(400, 'Unexpected payment total.');
+  if (refundAmountMinor !== undefined && refundAmountMinor > paymentTotalMinor!) throw new HttpError(400, 'Invalid refund amount.');
   const period = data.periodNumber;
   if (period !== undefined && (!Number.isInteger(period) || (period as number) < 1)) throw new HttpError(400, 'Invalid billing period.');
   return {
     key: `${type}:${text(event.eventId)}:${date(event.timestamp)}`,
-    kind, orderId: id, providerOrderId: text(data.orderId), mode: event.mode,
+    kind, orderId: id, providerOrderId: text(data.orderId), mode: event.mode as 'test' | 'prod',
     amountMinor: moneyMinor(price.subtotal), currency: text(data.currency), timestamp: date(event.timestamp),
     paymentId: kind === 'subscription' ? undefined : text(data.paymentId),
-    periodNumber: period, status: Object.hasOwn(statuses, type) ? statuses[type] : undefined, cancellationWithdrawn: type === 'subscription.uncanceled',
+    paymentTotalMinor, refundAmountMinor,
+    // Official /api-reference/webhooks#eventid-mapping: refund eventId is
+    // the Refund entity ID, the same as GraphQL Refund.id. Keep it unprefixed
+    // so webhook deliveries and reconciliation share the adjustment ledger.
+    adjustmentId: kind === 'revoked' ? text(event.eventId) : undefined,
+    reason: kind === 'revoked' ? 'refund' : undefined, source: 'webhook',
+    periodNumber: period as number | undefined, status: Object.hasOwn(statuses, type) ? statuses[type] : undefined, cancellationWithdrawn: type === 'subscription.uncanceled',
     periodStart: data.currentPeriodStart ? date(data.currentPeriodStart) : undefined,
     periodEnd: data.currentPeriodEnd ? date(data.currentPeriodEnd) : undefined,
   };

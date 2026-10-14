@@ -2,9 +2,12 @@ export async function scheduled(_controller, env) {
   // The free site can be deployed without configuring the optional AI module.
   const required = [
     'AI_FONT_APP_URL', 'AI_FONT_CRON_SECRET', 'NEXT_PUBLIC_SUPABASE_URL',
-    'SUPABASE_SERVICE_ROLE_KEY', 'MIXFONT_API_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY',
   ];
   if (required.some((name) => !env[name]?.trim())) return;
+  const hasBilling = ['WAFFO_MERCHANT_ID', 'WAFFO_PRIVATE_KEY', 'WAFFO_STORE_ID', 'WAFFO_PRODUCT_ID'].every(name => env[name]?.trim());
+  const hasMail = env.FREEMAIL_API_CONTRACT === 'idinging-send-v1' && ['FREEMAIL_API_URL', 'FREEMAIL_API_TOKEN', 'FREEMAIL_FROM_EMAIL'].every(name => env[name]?.trim());
+  if (!env.MIXFONT_API_KEY?.trim() && !hasBilling && !hasMail) return;
 
   // A service binding avoids public DNS, domain setup and an external scheduler.
   const url = new URL('/api/ai-font/reconcile', env.AI_FONT_APP_URL);
@@ -17,6 +20,6 @@ export async function scheduled(_controller, env) {
 
   const result = await response.json();
   if (typeof result.errors !== 'number' || result.errors !== 0) {
-    throw new Error('AI font reconciliation reported errors; inspect active jobs and provider configuration.');
+    throw new Error('AI font reconciliation reported errors; inspect jobs, billing and mail queues.');
   }
 }

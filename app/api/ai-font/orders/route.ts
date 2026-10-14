@@ -4,6 +4,7 @@ import { body, endpoint, HttpError, json, requireUser, sameOrigin } from '@/lib/
 import { adminClient } from '@/lib/ai-font/supabase';
 import { paymentProvider } from '@/lib/ai-font/payments';
 import type { PaymentOrder } from '@/lib/ai-font/payments/types';
+import { requireBillingAccess } from '@/lib/ai-font/billing-access';
 
 export async function POST(request: Request) {
   return endpoint(async () => {
@@ -11,6 +12,7 @@ export async function POST(request: Request) {
     const user = await requireUser();
     const services = availability();
     if (!services.checkout) throw new HttpError(503, 'Checkout is not available yet.');
+    await requireBillingAccess(user.id);
     const input = await body(request);
     if (!isUuid(input.id) || input.packageId !== FONT_PACK.id || input.provider !== services.provider || input.acceptedTerms !== true) throw new HttpError(400, 'Please select a valid pack and accept the purchase terms.');
     const db = adminClient();

@@ -11,7 +11,7 @@ import styles from './AiFontStudio.module.css';
 
 type Services = { auth: boolean; generation: boolean; checkout: boolean; sandbox: boolean; provider?: 'paypal' | 'waffo' };
 type Order = { id: string; provider: string; amount_minor: number; currency: string; credits: number; status: string; created_at: string };
-type Account = { user: { email: string } | null; credits: number; jobs: FontJob[]; orders: Order[]; creditEvents?: { id: number; kind: string; delta: number; created_at: string }[]; services: Services };
+type Account = { user: { email: string } | null; credits: number; billingRestricted?: boolean; jobs: FontJob[]; orders: Order[]; creditEvents?: { id: number; kind: string; delta: number; created_at: string }[]; services: Services };
 const button = 'inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 const secondary = 'inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 const field = 'w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-ring';
@@ -35,6 +35,13 @@ async function api<T>(path: string, method = 'GET', data?: unknown): Promise<T> 
 
 function saved(key: string) { try { return sessionStorage.getItem(key); } catch { return null; } }
 function save(key: string, value: string | null) { try { if (value === null) sessionStorage.removeItem(key); else sessionStorage.setItem(key, value); } catch {} }
+
+function paymentNotice(status: string, account: Account) {
+  if (account.billingRestricted || account.credits < 0) return 'Your payment or balance needs review. Contact support before generating another font.';
+  if (status === 'paid') return 'Payment confirmed. Your account balance has been updated.';
+  if (status === 'revoked') return 'This payment was refunded or reversed. Your account balance has been updated.';
+  return 'Payment has not completed yet. You can check it again under Your orders.';
+}
 
 const jobLabels: Record<FontJob['status'], string> = {
   reserved: 'Queued', starting: 'Starting', processing: 'Drawing your font', needs_review: 'Checking your generation', succeeded: 'Ready', failed: 'Failed · generation restored',
@@ -84,11 +91,10 @@ export default function AiFontStudio({ services: initialServices }: { services: 
         if (orderId && data.user && params.get('checkout') !== 'cancel') {
           const result = await api<{ status: string }>('orders/complete', 'POST', { id: orderId });
           if (!alive) return;
-          if (result.status === 'paid') {
-            save(checkoutKey, null);
-            setNotice('Payment confirmed. Your font generations are ready to use.');
-            await refresh();
-          } else setNotice('Payment has not completed yet. You can check it again under Your orders.');
+          const current = await refresh();
+          if (!alive) return;
+          if (['paid', 'revoked'].includes(result.status)) save(checkoutKey, null);
+          setNotice(paymentNotice(result.status, current));
         } else if (params.get('checkout') === 'return' && !data.user) {
           setNotice('Sign in with the same Google account to recover your purchase.');
         }
@@ -162,7 +168,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
     document.getElementById('font-artwork')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  const canGenerate = loaded && Boolean(account?.user) && (account?.credits ?? 0) >= STANDARD_FONT_CREDITS && services.generation && !blocked && !busy && prompt.trim().length >= 10;
+  const canGenerate = loaded && Boolean(account?.user) && (account?.credits ?? 0) >= STANDARD_FONT_CREDITS && services.generation && !account?.billingRestricted && !blocked && !busy && prompt.trim().length >= 10;
 
   return (
     <div className={styles.page}>
@@ -184,7 +190,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
       <div className={styles.accountStatus}>
         {account?.user && <p className="mt-3 text-center text-xs text-muted-foreground">{availableGenerations(account.credits)} generations available · {account.credits} credits</p>}
         <div className="mt-3 text-center text-sm" aria-live="polite">
-          {!loaded ? <p className="text-muted-foreground">Checking your account…</p> : !account ? <p className="text-muted-foreground">Account unavailable. <button className="text-primary underline" onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p> : !account.user ? <p><Link href="/login?next=%2Fai-font-generator" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>Log in</Link> <span className="text-muted-foreground">and add credits to generate your font.</span></p> : blocked ? <p className="text-muted-foreground">{active ? 'Your font is being generated. Check My fonts below.' : 'Your previous generation needs review. Check My fonts below.'}</p> : account.credits < 0 ? <p className="text-muted-foreground">Your balance needs review. <Link href="/contact" className="text-primary underline">Contact support</Link></p> : account.credits < STANDARD_FONT_CREDITS ? <p><span className="text-muted-foreground">Not enough credits. </span><Link href="/pricing" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>View plans & credits</Link></p> : !services.generation ? <p className="text-muted-foreground">Font generation is temporarily unavailable.</p> : <p className="text-muted-foreground">{prompt.trim().length < 10 ? 'Enter at least 10 characters.' : 'Ready to create your font.'}</p>}
+          {!loaded ? <p className="text-muted-foreground">Checking your account…</p> : !account ? <p className="text-muted-foreground">Account unavailable. <button className="text-primary underline" onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p> : !account.user ? <p><Link href="/login?next=%2Fai-font-generator" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>Log in</Link> <span className="text-muted-foreground">and add credits to generate your font.</span></p> : blocked ? <p className="text-muted-foreground">{active ? 'Your font is being generated. Check My fonts below.' : 'Your previous generation needs review. Check My fonts below.'}</p> : account.credits < 0 || account.billingRestricted ? <p className="text-muted-foreground">Your payment or balance needs review. <Link href="/contact" className="text-primary underline">Contact support</Link></p> : account.credits < STANDARD_FONT_CREDITS ? <p><span className="text-muted-foreground">Not enough credits. </span><Link href="/pricing" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>View plans & credits</Link></p> : !services.generation ? <p className="text-muted-foreground">Font generation is temporarily unavailable.</p> : <p className="text-muted-foreground">{prompt.trim().length < 10 ? 'Enter at least 10 characters.' : 'Ready to create your font.'}</p>}
         </div>
       </div>
       <div aria-live="polite" aria-atomic="true" className="mt-4">
@@ -259,8 +265,8 @@ export default function AiFontStudio({ services: initialServices }: { services: 
             {job.status === 'succeeded' && <div className="mt-4 flex flex-wrap gap-2"><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`preview-${job.id}`, () => previewFont(job.id, job.name || 'Custom English font'))}>Preview & create artwork</button><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`download-${job.id}`, async () => { const result = await api<{ url: string }>(`jobs/${job.id}/download`); window.location.assign(result.url); })}>Download TTF ↓</button></div>}
           </article>)}
         </div>}
-        {Boolean(account.creditEvents?.length) && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Credit activity</summary><p className="mt-2 text-xs text-muted-foreground">Your 30 most recent balance changes. Layout edits and exports are free.</p><ul className="mt-3 divide-y divide-border">{account.creditEvents?.map(event => <li key={event.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span>{{ order: 'Pack purchase', job: 'Font generation', restore: 'Failed generation restored', revoke: 'Payment refund or reversal', billing: 'Payment credits', 'billing-refund': 'Payment refund or reversal' }[event.kind] || 'Credit adjustment'} · {new Date(event.created_at).toLocaleDateString()}</span><span>{event.delta > 0 ? '+' : ''}{event.delta} credits</span></li>)}</ul></details>}
-        {account.orders.length > 0 && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Your orders</summary><ul className="mt-4 divide-y divide-border">{account.orders.map((order) => <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><span>{order.credits} credits · ${(order.amount_minor / 100).toFixed(2)} {order.currency} · {order.status}</span>{order.status === 'pending' && <button className={secondary} disabled={Boolean(busy)} onClick={() => act(`order-${order.id}`, async () => { const result = await api<{ status: string }>('orders/complete', 'POST', { id: order.id }); setNotice(result.status === 'paid' ? 'Payment confirmed. Your generations are ready.' : 'Payment has not completed.'); if (result.status === 'paid') save(checkoutKey, null); await refresh(); })}>Check payment</button>}</li>)}</ul></details>}
+        {Boolean(account.creditEvents?.length) && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Credit activity</summary><p className="mt-2 text-xs text-muted-foreground">Your 30 most recent balance changes. Layout edits and exports are free.</p><ul className="mt-3 divide-y divide-border">{account.creditEvents?.map(event => <li key={event.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span>{{ order: 'Pack purchase', job: 'Font generation', restore: 'Failed generation restored', revoke: 'Payment refund or reversal', billing: 'Payment credits', 'billing-refund': 'Payment refund or reversal', 'billing-adjustment': 'Refund or dispute adjustment' }[event.kind] || 'Credit adjustment'} · {new Date(event.created_at).toLocaleDateString()}</span><span>{event.delta > 0 ? '+' : ''}{event.delta} credits</span></li>)}</ul></details>}
+        {account.orders.length > 0 && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Your orders</summary><ul className="mt-4 divide-y divide-border">{account.orders.map((order) => <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><span>{order.credits} credits · ${(order.amount_minor / 100).toFixed(2)} {order.currency} · {order.status}</span>{order.status === 'pending' && <button className={secondary} disabled={Boolean(busy)} onClick={() => act(`order-${order.id}`, async () => { const result = await api<{ status: string }>('orders/complete', 'POST', { id: order.id }); const current = await refresh(); setNotice(paymentNotice(result.status, current)); if (['paid', 'revoked'].includes(result.status)) save(checkoutKey, null); })}>Check payment</button>}</li>)}</ul></details>}
       </section>}
 
       <section className="mt-12 grid gap-6 border-t border-border pt-8 sm:grid-cols-3" aria-label="How it works">

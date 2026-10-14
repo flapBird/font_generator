@@ -17,6 +17,7 @@ export async function POST(request: Request) {
     try { prompt = validatePrompt(input.prompt); } catch (error) { throw new HttpError(400, (error as Error).message); }
     const { error } = await adminClient().rpc('ai_font_reserve_job', { p_user: user.id, p_id: input.id, p_prompt: prompt, p_expected_cost: STANDARD_FONT_CREDITS });
     if (error) {
+      if (error.message.includes('BILLING_RESTRICTED')) throw new HttpError(403, 'Your payment is under review. Contact support before generating another font.');
       if (error.message.includes('COST_CHANGED')) throw new HttpError(409, 'Generation pricing changed. Please refresh before continuing.');
       if (error.message.includes('NO_CREDITS')) throw new HttpError(402, 'Purchase a font pack to generate a font.');
       if (error.message.includes('ACTIVE_JOB')) throw new HttpError(409, 'Please wait for your current font to finish.');
