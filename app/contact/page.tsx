@@ -32,7 +32,7 @@ export default function ContactPage() {
           <p className="mt-3 leading-7 text-slate-600 dark:text-slate-300">
             Send your message to{' '}
             <span className="font-semibold text-violet-700 dark:text-violet-300">
-              <span>contact</span>
+              <span>support</span>
               <span aria-hidden="true">@</span>
               <span>font-generators.org</span>
             </span>

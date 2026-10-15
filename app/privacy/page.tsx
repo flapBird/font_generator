@@ -130,7 +130,7 @@ export default function PrivacyPolicyPage() {
             The date at the top shows the latest revision. Questions and privacy
             requests can be sent to{' '}
             <span>
-              <span>contact</span>
+              <span>support</span>
               <span aria-hidden="true">@</span>
               <span>font-generators.org</span>
             </span>
