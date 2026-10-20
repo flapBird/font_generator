@@ -87,6 +87,9 @@ No environment file is required for local development.
 | `npm run preview:cloudflare` | Preview the existing Cloudflare build |
 | `npm run deploy` | Build and deploy to Cloudflare Workers |
 | `npm run deploy:cloudflare` | Deploy the existing Cloudflare build |
+| `npm run upload` | Build and upload a version for preview without changing production traffic |
+| `npm run upload:cloudflare` | Upload the existing Cloudflare build for preview |
+| `npm run promote:cloudflare` | Interactively select an uploaded version and its production traffic percentage |
 | `npm run cf-typegen` | Generate local Cloudflare binding types |
 | `npm run test:cloudflare` | Verify scheduled job authentication and error handling |
 | `npm run test:cloudflare:browser` | Verify routes and existing UI in the Workers runtime |
@@ -185,10 +188,14 @@ npm ci
 npm run preview
 # After configuring your Cloudflare account and runtime variables:
 npx wrangler login
-npm run deploy
+npm run upload
+# Inspect the version preview URL, then promote it in the dashboard or run:
+npm run promote:cloudflare
 ```
 
-Use **Workers**, with build command `npm run build:cloudflare` and deploy command `npm run deploy:cloudflare`, when connecting this Git repository in Cloudflare. The static-asset directory is `.open-next/assets`; the Worker entry is `cloudflare/worker.js`. Content uses the adapter's read-only static-assets cache, so no R2, KV or Durable Object provisioning is needed for this site's current caching behavior.
+Use **Workers**. The connected `font-generator` Worker listens only to `main`, with build command `npx opennextjs-cloudflare build` and deploy command `npx opennextjs-cloudflare upload`. Each push uploads a candidate version and provides a version preview URL; production traffic changes only when an operator selects **Deployments → Promote deployment**. Version previews use the resources configured for that version and are publicly reachable unless protected by Cloudflare Access. `npm run deploy` and `npm run deploy:cloudflare` remain direct production deployment commands for deliberate manual use.
+
+The static-asset directory is `.open-next/assets`; the Worker entry is `cloudflare/worker.js`. Content uses the adapter's read-only static-assets cache, so no R2, KV or Durable Object provisioning is needed for this site's current caching behavior.
 
 `npm run build` and `npm run start` still support ordinary Node.js hosting. No `output: 'export'` setting is enabled: the login/payment APIs require a server runtime, and neither `.next` nor `.open-next/assets` alone is a complete site deployment.
 

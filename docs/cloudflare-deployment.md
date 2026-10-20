@@ -41,17 +41,32 @@ handler reads Worker bindings directly. Both files are ignored. Never build a
 production artifact from local files containing development credentials: the
 adapter includes Next.js env-file values in its output.
 
-## Deploy from the CLI
+## Upload from the CLI and promote manually
 
 ```bash
 npx wrangler login
-npm run deploy
+npm run upload
+# Inspect the version preview URL before continuing:
+npm run promote:cloudflare
 ```
 
 The default Worker name is `font-generator`. If changing it, update both `name`
 and `services[0].service` in `wrangler.jsonc`; the self binding must target the
 same Worker. CLI deploy requires a Cloudflare account with Workers enabled.
-These commands publish the application; they are separate from local preview.
+`npm run upload` builds and uploads a candidate version without changing the
+active production deployment. If the build already exists, use
+`npm run upload:cloudflare`. The upload prints the version ID and its version
+preview URL. `preview_urls: true` keeps those URLs enabled in Wrangler config.
+
+After verification, open the Worker's **Deployments** tab, select **Promote
+deployment**, choose the exact version ID that was tested, and assign it 100%
+of production traffic. `npm run promote:cloudflare` offers the same version and
+traffic selection through Wrangler's interactive prompts. Promotion uses the
+uploaded build; it does not rebuild the repository or switch Git branches.
+
+`npm run preview` remains a local Workers preview. `npm run deploy` and
+`npm run deploy:cloudflare` immediately publish to production and bypass this
+manual promotion step; use them only for a deliberate direct deployment.
 
 For local Waffo checkout testing, keep `npm run dev` running on port 3000 and
 expose that port through an HTTPS tunnel in another terminal
@@ -100,14 +115,48 @@ and choose a Worker, with these settings:
 | --- | --- |
 | Root directory | Repository root |
 | Worker name | `font-generator` |
-| Build command | `npm run build:cloudflare` |
-| Deploy command | `npm run deploy:cloudflare` |
+| Production branch | `main` |
+| Build branch includes | `main` only |
+| Build command | `npx opennextjs-cloudflare build` |
+| Deploy command | `npx opennextjs-cloudflare upload` |
 | Build Node version | `NODE_VERSION=22` |
 
 The separate commands avoid building twice. Do not use `next start`, a Pages
 output-directory upload, or plain `wrangler deploy` without first running the
 OpenNext build. Cloudflare's normal dependency-install step should install dev
 dependencies too, since Wrangler is a dev dependency.
+
+This is the connected Worker's release flow: push to `main`, build, upload a
+candidate version, inspect its version preview URL, then manually select
+**Deployments → Promote deployment**. A successful build alone does not publish
+the candidate to the production domain. `feature/ai-font` is not included in
+automatic builds; merge reviewed work into `main` when it is ready for this flow.
+
+The deploy command is intentionally the adapter's CLI command, which is already
+available on `main`, rather than an npm script added only on a feature branch.
+Build settings live in Cloudflare, independently of Git: changing package
+scripts alone does not change an existing Worker's build trigger.
+
+### Preview access, services and trigger changes
+
+These are **Version URLs** for production release candidates. They use the
+bindings, variables and secrets configured for the uploaded version, without
+creating a separate test database or payment account. Version URLs are public
+unless protected with Cloudflare Access. Keep service configuration appropriate
+for the actions performed during verification.
+
+The AI module currently uses `AI_FONT_APP_URL` for same-origin API checks,
+checkout returns and the server's OAuth callback destination. A version URL
+with a different hostname is suitable for public-page inspection, but is not
+an isolated end-to-end login or checkout environment. Use localhost with Sandbox
+services or a separately configured staging environment for those tests.
+
+Version upload and promotion do not apply routes, custom domains or Cron trigger
+changes. After explicitly reviewing such changes, apply them separately with
+`npx wrangler triggers deploy`. In particular, when first releasing the AI Font
+Worker wrapper, apply its five-minute schedule only after the intended version
+and its required runtime configuration are ready. Uploading a candidate does
+not move the existing Cron traffic to it.
 
 ## Environment variables and secrets
 
@@ -236,6 +285,7 @@ npm run test:ai-font
 npm run test:cloudflare
 npx tsc --noEmit
 npm run build:cloudflare
+npm run upload:cloudflare -- --dry-run --outdir /tmp/font-generator-version-dry-run
 # Install Chromium if not already available:
 npx playwright install chromium
 npm run test:cloudflare:browser
@@ -262,3 +312,5 @@ References:
 - [OpenNext custom Worker handlers](https://opennext.js.org/cloudflare/howtos/custom-worker)
 - [Cloudflare Next.js deployment paths](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/)
 - [Cloudflare Workers resource limits](https://developers.cloudflare.com/workers/platform/limits/)
+- [Cloudflare deployment management](https://developers.cloudflare.com/workers/versions-and-deployments/deployment-management/)
+- [Cloudflare Version URLs](https://developers.cloudflare.com/workers/versions-and-deployments/version-urls/)
