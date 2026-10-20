@@ -278,6 +278,9 @@ test('a blocked description leaves credits and download availability unchanged',
 });
 
 test('pricing is public, uses the same credit allowance, and links to the studio', async ({ page }) => {
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: null, credits: 0, services: { checkout: true, sandbox: false, provider: 'waffo' },
+  } }));
   for (const width of [1280, 1024, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 850 });
     await page.goto('/pricing');
@@ -430,22 +433,31 @@ test('a confirmed checkout under dispute does not promise usable generations', a
   await expect(page.getByRole('button', { name: 'Generate font · 100 credits' })).toBeDisabled();
 });
 
-test('signed-in pricing keeps compact aligned actions and explains unavailable checkout', async ({ page }) => {
-  let checkout = false;
-  await page.route('**/api/ai-font/account', route => route.fulfill({ json: { user: { email: 'test@example.com' }, credits: 0, services: { checkout, sandbox: true, provider: 'waffo' } } }));
-  for (const enabled of [false, true]) {
-    checkout = enabled;
+test('pricing keeps aligned actions and shows pending payments regardless of account state', async ({ page }) => {
+  const scenarios = [
+    { checkout: false, user: null, accountError: false },
+    { checkout: false, user: { email: 'test@example.com' }, accountError: false },
+    { checkout: false, user: null, accountError: true },
+    { checkout: true, user: { email: 'test@example.com' }, accountError: false },
+  ];
+  let scenario = scenarios[0];
+  await page.route('**/api/ai-font/account', route => route.fulfill(scenario.accountError
+    ? { status: 503, json: { error: 'Account temporarily unavailable' } }
+    : { json: { user: scenario.user, credits: 0, services: { checkout: scenario.checkout, sandbox: true, provider: 'waffo' } } }));
+  for (const state of scenarios) {
+    scenario = state;
     for (const width of [1280, 390]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/pricing');
-      const buy = page.getByRole('button', { name: enabled ? 'Buy 3 generations with Waffo' : 'Purchases unavailable' });
+      const buy = page.getByRole('button', { name: state.checkout ? 'Buy 3 generations with Waffo' : 'Payments coming soon' });
       await expect(buy).toBeDisabled();
-      if (enabled) {
+      if (state.checkout) {
         await page.getByRole('checkbox').check();
         await expect(buy).toBeEnabled();
       } else {
         await expect(page.getByRole('checkbox')).toHaveCount(0);
-        await expect(page.getByRole('status')).toContainText('Paid font generation is not available yet');
+        await expect(page.getByRole('status')).toContainText('Payments are being set up. Purchases are not available yet.');
+        await expect(page.getByRole('link', { name: /Log in (to purchase|again)/ })).toHaveCount(0);
       }
       const freeBounds = await page.getByRole('link', { name: 'Use free tools', exact: true }).boundingBox();
       const buyBounds = await buy.boundingBox();
