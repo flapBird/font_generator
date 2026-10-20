@@ -82,7 +82,7 @@ export default function TermsPage() {
           <p>
             If you have any questions about these Terms, please contact us at{' '}
             <span className="text-primary">
-              <span>contact</span>
+              <span>support</span>
               <span aria-hidden="true">@</span>
               <span>font-generators.org</span>
             </span>

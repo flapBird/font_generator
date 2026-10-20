@@ -43,7 +43,7 @@ export default function AboutPage() {
             name: 'Font Generators',
             url: 'https://font-generators.org',
             description: 'Browser-based text and typography generators with practical compatibility guides.',
-            email: 'contact@font-generators.org',
+            email: 'support@font-generators.org',
           }),
         }}
       />

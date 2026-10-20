@@ -117,7 +117,6 @@ Build variables and runtime variables are separate settings in Cloudflare.
 
 | Variable | Build variables and secrets | Worker runtime variables and secrets |
 | --- | --- | --- |
-| `NEXT_PUBLIC_GA_ID` | Optional GA override | Not needed |
 | `NEXT_PUBLIC_SUPABASE_URL` | Required for client auth | Required for server auth and cron |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Required for client auth | Required for server auth |
 | `AI_FONT_APP_URL` | Not needed | Actual HTTPS origin, e.g. `https://font-generators.org` |
@@ -136,6 +135,9 @@ Build variables and runtime variables are separate settings in Cloudflare.
 | `FREEMAIL_API_CONTRACT` | Not needed | Optional: `idinging-send-v1` |
 | `FREEMAIL_API_URL`, `FREEMAIL_FROM_EMAIL`, `FREEMAIL_FROM_NAME` | Not needed | Optional full HTTPS send endpoint and sender settings |
 | `FREEMAIL_API_TOKEN` | Not needed | Optional secret: Freemail Bearer token |
+
+Google Analytics uses the fixed measurement ID `G-P3P9SJKZEG` on the production
+hostnames; `NEXT_PUBLIC_GA_ID` is no longer used.
 
 Only `NEXT_PUBLIC_*` values are browser-visible and compiled into client assets.
 Set them **before building**, including a local CLI build in `.env.local` if
@@ -211,6 +213,10 @@ added, switch to a writable cache and configure the adapter's revalidation queue
 as documented by OpenNext. Login and AI pages are dynamic; account/payment
 responses retain their existing `no-store` handling.
 
+Runtime cache writes and deletes are silent no-ops because deployed assets are
+immutable. Cache reads still use the adapter's static-assets implementation,
+while unknown paths return 404 without logging failed cache writes.
+
 `public/_headers` gives hashed `/_next/static/*` files a one-year immutable cache.
 Public files such as `ads.txt` retain normal revalidation. Do not add a blanket
 Cloudflare “Cache Everything” rule to auth or API routes.
@@ -228,10 +234,12 @@ npm run lint
 npm run test:generators
 npm run test:ai-font
 npm run test:cloudflare
+npx tsc --noEmit
 npm run build:cloudflare
 # Install Chromium if not already available:
 npx playwright install chromium
 npm run test:cloudflare:browser
+npx wrangler deploy --dry-run --outdir /tmp/font-generator-worker-dry-run
 ```
 
 The Workers browser suite reuses the existing UI/auth tests and additionally

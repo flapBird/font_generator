@@ -41,3 +41,15 @@ test('hashed static assets receive immutable browser caching', async ({ request 
   expect(response.status()).toBe(200);
   expect(response.headers()['cache-control']).toContain('immutable');
 });
+
+test('public tools and optional AI font pages remain available without service credentials', async ({ request }) => {
+  const response = await request.get('/');
+  expect(response.status()).toBe(200);
+  expect(await response.text()).toContain('Font Generators');
+  for (const path of ['/ai-font-generator', '/login', '/pricing', '/account']) {
+    expect((await request.get(path)).status(), path).toBe(200);
+  }
+  const directory = await (await request.get('/llms.txt')).text();
+  expect(directory).toContain('Optional account and AI features');
+  expect(directory).toContain('one standard English TTF with 72 glyphs');
+});
