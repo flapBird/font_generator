@@ -7,7 +7,7 @@ export default function PrivacyPolicyPage() {
         <header className="mb-12 text-center">
           <h1 className="text-3xl font-bold sm:text-4xl">Privacy Policy</h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Last updated: July 28, 2026
+            Last updated: October 20, 2026
           </p>
         </header>
 
@@ -27,6 +27,16 @@ export default function PrivacyPolicyPage() {
             Generators conversion server, stored in our database, or attached
             to a user account. Avoid entering passwords, payment details, or
             other sensitive information into any public website tool.
+          </p>
+          <p>
+            The optional AI Font Generator sends font descriptions to SeeAPI for
+            safety screening and, after approval, to Mixfont for font generation.
+            Rendered glyph specimens are also sent to SeeAPI before a new font
+            is delivered. SeeAPI currently states that stored input files, task
+            information and moderation results have no scheduled automatic expiry;
+            API request logs are retained for 60 days. See the{' '}
+            <Link href="/ai-font-generator/policy">AI font terms and privacy</Link>{' '}
+            for account, payment, storage, review and deletion details.
           </p>
 
           <h2>3. Information collected automatically</h2>

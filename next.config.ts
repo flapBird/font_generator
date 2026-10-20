@@ -3,6 +3,10 @@
 const nextConfig: NextConfig = {
   trailingSlash: false,
   turbopack: {},
+  // HTTPS tunnels forward to localhost; allow only the configured app host.
+  allowedDevOrigins: process.env.AI_FONT_APP_URL
+    ? [new URL(process.env.AI_FONT_APP_URL).hostname]
+    : [],
   async redirects() {
     return [
       {

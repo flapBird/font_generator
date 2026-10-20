@@ -12,7 +12,17 @@ The project distinguishes between text and artwork instead of presenting every r
 - **Visual generators** create themed graphics, memes, and game-inspired titles for PNG or SVG download.
 - **Hybrid generators** provide both rendered artwork and a separately labelled copyable-text alternative.
 
-User-entered text and image composition are processed in the browser. The application has no account system, database, or text-generation API.
+The existing free tools process user-entered text and image composition in the browser and require no account. The separate, optional AI font module adds Google sign-in, one-time PayPal purchases, and paid TTF generation only at `/ai-font-generator`.
+
+## Optional AI Font Module
+
+Open `/ai-font-generator` through the **AI Font** link in the desktop navigation or mobile menu. Free style references work without any service credentials. The included artwork editor lets visitors try reference fonts for free and lets purchasers turn generated fonts into square posts, wide banners, or transparent PNG lettering without spending more generation credits. Custom generation requires Google sign-in and purchased generations; there are no free API generations or sign-up credits. Existing generator functionality is unchanged.
+
+The header also provides an optional **Log in** entry at `/login`, with Google sign-in independent of payment configuration. Signed-in users can open **My fonts & purchases** or sign out from the account menu. Free tools never require login; unconfigured authentication shows an availability notice rather than a fake login.
+
+The module uses Supabase for Google authentication, a private credit/order ledger and font storage, Mixfont for standard English TTF generation, and a payment-provider interface with PayPal as its first implementation. Missing configuration disables checkout without affecting the free site. See [setup, architecture and verification](docs/ai-font-module.md) and [environment variable template](docs/ai-font.env.example). Real Google and PayPal Sandbox integration requires configured accounts; local provider tests use mocked HTTP.
+
+New font generation requires SeeAPI prompt screening before credits are reserved and NSFW screening of complete glyph specimens before delivery. Review tasks and private assets are persisted across retries; missing review configuration disables new generation. Apply the [moderation migration and configuration](docs/ai-font-moderation.md) together with this app version. The reusable [SeeAPI NSFW skill](skills/seeapi-nsfw/SKILL.md) also covers image and video generation sites.
 
 ## Features
 
@@ -79,8 +89,12 @@ No environment file is required for local development.
 | `npm run preview:cloudflare` | Preview the existing Cloudflare build |
 | `npm run deploy` | Build and deploy to Cloudflare Workers |
 | `npm run deploy:cloudflare` | Deploy the existing Cloudflare build |
+| `npm run upload` | Build and upload a version for preview without changing production traffic |
+| `npm run upload:cloudflare` | Upload the existing Cloudflare build for preview |
+| `npm run promote:cloudflare` | Interactively select an uploaded version and its production traffic percentage |
 | `npm run cf-typegen` | Generate local Cloudflare binding types |
-| `npm run test:cloudflare:browser` | Verify HTTP routes and assets in the Workers runtime |
+| `npm run test:cloudflare` | Verify scheduled job authentication and error handling |
+| `npm run test:cloudflare:browser` | Verify routes and existing UI in the Workers runtime |
 
 Run a production build locally with:
 
@@ -169,19 +183,23 @@ When adding a page, keep its slug, category, canonical path, default style IDs, 
 
 ## Deployment
 
-Cloudflare Workers deployment is configured using the OpenNext adapter. It retains the Next.js App Router, permanent redirects and prebuilt content pages. See [the Cloudflare deployment guide](docs/cloudflare-deployment.md) for CLI deployment, Workers Builds, environment variables and custom domains.
+Cloudflare Workers deployment is configured using the OpenNext adapter. It retains the Next.js App Router, server-side login/payment APIs, permanent redirects and prebuilt content pages. See [the Cloudflare deployment guide](docs/cloudflare-deployment.md) for CLI deployment, Workers Builds, environment variables, custom domains and the AI font cron trigger.
 
 ```bash
 npm ci
 npm run preview
-# After configuring your Cloudflare account:
+# After configuring your Cloudflare account and runtime variables:
 npx wrangler login
-npm run deploy
+npm run upload
+# Inspect the version preview URL, then promote it in the dashboard or run:
+npm run promote:cloudflare
 ```
 
-Use **Workers**, with build command `npm run build:cloudflare` and deploy command `npm run deploy:cloudflare`, when connecting this Git repository in Cloudflare. The static-asset directory is `.open-next/assets`; the Worker entry is `.open-next/worker.js`. Content uses the adapter's read-only static-assets cache, so no R2, KV or Durable Object provisioning is needed for this site's current caching behavior.
+Use **Workers**. The connected `font-generator` Worker listens only to `main`, with build command `npx opennextjs-cloudflare build` and deploy command `npx opennextjs-cloudflare upload`. Each push uploads a candidate version and provides a version preview URL; production traffic changes only when an operator selects **Deployments → Promote deployment**. Version previews use the resources configured for that version and are publicly reachable unless protected by Cloudflare Access. `npm run deploy` and `npm run deploy:cloudflare` remain direct production deployment commands for deliberate manual use.
 
-`npm run build` and `npm run start` still support ordinary Node.js hosting. No `output: 'export'` setting is enabled; neither `.next` nor `.open-next/assets` alone is a complete site deployment.
+The static-asset directory is `.open-next/assets`; the Worker entry is `cloudflare/worker.js`. Content uses the adapter's read-only static-assets cache, so no R2, KV or Durable Object provisioning is needed for this site's current caching behavior.
+
+`npm run build` and `npm run start` still support ordinary Node.js hosting. No `output: 'export'` setting is enabled: the login/payment APIs require a server runtime, and neither `.next` nor `.open-next/assets` alone is a complete site deployment.
 
 Before publishing a fork, review the production domain in metadata, canonical URLs, sitemap, robots rules, analytics, AdSense client ID, `public/ads.txt`, contact information, privacy policy, and terms.
 
@@ -196,3 +214,12 @@ Before publishing a fork, review the production domain in metadata, canonical UR
 ## License
 
 This repository does not currently include a standalone license file. Add an appropriate `LICENSE` before redistributing the project or accepting external contributions.
+
+
+The **Pricing** page at `/pricing` compares free tools and the one-time AI Font
+Starter Pack: $4.99 buys 300 customer credits, enough for three English font
+generations at 100 credits each. A local keyword matcher offers free reference
+style suggestions without AI API calls. Account credit activity shows purchases,
+generation charges, failure restorations and reversals. Apply both AI font SQL
+migrations in order; existing deployments must follow the coordinated credit
+upgrade procedure in `docs/ai-font-module.md` before deploying this version.

@@ -268,3 +268,7 @@ body {
     background: #111827;
     border: 1px solid #334155;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

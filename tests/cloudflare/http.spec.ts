@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
 
+test('Cloudflare scheduled entry runs safely without AI credentials', async ({ request }) => {
+  const response = await request.get('/__scheduled?cron=*/5%20*%20*%20*%20*');
+  expect(response.status()).toBe(200);
+});
+
 test('legacy URLs keep permanent canonical redirects in Workers', async ({ request }) => {
   for (const [source, target] of [
     ['/style', '/styles'],
@@ -37,13 +42,14 @@ test('hashed static assets receive immutable browser caching', async ({ request 
   expect(response.headers()['cache-control']).toContain('immutable');
 });
 
-test('public site remains available without account or AI font routes', async ({ request }) => {
+test('public tools and optional AI font pages remain available without service credentials', async ({ request }) => {
   const response = await request.get('/');
   expect(response.status()).toBe(200);
   expect(await response.text()).toContain('Font Generators');
-  for (const path of ['/ai-font-generator', '/login', '/pricing', '/account', '/api/ai-font/reconcile']) {
-    expect((await request.get(path)).status(), path).toBe(404);
+  for (const path of ['/ai-font-generator', '/login', '/pricing', '/account']) {
+    expect((await request.get(path)).status(), path).toBe(200);
   }
   const directory = await (await request.get('/llms.txt')).text();
-  expect(directory).not.toContain('Optional account and AI features');
+  expect(directory).toContain('Optional account and AI features');
+  expect(directory).toContain('one standard English TTF with 72 glyphs');
 });

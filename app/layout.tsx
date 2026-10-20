@@ -7,6 +7,7 @@
  import "@fontsource/roboto/latin-900.css";
  import "@fontsource/poppins/latin-900.css";
  import "@fontsource/berkshire-swash/latin-400.css";
+ import "@fontsource/eb-garamond/latin-400.css";
  import "@fontsource/eb-garamond/latin-700.css";
  import "@fontsource/luckiest-guy/latin-400.css";
  import "@fontsource/pixelify-sans/latin-700.css";
@@ -44,13 +45,10 @@
  }));
  const themeInitializationScript = `
    (() => {
-     let savedTheme = null;
-     try {
-       savedTheme = localStorage.getItem('font-generators-theme-v2');
-     } catch {}
-     const useDarkTheme = savedTheme === 'dark';
-     document.documentElement.classList.toggle('dark', useDarkTheme);
-     document.documentElement.style.colorScheme = useDarkTheme ? 'dark' : 'light';
+     // Keep the site light while the theme switch is unavailable, including
+     // browsers that saved a dark preference before the switch was removed.
+     document.documentElement.classList.remove('dark');
+     document.documentElement.style.colorScheme = 'light';
    })();
  `;
 

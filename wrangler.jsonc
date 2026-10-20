@@ -1,13 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "font-generator",
-  "main": ".open-next/worker.js",
+  "main": "cloudflare/worker.js",
   "compatibility_date": "2026-10-05",
-  "compatibility_flags": [
-    "nodejs_compat",
-    "global_fetch_strictly_public"
-  ],
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "keep_vars": true,
+  "preview_urls": true,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -18,6 +16,9 @@
       "service": "font-generator"
     }
   ],
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
   "observability": {
     "enabled": true
   }

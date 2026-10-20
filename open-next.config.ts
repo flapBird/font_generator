@@ -2,7 +2,7 @@ import type { IncrementalCache } from '@opennextjs/aws/types/overrides.js';
 import { defineCloudflareConfig } from '@opennextjs/cloudflare';
 import staticAssetsIncrementalCache from '@opennextjs/cloudflare/overrides/incremental-cache/static-assets-incremental-cache';
 
-// Content pages are built once per deployment; HTTP requests use the Next.js handler.
+// Content pages are built once per deployment; account/payment APIs stay dynamic.
 // No ISR or on-demand revalidation is used, so no R2/DO cache is needed.
 //
 // Deployments are immutable, so runtime cache writes can never succeed and the
