@@ -15,18 +15,27 @@ export default function PrivacyPolicyPage() {
           <h2>1. Scope of this policy</h2>
           <p>
             This policy explains how Font Generators handles information when
-            you visit font-generators.org, use a Unicode text generator, or
-            contact us. It also explains the data practices associated with
-            Google Analytics and Google AdSense.
+            you visit font-generators.org, use our free text and artwork tools,
+            use the optional AI Font Generator, sign in, make a purchase where
+            checkout is available, or contact us. It also explains the data
+            practices associated with Google Analytics and Google AdSense.
           </p>
 
-          <h2>2. Text entered in the generators</h2>
+          <h2>2. Free tools and AI font processing</h2>
           <p>
             The primary Unicode generators transform text directly in your
             browser. Text typed into those generators is not sent to a Font
             Generators conversion server, stored in our database, or attached
             to a user account. Avoid entering passwords, payment details, or
             other sensitive information into any public website tool.
+          </p>
+          <p>
+            Our existing free text and artwork tools, reference font previews,
+            and local PNG exports remain available without an account. Reference
+            previews use existing typefaces and do not create a custom AI font.
+            Custom AI font generation requires Google sign-in and sufficient
+            account credits; its descriptions and generated files are processed
+            by server-side services rather than only in your browser.
           </p>
           <p>
             The optional AI Font Generator sends font descriptions to SeeAPI for
@@ -39,7 +48,35 @@ export default function PrivacyPolicyPage() {
             for account, payment, storage, review and deletion details.
           </p>
 
-          <h2>3. Information collected automatically</h2>
+          <h2>3. Accounts, purchases and font storage</h2>
+          <p>
+            We use Supabase to handle Google sign-in and retain your account
+            identifier, email, display name, Google avatar URL and sign-in
+            timestamps. These details provide your account and connect your
+            purchases, credit balance and font history. You can change your
+            display name on the account page. Supabase also stores order and
+            credit records, generation descriptions and private font files for
+            later download. Generated fonts are not automatically published in
+            a public gallery.
+          </p>
+          <p>
+            When checkout is available, Waffo or PayPal processes payments,
+            depending on the checkout offered. We store payment references,
+            amounts, status and credit transactions, not card numbers or other
+            card details. We also retain safety-check task references, input
+            fingerprints, statuses and reported API usage to resume checks,
+            enforce limits and respond to support requests.
+          </p>
+          <p>
+            When transaction email is enabled, your account email address and
+            payment or credit adjustment summary are sent through our Freemail
+            service and its configured delivery provider, such as Mailjet.
+            These messages cover purchases, refunds or payment reviews and do
+            not enroll you in marketing email. Credit delivery does not depend
+            on email delivery.
+          </p>
+
+          <h2>4. Information collected automatically</h2>
           <p>
             Our hosting provider and third-party services may automatically
             process information such as your IP address, browser and device
@@ -49,7 +86,7 @@ export default function PrivacyPolicyPage() {
             website.
           </p>
 
-          <h2>4. Google Analytics</h2>
+          <h2>5. Google Analytics</h2>
           <p>
             We use Google Analytics to understand aggregate traffic and product
             usage. Google Analytics may use cookies or similar identifiers to
@@ -58,7 +95,7 @@ export default function PrivacyPolicyPage() {
             we intend to identify you personally through analytics events.
           </p>
 
-          <h2>5. Google AdSense and advertising cookies</h2>
+          <h2>6. Google AdSense and advertising cookies</h2>
           <p>
             We use Google AdSense to support the site with advertising.
             Third-party vendors, including Google, use cookies to serve ads
@@ -89,7 +126,7 @@ export default function PrivacyPolicyPage() {
             .
           </p>
 
-          <h2>6. Consent controls</h2>
+          <h2>7. Consent controls</h2>
           <p>
             Where required, visitors may be shown a consent message that
             provides choices about advertising cookies, analytics storage, and
@@ -98,7 +135,7 @@ export default function PrivacyPolicyPage() {
             Blocking cookies may affect some site or advertising features.
           </p>
 
-          <h2>7. Contact information</h2>
+          <h2>8. Contact information</h2>
           <p>
             If you contact us by email, we receive the email address, message,
             and any information you choose to include. We use it to respond to
@@ -106,17 +143,29 @@ export default function PrivacyPolicyPage() {
             do not sell contact information.
           </p>
 
-          <h2>8. Data retention and sharing</h2>
+          <h2>9. Data retention and sharing</h2>
           <p>
-            We retain direct correspondence only for as long as reasonably
-            needed to respond, keep business records, prevent abuse, or meet
-            legal obligations. Hosting, analytics, and advertising providers
-            may retain information under their own policies. We may disclose
-            information when required by law, to protect the service and its
-            users, or to service providers acting on our behalf.
+            We retain account, purchase and font data to provide accounts,
+            purchase history, credits and repeat downloads. We retain direct
+            correspondence as reasonably needed to respond, keep business
+            records, prevent abuse, or meet legal obligations. Transaction
+            records may need to be retained for accounting and dispute
+            resolution even after an account or font deletion request.
+          </p>
+          <p>
+            You can request account or font deletion through our{' '}
+            <Link href="/contact">contact page</Link>. Download copies of fonts
+            you wish to keep before requesting deletion. Our hosting,
+            authentication, payment, generation, safety-screening, email,
+            analytics and advertising providers may retain information under
+            their own policies. Deleting our local review files does not delete
+            a provider copy; SeeAPI deletion requests require review by its
+            support team. We may disclose information when required by law, to
+            protect the service and its users, or to service providers acting
+            on our behalf.
           </p>
 
-          <h2>9. Children&apos;s privacy</h2>
+          <h2>10. Children&apos;s privacy</h2>
           <p>
             Font Generators is a general-audience service and is not directed
             to children under 13. We do not knowingly collect personal
@@ -125,7 +174,7 @@ export default function PrivacyPolicyPage() {
             where appropriate.
           </p>
 
-          <h2>10. Your choices and rights</h2>
+          <h2>11. Your choices and rights</h2>
           <p>
             Depending on your location, you may have rights to request access,
             correction, deletion, or restriction of certain personal
@@ -134,7 +183,7 @@ export default function PrivacyPolicyPage() {
             request.
           </p>
 
-          <h2>11. Changes and contact</h2>
+          <h2>12. Changes and contact</h2>
           <p>
             We may update this policy as the site or legal requirements change.
             The date at the top shows the latest revision. Questions and privacy

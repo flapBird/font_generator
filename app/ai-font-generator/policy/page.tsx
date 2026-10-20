@@ -11,7 +11,9 @@ export default function AiFontPolicy() {
   return <article className="prose prose-slate mx-auto max-w-3xl px-5 pb-20 pt-28 dark:prose-invert">
     <Link href="/ai-font-generator">← Back to AI Font Generator</Link>
     <h1>AI font purchase terms & privacy</h1>
+    <p>Last updated: October 20, 2026</p>
     <p>These details apply to the paid AI Font Generator. Our existing free text and artwork tools remain available without an account.</p>
+    <p>Read these details with our <Link href="/terms">Terms of Service</Link> and <Link href="/privacy">Privacy Policy</Link>. Purchases are offered only when checkout is enabled. When payments are being set up, the <Link href="/pricing">Pricing page</Link> still shows the pack and price with a disabled Payments coming soon button.</p>
     <h2>What you purchase</h2>
     <p>The AI Font Starter Pack includes {FONT_PACK.credits} credits, enough for {availableGenerations(FONT_PACK.credits)} standard font generations, for a one-time price of US ${(FONT_PACK.amountMinor / 100).toFixed(2)}. Each standard generation costs {STANDARD_FONT_CREDITS} credits. There is no recurring subscription. Each generation creates a single-style TTF with 72 English letters, digits and basic punctuation. It does not include all languages, every symbol, or a family of weights.</p>
     <p>Free previews use existing open-source typefaces as style references. They are not custom AI results and do not promise an exact match. Generated fonts are intended primarily for creative titles and display lettering. Check readability, character coverage and spacing in your intended application.</p>

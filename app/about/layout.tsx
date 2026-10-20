@@ -2,10 +2,10 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'About',
-  description: 'Learn how Font Generators creates browser-based Unicode text, rendered typography, ASCII art, and downloadable text graphics.',
+  description: 'Learn about our free text and artwork tools, optional paid AI Font Generator, and how each service handles your input.',
   openGraph: {
     title: 'About Us - Font Generators',
-    description: 'Learn how our browser-based text generators work, how input is handled, and what compatibility limits to expect.',
+    description: 'Learn how our free tools and optional paid AI fonts work, how input is handled, and what compatibility limits to expect.',
     url: 'https://font-generators.org/about',
   },
   alternates: {

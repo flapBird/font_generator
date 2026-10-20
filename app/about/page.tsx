@@ -42,7 +42,7 @@ export default function AboutPage() {
             '@type': 'Organization',
             name: 'Font Generators',
             url: 'https://font-generators.org',
-            description: 'Browser-based text and typography generators with practical compatibility guides.',
+            description: 'Free text and artwork tools, an optional paid AI Font Generator, and practical compatibility guides.',
             email: 'support@font-generators.org',
           }),
         }}
@@ -55,7 +55,7 @@ export default function AboutPage() {
               About <span className="gradient-text">Font Generators</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-              Free browser-based tools for copyable Unicode text, rendered typography, ASCII art, and downloadable text graphics.
+              Free text and artwork tools, plus an optional paid AI Font Generator for custom English font files.
             </p>
           </header>
 
@@ -67,6 +67,9 @@ export default function AboutPage() {
               </p>
               <p>
                 Each generator is built around the intent named on its page. The controls, presets, examples, compatibility notes, and export options vary because a social profile, a meme headline, and a downloadable title graphic are different tasks.
+              </p>
+              <p>
+                The AI Font Generator adds custom English TTF generation with Google sign-in and account credits. Free style references and PNG artwork exports use existing typefaces; they are separate from a custom AI result. The <Link href="/pricing" className="font-semibold text-violet-700 hover:underline dark:text-violet-300">Pricing page</Link> describes the one-time credit pack and shows when purchases are unavailable. There is no recurring subscription in the current offer. The <Link href="/ai-font-generator/policy" className="font-semibold text-violet-700 hover:underline dark:text-violet-300">AI font purchase terms</Link> explain delivery, usage and refunds.
               </p>
             </div>
           </section>
@@ -116,7 +119,10 @@ export default function AboutPage() {
               <h2 className="text-2xl font-black text-slate-950 dark:text-white">Privacy and local processing</h2>
               <div className="mt-4 space-y-4 leading-7 text-slate-700 dark:text-slate-300">
                 <p>
-                  Generator conversion and rendering take place in the browser. Text entered into a generator is not submitted to a Font Generators conversion service or attached to an account.
+                  Free text conversion and artwork rendering take place in the browser. Text entered into those free tools is not submitted to a Font Generators conversion service or attached to an account.
+                </p>
+                <p>
+                  AI font generation uses account storage and external generation and safety-screening services. Descriptions, generated font files, purchases and credits are processed to provide that feature; they are not handled solely in your browser. The <Link href="/privacy" className="font-semibold text-violet-700 hover:underline dark:text-violet-300">Privacy Policy</Link> explains these additional data practices.
                 </p>
                 <p>
                   The site uses hosting services, analytics, and advertising. Those services can process visit and device information as explained in the <Link href="/privacy" className="font-semibold text-violet-700 hover:underline dark:text-violet-300">Privacy Policy</Link>. Avoid entering sensitive information into any public web tool.

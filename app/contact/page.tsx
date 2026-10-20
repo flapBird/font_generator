@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Contact',
-  description: 'Contact Font Generators about corrections, privacy, accessibility, or site feedback.',
+  description: 'Contact Font Generators about AI font purchases, generation issues, refunds, privacy, accessibility, or site feedback.',
   alternates: {
     canonical: 'https://font-generators.org/contact',
   },
@@ -21,7 +22,8 @@ export default function ContactPage() {
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
             We welcome reports about incorrect character mappings, platform
-            compatibility, accessibility, privacy, and broken pages.
+            compatibility, accessibility, privacy, and broken pages. We also
+            help with AI font purchases, generation issues and refund requests.
           </p>
         </header>
 
@@ -39,10 +41,16 @@ export default function ContactPage() {
             . Include the page URL and a short description when reporting a
             problem.
           </p>
+          <p className="mt-4 leading-7 text-slate-600 dark:text-slate-300">
+            For AI font support, include your account email and the order or
+            font reference, if available. See the{' '}
+            <Link href="/ai-font-generator/policy" className="text-violet-700 underline dark:text-violet-300">AI font purchase terms</Link>{' '}
+            for service details, generated-font permissions and refund rules.
+          </p>
           <p className="mt-4 text-sm leading-6 text-slate-500 dark:text-slate-400">
             Please do not email passwords, payment details, government
-            identifiers, or other sensitive information. This site does not
-            provide custom font licensing or legal advice.
+            identifiers, or other sensitive information. We cannot provide
+            legal advice about third-party rights.
           </p>
         </section>
 

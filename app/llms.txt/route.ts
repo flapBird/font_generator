@@ -65,7 +65,7 @@ const guideLines = guidePages.map(
 const body = [
   '# Font Generators',
   '',
-  '> Font Generators is a free collection of browser-based tools for copy-and-paste Unicode text, ASCII banners, real typeface previews, meme captions, 3D text, and downloadable title artwork. Each generator keeps its existing canonical URL and explains the exact output it produces.',
+  '> Font Generators offers free browser-based tools for copy-and-paste Unicode text, ASCII banners, real typeface previews, meme captions, 3D text, and downloadable title artwork, alongside an optional paid AI Font Generator for custom English TTF files. Each generator keeps its existing canonical URL and explains the exact output it produces.',
   '',
   'Use the output type to interpret a page correctly:',
   '',
@@ -100,10 +100,10 @@ const body = [
   '',
   '## Site information',
   '',
-  `- [About](${SITE_URL}/about): Site purpose and scope.`,
-  `- [Contact](${SITE_URL}/contact): Contact information.`,
-  `- [Privacy Policy](${SITE_URL}/privacy): Privacy and local-processing information.`,
-  `- [Terms of Use](${SITE_URL}/terms): Terms and usage conditions.`,
+  `- [About](${SITE_URL}/about): Free tools, optional paid AI fonts, output types, and service scope.`,
+  `- [Contact](${SITE_URL}/contact): Support for site issues, AI font purchases, refunds, and privacy requests.`,
+  `- [Privacy Policy](${SITE_URL}/privacy): Local processing for free tools, AI account and payment data, external generation and safety services, storage, and deletion requests.`,
+  `- [Terms of Use](${SITE_URL}/terms): Free and paid service terms, one-time AI font credits, delivery, usage, and refund conditions.`,
   `- [XML Sitemap](${SITE_URL}/sitemap.xml): Complete crawlable URL inventory.`,
   '',
 ].join('\n');
