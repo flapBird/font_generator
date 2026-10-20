@@ -22,6 +22,8 @@ The header also provides an optional **Log in** entry at `/login`, with Google s
 
 The module uses Supabase for Google authentication, a private credit/order ledger and font storage, Mixfont for standard English TTF generation, and a payment-provider interface with PayPal as its first implementation. Missing configuration disables checkout without affecting the free site. See [setup, architecture and verification](docs/ai-font-module.md) and [environment variable template](docs/ai-font.env.example). Real Google and PayPal Sandbox integration requires configured accounts; local provider tests use mocked HTTP.
 
+New font generation requires SeeAPI prompt screening before credits are reserved and NSFW screening of complete glyph specimens before delivery. Review tasks and private assets are persisted across retries; missing review configuration disables new generation. Apply the [moderation migration and configuration](docs/ai-font-moderation.md) together with this app version. The reusable [SeeAPI NSFW skill](skills/seeapi-nsfw/SKILL.md) also covers image and video generation sites.
+
 ## Features
 
 - Real-time Unicode conversion with search, category filters, and one-click copy

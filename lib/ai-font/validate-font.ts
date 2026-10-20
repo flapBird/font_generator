@@ -45,6 +45,9 @@ export function validateEnglishTtf(bytes: Buffer) {
     }
     const ordered = [...tables.values()].sort((a, b) => a.offset - b.offset);
     ensure(ordered.every((table, index) => index === 0 || ordered[index - 1].offset + ordered[index - 1].length <= table.offset), 'Overlapping font tables');
+    // Specimen review covers static monochrome TrueType outlines. Alternate
+    // bitmap/SVG/color or variable representations could display unchecked art.
+    ensure(!['SVG ', 'COLR', 'CPAL', 'sbix', 'CBDT', 'CBLC', 'EBDT', 'EBLC', 'fvar', 'gvar'].some((tag) => tables.has(tag)), 'Unsupported alternate font representation');
     const table = (tag: string, minimum: number) => {
       const entry = tables.get(tag);
       ensure(entry && entry.length >= minimum, `Missing or truncated ${tag} table`);

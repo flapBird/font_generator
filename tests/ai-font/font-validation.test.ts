@@ -96,3 +96,11 @@ test('unsupported-character warnings use the actual font map and ignore line bre
   assert.equal(unsupportedFontCharacters('Hello 中文中文🙂', REQUIRED_ENGLISH_CHARACTERS), '中文🙂');
   assert.equal(unsupportedFontCharacters('éA', 'Aé'), '');
 });
+
+test('alternate color, SVG, bitmap or variable content cannot bypass outline review', () => {
+  for (const tag of ['SVG ', 'COLR', 'sbix', 'CBDT', 'fvar', 'gvar']) {
+    const bytes = Buffer.from(fixture);
+    bytes.write(tag, record(bytes, 'post'), 4, 'ascii');
+    assert.throws(() => validateEnglishTtf(repair(bytes)), /Unsupported alternate font representation/);
+  }
+});

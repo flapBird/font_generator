@@ -227,7 +227,54 @@ test('llms.txt describes file validation, private delivery and missing-character
   expect(body).toContain('previews load that same stored file');
   expect(body).toContain('warning for characters absent from its character map');
   expect(body).toContain('Reference previews use existing fonts, not AI-generated results');
+  expect(body).toContain('Descriptions are reviewed for sexual content');
+  expect(body).toContain('before generation credits are reserved or Mixfont is called');
+  expect(body).toContain('New results are previewable and downloadable only after all specimen pages pass');
+  expect(body).toContain('no scheduled automatic expiry');
   expect(body).not.toContain('](https://font-generators.org/ai-font-generator)');
+});
+
+test('pending prompt moderation reuses the generation intent and does not claim credits were spent', async ({ page }) => {
+  const requests: { id: string; prompt: string }[] = [];
+  let credits = 300;
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'test@example.com' }, credits, orders: [], jobs: [],
+    services: { auth: true, generation: true, checkout: true },
+  } }));
+  await page.route('**/api/ai-font/jobs', route => {
+    requests.push(route.request().postDataJSON());
+    if (requests.length === 1) return route.fulfill({ status: 202, json: { id: requests[0].id, moderation: 'pending' } });
+    credits = 200;
+    return route.fulfill({ status: 202, json: { id: requests[0].id } });
+  });
+  await page.goto('/ai-font-generator');
+  await page.getByLabel('Font description').fill('A friendly rounded English font');
+  await page.getByRole('button', { name: 'Generate font · 100 credits' }).click();
+  await expect(page.getByText('Checking your description. No generation credits have been used.')).toBeVisible();
+  await expect(page.getByText('3 generations available')).toBeVisible();
+  await expect(page.getByText('Your font is on its way.', { exact: false })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText('2 generations available')).toBeVisible();
+  expect(requests).toHaveLength(2);
+  expect(requests[0]).toEqual(requests[1]);
+});
+
+test('a blocked description leaves credits and download availability unchanged', async ({ page }) => {
+  let submitted = 0;
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'test@example.com' }, credits: 300, orders: [], jobs: [],
+    services: { auth: true, generation: true, checkout: true },
+  } }));
+  await page.route('**/api/ai-font/jobs', route => {
+    submitted++;
+    return route.fulfill({ status: 422, json: { error: 'This description did not pass our safety checks. Please describe another font. No generation credits have been used.' } });
+  });
+  await page.goto('/ai-font-generator');
+  await page.getByLabel('Font description').fill('A description rejected by the mocked safety check');
+  await page.getByRole('button', { name: 'Generate font · 100 credits' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'did not pass our safety checks' })).toBeVisible();
+  await expect(page.getByText('3 generations available')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Download TTF ↓', exact: true })).toHaveCount(0);
+  expect(submitted).toBe(1);
 });
 
 test('pricing is public, uses the same credit allowance, and links to the studio', async ({ page }) => {

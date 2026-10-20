@@ -45,7 +45,7 @@ function paymentNotice(status: string, account: Account) {
 }
 
 const jobLabels: Record<FontJob['status'], string> = {
-  reserved: 'Queued', starting: 'Starting', processing: 'Drawing your font', needs_review: 'Checking your generation', succeeded: 'Ready', failed: 'Failed · generation restored',
+  reserved: 'Queued', starting: 'Starting', processing: 'Generating & reviewing', needs_review: 'Checking your generation', succeeded: 'Ready', failed: 'Failed · generation restored',
 };
 
 export default function AiFontStudio({ services: initialServices }: { services: Services }) {
@@ -146,7 +146,16 @@ export default function AiFontStudio({ services: initialServices }: { services: 
       if (previous?.prompt === request.prompt && previous?.id) request = previous;
     } catch {}
     save(pendingJobKey, JSON.stringify(request));
-    await api('jobs', 'POST', request);
+    let response = await api<{ moderation?: 'pending' }>('jobs', 'POST', request);
+    for (let attempt = 0; response.moderation === 'pending' && attempt < 4; attempt++) {
+      setNotice('Checking your description. No generation credits have been used.');
+      await new Promise<void>((resolve) => setTimeout(resolve, 3500));
+      response = await api<{ moderation?: 'pending' }>('jobs', 'POST', request);
+    }
+    if (response.moderation === 'pending') {
+      setNotice('Your description is still being checked. Try Generate again shortly. No generation credits have been used.');
+      return;
+    }
     save(pendingJobKey, null);
     save(draftKey, prompt);
     await refresh();

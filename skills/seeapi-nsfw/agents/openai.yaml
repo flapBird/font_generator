@@ -1,0 +1,4 @@
+interface:
+  display_name: "SeeAPI NSFW Moderation"
+  short_description: "Integrate SeeAPI checks for image and video generation"
+  default_prompt: "Use $seeapi-nsfw to add SeeAPI prompt, input-media, and output moderation to this generation app."

@@ -177,6 +177,7 @@ Build variables and runtime variables are separate settings in Cloudflare.
 | `PAYPAL_ENVIRONMENT` | Not needed | `sandbox` initially; `live` only after verification |
 | `SUPABASE_SERVICE_ROLE_KEY` | Not needed | Secret |
 | `MIXFONT_API_KEY` | Not needed | Secret |
+| `SEEAPI_API_KEY` | Not needed | Secret; required for new font generation and review |
 | `PAYPAL_CLIENT_ID` | Not needed | Server variable or secret |
 | `PAYPAL_CLIENT_SECRET` | Not needed | Secret |
 | `PAYPAL_WEBHOOK_ID` | Not needed | Server variable or secret |
@@ -187,6 +188,12 @@ Build variables and runtime variables are separate settings in Cloudflare.
 
 Google Analytics uses the fixed measurement ID `G-P3P9SJKZEG` on the production
 hostnames; `NEXT_PUBLIC_GA_ID` is no longer used.
+
+For safety review, apply `supabase/migrations/202610200001_font_moderation.sql`
+after the existing billing migrations, with generation and reconciliation paused,
+then deploy the matching application and set `SEEAPI_API_KEY` as a runtime secret.
+Do not resume the old application against this migration: its unreviewed delivery
+path will correctly fail. See [moderation rollout and verification](ai-font-moderation.md).
 
 Only `NEXT_PUBLIC_*` values are browser-visible and compiled into client assets.
 Set them **before building**, including a local CLI build in `.env.local` if

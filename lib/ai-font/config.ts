@@ -16,7 +16,7 @@ export function appOrigin() {
 
 export function availability() {
   const auth = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY && process.env.AI_FONT_APP_URL);
-  const generation = Boolean(auth && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.MIXFONT_API_KEY);
+  const generation = Boolean(auth && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.MIXFONT_API_KEY && process.env.SEEAPI_API_KEY?.trim());
   const provider: 'waffo' | 'paypal' = process.env.AI_FONT_PAYMENT_PROVIDER === 'waffo' ? 'waffo' : 'paypal';
   const waffo = Boolean(process.env.WAFFO_MERCHANT_ID && process.env.WAFFO_PRIVATE_KEY && process.env.WAFFO_WEBHOOK_PUBLIC_KEY && process.env.WAFFO_STORE_ID && process.env.WAFFO_PRODUCT_ID && /^https:\/\//.test(process.env.AI_FONT_APP_URL || ''));
   const paypal = Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET && process.env.PAYPAL_WEBHOOK_ID);
