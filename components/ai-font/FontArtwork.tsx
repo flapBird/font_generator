@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
+import { unsupportedFontCharacters } from '@/lib/ai-font/font-characters';
 
 const formats = {
   square: { label: 'Square post', width: 1080, height: 1080 },
@@ -9,7 +10,7 @@ const formats = {
 } as const;
 const control = 'min-h-11 rounded-lg border border-border bg-background px-3 py-2 text-sm';
 
-export default function FontArtwork({ family, name, reference = false }: { family: string; name: string; reference?: boolean }) {
+export default function FontArtwork({ family, name, reference = false, characters }: { family: string; name: string; reference?: boolean; characters?: string }) {
   const id = useId();
   const canvas = useRef<HTMLCanvasElement>(null);
   const [text, setText] = useState('Make something\nyours');
@@ -22,6 +23,7 @@ export default function FontArtwork({ family, name, reference = false }: { famil
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
   const dimensions = formats[format];
+  const missingCharacters = characters === undefined ? '' : unsupportedFontCharacters(text, characters);
 
   useEffect(() => {
     let alive = true;
@@ -86,6 +88,7 @@ export default function FontArtwork({ family, name, reference = false }: { famil
         <label className="block text-sm font-semibold" htmlFor={`${id}-text`}>Artwork text</label>
         <textarea id={`${id}-text`} value={text} maxLength={240} rows={3} className={`${control} w-full`} onChange={(event) => setText(event.target.value)} />
         <p className="text-xs text-muted-foreground">Up to 240 characters. Text wraps and scales to fit. English letters, numbers and basic punctuation work best; other characters may use a fallback font.</p>
+        {missingCharacters && <p role="status" className="text-sm text-amber-800">This font does not include these characters; they may appear in another font: {missingCharacters}</p>}
         <label className="block text-sm font-semibold" htmlFor={`${id}-format`}>Image format</label>
         <select id={`${id}-format`} className={`${control} w-full`} value={format} onChange={(event) => setFormat(event.target.value as keyof typeof formats)}>{Object.entries(formats).map(([key, item]) => <option value={key} key={key}>{item.label} · {item.width} × {item.height}</option>)}</select>
         <label className="block text-sm font-semibold" htmlFor={`${id}-size`}>Text size</label>

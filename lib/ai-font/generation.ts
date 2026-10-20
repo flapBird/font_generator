@@ -2,6 +2,7 @@ import 'server-only';
 import { adminClient } from './supabase';
 import { requiredEnv } from './config';
 import type { FontJob } from './catalog';
+import { FontValidationError, validateEnglishTtf } from './validate-font';
 
 type StoredJob = FontJob & { user_id: string; external_id: string | null; storage_path: string | null; updated_at: string };
 const apiBase = 'https://api.mixfont.com/v1/font-generations';
@@ -48,7 +49,10 @@ async function downloadFont(url: URL) {
   const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(20000), cache: 'no-store' });
   if (!response.ok || !response.body) throw new Error('Font download unavailable');
   const maxBytes = 20 * 1024 * 1024;
-  if (Number(response.headers.get('content-length')) > maxBytes) throw new Error('Font too large');
+  if (Number(response.headers.get('content-length')) > maxBytes) {
+    await response.body.cancel();
+    throw new FontValidationError('Font too large');
+  }
   const chunks: Uint8Array[] = [];
   let size = 0;
   const reader = response.body.getReader();
@@ -57,12 +61,12 @@ async function downloadFont(url: URL) {
       const { done, value } = await reader.read();
       if (done) break;
       size += value.length;
-      if (size > maxBytes) throw new Error('Font too large');
+      if (size > maxBytes) throw new FontValidationError('Font too large');
       chunks.push(value);
     }
   } finally { await reader.cancel(); }
   const bytes = Buffer.concat(chunks);
-  if (bytes.length < 12 || (bytes.readUInt32BE(0) !== 0x00010000 && bytes.toString('ascii', 0, 4) !== 'true')) throw new Error('Invalid TTF file');
+  validateEnglishTtf(bytes);
   return bytes;
 }
 
@@ -83,7 +87,16 @@ export async function reconcileJob(job: StoredJob) {
   if (result.id !== job.external_id) throw new Error('Generation mismatch');
   if (['failed', 'cancelled'].includes(result.status)) { await finish(job.id, 'failed'); return; }
   if (result.status !== 'succeeded') return;
-  const bytes = await downloadFont(safeFontUrl(result.ttf_url));
+  let bytes: Buffer;
+  try {
+    bytes = await downloadFont(safeFontUrl(result.ttf_url));
+  } catch (error) {
+    if (!(error instanceof FontValidationError)) throw error;
+    // A completed but invalid font cannot be delivered. The existing atomic
+    // failure function restores exactly the reserved customer credits once.
+    await finish(job.id, 'failed');
+    return;
+  }
   const path = `${job.user_id}/${job.id}.ttf`;
   const { error } = await adminClient().storage.from('ai-fonts').upload(path, bytes, { contentType: 'font/ttf', upsert: true });
   if (error) throw error;

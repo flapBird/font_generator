@@ -7,6 +7,7 @@ import { authChangedEvent } from '@/lib/ai-font/auth-navigation';
 import FontArtwork from './FontArtwork';
 import FontExamples from './FontExamples';
 import { matchFontStyle } from '@/lib/ai-font/style-match';
+import { unsupportedFontCharacters } from '@/lib/ai-font/font-characters';
 import styles from './AiFontStudio.module.css';
 
 type Services = { auth: boolean; generation: boolean; checkout: boolean; sandbox: boolean; provider?: 'paypal' | 'waffo' };
@@ -58,8 +59,8 @@ export default function AiFontStudio({ services: initialServices }: { services: 
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
-  const [loadedFonts, setLoadedFonts] = useState<Record<string, string>>({});
-  const [artworkFont, setArtworkFont] = useState<{ id: string; family: string; name: string } | null>(null);
+  const [loadedFonts, setLoadedFonts] = useState<Record<string, { family: string; characters: string }>>({});
+  const [artworkFont, setArtworkFont] = useState<{ id: string; family: string; name: string; characters: string } | null>(null);
   const actionLock = useRef(false);
   const services = account?.services ?? initialServices;
   const active = Boolean(account?.jobs.some((job) => ['reserved', 'starting', 'processing'].includes(job.status)));
@@ -154,17 +155,29 @@ export default function AiFontStudio({ services: initialServices }: { services: 
 
   async function previewFont(id: string, name: string) {
     if (loadedFonts[id]) {
-      setArtworkFont({ id, family: loadedFonts[id], name });
+      setArtworkFont({ id, ...loadedFonts[id], name });
       document.getElementById('font-artwork')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
     const result = await api<{ url: string }>(`jobs/${id}/download`);
     const family = `generated-${id}`;
-    const font = new FontFace(family, `url(${JSON.stringify(result.url)})`);
-    await font.load();
-    document.fonts.add(font);
-    setLoadedFonts((current) => ({ ...current, [id]: family }));
-    setArtworkFont({ id, family, name });
+    let characters: string;
+    try {
+      const [response, { parse }] = await Promise.all([fetch(result.url), import('opentype.js')]);
+      if (!response.ok) throw new Error();
+      const bytes = await response.arrayBuffer();
+      const parsed = parse(bytes, { lowMemory: true });
+      characters = Object.entries(parsed.tables.cmap.glyphIndexMap as Record<string, number>)
+        .filter(([, index]) => index > 0 && index < parsed.numGlyphs)
+        .map(([code]) => String.fromCodePoint(Number(code))).join('');
+      // Preview exactly the downloaded bytes; only select this font after the
+      // browser has accepted it, so a failed load cannot masquerade as a result.
+      const font = new FontFace(family, bytes);
+      await font.load();
+      document.fonts.add(font);
+    } catch { throw new Error('Your font preview could not load. Please try again.'); }
+    setLoadedFonts((current) => ({ ...current, [id]: { family, characters } }));
+    setArtworkFont({ id, family, name, characters });
     document.getElementById('font-artwork')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -245,7 +258,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
       </div>
 
       <div id="font-artwork" className="scroll-mt-24">
-        <FontArtwork family={account?.user && artworkFont ? artworkFont.family : sample.family} name={account?.user && artworkFont ? artworkFont.name : sample.name} reference={!account?.user || !artworkFont} />
+        <FontArtwork family={account?.user && artworkFont ? artworkFont.family : sample.family} name={account?.user && artworkFont ? artworkFont.name : sample.name} reference={!account?.user || !artworkFont} characters={account?.user && artworkFont ? artworkFont.characters : undefined} />
         {account?.user && artworkFont && <button className={`${secondary} mt-3`} onClick={() => setArtworkFont(null)}>Back to reference font</button>}
       </div>
 
@@ -261,7 +274,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
             <p className="mt-3 break-words text-sm text-muted-foreground">{job.prompt}</p>
             <p className="mt-3 text-xs text-muted-foreground">{new Date(job.created_at).toLocaleDateString()} · {job.id.slice(0, 8)}</p>
             {job.status === 'needs_review' && <p className="mt-3 text-sm">We could not confirm the provider response. Your request is saved and will not be charged again automatically. <Link className="text-primary underline" href="/contact">Contact support</Link> with the reference above.</p>}
-            {loadedFonts[job.id] && <p className="mt-4 break-words rounded-xl bg-muted p-4 text-3xl" style={{ fontFamily: loadedFonts[job.id], overflowWrap: 'anywhere' }}>{preview || 'Your words here'}</p>}
+            {loadedFonts[job.id] && <><p className="mt-4 break-words rounded-xl bg-muted p-4 text-3xl" style={{ fontFamily: loadedFonts[job.id].family, overflowWrap: 'anywhere' }}>{preview || 'Your words here'}</p>{unsupportedFontCharacters(preview || 'Your words here', loadedFonts[job.id].characters) && <p role="status" className="mt-2 text-sm text-amber-800">This font does not include these characters; they may appear in another font: {unsupportedFontCharacters(preview || 'Your words here', loadedFonts[job.id].characters)}</p>}</>}
             {job.status === 'succeeded' && <div className="mt-4 flex flex-wrap gap-2"><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`preview-${job.id}`, () => previewFont(job.id, job.name || 'Custom English font'))}>Preview & create artwork</button><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`download-${job.id}`, async () => { const result = await api<{ url: string }>(`jobs/${job.id}/download`); window.location.assign(result.url); })}>Download TTF ↓</button></div>}
           </article>)}
         </div>}

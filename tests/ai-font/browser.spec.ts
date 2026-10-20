@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
 test('free AI references require no account, payment or generation API', async ({ page }) => {
   const paidCalls: string[] = [];
@@ -141,12 +142,29 @@ test('artwork export uses the selected generated font without spending credits (
     jobs: [{ id, name: 'Test display font', prompt: 'A bold display font', status: 'succeeded', created_at: '2026-10-06T00:00:00Z' }],
     services: { auth: true, generation: true, checkout: true, sandbox: true },
   } }));
-  await page.route(`**/api/ai-font/jobs/${id}/download`, route => route.fulfill({ json: { url: 'http://localhost:3211/test-font.woff2' } }));
-  await page.route('**/test-font.woff2', route => route.fulfill({ path: 'node_modules/@fontsource/anton/files/anton-latin-400-normal.woff2', contentType: 'font/woff2' }));
+  await page.route(`**/api/ai-font/jobs/${id}/download`, route => route.fulfill({ json: { url: 'http://localhost:3211/test-font.ttf' } }));
+  const fontRequests: string[] = [];
+  await page.route('**/test-font.ttf', route => {
+    fontRequests.push(route.request().url());
+    return route.fulfill({ path: 'tests/ai-font/fixtures/mixfont-standard.ttf', contentType: 'font/ttf', headers: { 'Content-Disposition': 'attachment; filename="test-font.ttf"' } });
+  });
   await page.goto('/ai-font-generator');
   await expect(page.getByRole('button', { name: 'Download PNG', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Preview & create artwork' }).click();
   await expect(page.getByText('Editing with your generated font:', { exact: false })).toBeVisible();
+  expect(await page.evaluate((family) => document.fonts.check(`32px ${family}`, 'Aa 123'), `generated-${id}`)).toBe(true);
+  const ttfDownloadEvent = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download TTF ↓', exact: true }).click();
+  const ttfDownload = await ttfDownloadEvent;
+  expect(ttfDownload.suggestedFilename()).toBe('test-font.ttf');
+  const ttfChunks: Buffer[] = [];
+  for await (const chunk of (await ttfDownload.createReadStream())!) ttfChunks.push(Buffer.from(chunk));
+  expect(Buffer.concat(ttfChunks)).toEqual(readFileSync('tests/ai-font/fixtures/mixfont-standard.ttf'));
+  expect(fontRequests).toEqual(['http://localhost:3211/test-font.ttf', 'http://localhost:3211/test-font.ttf']);
+  await page.getByLabel('Your preview text').fill('Hello 中文🙂');
+  await expect(page.getByRole('status').filter({ hasText: 'This font does not include these characters' })).toContainText('中文🙂');
+  await page.getByLabel('Artwork text', { exact: true }).fill('Hello 中文🙂');
+  await expect(page.getByRole('status').filter({ hasText: 'This font does not include these characters' })).toHaveCount(2);
   await page.getByLabel('Artwork text', { exact: true }).fill('MY POSTER');
   await page.getByLabel('Image format', { exact: true }).selectOption('transparent');
   const downloadButton = page.getByRole('button', { name: 'Download PNG', exact: true });
@@ -181,6 +199,35 @@ test('artwork export uses the selected generated font without spending credits (
   await expect(downloadButton).toBeDisabled();
   await expect(page.getByText('2 generations available')).toBeVisible();
   expect(paidCalls).toEqual([]);
+});
+
+test('a corrupt font cannot appear as a successfully loaded generated preview', async ({ page }) => {
+  const id = '10000000-0000-4000-8000-000000000003';
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'test@example.com' }, credits: 200, orders: [],
+    jobs: [{ id, name: 'Broken font', prompt: 'A playful font', status: 'succeeded', created_at: '2026-10-20T00:00:00Z' }],
+    services: { auth: true, generation: true, checkout: true },
+  } }));
+  await page.route(`**/api/ai-font/jobs/${id}/download`, route => route.fulfill({ json: { url: 'http://localhost:3211/broken-font.ttf' } }));
+  await page.route('**/broken-font.ttf', route => route.fulfill({ body: 'not a font', contentType: 'font/ttf' }));
+  await page.goto('/ai-font-generator');
+  await page.getByRole('button', { name: 'Preview & create artwork' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'Your font preview could not load' })).toBeVisible();
+  await expect(page.getByText('Editing with your generated font:', { exact: false })).toHaveCount(0);
+  await expect(page.getByLabel('Reference font artwork preview', { exact: true })).toBeVisible();
+});
+
+test('llms.txt describes file validation, private delivery and missing-character warnings', async ({ request }) => {
+  const response = await request.get('/llms.txt');
+  expect(response.ok()).toBe(true);
+  const body = await response.text();
+  expect(body).toContain('# Font Generators');
+  expect(body).toContain('generated TTF files are checked for table integrity');
+  expect(body).toContain('restore its reserved customer credits');
+  expect(body).toContain('previews load that same stored file');
+  expect(body).toContain('warning for characters absent from its character map');
+  expect(body).toContain('Reference previews use existing fonts, not AI-generated results');
+  expect(body).not.toContain('](https://font-generators.org/ai-font-generator)');
 });
 
 test('pricing is public, uses the same credit allowance, and links to the studio', async ({ page }) => {
