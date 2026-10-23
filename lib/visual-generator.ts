@@ -478,7 +478,7 @@ export const getSpecializedAbout = (slug: string, pageTitle: string): string[] |
     ? `The primary faces (${bundledFonts}) are bundled open-source alternatives, so the same lettering loads for every visitor instead of silently falling back to Arial, Times New Roman, or Courier New. Proprietary brand fonts and logo assets are not distributed.`
     : 'When a named commercial or system font is already installed on the visitor’s device, the preview can use it without distributing the font software. When it is not available, the generator reports that state and renders a clearly labelled fallback direction instead of claiming the fallback is the original typeface.';
   const workflowDetails = [
-    config.capabilities?.includes('background-image') ? 'You can add a local image and place the first and final text lines in the familiar top-and-bottom meme layout.' : '',
+    config.capabilities?.includes('background-image') ? 'Text lines stay together in the center by default. Choose Top & bottom (meme) to place the first and final lines at opposite edges, with an optional local background image.' : '',
     config.capabilities?.includes('game-codes') ? 'A separate Minecraft formatting-code result is provided for compatible game fields; the canvas artwork itself is an image and cannot be pasted into the game as formatted text.' : '',
     config.capabilities?.includes('copyable-name') ? 'A separate Unicode player-name alternative is available to copy, with a compatibility warning because game name rules vary.' : '',
     ['brat-text-generator', 'fire-font-generator', 'glitter-font-generator', 'ransom-note-font-generator'].includes(slug) ? 'The page also retains a clearly labelled copyable Unicode section for destinations that accept text but not images.' : '',
@@ -548,7 +548,7 @@ export const getSpecializedHowTo = (slug: string): string | null => {
   const config = configs[slug];
   if (!config) return null;
   if (config.capabilities?.includes('background-image')) {
-    return 'Enter the top caption on the first line and the bottom caption on the final line. Add an image from your device, select a high-contrast preset, adjust the outline, and download PNG or faithful SVG to preserve the exact meme layout.';
+    return 'Enter your headline with line breaks; lines are centered together by default. For a meme, choose Top & bottom (meme) under Text layout, enter the top caption on the first line and the bottom caption on the final line, and optionally add an image from your device. Select a high-contrast preset, adjust the outline, and download PNG or faithful SVG to preserve the exact layout.';
   }
   if (config.capabilities?.includes('game-codes')) {
     return 'Enter a server or build title, choose a pixel-art preset, and export the image for banners or thumbnails. Use the separate color and bold controls only when you need a copyable Minecraft formatting code for a compatible field.';
@@ -583,7 +583,7 @@ export const getSpecializedFeatureList = (slug: string): string[] | null => {
     'Editable SVG download',
     'Faithful SVG download',
   ];
-  if (config.capabilities?.includes('background-image')) features.splice(1, 0, 'Local background image upload', 'Top-and-bottom meme layout');
+  if (config.capabilities?.includes('background-image')) features.splice(1, 0, 'Local background image upload', 'Centered lines or top-and-bottom meme layout');
   if (config.capabilities?.includes('font-specimen')) features.splice(1, 0, 'Typeface availability and specimen');
   if (config.capabilities?.includes('game-codes')) features.splice(1, 0, 'Copyable Minecraft formatting code');
   if (config.capabilities?.includes('copyable-name')) features.splice(1, 0, 'Copyable Unicode player-name alternative');

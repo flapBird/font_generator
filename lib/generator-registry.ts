@@ -99,7 +99,7 @@ const overrides: Record<string, GeneratorOverride> = {
   'impact-font-generator': {
     kind: 'meme',
     intent: {
-      primary: 'Add high-contrast Impact captions to a meme or uploaded image.',
+      primary: 'Create high-contrast Impact headlines with centered lines by default, or choose top-and-bottom meme captions with an optional local background image.',
       secondary: ['Create standalone poster and thumbnail headlines.'],
       expectedOutputs: ['png', 'svg'],
     },

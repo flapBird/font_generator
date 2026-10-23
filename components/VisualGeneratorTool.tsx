@@ -82,6 +82,7 @@ export default function VisualGeneratorTool({
   const [presetId, setPresetId] = useState(config.presets[0]?.id ?? '');
   const [fontSize, setFontSize] = useState(112);
   const [format, setFormat] = useState<CanvasFormat>('banner');
+  const [captionLayout, setCaptionLayout] = useState<'centered' | 'meme'>('centered');
   const [transparent, setTransparent] = useState(false);
   const [fontAvailable, setFontAvailable] = useState<boolean | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
@@ -105,6 +106,7 @@ export default function VisualGeneratorTool({
     [config.capabilities],
   );
   const minecraftCode = `§${minecraftColorCode}${minecraftBold ? '§l' : ''}${inputText}`;
+  const useMemeLayout = hasCapability('meme-layout') && captionLayout === 'meme';
   const fortniteNameAlternative = convertToFancyText(inputText, 'bold');
 
   const selectPreset = (preset: VisualFontPreset, preserveWeight = false) => {
@@ -371,7 +373,7 @@ export default function VisualGeneratorTool({
 
     lines.forEach((line, index) => {
       const centeredY = startY + index * lineHeight;
-      const y = hasCapability('meme-layout') && lines.length > 1
+      const y = useMemeLayout && lines.length > 1
         ? index === 0
           ? resolvedSize * 1.08
           : index === lines.length - 1
@@ -394,7 +396,7 @@ export default function VisualGeneratorTool({
       }
       drawSpacedText(line, canvas.width / 2, y, 'fill');
     });
-  }, [activeFontWeight, backgroundImage, controls, currentPreset, dimensions, fontSize, hasCapability, renderedText, resolveTextLayout, transparent]);
+  }, [activeFontWeight, backgroundImage, controls, currentPreset, dimensions, fontSize, hasCapability, renderedText, resolveTextLayout, transparent, useMemeLayout]);
 
   useEffect(() => {
     if (canvasRef.current) drawCanvas(canvasRef.current);
@@ -432,7 +434,7 @@ export default function VisualGeneratorTool({
     const textAttributes = `font-family="${escapeXml(currentPreset.fontFamily)}" font-size="${resolvedSize}" font-weight="${activeFontWeight}" font-style="${currentPreset.fontStyle ?? 'normal'}" letter-spacing="${resolvedSpacing}" fill="${fill}" stroke="${controls.strokeWidth ? controls.strokeColor : 'none'}" stroke-width="${controls.strokeWidth * 2}" paint-order="stroke fill" filter="url(#${filterId})"`;
     const textElements = lines.map((line, lineIndex) => {
       const centeredY = startY + lineIndex * lineHeight;
-      const y = hasCapability('meme-layout') && lines.length > 1
+      const y = useMemeLayout && lines.length > 1
         ? lineIndex === 0
           ? resolvedSize * 1.08
           : lineIndex === lines.length - 1
@@ -752,9 +754,19 @@ export default function VisualGeneratorTool({
           <div>
             <label htmlFor="visual-text-input" className="text-sm font-semibold text-slate-900 dark:text-white">Your text</label>
             <textarea id="visual-text-input" value={inputText} onChange={(event) => setInputText(event.target.value)} rows={3} maxLength={120} placeholder={pageTitle} className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-base outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900" />
-            <div className="mt-2 flex justify-between gap-3 text-xs text-slate-500"><span>{hasCapability('meme-layout') ? 'First line goes on top; the final line goes on the bottom.' : 'Canvas grows with additional lines'}</span><span>{inputText.length}/120</span></div>
+            <div className="mt-2 flex justify-between gap-3 text-xs text-slate-500"><span>{hasCapability('meme-layout') ? useMemeLayout ? 'First line goes on top; the final line goes on the bottom.' : 'Lines stay together in the center. Choose Top & bottom for meme captions.' : 'Canvas grows with additional lines'}</span><span>{inputText.length}/120</span></div>
             <p className="mt-1 text-xs text-slate-500">Rendered locally—your text isn&apos;t uploaded.</p>
           </div>
+
+          {hasCapability('meme-layout') && (
+            <div>
+              <label htmlFor="visual-caption-layout" className="text-sm font-semibold text-slate-900 dark:text-white">Text layout</label>
+              <select id="visual-caption-layout" value={captionLayout} onChange={(event) => setCaptionLayout(event.target.value as 'centered' | 'meme')} className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
+                <option value="centered">Centered lines</option>
+                <option value="meme">Top &amp; bottom (meme)</option>
+              </select>
+            </div>
+          )}
 
           <div className="xl:hidden">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">

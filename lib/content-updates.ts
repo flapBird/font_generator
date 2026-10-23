@@ -1,4 +1,7 @@
 const updateGroups = {
+  '2026-10-23': [
+    '/impact-font-generator',
+  ],
   '2026-08-27': [
     '/visual-art',
     '/times-new-roman-font-generator',
@@ -41,7 +44,6 @@ const updateGroups = {
     '/heart-font-generator',
     '/big-font-generator',
     '/ransom-note-font-generator',
-    '/impact-font-generator',
     '/san-francisco-font-generator',
     '/metallica-font-generator',
     '/tiktok-font-generator',
