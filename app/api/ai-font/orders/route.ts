@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   return endpoint(async () => {
     sameOrigin(request);
     const user = await requireUser();
-    const services = availability();
+    const services = availability(user);
     if (!services.checkout) throw new HttpError(503, 'Checkout is not available yet.');
     await requireBillingAccess(user.id);
     const input = await body(request);

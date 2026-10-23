@@ -20,14 +20,18 @@ export default function PricingCheckout({ services }: { services: Services }) {
   const requestId = useRef<string | null>(null);
   useEffect(() => {
     let alive = true;
+    let latestRefresh = 0;
     const refresh = async () => {
+      const refreshId = ++latestRefresh;
+      setAccount(null); setLoaded(false); setAccepted(false); setError('');
+      requestId.current = null;
       try {
         const response = await fetch('/api/ai-font/account', { cache: 'no-store' });
         if (!response.ok) throw new Error('Unable to load your account. Please reload to try again.');
         const data = await response.json();
-        if (alive) { setAccount(data); setAccepted(false); setError(''); }
-      } catch (err) { if (alive) setError((err as Error).message); }
-      finally { if (alive) setLoaded(true); }
+        if (alive && refreshId === latestRefresh) setAccount(data);
+      } catch (err) { if (alive && refreshId === latestRefresh) setError((err as Error).message); }
+      finally { if (alive && refreshId === latestRefresh) setLoaded(true); }
     };
     void refresh();
     window.addEventListener(authChangedEvent, refresh);
@@ -37,7 +41,7 @@ export default function PricingCheckout({ services }: { services: Services }) {
   const provider = current.provider || 'paypal';
   const providerName = provider === 'waffo' ? 'Waffo' : 'PayPal';
   async function buy() {
-    if (lock.current || !account?.user || !accepted || !current.checkout || (account.credits < 0 || account.billingRestricted)) return;
+    if (lock.current || !loaded || !account?.user || !accepted || !current.checkout || (account.credits < 0 || account.billingRestricted)) return;
     lock.current = true; setBusy(true); setError('');
     try {
       if (!requestId.current) {

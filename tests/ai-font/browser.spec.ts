@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { authChangedEvent } from '../../lib/ai-font/auth-navigation';
 
 test('free AI references require no account, payment or generation API', async ({ page }) => {
   const paidCalls: string[] = [];
@@ -465,4 +466,27 @@ test('pricing keeps aligned actions and shows pending payments regardless of acc
       if (width === 1280) expect(Math.abs(freeBounds!.y + freeBounds!.height - buyBounds!.y - buyBounds!.height)).toBeLessThanOrEqual(1);
     }
   }
+});
+
+test('private checkout follows the verified account response and clears access when accounts change', async ({ page }) => {
+  let account: { email: string; checkout: boolean } | null = null;
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: account ? { email: account.email } : null, credits: 0,
+    services: { checkout: account?.checkout ?? false, sandbox: true, provider: 'waffo' },
+  } }));
+  await page.route('**/api/ai-font/orders', () => { throw new Error('No purchase should be started in this UI test'); });
+  await page.goto('/pricing');
+  const pending = page.getByRole('button', { name: 'Payments coming soon' });
+  const buy = page.getByRole('button', { name: 'Buy 3 generations with Waffo' });
+  await expect(pending).toBeDisabled();
+  account = { email: 'owner@example.com', checkout: true };
+  await page.evaluate(event => window.dispatchEvent(new Event(event)), authChangedEvent);
+  await expect(buy).toBeDisabled();
+  await page.getByRole('checkbox').check();
+  await expect(buy).toBeEnabled();
+  account = { email: 'other@example.com', checkout: false };
+  await page.evaluate(event => window.dispatchEvent(new Event(event)), authChangedEvent);
+  await expect(pending).toBeDisabled();
+  await expect(buy).toHaveCount(0);
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
 });

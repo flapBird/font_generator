@@ -5,10 +5,11 @@ import { endpoint, json } from '@/lib/ai-font/http';
 
 export async function GET() {
   return endpoint(async () => {
-    const services = availability();
+    let services = availability();
     if (!services.auth) return json({ user: null, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], services });
-    const { data: { user } } = await (await authClient()).auth.getUser();
-    if (!user) return json({ user: null, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], services });
+    const { data: { user }, error: authError } = await (await authClient()).auth.getUser();
+    if (authError || !user) return json({ user: null, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], services });
+    services = availability(user);
     const db = adminClient();
     const results = await Promise.all([
       db.from('ai_font_wallets').select('balance').eq('user_id', user.id).maybeSingle(),

@@ -182,6 +182,8 @@ Build variables and runtime variables are separate settings in Cloudflare.
 | `PAYPAL_CLIENT_SECRET` | Not needed | Secret |
 | `PAYPAL_WEBHOOK_ID` | Not needed | Server variable or secret |
 | `AI_FONT_CRON_SECRET` | Not needed | Long random secret |
+| `AI_FONT_CHECKOUT_MODE` | Not needed | Server runtime setting; defaults to `private`, set `public` only for public launch |
+| `AI_FONT_CHECKOUT_ALLOWLIST` | Not needed | Server runtime setting; Comma-separated verified login emails allowed to buy during private rollout |
 | `INBOX_URL`, `INBOX_FROM_EMAIL`, `INBOX_FROM_NAME` | Not needed | Optional mail service HTTPS origin and authorized sender settings |
 | `INBOX_SEND_API_KEY` | Not needed | Optional secret: mail service send API key |
 

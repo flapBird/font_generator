@@ -7,6 +7,43 @@ payment checks, refund adjustments, dispute holds, operator decisions and a mail
 outbox. Only `service_role` can access these tables and functions. This source
 change does not apply the migration to a hosted database or deploy the Worker.
 
+## Private checkout rollout
+
+Checkout defaults to a private rollout. Configure these **server runtime** values
+in Worker Variables and Secrets (or ignored `.env.local` for local development):
+
+```dotenv
+AI_FONT_CHECKOUT_MODE=private
+AI_FONT_CHECKOUT_ALLOWLIST=
+```
+
+Set the allowlist to the Google login emails permitted to test purchases, separated
+by commas (or newlines). Start with only your own account.
+Only the confirmed email returned by Supabase `auth.getUser()` is compared, using
+case-insensitive exact matching. User metadata, request bodies and browser state
+cannot grant access. The configured allowlist is not returned in API responses
+or page props. An empty allowlist, unknown mode, unverified email or unlisted account
+cannot purchase. Missing mode defaults to `private`.
+
+Payment, generation, moderation and cron configuration must still be ready.
+The test account must still accept terms, have no billing restriction and pass
+the existing order validation and rate limit. Private access does not select a
+payment sandbox: the existing Waffo/PayPal environment setting still determines
+whether a purchase uses test or real money.
+
+The account API returns personalized checkout availability. Visitors and other
+accounts see the existing disabled **Payments coming soon** button. The order
+creation endpoint independently repeats this check before database writes or
+payment-provider calls, so changing the UI cannot bypass it. Existing orders,
+payment webhooks, reconciliation, cancellation and purchased-credit usage continue
+to work; the gate only controls starting or reopening checkout sessions.
+
+When ready to open purchases, explicitly set `AI_FONT_CHECKOUT_MODE=public` and
+apply the runtime configuration. No frontend rebuild is required for these two
+settings. All existing payment checks still apply. This remains a one-time pack,
+not a new recurring subscription product. Test the private and public states
+with mocks; changing these settings alone does not validate a real payment.
+
 ## Payment recovery
 
 Keep the signed HTTP webhook for `order.completed` and `refund.succeeded`.
