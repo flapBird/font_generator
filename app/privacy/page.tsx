@@ -69,8 +69,8 @@ export default function PrivacyPolicyPage() {
           </p>
           <p>
             When transaction email is enabled, your account email address and
-            payment or credit adjustment summary are sent through our Freemail
-            service and its configured delivery provider, such as Mailjet.
+            payment or credit adjustment summary are sent through our configured
+            transactional email service and its delivery infrastructure.
             These messages cover purchases, refunds or payment reviews and do
             not enroll you in marketing email. Credit delivery does not depend
             on email delivery.

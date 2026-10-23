@@ -182,9 +182,8 @@ Build variables and runtime variables are separate settings in Cloudflare.
 | `PAYPAL_CLIENT_SECRET` | Not needed | Secret |
 | `PAYPAL_WEBHOOK_ID` | Not needed | Server variable or secret |
 | `AI_FONT_CRON_SECRET` | Not needed | Long random secret |
-| `FREEMAIL_API_CONTRACT` | Not needed | Optional: `idinging-send-v1` |
-| `FREEMAIL_API_URL`, `FREEMAIL_FROM_EMAIL`, `FREEMAIL_FROM_NAME` | Not needed | Optional full HTTPS send endpoint and sender settings |
-| `FREEMAIL_API_TOKEN` | Not needed | Optional secret: Freemail Bearer token |
+| `INBOX_URL`, `INBOX_FROM_EMAIL`, `INBOX_FROM_NAME` | Not needed | Optional mail service HTTPS origin and authorized sender settings |
+| `INBOX_SEND_API_KEY` | Not needed | Optional secret: mail service send API key |
 
 Google Analytics uses the fixed measurement ID `G-P3P9SJKZEG` on the production
 hostnames; `NEXT_PUBLIC_GA_ID` is no longer used.
@@ -232,15 +231,16 @@ order reference and metadata.
 `WORKER_SELF_REFERENCE` to issue an authenticated GET to the existing
 `/api/ai-font/reconcile` route, so completed fonts persist when users close the
 browser. The same route also checks Waffo payments/refunds/disputes and delivers
-queued transaction email through Freemail. These queues have independent database
+queued transaction email through the Inbox send API. These queues have independent database
 leases and errors. No external scheduler is necessary on Workers. Apply
 `202610140001_billing_reconciliation_outbox.sql` before deploying this version;
 see [billing operations](ai-font-billing.md) for refund rules, dispute review,
-Freemail configuration and rollout checks.
+Inbox configuration and rollout checks.
 
 Reconciliation handles up to ten jobs sequentially per pass, avoiding simultaneous
-large TTF buffers in Workers' 128 MB isolate memory. Billing and mail each claim
-up to three items per pass, so backlog affects per-order notification latency.
+large TTF buffers in Workers' 128 MB isolate memory. Billing claims up to three
+items and mail claims one item per pass, so backlog affects per-order notification
+latency.
 The cron's internal request
 has a ten-minute timeout within Cloudflare's fifteen-minute scheduled wall limit.
 Monitor batch duration and backlog as volume grows. This bounds memory within a
@@ -248,7 +248,7 @@ batch; it is not a guarantee for arbitrary concurrent traffic or provider load.
 
 Without the app URL, cron secret or Supabase URL/service key, the scheduled
 handler skips work. It also skips when none of Mixfont, Waffo reconciliation or
-Freemail is configured. Billing and mail can run without the Mixfont key; font
+Inbox mail is configured. Billing and mail can run without the Mixfont key; font
 generation remains disabled in that case. Once configured, HTTP errors, transport
 failures and nonzero reconciliation errors fail the scheduled event and appear
 in Worker observability. Monitor Cron execution and old `processing`/`needs_review` jobs

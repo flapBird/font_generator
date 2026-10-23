@@ -1,14 +1,14 @@
 import 'server-only';
 import { adminClient } from './supabase';
 import { billingMessage, type BillingMail } from './notifications';
-import { freemailAvailable, freemailSettings, sendFreemail, FreemailDeliveryError } from './freemail';
+import { inboxAvailable, inboxSettings, sendInboxMail, InboxDeliveryError } from '../mail/inbox';
 
 export async function deliverBillingMail() {
-  if (!freemailAvailable()) return { checked: 0, errors: 0, disabled: true };
+  if (!inboxAvailable()) return { checked: 0, errors: 0, disabled: true };
   // Reject bad deployment settings before taking any delivery leases.
-  freemailSettings();
+  inboxSettings();
   const db = adminClient();
-  const { data, error } = await db.rpc('ai_font_claim_mail', { p_limit: 3 });
+  const { data, error } = await db.rpc('ai_font_claim_mail', { p_limit: 1 });
   if (error) throw error;
   const result = { checked: 0, errors: 0, disabled: false };
   for (const mail of (data || []) as BillingMail[]) {
@@ -23,10 +23,13 @@ export async function deliverBillingMail() {
       if (startError) throw startError;
       if (!started) continue;
       phase = 'sending';
-      messageId = await sendFreemail(message);
+      messageId = await sendInboxMail(message);
     } catch (error) {
-      failure = error instanceof FreemailDeliveryError ? error.code
+      failure = error instanceof InboxDeliveryError ? error.code
         : phase === 'sending' ? 'DELIVERY_UNCERTAIN' : phase === 'preparing' ? 'RETRY_PREPARE' : 'PERMANENT_PAYLOAD';
+      // Only allowlisted diagnostics; never log the recipient, body or raw error.
+      console.warn('billing_mail_failed', { mailId: mail.id, code: failure,
+        status: error instanceof InboxDeliveryError ? error.status : undefined });
       result.errors++;
     }
     const { data: finished, error: finishError } = await db.rpc('ai_font_finish_mail', {

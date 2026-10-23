@@ -97,50 +97,90 @@ more than the original payment's credits. Duplicate decisions are
 idempotent; a reversed case cannot subsequently be marked lost by a stale retry.
 Other unresolved disputes or negative balances continue to restrict the account.
 
-## Freemail configuration
+## Inbox transaction mail configuration
 
-The website calls Freemail only. Mailjet credentials and its integration belong
-in Freemail. The adapter follows the supplied
-[Freemail API contract](https://github.com/idinging/freemail/blob/master/docs/api.md):
-POST `/api/send`, Bearer authentication, JSON
-`{from, fromName, to, subject, text}`, and `{success:true,id,provider}` on acceptance.
-The upstream documentation lists other delivery providers; any Mailjet bridge
-must preserve this contract. No direct Mailjet SDK is installed on this site.
+The reusable server-only adapter is `lib/mail/inbox.ts`. It calls the configured
+HTTPS origin at `POST /api/v1/send` with a server-constructed Bearer header and
+JSON `{from: {email, name}, to, cc?, bcc?, subject, text?, html?}`. At least one
+nonblank text or HTML body is required. The adapter supports an address or address
+array for `to`, `cc` and `bcc`; the existing billing flow uses only the single
+account address stored in the outbox. There is no public mail-sending endpoint.
+Sender identity always comes from server settings, and browser Origin, Cookie and
+Authorization headers are never forwarded. Redirects are refused.
 
-Place these server-only values in ignored `.env.local` for development and Worker
-runtime secrets/settings for deployment. URL, token and sender are intentionally
-blank until the mail service is ready. The same placeholders are in the ignored
-local `docs/ai-font.env.example`.
+Copy the blank placeholders from the tracked `.env.example` into ignored
+`.env.local` for development. In production, use Worker runtime variables and
+secrets (never `NEXT_PUBLIC_*` values). Configure:
 
-```dotenv
-FREEMAIL_API_CONTRACT=idinging-send-v1
-FREEMAIL_API_URL=
-FREEMAIL_API_TOKEN=
-FREEMAIL_FROM_EMAIL=
-FREEMAIL_FROM_NAME=Font Generators
-```
+- `INBOX_URL`: `https://mail.leeswalvpn.ccwu.cc` (origin only, no API path).
+- `INBOX_SEND_API_KEY`: your send API key, stored as a server secret.
+- `INBOX_FROM_EMAIL`: `support@font-generators.org`.
+- `INBOX_FROM_NAME`: `Font Generators`.
 
-`FREEMAIL_API_URL` is the full HTTPS send endpoint, for example
-`https://mail.example.com/api/send`. `FREEMAIL_API_TOKEN` is the Bearer token
-authorized to send from the configured address. It is never public or put in a
-URL. Without all required settings, sending is disabled and committed notices
-remain queued. Completing this configuration enables cron delivery of the queued
-notices; review old/test entries before enabling production mail.
+The mailbox must already exist and the key must be authorized for that sender.
+No mailbox login password or Mailjet credentials are needed. Remove the old
+mail adapter settings from deployment environments; they are no longer read.
+The previous adapter and its configuration contract have been removed.
+Without all four settings, sending is disabled and committed notices remain
+queued. Invalid settings fail before taking delivery leases. Completing this
+configuration enables cron delivery of queued notices: review old/test entries
+before enabling production mail. No new database migration is required beyond
+the existing billing outbox migration.
 
 Payment credit changes and notification intent commit together. Delivery runs
-afterward, at most three messages per cron pass. The recipient is the Supabase
-account email, not an arbitrary cashier address. Messages cover confirmed credit
-arrival, refunds, restricted disputes and confirmed recoveries. A payment under
-review is described as confirmed but paused, not ready to spend. Messages use the
-balance snapshot at the adjustment time; the account page shows the current state.
+afterward, at most **one message per five-minute cron pass**. Recipients come from
+Supabase account records, not browser input. Messages cover Waffo credit arrival,
+refunds, restricted disputes and confirmed recoveries. Payment under review is
+described as confirmed but paused. Messages use the balance snapshot at adjustment
+time; the account page shows the current state. Email failure never rolls back
+payment or credits. This integration does not change authentication email,
+PayPal flows or the contact page.
 
-Freemail does not document request idempotency. A timeout, lost response, 5xx or
-invalid successful receipt is therefore `needs_review`, not automatically resent.
-A process crash after delivery starts also requires review. A confirmed rate
-limit is retried with backoff, up to eight attempts. Permanent configuration or
-request rejection requires correction and review. `sent` means Freemail accepted
-the message and returned an ID; it does not prove inbox delivery. Email failure
-never rolls back payment or credits.
+The service limits each key to **60 requests/minute** and each sender mailbox to
+**20 messages/hour and 100/day**. Mailbox limits are shared across projects.
+One cron message at a time reduces bursts, but does not reserve quota or enforce
+a global/day budget locally: the service remains authoritative. Daily or shared
+quota exhaustion can delay mail and exhaust the bounded retry budget; monitor
+pending and review queues. This is low-volume transaction mail, not OTP or bulk
+marketing infrastructure. Requests over 20 MiB are rejected locally.
+
+Each call has a **35-second timeout**, allowing for the service's 25-second send
+timeout. Delivery is awaited inside the existing authenticated reconciliation
+route (600-second budget), invoked by the Cron service binding, rather than
+post-response background work. This fits the current
+[Cloudflare Cron 15-minute wall-time limit](https://developers.cloudflare.com/workers/platform/limits/#wall-time-limits-by-invocation-type).
+If moved to a platform with a shorter request limit, run this outbox consumer in
+a background worker that can await at least 35 seconds per message plus database
+work; do not shorten the timeout and automatically resend.
+
+Only **HTTP 202 with `{id: "...", status: "sent"}`** is accepted. `sent` in the
+outbox means accepted and saved to the service's Sent folder, not final delivery.
+The API has no idempotency key support. Outbox event uniqueness and delivery leases
+prevent local duplicates but cannot deduplicate a second upstream send.
+
+| Outcome | Recorded code and handling |
+| --- | --- |
+| Timeout, network exception, 502, unexpected status, invalid/non-JSON 202 receipt | `DELIVERY_UNCERTAIN`: sending outcome unknown; `needs_review`, no automatic resend |
+| 401 | `PERMANENT_AUTHENTICATION`: invalid API key; review |
+| 403 | `PERMANENT_SENDER_UNAUTHORIZED`: sender not authorized (the adapter does not send Origin); review |
+| 404 | `PERMANENT_SENDER_NOT_FOUND`: mailbox missing; review |
+| 400 or 413 | `PERMANENT_REJECTED`: invalid/oversized message; review |
+| 503 | `PERMANENT_CONFIGURATION`: mail service configuration error; review |
+| 429 | `RETRY_RATE_LIMIT`: known rejection, existing exponential backoff; review after eight attempts |
+
+HTTP status handling does not depend on JSON error bodies. Receipt reading is
+bounded to 16 KiB. Error logs include only outbox ID, fixed error code and HTTP
+status when available; they never contain recipients, keys, bodies or full requests.
+The durable outbox `last_error` records the fixed code. A process crash after
+sending starts, or failure to save the acceptance receipt, also requires review
+when its lease expires. Local preparation failures can retry before a send starts.
+
+Validation uses intercepted fetch mocks, including success, authorization failure,
+rate limiting, timeout, network failure and non-JSON responses, plus existing
+outbox database tests. Run `npm run test:ai-font`, `npm run test:cloudflare`,
+`npx tsc --noEmit` and `npm run lint`. These checks **do not verify real delivery**.
+No real test email is sent without an explicit request; deployment credentials
+must be configured separately by the operator.
 
 ## Operations
 
@@ -150,7 +190,7 @@ failures, overdue `next_billing_check_at`, `billing_last_error`, active dispute
 holds, and mail `needs_review` or overdue leases. Account and recipient data must
 stay in restricted administrative tools and out of logs.
 
-Before requeueing an uncertain email, check Freemail's sent records and downstream
+Before requeueing an uncertain email, check the mail service's Sent records and downstream
 delivery record. If it was accepted, record its receipt instead of sending again.
 If it was definitely not accepted, clear the started/lease fields and requeue the
 specific reviewed row. Never bulk-reset all `needs_review` notices.
@@ -159,4 +199,4 @@ Verify on a separate test database: lost webhook payment recovery, duplicate
 notifications, multiple partial refunds, refund-before-payment, spent-credit
 deficits, dispute review/recovery and mail acceptance/failure. This implementation
 has database/provider-mock tests; a hosted end-to-end test still needs the new
-migration, an actual site-started sandbox purchase and configured Freemail.
+migration, an actual site-started sandbox purchase and configured Inbox mail.

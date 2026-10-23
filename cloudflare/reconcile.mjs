@@ -6,7 +6,7 @@ export async function scheduled(_controller, env) {
   ];
   if (required.some((name) => !env[name]?.trim())) return;
   const hasBilling = ['WAFFO_MERCHANT_ID', 'WAFFO_PRIVATE_KEY', 'WAFFO_STORE_ID', 'WAFFO_PRODUCT_ID'].every(name => env[name]?.trim());
-  const hasMail = env.FREEMAIL_API_CONTRACT === 'idinging-send-v1' && ['FREEMAIL_API_URL', 'FREEMAIL_API_TOKEN', 'FREEMAIL_FROM_EMAIL'].every(name => env[name]?.trim());
+  const hasMail = ['INBOX_URL', 'INBOX_SEND_API_KEY', 'INBOX_FROM_EMAIL', 'INBOX_FROM_NAME'].every(name => env[name]?.trim());
   if (!env.MIXFONT_API_KEY?.trim() && !hasBilling && !hasMail) return;
 
   // A service binding avoids public DNS, domain setup and an external scheduler.

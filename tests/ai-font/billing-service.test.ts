@@ -12,8 +12,8 @@ const settings = {
   NEXT_PUBLIC_SUPABASE_URL: 'https://billing-test.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'test-service-key',
   WAFFO_MERCHANT_ID: 'merchant', WAFFO_STORE_ID: 'store', WAFFO_PRODUCT_ID: 'product', WAFFO_ENVIRONMENT: 'test',
   WAFFO_PRIVATE_KEY: keys.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
-  AI_FONT_APP_URL: 'https://fonts.example', FREEMAIL_API_CONTRACT: 'idinging-send-v1', FREEMAIL_API_URL: 'https://mail.example/api/send',
-  FREEMAIL_API_TOKEN: 'test-mail-token', FREEMAIL_FROM_EMAIL: 'receipts@example.com',
+  AI_FONT_APP_URL: 'https://fonts.example', INBOX_URL: 'https://mail.example',
+  INBOX_SEND_API_KEY: 'test-mail-token', INBOX_FROM_EMAIL: 'receipts@example.com', INBOX_FROM_NAME: 'Font Generators',
 };
 async function configured(action: () => Promise<void>) {
   const previous = { ...process.env }, original = globalThis.fetch;
@@ -71,17 +71,17 @@ test('failed complete provider validation never partially applies a payment', as
   });
 });
 
-test('claimed email sends through Bearer-authenticated Freemail and saves its receipt', async () => {
+test('claimed email sends through Bearer-authenticated Inbox and saves its receipt', async () => {
   await configured(async () => {
     const mail = { id: 42, event_key: 'payment:waffo:PAY_1', claim_token: 'mail-lease', recipient_email: 'buyer@example.com', kind: 'payment_credited', order_id: id, payload: { creditsDelta: 300, balance: 300 } };
     let sends = 0;
     globalThis.fetch = async (url, init) => {
       const path = new URL(String(url)).pathname, body = JSON.parse(String(init?.body));
-      if (path.endsWith('ai_font_claim_mail')) return Response.json([mail]);
+      if (path.endsWith('ai_font_claim_mail')) { assert.equal(body.p_limit, 1); return Response.json([mail]); }
       if (path.endsWith('ai_font_begin_mail_delivery')) return Response.json(true);
-      if (path === '/api/send') {
+      if (path === '/api/v1/send') {
         sends++; assert.equal(new Headers(init?.headers).get('Authorization'), 'Bearer test-mail-token');
-        assert.equal(body.to, 'buyer@example.com'); return Response.json({ success: true, id: 'mail-receipt' });
+        assert.equal(body.to, 'buyer@example.com'); return Response.json({ status: 'sent', id: 'mail-receipt' }, { status: 202 });
       }
       assert.ok(path.endsWith('ai_font_finish_mail'));
       assert.equal(body.p_token, 'mail-lease'); assert.equal(body.p_message_id, 'mail-receipt'); assert.equal(body.p_error, null);
@@ -99,12 +99,50 @@ test('lost email acceptance response is held without an automatic second send', 
       const path = new URL(String(url)).pathname, body = JSON.parse(String(init?.body));
       if (path.endsWith('ai_font_claim_mail')) return Response.json([{ id: 42, event_key: 'payment:one', claim_token: 'mail-lease', recipient_email: 'buyer@example.com', kind: 'payment_credited', order_id: id, payload: { creditsDelta: 300, balance: 300 } }]);
       if (path.endsWith('ai_font_begin_mail_delivery')) return Response.json(true);
-      if (path === '/api/send') { sends++; throw new Error('Receipt lost'); }
+      if (path === '/api/v1/send') { sends++; throw new Error('Receipt lost'); }
       assert.ok(path.endsWith('ai_font_finish_mail'));
       assert.equal(body.p_error, 'DELIVERY_UNCERTAIN'); assert.equal(body.p_message_id, null);
       return Response.json(true);
     };
     assert.equal((await deliverBillingMail()).errors, 1);
     assert.equal(sends, 1);
+  });
+});
+
+test('mail configuration is checked before claiming or sending queued notices', async () => {
+  await configured(async () => {
+    globalThis.fetch = async () => assert.fail('Unexpected database or mail request');
+    delete process.env.INBOX_SEND_API_KEY;
+    assert.deepEqual(await deliverBillingMail(), { checked: 0, errors: 0, disabled: true });
+    process.env.INBOX_SEND_API_KEY = 'mock-key';
+    process.env.INBOX_URL = 'https://private:credential@mail.example';
+    await assert.rejects(deliverBillingMail(), { message: 'PERMANENT_CONFIGURATION' });
+  });
+});
+
+test('mail failures persist safe queue codes and log only redacted diagnostics', async (t) => {
+  await configured(async () => {
+    const logs: unknown[][] = [];
+    t.mock.method(console, 'warn', (...args: unknown[]) => { logs.push(args); });
+    for (const [status, code] of [[401, 'PERMANENT_AUTHENTICATION'], [429, 'RETRY_RATE_LIMIT'],
+      [502, 'DELIVERY_UNCERTAIN'], [503, 'PERMANENT_CONFIGURATION'], [202, 'DELIVERY_UNCERTAIN']] as const) {
+      let sends = 0, finished = 0;
+      globalThis.fetch = async (url, init) => {
+        const path = new URL(String(url)).pathname, body = JSON.parse(String(init?.body));
+        if (path.endsWith('ai_font_claim_mail')) return Response.json([{ id: 42, claim_token: 'mail-lease',
+          recipient_email: 'buyer@example.com', kind: 'payment_credited', order_id: id, payload: { creditsDelta: 300, balance: 300 } }]);
+        if (path.endsWith('ai_font_begin_mail_delivery')) return Response.json(true);
+        if (path === '/api/v1/send') { sends++; return new Response('sensitive non-JSON diagnostics', { status }); }
+        assert.ok(path.endsWith('ai_font_finish_mail'));
+        finished++;
+        assert.equal(body.p_error, code);
+        assert.equal(body.p_message_id, null);
+        return Response.json(true);
+      };
+      assert.equal((await deliverBillingMail()).errors, 1);
+      assert.equal(sends, 1);
+      assert.equal(finished, 1);
+      assert.deepEqual(logs.at(-1), ['billing_mail_failed', { mailId: 42, code, status }]);
+    }
   });
 });

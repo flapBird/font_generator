@@ -8,14 +8,12 @@ const mail: BillingMail = {
   payload: { creditsDelta: 300, balance: 300 },
 };
 
-test('billing email uses the committed credit change and a stable deduplication key', () => {
+test('billing email uses the committed credit change and account recipient', () => {
   const message = billingMessage(mail, 'https://fonts.example');
   assert.equal(message.to, 'buyer@example.com');
-  assert.equal(message.idempotencyKey, 'ai-font-mail-42');
   assert.match(message.text, /300 credits have been added/);
   assert.match(message.text, /one-time purchases/);
   assert.match(message.text, /https:\/\/fonts.example\/account/);
-  assert.equal(billingMessage(mail, 'https://fonts.example').idempotencyKey, message.idempotencyKey);
 });
 
 test('refund mail explains a spent-credit deficit without promising a new charge', () => {

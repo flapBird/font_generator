@@ -37,7 +37,7 @@ test('cron authenticates to the existing route through the self service binding'
 test('billing and mail can run without enabling paid font generation', async () => {
   for (const config of [
     { WAFFO_MERCHANT_ID: 'merchant', WAFFO_PRIVATE_KEY: 'key', WAFFO_STORE_ID: 'store', WAFFO_PRODUCT_ID: 'product' },
-    { FREEMAIL_API_CONTRACT: 'idinging-send-v1', FREEMAIL_API_URL: 'https://mail.example.com/api/send', FREEMAIL_API_TOKEN: 'token', FREEMAIL_FROM_EMAIL: 'receipts@example.com' },
+    { INBOX_URL: 'https://mail.example.com', INBOX_SEND_API_KEY: 'token', INBOX_FROM_EMAIL: 'receipts@example.com', INBOX_FROM_NAME: 'Font Generators' },
   ]) {
     let calls = 0;
     const env = configuredEnv(async () => { calls++; return Response.json({ errors: 0 }); });

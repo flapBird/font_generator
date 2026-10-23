@@ -10,7 +10,7 @@ export type BillingMail = {
   order_id: string;
   payload: Record<string, unknown>;
 };
-export type TransactionalMessage = { to: string; subject: string; text: string; idempotencyKey: string };
+export type TransactionalMessage = { to: string; subject: string; text: string };
 
 function integer(value: unknown, name: string) {
   if (!Number.isSafeInteger(value)) throw new Error(`Invalid billing mail ${name}`);
@@ -54,6 +54,5 @@ export function billingMessage(mail: BillingMail, origin = appOrigin()): Transac
     to: mail.recipient_email,
     subject,
     text: `${details}\n\nBalance at the time of this adjustment: ${balance} credits.\nOrder reference: ${reference}\n${negative}\nView your account: ${account}\nContact support: ${support}\n\nFont Generators`,
-    idempotencyKey: `ai-font-mail-${mail.id}`,
   };
 }
