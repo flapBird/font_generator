@@ -94,6 +94,15 @@ export default function PrivacyPolicyPage() {
             names, email addresses, generator input, or other information that
             we intend to identify you personally through analytics events.
           </p>
+          <p>
+            Sign-in and purchase analytics may link visits using a pseudonymous
+            account identifier. When analytics is enabled, checkout and confirmed
+            purchase events include a transaction identifier, product, amount,
+            currency, and payment environment. These events help us measure where
+            visitors complete or leave the purchase process. Server-side events
+            depend on analytics configuration and an available browser analytics
+            identifier; they do not include payment card details or font descriptions.
+          </p>
 
           <h2>6. Google AdSense and advertising cookies</h2>
           <p>

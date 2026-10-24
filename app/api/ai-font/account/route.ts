@@ -1,3 +1,4 @@
+import { analyticsIdentity } from '@/lib/analytics/server';
 import { displayName, googleAvatar } from '@/lib/ai-font/profile';
 import { availability } from '@/lib/ai-font/config';
 import { adminClient, authClient } from '@/lib/ai-font/supabase';
@@ -6,9 +7,9 @@ import { endpoint, json } from '@/lib/ai-font/http';
 export async function GET() {
   return endpoint(async () => {
     let services = availability();
-    if (!services.auth) return json({ user: null, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], services });
+    if (!services.auth) return json({ user: null, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], analytics: analyticsIdentity(null), services });
     const { data: { user }, error: authError } = await (await authClient()).auth.getUser();
-    if (authError || !user) return json({ user: null, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], services });
+    if (authError || !user) return json({ user: null, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], analytics: analyticsIdentity(null), services });
     services = availability(user);
     const db = adminClient();
     const results = await Promise.all([
@@ -21,6 +22,9 @@ export async function GET() {
       db.from('ai_font_billing_holds').select('adjustment_id').eq('user_id', user.id).eq('active', true).limit(1),
     ]);
     for (const result of results) if (result.error) throw result.error;
-    return json({ user: { email: user.email, displayName: displayName(results[4].data?.display_name || user.user_metadata?.full_name), avatarUrl: googleAvatar(results[4].data?.avatar_url || user.user_metadata?.avatar_url), createdAt: user.created_at, lastSignInAt: user.last_sign_in_at, provider: 'Google' }, credits: results[0].data?.balance ?? 0, billingRestricted: Boolean(results[6].data?.length), jobs: results[1].data, orders: results[2].data, subscriptions: results[5].data, creditEvents: results[3].data?.map(({ event_key, ...event }) => ({ ...event, kind: event_key.split(':')[0] })), services });
+    const credits = results[0].data?.balance ?? 0;
+    const billingRestricted = Boolean(results[6].data?.length);
+    const analytics = { ...analyticsIdentity(user), checkoutEligible: services.checkout && credits >= 0 && !billingRestricted };
+    return json({ analytics, user: { email: user.email, displayName: displayName(results[4].data?.display_name || user.user_metadata?.full_name), avatarUrl: googleAvatar(results[4].data?.avatar_url || user.user_metadata?.avatar_url), createdAt: user.created_at, lastSignInAt: user.last_sign_in_at, provider: 'Google' }, credits, billingRestricted, jobs: results[1].data, orders: results[2].data, subscriptions: results[5].data, creditEvents: results[3].data?.map(({ event_key, ...event }) => ({ ...event, kind: event_key.split(':')[0] })), services });
   });
 }

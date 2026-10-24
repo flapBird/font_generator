@@ -1,3 +1,4 @@
+import { LOGIN_ANALYTICS_COOKIE } from '@/lib/analytics/shared';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { authClient } from '@/lib/ai-font/supabase';
@@ -14,8 +15,10 @@ export async function GET(request: Request) {
   const code = params.get('code');
   try {
     if (!code) throw new Error('Missing code');
-    const { error } = await (await authClient()).auth.exchangeCodeForSession(code);
-    if (error) throw error;
+    const { data, error } = await (await authClient()).auth.exchangeCodeForSession(code);
+    if (error || !data.user) throw error || new Error('Missing authenticated user');
+    jar.set(LOGIN_ANALYTICS_COOKIE, JSON.stringify({ id: crypto.randomUUID(), userId: data.user.id, destination: next }),
+      { httpOnly: true, secure: destination.protocol === 'https:', sameSite: 'lax', path: '/', maxAge: 300 });
   } catch {
     destination.pathname = '/login';
     destination.searchParams.set('error', 'google');

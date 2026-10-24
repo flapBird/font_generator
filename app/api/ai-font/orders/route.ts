@@ -1,3 +1,4 @@
+import { attachOrderAnalytics } from '@/lib/analytics/server';
 import { FONT_PACK, isUuid } from '@/lib/ai-font/catalog';
 import { availability } from '@/lib/ai-font/config';
 import { body, endpoint, HttpError, json, requireUser, sameOrigin } from '@/lib/ai-font/http';
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
       order = data;
     }
     if (order.status !== 'pending') throw new HttpError(410, 'This order has already been processed. Refresh your account before purchasing again.');
+    await attachOrderAnalytics(order.id, user, input.analytics);
     const checkout = await paymentProvider(order.provider).createCheckout(order);
     if (order.external_id && order.external_id !== checkout.externalId) throw new HttpError(410, 'This checkout expired. Please try purchasing again.');
     const { error } = await db.from('ai_font_orders').update({ external_id: checkout.externalId, checkout_url: checkout.approvalUrl, checkout_expires_at: checkout.expiresAt || null }).eq('id', order.id).eq('user_id', user.id);

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { setAnalyticsIdentity, trackLoginResult } from '@/lib/analytics/browser';
 import { authChangedEvent, authReturnPath } from '@/lib/ai-font/auth-navigation';
 
 const authConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
@@ -18,16 +19,18 @@ export default function AccountMenu() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const menu = useRef<HTMLDetailsElement>(null);
+  const latestRefresh = useRef(0);
 
   useEffect(() => {
     if (!authConfigured) return;
     let alive = true;
     async function refresh() {
+      const refreshId = ++latestRefresh.current;
       try {
         const response = await fetch('/api/ai-font/auth/session', { cache: 'no-store' });
         if (!response.ok) return;
         const result = await response.json();
-        if (alive) setUser(result.user);
+        if (alive && refreshId === latestRefresh.current) { setUser(result.user); setAnalyticsIdentity(result.analytics || null); trackLoginResult(result.loginEvent); }
       } catch { /* A sign-in service outage must not disrupt free tools. */ }
     }
     void refresh();
@@ -56,7 +59,8 @@ export default function AccountMenu() {
     try {
       const response = await fetch('/api/ai-font/auth/signout', { method: 'POST' });
       if (!response.ok) throw new Error();
-      setUser(null);
+      latestRefresh.current++;
+      setUser(null); setAnalyticsIdentity(null);
       window.dispatchEvent(new Event(authChangedEvent));
     } catch { setError('Could not sign out. Please try again.'); }
     finally { setBusy(false); }

@@ -1,5 +1,6 @@
 'use client';
 
+import { trackEvent } from '../analytics/browser';
 import { authCallbackPath, authReturnCookie, authReturnPath } from './auth-navigation';
 
 export async function signInWithGoogle(next = '/ai-font-generator') {
@@ -7,6 +8,7 @@ export async function signInWithGoogle(next = '/ai-font-generator') {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) throw new Error('Google sign-in is not available yet.');
+  trackEvent('login_start', { destination: authReturnPath(next) });
   const client = createBrowserClient(url, key);
   const callback = new URL(authCallbackPath, window.location.origin);
   // Keep Supabase's allowlisted callback URL exact; this short-lived cookie

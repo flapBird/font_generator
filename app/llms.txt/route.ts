@@ -100,6 +100,8 @@ const body = [
   '',
   '## Site information',
   '',
+  'Google Analytics measures visits and sign-in or purchase steps using browser identifiers and a pseudonymous account identifier. Optional server-side checkout and confirmed-purchase events include the transaction identifier, product, amount, and currency; availability depends on analytics configuration and an available browser analytics identifier. Analytics events exclude account emails, names, font descriptions, and payment card details.',
+  '',
   `- [About](${SITE_URL}/about): Free tools, optional paid AI fonts, output types, and service scope.`,
   `- [Contact](${SITE_URL}/contact): Support for site issues, AI font purchases, refunds, and privacy requests.`,
   `- [Privacy Policy](${SITE_URL}/privacy): Local processing for free tools, AI account and payment data, external generation and safety services, storage, and deletion requests.`,

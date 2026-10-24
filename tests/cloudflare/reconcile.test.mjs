@@ -34,10 +34,11 @@ test('cron authenticates to the existing route through the self service binding'
   assert.equal(calls, 1);
 });
 
-test('billing and mail can run without enabling paid font generation', async () => {
+test('billing, mail and analytics can run without enabling paid font generation', async () => {
   for (const config of [
     { WAFFO_MERCHANT_ID: 'merchant', WAFFO_PRIVATE_KEY: 'key', WAFFO_STORE_ID: 'store', WAFFO_PRODUCT_ID: 'product' },
     { INBOX_URL: 'https://mail.example.com', INBOX_SEND_API_KEY: 'token', INBOX_FROM_EMAIL: 'receipts@example.com', INBOX_FROM_NAME: 'Font Generators' },
+    { GA4_MEASUREMENT_PROTOCOL_SECRET: 'mock-secret' },
   ]) {
     let calls = 0;
     const env = configuredEnv(async () => { calls++; return Response.json({ errors: 0 }); });

@@ -1,3 +1,7 @@
+import { cookies } from 'next/headers';
+import { LOGIN_ANALYTICS_COOKIE } from '@/lib/analytics/shared';
+import { analyticsIdentity } from '@/lib/analytics/server';
+import { authReturnPath } from '@/lib/ai-font/auth-navigation';
 import { displayName, googleAvatar } from '@/lib/ai-font/profile';
 import { availability } from '@/lib/ai-font/config';
 import { adminClient, authClient } from '@/lib/ai-font/supabase';
@@ -14,6 +18,17 @@ export async function GET() {
       const result = await adminClient().from('ai_font_profiles').select('display_name,avatar_url').eq('user_id', user.id).maybeSingle();
       profile = result.data;
     }
-    return json({ user: { email: user.email, displayName: displayName(profile?.display_name || user.user_metadata?.full_name), avatarUrl: googleAvatar(profile?.avatar_url || user.user_metadata?.avatar_url) } });
+    let loginEvent = null;
+    const jar = await cookies();
+    const marker = jar.get(LOGIN_ANALYTICS_COOKIE)?.value;
+    if (marker) {
+      jar.set(LOGIN_ANALYTICS_COOKIE, '', { path: '/', maxAge: 0 });
+      try {
+        const value = JSON.parse(marker);
+        if (value.userId === user.id && typeof value.id === 'string' && /^[a-f0-9-]{36}$/.test(value.id))
+          loginEvent = { id: value.id, destination: authReturnPath(value.destination) };
+      } catch { /* Invalid markers never count as successful logins. */ }
+    }
+    return json({ analytics: analyticsIdentity(user), loginEvent, user: { email: user.email, displayName: displayName(profile?.display_name || user.user_metadata?.full_name), avatarUrl: googleAvatar(profile?.avatar_url || user.user_metadata?.avatar_url) } });
   });
 }

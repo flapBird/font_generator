@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { FONT_PACK, availableGenerations } from '@/lib/ai-font/catalog';
+import { checkoutAnalyticsContext, setAnalyticsIdentity, trackEvent } from '@/lib/analytics/browser';
+import type { AnalyticsIdentity } from '@/lib/analytics/shared';
 import { authChangedEvent } from '@/lib/ai-font/auth-navigation';
 
 type Services = { checkout: boolean; sandbox: boolean; provider?: 'waffo' | 'paypal' };
-type Account = { user: { email: string } | null; credits: number; billingRestricted?: boolean; services: Services };
+type Account = { analytics?: AnalyticsIdentity; user: { email: string } | null; credits: number; billingRestricted?: boolean; services: Services };
 const checkoutKey = 'ai-font-studio-checkout-v1';
 const action = 'inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-primary px-5 py-3 font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50';
 
@@ -29,7 +31,9 @@ export default function PricingCheckout({ services }: { services: Services }) {
         const response = await fetch('/api/ai-font/account', { cache: 'no-store' });
         if (!response.ok) throw new Error('Unable to load your account. Please reload to try again.');
         const data = await response.json();
-        if (alive && refreshId === latestRefresh) setAccount(data);
+        if (alive && refreshId === latestRefresh) {
+          setAccount(data); setAnalyticsIdentity(data.analytics || null); trackEvent('view_item');
+        }
       } catch (err) { if (alive && refreshId === latestRefresh) setError((err as Error).message); }
       finally { if (alive && refreshId === latestRefresh) setLoaded(true); }
     };
@@ -43,21 +47,27 @@ export default function PricingCheckout({ services }: { services: Services }) {
   async function buy() {
     if (lock.current || !loaded || !account?.user || !accepted || !current.checkout || (account.credits < 0 || account.billingRestricted)) return;
     lock.current = true; setBusy(true); setError('');
+    setAnalyticsIdentity(account.analytics || null); trackEvent('checkout_click');
+    let failureTracked = false;
     try {
       if (!requestId.current) {
         try { requestId.current = sessionStorage.getItem(checkoutKey); } catch {}
         requestId.current ||= crypto.randomUUID();
       }
       try { sessionStorage.setItem(checkoutKey, requestId.current); } catch {}
-      const response = await fetch('/api/ai-font/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: requestId.current, provider, packageId: FONT_PACK.id, acceptedTerms: accepted }) });
-      const result = await response.json();
+      const analytics = await checkoutAnalyticsContext();
+      const response = await fetch('/api/ai-font/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: requestId.current, provider, packageId: FONT_PACK.id, acceptedTerms: accepted, analytics }) });
       if (!response.ok) {
+        trackEvent('checkout_error', { errorCode: `HTTP_${response.status}` });
+        failureTracked = true;
         if (response.status === 410) { requestId.current = null; try { sessionStorage.removeItem(checkoutKey); } catch {} }
         if (response.status === 401) setAccount(null);
+        const result = await response.json().catch(() => ({}));
         throw new Error(result.error || 'Checkout could not start. Please try again.');
       }
+      const result = await response.json();
       window.location.assign(result.approvalUrl);
-    } catch (err) { setError((err as Error).message); }
+    } catch (err) { if (!failureTracked) trackEvent('checkout_error', { errorCode: 'NETWORK' }); setError((err as Error).message); }
     finally { lock.current = false; setBusy(false); }
   }
   return <div className="mt-6 self-end" id="checkout">

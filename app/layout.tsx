@@ -96,7 +96,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const gaId = 'G-P3P9SJKZEG';
  
   return (
     <html lang="en" suppressHydrationWarning>
@@ -113,7 +112,7 @@ export default function RootLayout({
           clientId={adsenseClientId}
           allowedPaths={adEligiblePaths}
         />
-        <GoogleAnalytics measurementId={gaId} />
+        <GoogleAnalytics />
         <Script id="microsoft-clarity" strategy="afterInteractive">
           {`
             (function(c,l,a,r,i,t,y){
