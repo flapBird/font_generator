@@ -193,7 +193,7 @@ function GeneratorDirectoryContent({
         href={item.href}
         onClick={preserveScrollPosition}
         aria-current={isCurrentGenerator(item.title) ? 'page' : undefined}
-        className={`flex min-h-10 items-center gap-2 rounded-lg border-l-2 px-2.5 py-2 text-xs font-semibold transition ${
+        className={`flex min-h-10 items-center gap-2 rounded-lg border-l-2 px-2.5 py-2 text-xs font-medium transition ${
           isCurrentGenerator(item.title)
             ? 'border-violet-600 bg-violet-50 text-violet-700 shadow-sm dark:bg-violet-950/40 dark:text-violet-200'
             : 'border-transparent text-slate-600 hover:bg-white hover:text-violet-700 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-violet-300'
@@ -342,7 +342,7 @@ function MobileGeneratorRail({
                   scroll
                   aria-current={isCurrent ? 'page' : undefined}
                   onClick={preserveScrollPosition}
-                  className={`flex min-h-11 shrink-0 snap-start items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+                  className={`flex min-h-11 shrink-0 snap-start items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition ${
                     isCurrent
                       ? 'border-violet-500 bg-violet-600 text-white shadow-sm dark:border-violet-400 dark:bg-violet-500'
                       : 'border-slate-200 bg-white text-slate-700 hover:border-violet-300 hover:text-violet-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-violet-700 dark:hover:text-violet-300'
@@ -556,7 +556,7 @@ export default function GeneratorTool({
         <div className="p-3 sm:p-5 lg:p-6">
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[220px_minmax(0,1fr)_300px]">
               <div className="order-1 min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.5)] sm:p-5 xl:col-start-2 xl:row-start-1 dark:border-slate-800 dark:bg-slate-900">
-                <label htmlFor={inputId} className="block text-sm font-semibold text-slate-900 dark:text-white">
+                <label htmlFor={inputId} className="block text-sm font-medium text-slate-900 dark:text-white">
                   Enter your text
                 </label>
                 <div className="relative mt-2">
@@ -618,7 +618,7 @@ export default function GeneratorTool({
 
               <div className="order-3 min-w-0 xl:col-start-2 xl:row-start-2">
                 <div className="flex items-end justify-between gap-4">
-                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
                     {searchedStyleIds.length} {inputText ? 'generated' : 'available'} styles
                   </h3>
                 </div>
@@ -647,7 +647,7 @@ export default function GeneratorTool({
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex min-w-0 flex-wrap items-center gap-2">
-                            <h4 className="font-semibold text-slate-900 dark:text-white">{getFontDisplayName(variant.name)}</h4>
+                            <h4 className="font-medium text-slate-900 dark:text-white">{getFontDisplayName(variant.name)}</h4>
                             <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-400">
                               {categoryLabels[variant.category]}
                             </span>
@@ -851,7 +851,7 @@ export default function GeneratorTool({
       <div className="p-5 sm:p-8">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
           <div>
-            <label htmlFor={inputId} className="block text-sm font-semibold text-slate-900 dark:text-white">
+            <label htmlFor={inputId} className="block text-sm font-medium text-slate-900 dark:text-white">
               Enter your text
             </label>
             <textarea
@@ -930,7 +930,7 @@ export default function GeneratorTool({
                     setVisibleLimit(initialResultLimit);
                   }}
                   aria-pressed={popularFilterId === filter.id}
-                  className={`min-h-11 shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:min-h-0 ${
+                  className={`min-h-11 shrink-0 rounded-full px-4 py-2 text-sm font-medium transition sm:min-h-0 ${
                     popularFilterId === filter.id
                       ? 'bg-violet-600 text-white'
                       : 'border border-violet-200 bg-violet-50/70 text-violet-800 hover:border-violet-400 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-200'
@@ -953,7 +953,7 @@ export default function GeneratorTool({
                   setVisibleLimit(initialResultLimit);
                 }}
                 aria-pressed={activeFilter === filter.id}
-                className={`min-h-11 shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition sm:min-h-0 ${
+                className={`min-h-11 shrink-0 rounded-full px-4 py-2 text-sm font-medium transition sm:min-h-0 ${
                   activeFilter === filter.id
                     ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950'
                     : 'border border-slate-300 bg-white text-slate-600 hover:border-violet-400 hover:text-violet-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
@@ -1071,7 +1071,7 @@ export default function GeneratorTool({
                         onClick={() => setPreviewStyleId((current) => current === variant.id ? null : variant.id)}
                         aria-expanded={previewVariant?.id === variant.id}
                         aria-controls={`social-preview-${variant.id}`}
-                        className={`min-h-11 rounded-xl border px-3 py-2.5 text-sm font-semibold transition sm:min-h-0 ${
+                        className={`min-h-11 rounded-xl border px-3 py-2.5 text-sm font-medium transition sm:min-h-0 ${
                           previewVariant?.id === variant.id
                             ? 'border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-700 dark:bg-violet-950/40 dark:text-violet-300'
                             : 'border-slate-300 text-slate-600 hover:border-violet-400 hover:text-violet-700 dark:border-slate-700 dark:text-slate-300'

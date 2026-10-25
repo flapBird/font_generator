@@ -235,13 +235,17 @@ order reference and metadata.
 browser. The same route also checks Waffo payments/refunds/disputes and delivers
 queued transaction email through the Inbox send API. These queues have independent database
 leases and errors. No external scheduler is necessary on Workers. Apply
-`202610140001_billing_reconciliation_outbox.sql` before deploying this version;
+`202610140001_billing_reconciliation_outbox.sql` and, after the moderation and
+failure-details migrations, `202610260001_job_notifications.sql` before deploying this version;
 see [billing operations](ai-font-billing.md) for refund rules, dispute review,
 Inbox configuration and rollout checks.
 
 Reconciliation handles up to ten jobs sequentially per pass, avoiding simultaneous
 large TTF buffers in Workers' 128 MB isolate memory. Billing claims up to three
-items and mail claims one item per pass, so backlog affects per-order notification
+items. Billing and font-result mail share one message per pass, alternating queue
+priority with fallback when the preferred queue is empty. Font mail only covers
+future terminal transitions; it does not backfill historical tasks. See the
+[Chinese notification guide](ai-font-notifications.md). Backlog affects notification
 latency.
 The cron's internal request
 has a ten-minute timeout within Cloudflare's fifteen-minute scheduled wall limit.

@@ -7,7 +7,7 @@ export default function PrivacyPolicyPage() {
         <header className="mb-12 text-center">
           <h1 className="text-3xl font-bold sm:text-4xl">Privacy Policy</h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Last updated: October 20, 2026
+            Last updated: October 26, 2026
           </p>
         </header>
 
@@ -69,11 +69,15 @@ export default function PrivacyPolicyPage() {
           </p>
           <p>
             When transaction email is enabled, your account email address and
-            payment or credit adjustment summary are sent through our configured
+            payment or credit adjustment summary, or font task reference, final
+            outcome, public failure reason and restored credit amount are sent
+            through our configured
             transactional email service and its delivery infrastructure.
-            These messages cover purchases, refunds or payment reviews and do
-            not enroll you in marketing email. Credit delivery does not depend
-            on email delivery.
+            These messages cover purchases, refunds, payment reviews and final
+            font generation results. Generation notices do not include your
+            description, font file or private download URL. They do not enroll
+            you in marketing email. Font and credit delivery do not depend on
+            email delivery.
           </p>
 
           <h2>4. Information collected automatically</h2>

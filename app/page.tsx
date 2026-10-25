@@ -64,7 +64,7 @@ export default function HomePage() {
               aria-hidden="true"
               className="absolute left-1/2 top-5 -z-10 h-40 w-[min(38rem,92vw)] -translate-x-1/2 rounded-full bg-violet-300/20 blur-3xl dark:bg-violet-600/10"
             />
-            <h1 className="gradient-text text-4xl font-black leading-[1.02] tracking-[-0.045em] sm:text-6xl lg:text-[4rem]">
+            <h1 className="gradient-text text-4xl font-medium leading-[1.02] tracking-[-0.045em] sm:text-6xl lg:text-[4rem]">
               Free Font Generator
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8 dark:text-slate-300">

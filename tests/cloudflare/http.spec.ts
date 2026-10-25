@@ -70,4 +70,7 @@ test('public tools and optional AI font pages remain available without service c
   const directory = await (await request.get('/llms.txt')).text();
   expect(directory).toContain('Optional account and AI features');
   expect(directory).toContain('one standard English TTF with 72 glyphs');
+  expect(directory).toContain('Optional transactional email can notify signed-in users when a font is ready');
+  expect(directory).toContain('Historical completed tasks are not backfilled');
+  expect(directory).toContain('descriptions, font attachments and private download URLs are excluded');
 });

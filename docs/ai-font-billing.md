@@ -161,11 +161,14 @@ The previous adapter and its configuration contract have been removed.
 Without all four settings, sending is disabled and committed notices remain
 queued. Invalid settings fail before taking delivery leases. Completing this
 configuration enables cron delivery of queued notices: review old/test entries
-before enabling production mail. No new database migration is required beyond
-the existing billing outbox migration.
+before enabling production mail. Billing uses the existing billing outbox migration;
+font result notices additionally require `202610260001_job_notifications.sql`.
+See [font result notifications](ai-font-notifications.md) for the Chinese rollout guide.
 
 Payment credit changes and notification intent commit together. Delivery runs
-afterward, at most **one message per five-minute cron pass**. Recipients come from
+afterward, sharing at most **one message per five-minute cron pass** with font
+result notifications. Queue priority alternates each pass; an empty preferred
+queue yields to the other queue. Recipients come from
 Supabase account records, not browser input. Messages cover Waffo credit arrival,
 refunds, restricted disputes and confirmed recoveries. Payment under review is
 described as confirmed but paused. Messages use the balance snapshot at adjustment
@@ -221,8 +224,10 @@ must be configured separately by the operator.
 
 ## Operations
 
-Cron response reports separate `billing`, `jobs` and `mail` counts and an aggregate
-`errors` count. One queue's failure does not stop the others. Monitor scheduled
+Cron response reports separate `billing`, `jobs`, billing `mail`, font `fontMail`
+and `analytics` counts and an aggregate `errors` count. Generation or billing
+failures do not stop mail processing. A mail queue error ends that pass's mail
+budget; queue priority alternates on later passes. Monitor scheduled
 failures, overdue `next_billing_check_at`, `billing_last_error`, active dispute
 holds, and mail `needs_review` or overdue leases. Account and recipient data must
 stay in restricted administrative tools and out of logs.

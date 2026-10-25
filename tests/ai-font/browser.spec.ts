@@ -741,6 +741,9 @@ test('account typography stays inside the workspace without changing public page
     const style = getComputedStyle(element);
     return { family: style.fontFamily, weight: style.fontWeight, spacing: style.letterSpacing, size: style.fontSize };
   });
+  expect(hero.weight).toBe('500');
+  expect(await page.locator('header .brand-gradient-text').evaluate(element => getComputedStyle(element).fontWeight)).toBe('500');
+  expect(await page.locator('[data-generator-directory-scroll] a').first().evaluate(element => getComputedStyle(element).fontWeight)).toBe('500');
   for (const target of ['/account','/my-fonts']) {
     await page.goto(target);
     await expect(page.getByRole('navigation', { name: 'Account navigation' })).toBeVisible();

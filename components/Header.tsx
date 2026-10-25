@@ -26,7 +26,7 @@ const primaryLinks = [
 ];
 
 const desktopLinkClass =
-  'flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-muted hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200 dark:hover:text-white';
+  'flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-muted hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200 dark:hover:text-white';
 
 const compactGeneratorLabel = (label: string) =>
   label.replace(/\s+Generator$/i, '');
@@ -160,7 +160,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
             <div className="mx-3 mb-2 rounded-2xl border border-border/70 bg-muted/45 p-2">
               <Link
                 href={indexHref}
-                className="mb-1 flex min-h-11 items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-background"
+                className="mb-1 flex min-h-11 items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-background"
                 onClick={closeAllMenus}
               >
                 View all {label.toLowerCase()}
@@ -201,7 +201,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
             className="flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onClick={closeAllMenus}
           >
-            <span className="brand-gradient-text text-lg font-black tracking-[-0.025em] sm:text-2xl">Font Generators</span>
+            <span className="brand-gradient-text text-lg font-medium tracking-[-0.025em] sm:text-2xl">Font Generators</span>
           </Link>
 
           <div className="flex h-full items-center gap-1">
@@ -258,7 +258,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
                     <div className="mt-2 flex justify-center border-t border-border/70 px-2.5 pt-2.5">
                       <Link
                         href="/styles"
-                        className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-violet-800 dark:hover:text-violet-300"
+                        className="group inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-violet-800 dark:hover:text-violet-300"
                         onClick={closeAllMenus}
                       >
                         <span>View all</span>
@@ -318,7 +318,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
                     <div className="mt-2 flex justify-center border-t border-border/70 px-2.5 pt-2.5">
                       <Link
                         href="/visual-art"
-                        className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-violet-800 dark:hover:text-violet-300"
+                        className="group inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-violet-800 dark:hover:text-violet-300"
                         onClick={closeAllMenus}
                       >
                         <span>View all</span>

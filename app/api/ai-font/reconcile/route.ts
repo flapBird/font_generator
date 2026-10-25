@@ -4,7 +4,7 @@ import { requiredEnv } from '@/lib/ai-font/config';
 import { endpoint, HttpError, json } from '@/lib/ai-font/http';
 import { reconcileJobs } from '@/lib/ai-font/generation';
 import { reconcileBilling, billingReconciliationAvailable } from '@/lib/ai-font/payments/reconciliation';
-import { deliverBillingMail } from '@/lib/ai-font/mail-delivery';
+import { deliverQueuedMail } from '@/lib/ai-font/mail-delivery';
 
 export const maxDuration = 600;
 
@@ -21,8 +21,8 @@ export async function GET(request: Request) {
     };
     const billing = billingReconciliationAvailable() ? await safe(() => reconcileBilling()) : { checked: 0, errors: 0 };
     const jobs = process.env.MIXFONT_API_KEY?.trim() ? await safe(() => reconcileJobs()) : { checked: 0, errors: 0 };
-    const mail = await safe(() => deliverBillingMail());
+    const { billing: mail, jobs: fontMail } = await deliverQueuedMail();
     const analytics = await safe(() => deliverAnalytics());
-    return json({ billing, jobs, mail, analytics, checked: billing.checked + jobs.checked + mail.checked + analytics.checked, errors: billing.errors + jobs.errors + mail.errors + analytics.errors });
+    return json({ billing, jobs, mail, fontMail, analytics, checked: billing.checked + jobs.checked + mail.checked + fontMail.checked + analytics.checked, errors: billing.errors + jobs.errors + mail.errors + fontMail.errors + analytics.errors });
   });
 }
