@@ -12,7 +12,7 @@ import styles from './AiFontStudio.module.css';
 
 type Services = { auth: boolean; generation: boolean; checkout: boolean; sandbox: boolean; provider?: 'paypal' | 'waffo' };
 type Order = { id: string; provider: string; amount_minor: number; currency: string; credits: number; status: string; created_at: string };
-type Account = { user: { email: string } | null; credits: number; billingRestricted?: boolean; jobs: FontJob[]; orders: Order[]; creditEvents?: { id: number; kind: string; delta: number; created_at: string }[]; services: Services };
+type Account = { user: { email: string } | null; credits: number | null; billingRestricted?: boolean; billingUnavailable?: boolean; unavailableSections?: string[]; jobs: FontJob[]; orders: Order[]; creditEvents?: { id: number; kind: string; delta: number; created_at: string }[]; services: Services };
 const button = 'inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 const secondary = 'inline-flex min-h-11 items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 const field = 'w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-ring';
@@ -38,7 +38,7 @@ function saved(key: string) { try { return sessionStorage.getItem(key); } catch 
 function save(key: string, value: string | null) { try { if (value === null) sessionStorage.removeItem(key); else sessionStorage.setItem(key, value); } catch {} }
 
 function paymentNotice(status: string, account: Account) {
-  if (account.billingRestricted || account.credits < 0) return 'Your payment or balance needs review. Contact support before generating another font.';
+  if (account.billingRestricted || (account.credits ?? 0) < 0) return 'Your payment or balance needs review. Contact support before generating another font.';
   if (status === 'paid') return 'Payment confirmed. Your account balance has been updated.';
   if (status === 'revoked') return 'This payment was refunded or reversed. Your account balance has been updated.';
   return 'Payment has not completed yet. You can check it again under Your orders.';
@@ -48,7 +48,7 @@ const jobLabels: Record<FontJob['status'], string> = {
   reserved: 'Queued', starting: 'Starting', processing: 'Generating & reviewing', needs_review: 'Checking your generation', succeeded: 'Ready', failed: 'Failed · generation restored',
 };
 
-export default function AiFontStudio({ services: initialServices }: { services: Services }) {
+export default function AiFontStudio({ services: initialServices, libraryOnly = false }: { services: Services; libraryOnly?: boolean }) {
   const [sample, setSample] = useState<(typeof FONT_SAMPLES)[number]>(FONT_SAMPLES[0]);
   const [styleDescription, setStyleDescription] = useState('');
   const [matchNotice, setMatchNotice] = useState('');
@@ -131,6 +131,14 @@ export default function AiFontStudio({ services: initialServices }: { services: 
     return () => { stopped = true; clearTimeout(timer); };
   }, [active, refresh]);
 
+  useEffect(() => {
+    if (account?.user && window.location.hash === '#my-fonts-title') document.getElementById('my-fonts-title')?.scrollIntoView({ block: 'start' });
+  }, [account?.user]);
+
+  useEffect(() => {
+    if (libraryOnly && artworkFont) document.getElementById('font-artwork')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [libraryOnly, artworkFont]);
+
   async function act(name: string, action: () => Promise<void>) {
     if (actionLock.current) return;
     actionLock.current = true;
@@ -190,7 +198,39 @@ export default function AiFontStudio({ services: initialServices }: { services: 
     document.getElementById('font-artwork')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  const canGenerate = loaded && Boolean(account?.user) && (account?.credits ?? 0) >= STANDARD_FONT_CREDITS && services.generation && !account?.billingRestricted && !blocked && !busy && prompt.trim().length >= 10;
+  const canGenerate = loaded && Boolean(account?.user) && (account?.credits ?? 0) >= STANDARD_FONT_CREDITS && services.generation && !account?.billingRestricted && !account?.billingUnavailable && account?.credits !== null && !blocked && !busy && prompt.trim().length >= 10;
+
+  const library = account?.user && <section className="mt-10" aria-labelledby="my-fonts-title">
+        <div className="mb-5 flex items-center justify-between gap-3"><h2 id="my-fonts-title" className="scroll-mt-28 text-2xl font-bold">My fonts</h2><button className={secondary} disabled={Boolean(busy)} onClick={() => act('refresh', async () => { if (!account.billingUnavailable) await api('jobs', 'PATCH'); await refresh(); })}>Refresh</button></div>
+        {account.unavailableSections?.includes('fonts') ? <p role="alert">Your fonts could not load. Please try Refresh again.</p> : account.jobs.length === 0 ? <p className="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">Your custom fonts will be saved here. Use a paid generation whenever you are ready.</p> : <div className="grid gap-4 sm:grid-cols-2">
+          {account.jobs.map((job) => <article key={job.id} className="min-w-0 rounded-2xl border border-border p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-semibold">{job.name || 'Custom English font'}</h3><span className="rounded-full bg-muted px-3 py-1 text-xs">{jobLabels[job.status]}</span></div>
+            <p className="mt-3 break-words text-sm text-muted-foreground">{job.prompt}</p>
+            <p className="mt-3 text-xs text-muted-foreground">{new Date(job.created_at).toLocaleDateString()} · {job.id.slice(0, 8)}</p>
+            {job.status === 'needs_review' && <p className="mt-3 text-sm">We could not confirm the provider response. Your request is saved and will not be charged again automatically. <Link className="text-primary underline" href="/contact">Contact support</Link> with the reference above.</p>}
+            {loadedFonts[job.id] && <><p className="mt-4 break-words rounded-xl bg-muted p-4 text-3xl" style={{ fontFamily: loadedFonts[job.id].family, overflowWrap: 'anywhere' }}>{preview || 'Your words here'}</p>{unsupportedFontCharacters(preview || 'Your words here', loadedFonts[job.id].characters) && <p role="status" className="mt-2 text-sm text-amber-800">This font does not include these characters; they may appear in another font: {unsupportedFontCharacters(preview || 'Your words here', loadedFonts[job.id].characters)}</p>}</>}
+            {job.status === 'succeeded' && <div className="mt-4 flex flex-wrap gap-2"><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`preview-${job.id}`, () => previewFont(job.id, job.name || 'Custom English font'))}>Preview & create artwork</button><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`download-${job.id}`, async () => { const result = await api<{ url: string }>(`jobs/${job.id}/download`); window.location.assign(result.url); })}>Download TTF ↓</button></div>}
+          </article>)}
+        </div>}
+        {Boolean(account.creditEvents?.length) && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Credit activity</summary><p className="mt-2 text-xs text-muted-foreground">Your 30 most recent balance changes. Layout edits and exports are free.</p><ul className="mt-3 divide-y divide-border">{account.creditEvents?.map(event => <li key={event.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span>{{ order: 'Pack purchase', job: 'Font generation', restore: 'Failed generation restored', revoke: 'Payment refund or reversal', billing: 'Payment credits', 'billing-refund': 'Payment refund or reversal', 'billing-adjustment': 'Refund or dispute adjustment' }[event.kind] || 'Credit adjustment'} · {new Date(event.created_at).toLocaleDateString()}</span><span>{event.delta > 0 ? '+' : ''}{event.delta} credits</span></li>)}</ul></details>}
+        {account.orders.length > 0 && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Your orders</summary><ul className="mt-4 divide-y divide-border">{account.orders.map((order) => <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><span>{order.credits} credits · ${(order.amount_minor / 100).toFixed(2)} {order.currency} · {order.status}</span>{order.status === 'pending' && <button className={secondary} disabled={Boolean(busy)} onClick={() => act(`order-${order.id}`, async () => { const result = await api<{ status: string }>('orders/complete', 'POST', { id: order.id }); const current = await refresh(); setNotice(paymentNotice(result.status, current)); if (['paid', 'revoked'].includes(result.status)) save(checkoutKey, null); })}>Check payment</button>}</li>)}</ul></details>}
+      </section>;
+
+  if (libraryOnly) return <main className="mx-auto max-w-5xl px-5 pb-24 pt-28">
+    <div className="flex flex-wrap items-center justify-between gap-4"><h1 className="text-3xl font-bold">My fonts & purchases</h1><Link className={secondary} href="/ai-font-generator">Create a font</Link></div>
+    <p className="mt-3 text-muted-foreground">Your private font library and recent purchases.</p>
+    {error && <p role="alert" className="mt-5 text-red-600">{error} <button className={secondary} onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p>}
+    {!loaded && <p className="mt-6">Loading your fonts…</p>}
+    {loaded && !account && !error && <p role="alert" className="mt-6">Your fonts could not load. <button className={secondary} onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p>}
+    {account && !account.user && <div className="mt-6"><p>Sign in to view your saved fonts and purchases.</p><Link className={`${button} mt-4`} href="/login?next=%2Fmy-fonts">Continue to Google sign-in</Link></div>}
+    {account?.user && account.billingUnavailable && <p role="status" className="mt-6">Some account services are temporarily unavailable. Your available records are shown below.</p>}
+    {library}
+    {account?.user && account.unavailableSections?.includes('purchases') && <p role="alert" className="mt-6">Your purchases could not load. Please try Refresh again.</p>}
+    {account?.user && !account.orders.length && !account.unavailableSections?.includes('purchases') && <section className="mt-6"><h2 className="text-xl font-bold">Purchases</h2><p className="mt-3 text-muted-foreground">No purchases yet.</p></section>}
+    {notice && <p role="status" className="mt-6">{notice}</p>}
+    {account?.user && artworkFont && <section id="font-artwork" className="mt-10 scroll-mt-28" aria-label="Font preview and artwork"><label htmlFor="library-preview" className="mb-2 block font-semibold">Your preview text</label><input id="library-preview" className={field} value={preview} maxLength={100} onChange={event => setPreview(event.target.value)} /><FontArtwork family={artworkFont.family} name={artworkFont.name} reference={false} characters={artworkFont.characters} /></section>}
+    <Link className="mt-8 inline-block text-sm text-primary underline" href="/account">Account & billing</Link>
+  </main>;
 
   return (
     <div className={styles.page}>
@@ -210,9 +250,9 @@ export default function AiFontStudio({ services: initialServices }: { services: 
         </div>
       </section>
       <div className={styles.accountStatus}>
-        {account?.user && <p className="mt-3 text-center text-xs text-muted-foreground">{availableGenerations(account.credits)} generations available · {account.credits} credits</p>}
+        {account?.user && !account.billingUnavailable && account.credits !== null && <p className="mt-3 text-center text-xs text-muted-foreground">{availableGenerations(account.credits ?? 0)} generations available · {account.credits} credits</p>}
         <div className="mt-3 text-center text-sm" aria-live="polite">
-          {!loaded ? <p className="text-muted-foreground">Checking your account…</p> : !account ? <p className="text-muted-foreground">Account unavailable. <button className="text-primary underline" onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p> : !account.user ? <p><Link href="/login?next=%2Fai-font-generator" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>Log in</Link> <span className="text-muted-foreground">and add credits to generate your font.</span></p> : blocked ? <p className="text-muted-foreground">{active ? 'Your font is being generated. Check My fonts below.' : 'Your previous generation needs review. Check My fonts below.'}</p> : account.credits < 0 || account.billingRestricted ? <p className="text-muted-foreground">Your payment or balance needs review. <Link href="/contact" className="text-primary underline">Contact support</Link></p> : account.credits < STANDARD_FONT_CREDITS ? <p><span className="text-muted-foreground">Not enough credits. </span><Link href="/pricing" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>View plans & credits</Link></p> : !services.generation ? <p className="text-muted-foreground">Font generation is temporarily unavailable.</p> : <p className="text-muted-foreground">{prompt.trim().length < 10 ? 'Enter at least 10 characters.' : 'Ready to create your font.'}</p>}
+          {!loaded ? <p className="text-muted-foreground">Checking your account…</p> : !account ? <p className="text-muted-foreground">Account unavailable. <button className="text-primary underline" onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p> : !account.user ? <p><Link href="/login?next=%2Fai-font-generator" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>Log in</Link> <span className="text-muted-foreground">and add credits to generate your font.</span></p> : account.billingUnavailable ? <p className="text-muted-foreground">Account services are temporarily unavailable. <button className="text-primary underline" onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p> : blocked ? <p className="text-muted-foreground">{active ? 'Your font is being generated. Check My fonts below.' : 'Your previous generation needs review. Check My fonts below.'}</p> : (account.credits ?? 0) < 0 || account.billingRestricted ? <p className="text-muted-foreground">Your payment or balance needs review. <Link href="/contact" className="text-primary underline">Contact support</Link></p> : (account.credits ?? 0) < STANDARD_FONT_CREDITS ? <p><span className="text-muted-foreground">Not enough credits. </span><Link href="/pricing" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>View plans & credits</Link></p> : !services.generation ? <p className="text-muted-foreground">Font generation is temporarily unavailable.</p> : <p className="text-muted-foreground">{prompt.trim().length < 10 ? 'Enter at least 10 characters.' : 'Ready to create your font.'}</p>}
         </div>
       </div>
       <div aria-live="polite" aria-atomic="true" className="mt-4">
@@ -275,21 +315,7 @@ export default function AiFontStudio({ services: initialServices }: { services: 
         {[['No subscription', 'Buy a small pack for your next project.'], ['Private font library', 'Your generated files are not listed in a public gallery.'], ['Ready for your design', 'Download TTF fonts and export PNG artwork without a watermark.']].map(([title, copy]) => <div key={title}><h2 className="text-sm font-bold">{title}</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{copy}</p></div>)}
       </div>
 
-      {account?.user && <section className="mt-10" aria-labelledby="my-fonts-title">
-        <div className="mb-5 flex items-center justify-between gap-3"><h2 id="my-fonts-title" className="text-2xl font-bold">My fonts</h2><button className={secondary} disabled={Boolean(busy)} onClick={() => act('refresh', async () => { await api('jobs', 'PATCH'); await refresh(); })}>Refresh</button></div>
-        {account.jobs.length === 0 ? <p className="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">Your custom fonts will be saved here. Use a paid generation whenever you are ready.</p> : <div className="grid gap-4 sm:grid-cols-2">
-          {account.jobs.map((job) => <article key={job.id} className="min-w-0 rounded-2xl border border-border p-5">
-            <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-semibold">{job.name || 'Custom English font'}</h3><span className="rounded-full bg-muted px-3 py-1 text-xs">{jobLabels[job.status]}</span></div>
-            <p className="mt-3 break-words text-sm text-muted-foreground">{job.prompt}</p>
-            <p className="mt-3 text-xs text-muted-foreground">{new Date(job.created_at).toLocaleDateString()} · {job.id.slice(0, 8)}</p>
-            {job.status === 'needs_review' && <p className="mt-3 text-sm">We could not confirm the provider response. Your request is saved and will not be charged again automatically. <Link className="text-primary underline" href="/contact">Contact support</Link> with the reference above.</p>}
-            {loadedFonts[job.id] && <><p className="mt-4 break-words rounded-xl bg-muted p-4 text-3xl" style={{ fontFamily: loadedFonts[job.id].family, overflowWrap: 'anywhere' }}>{preview || 'Your words here'}</p>{unsupportedFontCharacters(preview || 'Your words here', loadedFonts[job.id].characters) && <p role="status" className="mt-2 text-sm text-amber-800">This font does not include these characters; they may appear in another font: {unsupportedFontCharacters(preview || 'Your words here', loadedFonts[job.id].characters)}</p>}</>}
-            {job.status === 'succeeded' && <div className="mt-4 flex flex-wrap gap-2"><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`preview-${job.id}`, () => previewFont(job.id, job.name || 'Custom English font'))}>Preview & create artwork</button><button className={secondary} disabled={Boolean(busy)} onClick={() => act(`download-${job.id}`, async () => { const result = await api<{ url: string }>(`jobs/${job.id}/download`); window.location.assign(result.url); })}>Download TTF ↓</button></div>}
-          </article>)}
-        </div>}
-        {Boolean(account.creditEvents?.length) && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Credit activity</summary><p className="mt-2 text-xs text-muted-foreground">Your 30 most recent balance changes. Layout edits and exports are free.</p><ul className="mt-3 divide-y divide-border">{account.creditEvents?.map(event => <li key={event.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span>{{ order: 'Pack purchase', job: 'Font generation', restore: 'Failed generation restored', revoke: 'Payment refund or reversal', billing: 'Payment credits', 'billing-refund': 'Payment refund or reversal', 'billing-adjustment': 'Refund or dispute adjustment' }[event.kind] || 'Credit adjustment'} · {new Date(event.created_at).toLocaleDateString()}</span><span>{event.delta > 0 ? '+' : ''}{event.delta} credits</span></li>)}</ul></details>}
-        {account.orders.length > 0 && <details className="mt-6 rounded-2xl border border-border p-5"><summary className="cursor-pointer font-semibold">Your orders</summary><ul className="mt-4 divide-y divide-border">{account.orders.map((order) => <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><span>{order.credits} credits · ${(order.amount_minor / 100).toFixed(2)} {order.currency} · {order.status}</span>{order.status === 'pending' && <button className={secondary} disabled={Boolean(busy)} onClick={() => act(`order-${order.id}`, async () => { const result = await api<{ status: string }>('orders/complete', 'POST', { id: order.id }); const current = await refresh(); setNotice(paymentNotice(result.status, current)); if (['paid', 'revoked'].includes(result.status)) save(checkoutKey, null); })}>Check payment</button>}</li>)}</ul></details>}
-      </section>}
+      {library}
 
       <section className="mt-12 grid gap-6 border-t border-border pt-8 sm:grid-cols-3" aria-label="How it works">
         {[['01', 'Explore a style', 'Try your words in our free style references. No account or generation credits needed.'], ['02', 'Make it your own', 'Describe your font and sign in. Choose a credit pack on the Pricing page if you need credits.'], ['03', 'Download and create', 'Download your TTF, or use the artwork editor to create PNG posters and transparent lettering. Layout edits do not use generations.']].map(([number, title, copy]) => <div key={number}><p className="text-sm font-semibold text-primary">{number}</p><h2 className="mt-2 font-bold">{title}</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{copy}</p></div>)}

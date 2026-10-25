@@ -2,6 +2,11 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { authChangedEvent } from '../../lib/ai-font/auth-navigation';
 
+// These local regressions never contact production analytics or payment services.
+test.beforeEach(async ({ context }) => {
+  await context.route('https://**/*', route => route.abort());
+});
+
 test('free AI references require no account, payment or generation API', async ({ page }) => {
   const paidCalls: string[] = [];
   page.on('request', (request) => {
@@ -489,4 +494,61 @@ test('private checkout follows the verified account response and clears access w
   await expect(pending).toBeDisabled();
   await expect(buy).toHaveCount(0);
   await expect(page.getByRole('checkbox')).toHaveCount(0);
+});
+
+test('partial account outages preserve the profile and never display a failed wallet as zero', async ({ page }) => {
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'user@example.com', displayName: 'Font User', avatarUrl: null, provider: 'Google', createdAt: '2026-10-01T00:00:00Z' },
+    credits: null, billingUnavailable: true, unavailableSections: ['credits', 'subscriptions', 'purchases'],
+    jobs: [], orders: [], subscriptions: [], creditEvents: [], services: { auth: true, generation: false, checkout: false, sandbox: true },
+  } }));
+  await page.goto('/account');
+  await expect(page.getByLabel('Display name')).toHaveValue('Font User');
+  await expect(page.getByText('user@example.com', { exact: true })).toBeVisible();
+  await expect(page.getByText('Your balance could not load. Please try again.')).toBeVisible();
+  await expect(page.getByText('0 credits', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('No purchases yet.', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Purchases could not load. Please try again.')).toBeVisible();
+  await page.goto('/ai-font-generator');
+  await page.getByLabel('Font description').fill('A friendly rounded display font');
+  await expect(page.getByRole('button', { name: 'Generate font · 100 credits' })).toBeDisabled();
+  await expect(page.getByText('Account services are temporarily unavailable.', { exact: false })).toBeVisible();
+  await page.goto('/pricing');
+  await expect(page.getByRole('button', { name: 'Payments coming soon' })).toBeDisabled();
+  await expect(page.getByText('Your account services could not load.', { exact: false })).toBeVisible();
+});
+
+test('the account library link opens a private page with saved fonts, not the generation form', async ({ page, request }) => {
+  const id = '10000000-0000-4000-8000-000000000002';
+  const paidCalls: string[] = [];
+  page.on('request', req => { if (req.method() === 'POST' && /\/api\/ai-font\/(jobs|orders)/.test(req.url())) paidCalls.push(req.url()); });
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'user@example.com', displayName: 'Font User', avatarUrl: null, provider: 'Google', createdAt: '2026-10-01T00:00:00Z' },
+    credits: 300, billingUnavailable: true, unavailableSections: ['billing'], orders: [], subscriptions: [], creditEvents: [],
+    jobs: [{ id, name: 'My saved font', prompt: 'A bold display font', status: 'succeeded', created_at: '2026-10-06T00:00:00Z' }],
+    services: { auth: true, generation: false, checkout: false, sandbox: true },
+  } }));
+  await page.route(`**/api/ai-font/jobs/${id}/download`, route => route.fulfill({ json: { url: 'http://localhost:3211/test-font.ttf' } }));
+  await page.route('**/test-font.ttf', route => route.fulfill({ path: 'tests/ai-font/fixtures/mixfont-standard.ttf', contentType: 'font/ttf' }));
+  await page.goto('/account');
+  await page.getByRole('link', { name: 'My fonts & purchases', exact: true }).click();
+  await expect(page).toHaveURL(/\/my-fonts$/);
+  await expect(page.getByRole('heading', { name: 'My fonts & purchases', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'My saved font', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Font description')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Download TTF ↓' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Preview & create artwork' }).click();
+  await expect(page.getByText('Editing with your generated font:', { exact: false })).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+  expect(await (await request.get('/sitemap.xml')).text()).not.toContain('/my-fonts');
+  expect(paidCalls).toEqual([]);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/font-generator-my-fonts.png', fullPage: true });
+});
+
+test('the private font library has its own sign-in return path', async ({ page }) => {
+  await page.goto('/my-fonts');
+  await expect(page.getByRole('link', { name: 'Continue to Google sign-in' })).toHaveAttribute('href', '/login?next=%2Fmy-fonts');
+  await expect(page.getByLabel('Font description')).toHaveCount(0);
 });
