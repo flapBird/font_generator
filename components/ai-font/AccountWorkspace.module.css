@@ -1,4 +1,8 @@
 .workspace {
+  --font-sans: ui-sans-serif;
+  --font-geist-sans: ui-sans-serif;
+  --font-geist-mono: ui-monospace;
+  font-family: var(--font-sans), system-ui, sans-serif;
   max-width: 1200px;
   margin: auto;
   padding: 104px 24px 88px;

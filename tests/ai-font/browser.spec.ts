@@ -721,3 +721,40 @@ test('account loading times out with retry instead of spinning forever', async (
   await expect(page.getByRole('status', { name: 'Loading account' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Retry', exact: true })).toBeEnabled();
 });
+
+test('account typography stays inside the workspace without changing public pages or shared navigation', async ({ page }) => {
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'fixture@example.com', displayName: 'Font User' }, credits: 300, jobs: [], orders: [], creditEvents: [], subscriptions: [],
+    services: { auth: true, generation: true, checkout: true, sandbox: true },
+  } }));
+  const sharedTypography = () => page.evaluate(() => ({
+    body: getComputedStyle(document.body).fontFamily,
+    header: getComputedStyle(document.querySelector('header')!).fontFamily,
+    footer: getComputedStyle(document.querySelector('footer')!).fontFamily,
+    variables: ['--font-sans','--font-geist-sans','--font-geist-mono'].map(name => getComputedStyle(document.documentElement).getPropertyValue(name).trim()),
+  }));
+  await page.goto('/');
+  const original = await sharedTypography();
+  expect(original.body).toBe('Arial, Helvetica, sans-serif');
+  expect(original.variables).toEqual(['','','']);
+  const hero = await page.getByRole('heading', { level: 1, name: 'Free Font Generator', exact: true }).evaluate(element => {
+    const style = getComputedStyle(element);
+    return { family: style.fontFamily, weight: style.fontWeight, spacing: style.letterSpacing, size: style.fontSize };
+  });
+  for (const target of ['/account','/my-fonts']) {
+    await page.goto(target);
+    await expect(page.getByRole('navigation', { name: 'Account navigation' })).toBeVisible();
+    const workspace = page.getByRole('navigation', { name: 'Account navigation' }).locator('..').locator('..');
+    expect(await workspace.evaluate(element => getComputedStyle(element).getPropertyValue('--font-sans').trim())).toBe('ui-sans-serif');
+    expect(await workspace.evaluate(element => getComputedStyle(element).fontFamily)).toContain('ui-sans-serif');
+    expect(await sharedTypography()).toEqual(original);
+  }
+  await page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', { name: 'Home', exact: true }).first().click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(await sharedTypography()).toEqual(original);
+  expect(await page.getByRole('heading', { level: 1, name: 'Free Font Generator', exact: true }).evaluate(element => {
+    const style = getComputedStyle(element);
+    return { family: style.fontFamily, weight: style.fontWeight, spacing: style.letterSpacing, size: style.fontSize };
+  })).toEqual(hero);
+  await page.screenshot({ path: '/tmp/font-generator-home-restored.png' });
+});
