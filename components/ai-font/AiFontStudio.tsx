@@ -21,7 +21,7 @@ const pendingJobKey = 'ai-font-studio-pending-job-v1';
 const checkoutKey = 'ai-font-studio-checkout-v1';
 
 class ApiError extends Error {
-  constructor(public status: number, message: string) { super(message); }
+  constructor(public status: number, message: string, public retryAfterSeconds = 0, public restartAllowed = false) { super(message); }
 }
 
 async function api<T>(path: string, method = 'GET', data?: unknown): Promise<T> {
@@ -30,9 +30,14 @@ async function api<T>(path: string, method = 'GET', data?: unknown): Promise<T> 
     body: data === undefined ? undefined : JSON.stringify(data),
   });
   const result = await response.json();
-  if (!response.ok) throw new ApiError(response.status, result.error || 'Please try again.');
+  if (!response.ok) {
+    const delay = Number(response.headers.get('Retry-After') || result.retryAfterSeconds);
+    throw new ApiError(response.status, result.error || 'Please try again.', Number.isFinite(delay) ? Math.max(0, Math.min(300, Math.ceil(delay))) : 0, result.code === 'MODERATION_UNAVAILABLE' && result.restartAllowed === true);
+  }
   return result;
 }
+
+function reviewWaitState(prompt: string, seconds: number, pending: boolean) { return { prompt, seconds, pending, retryAt: Date.now() + seconds * 1000 }; }
 
 function saved(key: string) { try { return sessionStorage.getItem(key); } catch { return null; } }
 function save(key: string, value: string | null) { try { if (value === null) sessionStorage.removeItem(key); else sessionStorage.setItem(key, value); } catch {} }
@@ -59,12 +64,20 @@ export default function AiFontStudio({ services: initialServices, libraryOnly = 
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
+  const [reviewWait, setReviewWait] = useState<ReturnType<typeof reviewWaitState> | null>(null);
   const [loadedFonts, setLoadedFonts] = useState<Record<string, { family: string; characters: string }>>({});
   const [artworkFont, setArtworkFont] = useState<{ id: string; family: string; name: string; characters: string } | null>(null);
   const actionLock = useRef(false);
   const services = account?.services ?? initialServices;
   const active = Boolean(account?.jobs.some((job) => ['reserved', 'starting', 'processing'].includes(job.status)));
   const blocked = Boolean(account?.jobs.some((job) => ['reserved', 'starting', 'processing', 'needs_review'].includes(job.status)));
+  const currentReview = reviewWait?.prompt === prompt.trim() ? reviewWait : null;
+
+  useEffect(() => {
+    if (!reviewWait?.seconds) return;
+    const timer = setTimeout(() => setReviewWait(current => current && { ...current, seconds: Math.max(0, Math.ceil((current.retryAt - Date.now()) / 1000)) }), 1000);
+    return () => clearTimeout(timer);
+  }, [reviewWait]);
 
   const refresh = useCallback(async () => {
     const data = await api<Account>('account');
@@ -154,16 +167,36 @@ export default function AiFontStudio({ services: initialServices, libraryOnly = 
       if (previous?.prompt === request.prompt && previous?.id) request = previous;
     } catch {}
     save(pendingJobKey, JSON.stringify(request));
-    let response = await api<{ moderation?: 'pending' }>('jobs', 'POST', request);
-    for (let attempt = 0; response.moderation === 'pending' && attempt < 4; attempt++) {
-      setNotice('Checking your description. No generation credits have been used.');
-      await new Promise<void>((resolve) => setTimeout(resolve, 3500));
-      response = await api<{ moderation?: 'pending' }>('jobs', 'POST', request);
+    type Submission = { moderation?: 'pending'; retryAfterSeconds?: number; waitingToRetry?: boolean };
+    let response: Submission;
+    try {
+      response = await api<Submission>('jobs', 'POST', request);
+      for (let attempt = 0; response.moderation === 'pending'; attempt++) {
+        const delay = typeof response.retryAfterSeconds === 'number' && Number.isFinite(response.retryAfterSeconds) ? Math.max(3, Math.min(300, Math.ceil(response.retryAfterSeconds))) : 4;
+        if (response.waitingToRetry || delay > 10) {
+          setReviewWait(reviewWaitState(request.prompt, delay, !response.waitingToRetry));
+          setNotice(response.waitingToRetry ? 'Safety checks are waiting to retry after a temporary failure. No generation credits have been used.' : 'Your description is still being checked. No generation credits have been used.');
+          return;
+        }
+        setReviewWait(reviewWaitState(request.prompt, 0, true));
+        setNotice('Checking your description. No generation credits have been used.');
+        if (attempt >= 4) {
+          setReviewWait(reviewWaitState(request.prompt, delay, true));
+          setNotice('Your description is still being checked. Check it again shortly to continue. No generation credits have been used.');
+          return;
+        }
+        await new Promise<void>((resolve) => setTimeout(resolve, delay * 1000));
+        response = await api<Submission>('jobs', 'POST', request);
+      }
+    } catch (failure) {
+      if (failure instanceof ApiError && failure.restartAllowed) {
+        save(pendingJobKey, null);
+        setReviewWait(reviewWaitState(request.prompt, 0, false));
+      }
+      if (failure instanceof ApiError && failure.retryAfterSeconds > 0) setReviewWait(reviewWaitState(request.prompt, failure.retryAfterSeconds, false));
+      throw failure;
     }
-    if (response.moderation === 'pending') {
-      setNotice('Your description is still being checked. Try Generate again shortly. No generation credits have been used.');
-      return;
-    }
+    setReviewWait(null);
     save(pendingJobKey, null);
     save(draftKey, prompt);
     await refresh();
@@ -198,7 +231,7 @@ export default function AiFontStudio({ services: initialServices, libraryOnly = 
     document.getElementById('font-artwork')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  const canGenerate = loaded && Boolean(account?.user) && (account?.credits ?? 0) >= STANDARD_FONT_CREDITS && services.generation && !account?.billingRestricted && !account?.billingUnavailable && account?.credits !== null && !blocked && !busy && prompt.trim().length >= 10;
+  const canGenerate = loaded && Boolean(account?.user) && (account?.credits ?? 0) >= STANDARD_FONT_CREDITS && services.generation && !account?.billingRestricted && !account?.billingUnavailable && account?.credits !== null && !blocked && !busy && !(currentReview && currentReview.seconds > 0) && prompt.trim().length >= 10;
 
   const library = account?.user && <section className="mt-10" aria-labelledby="my-fonts-title">
         <div className="mb-5 flex items-center justify-between gap-3"><h2 id="my-fonts-title" className="scroll-mt-28 text-2xl font-bold">My fonts</h2><button className={secondary} disabled={Boolean(busy)} onClick={() => act('refresh', async () => { if (!account.billingUnavailable) await api('jobs', 'PATCH'); await refresh(); })}>Refresh</button></div>
@@ -246,13 +279,13 @@ export default function AiFontStudio({ services: initialServices, libraryOnly = 
         <textarea id="ai-font-prompt" className={styles.prompt} value={prompt} maxLength={1000} placeholder="A playful rounded typeface for a neighborhood bakery…" onChange={(event) => { setPrompt(event.target.value); save(draftKey, event.target.value); }} aria-describedby="ai-prompt-help" />
         <div className={styles.generatorBar}>
           <p id="ai-prompt-help">English · 72 glyphs · TTF <span className={styles.characterCount}>{prompt.length}/1000</span></p>
-          <button className={button} disabled={!canGenerate} onClick={() => act('generate', generate)}>{busy === 'generate' ? 'Starting your font…' : `Generate font · ${STANDARD_FONT_CREDITS} credits`}</button>
+          <button className={button} disabled={!canGenerate} onClick={() => act('generate', generate)}>{busy === 'generate' ? currentReview?.pending ? 'Checking description…' : 'Submitting request…' : currentReview?.pending ? 'Check description again' : `Generate font · ${STANDARD_FONT_CREDITS} credits`}</button>
         </div>
       </section>
       <div className={styles.accountStatus}>
         {account?.user && !account.billingUnavailable && account.credits !== null && <p className="mt-3 text-center text-xs text-muted-foreground">{availableGenerations(account.credits ?? 0)} generations available · {account.credits} credits</p>}
         <div className="mt-3 text-center text-sm" aria-live="polite">
-          {!loaded ? <p className="text-muted-foreground">Checking your account…</p> : !account ? <p className="text-muted-foreground">Account unavailable. <button className="text-primary underline" onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p> : !account.user ? <p><Link href="/login?next=%2Fai-font-generator" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>Log in</Link> <span className="text-muted-foreground">and add credits to generate your font.</span></p> : account.billingUnavailable ? <p className="text-muted-foreground">Account services are temporarily unavailable. <button className="text-primary underline" onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p> : blocked ? <p className="text-muted-foreground">{active ? 'Your font is being generated. Check My fonts below.' : 'Your previous generation needs review. Check My fonts below.'}</p> : (account.credits ?? 0) < 0 || account.billingRestricted ? <p className="text-muted-foreground">Your payment or balance needs review. <Link href="/contact" className="text-primary underline">Contact support</Link></p> : (account.credits ?? 0) < STANDARD_FONT_CREDITS ? <p><span className="text-muted-foreground">Not enough credits. </span><Link href="/pricing" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>View plans & credits</Link></p> : !services.generation ? <p className="text-muted-foreground">Font generation is temporarily unavailable.</p> : <p className="text-muted-foreground">{prompt.trim().length < 10 ? 'Enter at least 10 characters.' : 'Ready to create your font.'}</p>}
+          {!loaded ? <p className="text-muted-foreground">Checking your account…</p> : !account ? <p className="text-muted-foreground">Account unavailable. <button className="text-primary underline" onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p> : !account.user ? <p><Link href="/login?next=%2Fai-font-generator" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>Log in</Link> <span className="text-muted-foreground">and add credits to generate your font.</span></p> : busy === 'generate' ? <p className="text-muted-foreground">{currentReview?.pending ? 'Checking your description before starting a font.' : 'Submitting your request for safety checks.'}</p> : currentReview && currentReview.seconds > 0 ? <p role="status" className="text-muted-foreground">Try safety checks again in {currentReview.seconds} seconds. No generation credits have been used.</p> : currentReview ? <p className="text-muted-foreground">{currentReview.pending ? 'Your description is still being checked. Check again to continue.' : 'Safety checks were unavailable. Try again to continue.'}</p> : error ? <p className="text-muted-foreground">Your request did not complete. Review the message below before trying again.</p> : account.billingUnavailable ? <p className="text-muted-foreground">Account services are temporarily unavailable. <button className="text-primary underline" onClick={() => act('refresh', async () => { await refresh(); })}>Try again</button></p> : blocked ? <p className="text-muted-foreground">{active ? 'Your font is being generated. Check My fonts below.' : 'Your previous generation needs review. Check My fonts below.'}</p> : (account.credits ?? 0) < 0 || account.billingRestricted ? <p className="text-muted-foreground">Your payment or balance needs review. <Link href="/contact" className="text-primary underline">Contact support</Link></p> : (account.credits ?? 0) < STANDARD_FONT_CREDITS ? <p><span className="text-muted-foreground">Not enough credits. </span><Link href="/pricing" className="font-semibold text-primary underline" onClick={() => save(draftKey, prompt)}>View plans & credits</Link></p> : !services.generation ? <p className="text-muted-foreground">Font generation is temporarily unavailable.</p> : <p className="text-muted-foreground">{prompt.trim().length < 10 ? 'Enter at least 10 characters.' : 'Ready to create your font.'}</p>}
         </div>
       </div>
       <div aria-live="polite" aria-atomic="true" className="mt-4">

@@ -51,7 +51,10 @@ completion. Old application code cannot silently deliver new unreviewed files.
   idempotency key/body; a known task is polled, not recreated. Pending checks wait
   at least 3 seconds, transient failures at least a minute or the bounded
   `Retry-After` delay. Twenty attempts or 24 hours end an unresolved check as
-  failed. No uncertain or malformed verdict counts as approval.
+  failed. Explicitly rejected creation requests stop instead of automatically resubmitting.
+  The studio honors the persisted retry delay and distinguishes checking from waiting
+  to retry; it does not show Ready while an attempt is in progress. No uncertain or
+  malformed verdict counts as approval. See the [Chinese troubleshooting guide](ai-font-generation.md).
 - Only after every bound page passes are the original TTF bytes copied to the
   delivered bucket and the job marked successful. The final hash is rechecked;
   the SQL function and download API both enforce the release gate. A rejected or

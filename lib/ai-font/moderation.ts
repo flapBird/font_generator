@@ -5,14 +5,15 @@ import { submitModeration, pollModeration, SeeApiError, type ModerationKind } fr
 import { renderFontSpecimens } from './font-specimens';
 
 type ReviewStatus = 'pending' | 'passed' | 'blocked' | 'failed';
-type Review = { id: string; status: ReviewStatus; provider_task_id: string | null; claim_token: string | null };
+type Review = { id: string; status: ReviewStatus; provider_task_id: string | null; claim_token: string | null; next_check_at?: string; lease_until?: string | null };
+export type PromptReviewState = { status: ReviewStatus; retryAfterSeconds: number; waitingToRetry: boolean };
 export type ReviewJob = { id: string; user_id: string; output_hash?: string | null; review_page_count?: number | null };
 
 export function reviewHash(value: string | Buffer) { return createHash('sha256').update(value).digest('hex'); }
 export function reviewStoragePath(job: ReviewJob, hash: string) { return `${job.user_id}/${job.id}/${hash}`; }
 export function reviewStagePath(job: ReviewJob) { return `${job.user_id}/${job.id}/staged.ttf`; }
 
-async function check(kind: ModerationKind, user: string, request: string, stage: string, input: string, inputHash: string, assetHash: string | null = null): Promise<ReviewStatus> {
+async function check(kind: ModerationKind, user: string, request: string, stage: string, input: string, inputHash: string, assetHash: string | null = null): Promise<PromptReviewState> {
   const db = adminClient();
   const { data, error } = await db.rpc('ai_font_prepare_moderation', {
     p_user: user, p_request: request, p_stage: stage, p_input_hash: inputHash, p_asset_hash: assetHash,
@@ -20,7 +21,13 @@ async function check(kind: ModerationKind, user: string, request: string, stage:
   if (error) throw error;
   const review = data as Review;
   if (!review || !['pending', 'passed', 'blocked', 'failed'].includes(review.status)) throw new Error('Review unavailable');
-  if (review.status !== 'pending' || !review.claim_token) return review.status;
+  if (review.status !== 'pending') return { status: review.status, retryAfterSeconds: 0, waitingToRetry: false };
+  if (!review.claim_token) {
+    const now = Date.now();
+    const nextCheck = Date.parse(review.next_check_at || '') || now;
+    const leaseUntil = Date.parse(review.lease_until || '') || now;
+    return { status: 'pending', retryAfterSeconds: Math.max(3, Math.min(300, Math.ceil((Math.max(nextCheck, leaseUntil) - now) / 1000))), waitingToRetry: !review.provider_task_id && leaseUntil <= now && nextCheck > now };
+  }
   try {
     const outcome = review.provider_task_id
       ? await pollModeration(kind, review.provider_task_id)
@@ -32,19 +39,25 @@ async function check(kind: ModerationKind, user: string, request: string, stage:
     if (saved.error) throw saved.error;
     // An expired lease cannot publish a stale verdict. Another invocation can
     // read the durable result or safely replay the original idempotency key.
-    return saved.data === true ? outcome.status : 'pending';
+    return { status: saved.data === true ? outcome.status : 'pending', retryAfterSeconds: 3, waitingToRetry: false };
   } catch (failure) {
     await db.rpc('ai_font_finish_moderation', {
       p_id: review.id, p_token: review.claim_token, p_task_id: review.provider_task_id,
-      p_status: 'retry', p_consumed_credits: null,
+      // An explicit rejection before task creation needs configuration/input
+      // repair, not automatic resubmission. Ambiguous responses retain the key.
+      p_status: failure instanceof SeeApiError && failure.submissionRejected ? 'failed' : 'retry', p_consumed_credits: null,
       p_retry_after_seconds: failure instanceof SeeApiError ? Math.max(60, failure.retryAfterSeconds ?? 60) : 60,
     }).then(() => {}, () => {});
     throw failure;
   }
 }
 
-export function reviewPrompt(user: string, request: string, prompt: string) {
+export function reviewPromptState(user: string, request: string, prompt: string) {
   return check('text', user, request, 'prompt', prompt, reviewHash(prompt));
+}
+
+export async function reviewPrompt(user: string, request: string, prompt: string) {
+  return (await reviewPromptState(user, request, prompt)).status;
 }
 
 async function storedBytes(path: string, maximum: number) {
@@ -118,7 +131,7 @@ export async function reviewGeneratedFont(job: ReviewJob, incoming?: Buffer): Pr
     const png = await storedBytes(`${reviewStoragePath(job, job.output_hash)}/${index}.png`, 4 * 1024 * 1024);
     const hash = reviewHash(png);
     if (existing && existing.input_hash !== hash) throw new Error('Review image changed');
-    const status = await check('image', job.user_id, job.id, stage, `data:image/png;base64,${png.toString('base64')}`, hash, job.output_hash);
+    const { status } = await check('image', job.user_id, job.id, stage, `data:image/png;base64,${png.toString('base64')}`, hash, job.output_hash);
     if (status === 'blocked' || status === 'failed') return status;
     // One provider operation per job/invocation bounds HTTP request duration and
     // Workers memory. Cron and authenticated refresh resume subsequent pages.

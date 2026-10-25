@@ -257,11 +257,66 @@ test('pending prompt moderation reuses the generation intent and does not claim 
   await page.getByLabel('Font description').fill('A friendly rounded English font');
   await page.getByRole('button', { name: 'Generate font · 100 credits' }).click();
   await expect(page.getByText('Checking your description. No generation credits have been used.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Checking description…' })).toBeDisabled();
+  await expect(page.getByText('Ready to create your font.', { exact: true })).toHaveCount(0);
   await expect(page.getByText('3 generations available')).toBeVisible();
   await expect(page.getByText('Your font is on its way.', { exact: false })).toBeVisible({ timeout: 10000 });
   await expect(page.getByText('2 generations available')).toBeVisible();
   expect(requests).toHaveLength(2);
   expect(requests[0]).toEqual(requests[1]);
+});
+
+test('an unavailable check respects the cooldown and reuses its intent instead of rapidly posting jobs', async ({ page }) => {
+  await page.clock.install();
+  const requests: { id: string; prompt: string }[] = [];
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'test@example.com' }, credits: 300, orders: [], jobs: [], services: { auth: true, generation: true, checkout: true },
+  } }));
+  await page.route('**/api/ai-font/jobs', route => {
+    requests.push(route.request().postDataJSON());
+    return route.fulfill(requests.length === 1
+      ? { status: 503, headers: { 'Retry-After': '60' }, json: { error: 'Safety checks are temporarily unavailable. No generation credits have been used.', code: 'MODERATION_UNAVAILABLE', retryAfterSeconds: 60 } }
+      : { status: 202, headers: { 'Retry-After': '60' }, json: { moderation: 'pending', waitingToRetry: true, retryAfterSeconds: 60 } });
+  });
+  await page.goto('/ai-font-generator');
+  await page.getByLabel('Font description').fill('A friendly rounded English font');
+  const generate = page.getByRole('button', { name: 'Generate font · 100 credits' });
+  await generate.click();
+  await expect(generate).toBeDisabled();
+  await expect(page.getByRole('status').filter({ hasText: 'Try safety checks again in 60 seconds.' })).toBeVisible();
+  await expect(page.getByText('Ready to create your font.', { exact: true })).toHaveCount(0);
+  await page.clock.fastForward(10000);
+  expect(requests).toHaveLength(1);
+  await page.clock.fastForward(50000);
+  await expect(generate).toBeEnabled();
+  await generate.click();
+  await expect(page.getByText('Safety checks are waiting to retry after a temporary failure.', { exact: false })).toBeVisible();
+  await page.clock.fastForward(15000);
+  expect(requests).toHaveLength(2);
+  expect(requests[0]).toEqual(requests[1]);
+  await expect(page.getByRole('button', { name: 'Checking description…' })).toHaveCount(0);
+  await expect(page.getByText('3 generations available', { exact: false })).toBeVisible();
+});
+
+test('an explicitly rejected moderation submission starts a new intent only on a manual retry', async ({ page }) => {
+  const ids: string[] = [];
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'test@example.com' }, credits: 300, orders: [], jobs: [], services: { auth: true, generation: true, checkout: true },
+  } }));
+  await page.route('**/api/ai-font/jobs', route => {
+    ids.push(route.request().postDataJSON().id);
+    return route.fulfill({ status: 503, json: { error: 'Safety checks are temporarily unavailable. No generation credits have been used.', code: 'MODERATION_UNAVAILABLE', restartAllowed: true, retryAfterSeconds: 0 } });
+  });
+  await page.goto('/ai-font-generator');
+  await page.getByLabel('Font description').fill('A friendly rounded English font');
+  const generate = page.getByRole('button', { name: 'Generate font · 100 credits' });
+  await generate.click();
+  await expect(page.getByText('Safety checks were unavailable. Try again to continue.')).toBeVisible();
+  expect(ids).toHaveLength(1);
+  await generate.click();
+  await expect(page.getByText('Safety checks were unavailable. Try again to continue.')).toBeVisible();
+  await expect.poll(() => ids.length).toBe(2);
+  expect(ids[0]).not.toBe(ids[1]);
 });
 
 test('a blocked description leaves credits and download availability unchanged', async ({ page }) => {

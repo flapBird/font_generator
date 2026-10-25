@@ -10,7 +10,7 @@ export type ModerationOutcome = {
 
 /** Only sanitized, actionable metadata crosses the provider boundary. */
 export class SeeApiError extends Error {
-  constructor(public readonly retryable = false, public readonly retryAfterSeconds: number | null = null) {
+  constructor(public readonly retryable = false, public readonly retryAfterSeconds: number | null = null, public readonly httpStatus: number | null = null, public readonly code: 'INVALID_RESPONSE' | 'HTTP_ERROR' | 'TRANSPORT_ERROR' = 'INVALID_RESPONSE', public readonly submissionRejected = false) {
     super('Content moderation is temporarily unavailable. Please try again later.');
     this.name = 'SeeApiError';
   }
@@ -113,7 +113,7 @@ async function request(kind: ModerationKind, path: string, init: RequestInit, ex
       cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(15000),
     });
     if (response.status !== 200 && response.status !== 202) {
-      const error = new SeeApiError(response.status === 429 || response.status >= 500, retryAfter(response));
+      const error = new SeeApiError(response.status === 429 || response.status >= 500, retryAfter(response), response.status, 'HTTP_ERROR', init.method === 'POST' && [400, 401, 402, 403, 404, 422].includes(response.status));
       await response.body?.cancel();
       throw error;
     }
@@ -121,7 +121,7 @@ async function request(kind: ModerationKind, path: string, init: RequestInit, ex
   } catch (error) {
     if (error instanceof SeeApiError) throw error;
     // A timed-out POST may have been accepted. The caller must reuse its stored key.
-    throw new SeeApiError(true);
+    throw new SeeApiError(true, null, null, 'TRANSPORT_ERROR');
   }
 }
 

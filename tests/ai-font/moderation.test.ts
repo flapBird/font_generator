@@ -1,6 +1,6 @@
 import { test, type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
-import { reviewHash, reviewPrompt, stagedFontBytes } from '../../lib/ai-font/moderation';
+import { reviewHash, reviewPrompt, reviewPromptState, stagedFontBytes } from '../../lib/ai-font/moderation';
 
 const prompt = 'A friendly rounded serif for a neighborhood bakery';
 const categories = ['sexual_explicit', 'sexual_suggestive', 'sexual_minors', 'violence', 'hate', 'harassment', 'self_harm'];
@@ -22,7 +22,8 @@ function promptReview(context: TestContext, admissionError?: string) {
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-key';
   process.env.SEEAPI_API_KEY = 'test-seeapi-key';
   const events: string[] = [], submissions: { key: string | null; body: string }[] = [];
-  const check = { id: 'persisted-review', status: 'pending', provider_task_id: null as string | null };
+  const check = { id: 'persisted-review', status: 'pending', provider_task_id: null as string | null, next_check_at: '', lease_until: null as string | null };
+  let canClaim = true;
   let provider: (request: Request) => Promise<Response> = async () => Response.json(textResult());
   globalThis.fetch = async (input, init) => {
     const request = new Request(input, init), url = new URL(request.url);
@@ -37,7 +38,7 @@ function promptReview(context: TestContext, admissionError?: string) {
       events.push('admission');
       assert.deepEqual(body, { p_user: 'test-user', p_request: 'request-id', p_stage: 'prompt', p_input_hash: reviewHash(prompt), p_asset_hash: null });
       if (admissionError) return Response.json({ code: 'P0001', message: admissionError }, { status: 400 });
-      return Response.json({ ...check, claim_token: check.status === 'pending' ? 'lease-token' : null });
+      return Response.json({ ...check, claim_token: check.status === 'pending' && canClaim ? 'lease-token' : null });
     }
     assert.equal(url.pathname, '/rest/v1/rpc/ai_font_finish_moderation');
     events.push(`save-${body.p_status}`);
@@ -50,8 +51,41 @@ function promptReview(context: TestContext, admissionError?: string) {
     globalThis.fetch = originalFetch;
     keys.forEach((key, index) => { if (env[index] === undefined) delete process.env[key]; else process.env[key] = env[index]; });
   });
-  return { check, events, submissions, provider: (fetcher: typeof provider) => { provider = fetcher; }, run: () => reviewPrompt('test-user', 'request-id', prompt) };
+  return { check, events, submissions, provider: (fetcher: typeof provider) => { provider = fetcher; }, pause: (seconds: number, leased = false) => { canClaim = false; check.next_check_at = new Date(Date.now() + seconds * 1000).toISOString(); if (leased) check.lease_until = check.next_check_at; }, run: () => reviewPrompt('test-user', 'request-id', prompt), state: () => reviewPromptState('test-user', 'request-id', prompt) };
 }
+
+test('a durable retry cooldown is reported as waiting without contacting the provider again', async context => {
+  const review = promptReview(context);
+  review.pause(60);
+  const state = await review.state();
+  assert.equal(state.status, 'pending');
+  assert.equal(state.waitingToRetry, true);
+  assert.ok(state.retryAfterSeconds >= 59 && state.retryAfterSeconds <= 60);
+  assert.deepEqual(review.events, ['admission']);
+  assert.deepEqual(review.submissions, []);
+});
+
+test('an accepted provider task or active lease is checking, not a failed submission cooldown', async context => {
+  for (const leased of [false, true]) await context.test(leased ? 'active lease' : 'accepted task', async child => {
+    const review = promptReview(child);
+    review.pause(8, leased);
+    if (!leased) review.check.provider_task_id = 'task_prompt-review';
+    const state = await review.state();
+    assert.equal(state.waitingToRetry, false);
+    assert.ok(state.retryAfterSeconds >= 7 && state.retryAfterSeconds <= 8);
+    assert.deepEqual(review.events, ['admission']);
+  });
+});
+
+test('a rejected creation is not automatically retried as if a provider task were running', async context => {
+  const review = promptReview(context);
+  review.provider(async () => Response.json({ error: { message: 'secret detail' } }, { status: 401 }));
+  await assert.rejects(review.run());
+  assert.equal(review.check.status, 'failed');
+  assert.equal(await review.run(), 'failed');
+  assert.equal(review.submissions.length, 1);
+  assert.deepEqual(review.events, ['admission', 'provider-POST', 'save-failed', 'admission']);
+});
 
 test('prompt admission checks balance, billing restrictions and limits before any paid provider call', async (context) => {
   for (const error of ['NO_CREDITS', 'BILLING_RESTRICTED', 'REVIEW_RATE_LIMIT', 'ACTIVE_JOB', 'REVIEW_MISMATCH']) await context.test(error, async (child) => {

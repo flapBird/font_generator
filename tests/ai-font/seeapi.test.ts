@@ -113,7 +113,7 @@ test('SeeAPI sanitizes HTTP, parsing, oversized and uncertain network failures w
   let response = () => new Response('secret-upstream-body', { status: 429, headers: { 'Retry-After': '5' } });
   await mockFetch(context, async () => { calls++; return response(); });
   await assert.rejects(submitModeration('text', 'A serif font', 'stable-key'), (error: unknown) => {
-    assert.ok(error instanceof SeeApiError); assert.equal(error.retryable, true); assert.equal(error.retryAfterSeconds, 5); assert.ok(!error.message.includes('secret')); return true;
+    assert.ok(error instanceof SeeApiError); assert.equal(error.retryable, true); assert.equal(error.retryAfterSeconds, 5); assert.equal(error.httpStatus, 429); assert.equal(error.code, 'HTTP_ERROR'); assert.equal(error.submissionRejected, false); assert.ok(!error.message.includes('secret')); return true;
   });
   assert.equal(calls, 1);
   for (const next of [
