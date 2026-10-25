@@ -59,7 +59,7 @@ test('attaching optional analytics cannot fail checkout when the analytics migra
   await assert.doesNotReject(attachOrderAnalytics(event.order_id, { id: 'user' }, context));
 }));
 
-for (const [status, expected] of [[204, null], [401, 'REQUEST_REJECTED'], [429, 'RATE_LIMIT'], [502, 'DELIVERY_UNCERTAIN'], [0, 'DELIVERY_UNCERTAIN']] as const) {
+for (const [status, expected] of [[204, null], [307, 'REQUEST_REJECTED'], [401, 'REQUEST_REJECTED'], [429, 'RATE_LIMIT'], [502, 'DELIVERY_UNCERTAIN'], [0, 'DELIVERY_UNCERTAIN']] as const) {
   test(`GA4 delivery ${status || 'timeout'} is classified without automatic resend`, async () => configured(async () => {
     let sends = 0, finished = false;
     globalThis.fetch = async (url, init) => {
@@ -70,7 +70,7 @@ for (const [status, expected] of [[204, null], [401, 'REQUEST_REJECTED'], [429, 
         assert.equal(parsed.hostname, 'www.google-analytics.com');
         assert.equal(parsed.searchParams.get('api_secret'), 'mock-secret');
         assert.deepEqual(Object.keys(init!.headers!), ['Content-Type']);
-        assert.equal(init?.redirect, 'error'); assert.equal(init?.credentials, 'omit'); assert.ok(init?.signal);
+        assert.equal(init?.redirect, 'manual'); assert.equal(init?.credentials, 'omit'); assert.ok(init?.signal);
         assert.ok(!String(init?.body).includes('mock-secret'));
         if (!status) throw new DOMException('timed out', 'TimeoutError');
         return new Response(status === 204 ? null : '<html>upstream unavailable</html>', { status });

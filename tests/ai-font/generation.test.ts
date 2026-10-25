@@ -21,7 +21,7 @@ function configure(context: TestContext, fetcher: typeof fetch) {
 
 type StoredJob = Parameters<typeof reconcileJob>[0];
 type Check = { id: string; stage: string; input_hash: string; asset_hash: string; status: string; provider_task_id: string | null };
-type Scenario = 'valid' | 'invalid' | 'oversized' | 'stream-oversized' | 'download-error' | 'storage-error' | 'partial-storage' | 'bind-error' | 'stage-read-error' | 'blocked' | 'immediate-blocked' | 'malformed' | 'provider-error';
+type Scenario = 'valid' | 'invalid' | 'oversized' | 'stream-oversized' | 'download-error' | 'download-redirect' | 'storage-error' | 'partial-storage' | 'bind-error' | 'stage-read-error' | 'blocked' | 'immediate-blocked' | 'malformed' | 'provider-error';
 
 function pipeline(context: TestContext, scenario: Scenario = 'valid') {
   const job: StoredJob = {
@@ -43,8 +43,10 @@ function pipeline(context: TestContext, scenario: Scenario = 'valid') {
     }
     if (url.hostname === 'static.mixfont.com') {
       events.push('font-download');
+      assert.equal(request.redirect, 'manual');
       if (expiredVendor) return new Response(null, { status: 410 });
       if (scenario === 'download-error') return new Response(null, { status: 503 });
+      if (scenario === 'download-redirect') return new Response(null, { status: 302, headers: { Location: 'https://untrusted.example/font.ttf' } });
       if (scenario === 'invalid') return new Response(fixture.subarray(0, 12));
       if (scenario === 'oversized') return new Response('too big', { headers: { 'Content-Length': String(21 * 1024 * 1024) } });
       if (scenario === 'stream-oversized') return new Response(new Uint8Array(20 * 1024 * 1024 + 1));
@@ -194,10 +196,10 @@ test('reconciliation bounds provider concurrency and continues after a failed jo
 });
 
 test('invalid font downloads fail without moderation; transient download/storage errors remain recoverable', async (context) => {
-  for (const scenario of ['invalid', 'oversized', 'stream-oversized', 'download-error', 'storage-error'] as const) {
+  for (const scenario of ['invalid', 'oversized', 'stream-oversized', 'download-error', 'download-redirect', 'storage-error'] as const) {
     await context.test(scenario, async (child) => {
       const state = pipeline(child, scenario);
-      if (scenario === 'download-error' || scenario === 'storage-error') {
+      if (scenario === 'download-error' || scenario === 'download-redirect' || scenario === 'storage-error') {
         await assert.rejects(state.run());
         assert.deepEqual(state.finished, []);
       } else {

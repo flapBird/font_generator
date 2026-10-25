@@ -43,7 +43,7 @@ export async function deliverAnalytics() {
       let response: Response;
       try {
         response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
-          signal: AbortSignal.timeout(7_000), redirect: 'error', credentials: 'omit', cache: 'no-store' });
+          signal: AbortSignal.timeout(7_000), redirect: 'manual', credentials: 'omit', cache: 'no-store' });
       } catch { throw new Error('DELIVERY_UNCERTAIN'); }
       await response.body?.cancel().catch(() => undefined);
       if (!response.ok) throw new Error(response.status === 429 ? 'RATE_LIMIT' : response.status >= 500 ? 'DELIVERY_UNCERTAIN' : 'REQUEST_REJECTED');

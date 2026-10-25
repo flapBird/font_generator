@@ -48,8 +48,11 @@ export function safeFontUrl(value: unknown) {
 }
 
 async function downloadFont(url: URL) {
-  const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(20000), cache: 'no-store' });
-  if (!response.ok || !response.body) throw new Error('Font download unavailable');
+  const response = await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(20000), cache: 'no-store' });
+  if (!response.ok || !response.body) {
+    await response.body?.cancel();
+    throw new Error('Font download unavailable');
+  }
   const maxBytes = 20 * 1024 * 1024;
   if (Number(response.headers.get('content-length')) > maxBytes) {
     await response.body.cancel();

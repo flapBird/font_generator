@@ -25,7 +25,7 @@ test('SeeAPI sends original content with fixed policy, stable idempotency, serve
   await mockFetch(context, async (url, init) => {
     assert.equal(String(url), 'https://api.seeapi.com/v1/inferences');
     seen.push(init!);
-    assert.equal(init?.redirect, 'error'); assert.equal(init?.cache, 'no-store'); assert.ok(init?.signal);
+    assert.equal(init?.redirect, 'manual'); assert.equal(init?.cache, 'no-store'); assert.ok(init?.signal);
     const headers = new Headers(init?.headers);
     assert.equal(headers.get('Authorization'), 'Bearer unit-test-seeapi-key');
     assert.equal(headers.get('Idempotency-Key'), 'job-1-prompt-v1');
@@ -35,6 +35,23 @@ test('SeeAPI sends original content with fixed policy, stable idempotency, serve
   });
   for (let attempt = 0; attempt < 2; attempt++) assert.deepEqual(await submitModeration('text', 'A friendly serif font', 'job-1-prompt-v1'), { taskId: 'task_test-123', status: 'passed', consumedCredits: 0.002 });
   assert.equal(seen.length, 2);
+});
+
+test('SeeAPI rejects redirects without following credentials or starting a replacement check', async (context) => {
+  let status = 301, calls = 0;
+  await mockFetch(context, async (_url, init) => {
+    calls++;
+    assert.equal(init?.redirect, 'manual');
+    return new Response('private-upstream-body', { status, headers: { Location: 'https://untrusted.example/' } });
+  });
+  for (status of [301, 302, 303, 307, 308]) {
+    for (const check of [() => submitModeration('text', 'A serif font', 'stable-key'), () => pollModeration('text', 'task_test-123')]) {
+      await assert.rejects(check, (error: unknown) => error instanceof SeeApiError
+        && error.code === 'HTTP_ERROR' && error.httpStatus === status && !error.submissionRejected
+        && !error.message.includes('private'));
+    }
+  }
+  assert.equal(calls, 10);
 });
 
 test('SeeAPI preserves accepted tasks for later polling and distinguishes execution failures from content flags', async (context) => {

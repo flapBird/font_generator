@@ -110,7 +110,9 @@ async function request(kind: ModerationKind, path: string, init: RequestInit, ex
   try {
     const response = await fetch(API + path, {
       ...init, headers: { ...init.headers, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      cache: 'no-store', redirect: 'error', signal: AbortSignal.timeout(15000),
+      // Workers rejects redirect: 'error' before sending. Manual mode keeps
+      // credentials on this host; the status check below rejects every 3xx.
+      cache: 'no-store', redirect: 'manual', signal: AbortSignal.timeout(15000),
     });
     if (response.status !== 200 && response.status !== 202) {
       const error = new SeeApiError(response.status === 429 || response.status >= 500, retryAfter(response), response.status, 'HTTP_ERROR', init.method === 'POST' && [400, 401, 402, 403, 404, 422].includes(response.status));

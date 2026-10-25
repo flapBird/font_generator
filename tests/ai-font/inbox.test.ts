@@ -31,7 +31,7 @@ test('only server sender and isolated Bearer headers are sent; a valid 202 recei
       assert.deepEqual(Object.fromEntries(new Headers(init?.headers)), {
         authorization: 'Bearer mock-server-token', 'content-type': 'application/json',
       });
-      assert.equal(init?.redirect, 'error');
+      assert.equal(init?.redirect, 'manual');
       assert.equal(init?.credentials, 'omit');
       assert.equal(init?.cache, 'no-store');
       assert.deepEqual(JSON.parse(String(init?.body)), {

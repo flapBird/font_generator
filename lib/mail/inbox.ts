@@ -61,7 +61,7 @@ export async function sendInboxMail(message: InboxMessage): Promise<string> {
   try {
     response = await fetch(settings.url, {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${settings.token}` },
-      body, cache: 'no-store', redirect: 'error', credentials: 'omit', signal: AbortSignal.timeout(35_000),
+      body, cache: 'no-store', redirect: 'manual', credentials: 'omit', signal: AbortSignal.timeout(35_000),
     });
   } catch { throw new InboxDeliveryError('DELIVERY_UNCERTAIN'); }
 
