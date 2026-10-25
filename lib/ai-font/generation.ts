@@ -5,12 +5,18 @@ import type { FontJob } from './catalog';
 import { FontValidationError, validateEnglishTtf } from './validate-font';
 import { approvedFontBytes, reviewGeneratedFont, reviewStoragePath, reviewStagePath, stagedFontBytes, type ReviewJob } from './moderation';
 import { FontSpecimenError } from './font-specimens';
+import type { JobFailureCode } from './job-status';
 
 type StoredJob = FontJob & ReviewJob & { external_id: string | null; storage_path: string | null; updated_at: string };
 const apiBase = 'https://api.mixfont.com/v1/font-generations';
 
-async function finish(id: string, status: 'failed' | 'succeeded', path: string | null = null, name: string | null = null) {
-  const { error } = await adminClient().rpc('ai_font_finish_job', { p_id: id, p_status: status, p_path: path, p_name: name });
+async function finish(id: string, status: 'failed' | 'succeeded', path: string | null = null, name: string | null = null, reason: JobFailureCode | null = null) {
+  const db = adminClient();
+  const args = { p_id: id, p_status: status, p_path: path, p_name: name };
+  let { error } = await db.rpc('ai_font_finish_job_with_reason', { ...args, p_reason: reason });
+  // A rolling deployment without the additive migration still settles credits.
+  // Other errors may be uncertain commits: never treat them as a missing RPC.
+  if (error?.code === 'PGRST202') ({ error } = await db.rpc('ai_font_finish_job', args));
   if (error) throw error;
 }
 
@@ -26,7 +32,12 @@ async function start(job: StoredJob) {
       method: 'POST', headers: { 'x-api-key': requiredEnv('MIXFONT_API_KEY'), 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: job.prompt, glyph_set: 'standard' }), cache: 'no-store', signal: AbortSignal.timeout(20000),
     });
-    if ([400, 401, 402, 403, 422, 429].includes(response.status)) { await finish(job.id, 'failed'); return; }
+    if ([400, 401, 402, 403, 422, 429].includes(response.status)) {
+      const reason = response.status === 429 ? 'service_busy' : [401,402,403].includes(response.status) ? 'service_unavailable' : 'request_rejected';
+      console.error('[ai-font] Generation submission rejected:', { httpStatus: response.status, code: reason });
+      await response.body?.cancel();
+      await finish(job.id, 'failed', null, null, reason); return;
+    }
     if (!response.ok) throw new Error('Uncertain generation submission');
     const result = await response.json();
     if (typeof result.id !== 'string' || !/^[a-zA-Z0-9-]{1,100}$/.test(result.id)) throw new Error('Invalid generation response');
@@ -99,7 +110,7 @@ export async function reconcileJob(job: StoredJob) {
         if (!response.ok) throw new Error('Generation status unavailable');
         const result = await response.json();
         if (result.id !== job.external_id) throw new Error('Generation mismatch');
-        if (['failed', 'cancelled'].includes(result.status)) { await finish(job.id, 'failed'); return; }
+        if (['failed', 'cancelled'].includes(result.status)) { await finish(job.id, 'failed', null, null, 'generation_failed'); return; }
         if (result.status !== 'succeeded') return;
         bytes = await downloadFont(safeFontUrl(result.ttf_url));
         if (typeof result.name === 'string') name = result.name;
@@ -109,12 +120,12 @@ export async function reconcileJob(job: StoredJob) {
     }
     const review = await reviewGeneratedFont(job, bytes);
     if (review === 'pending') return;
-    if (review === 'blocked' || review === 'failed') { await finish(job.id, 'failed'); await cleanupReview(job); return; }
+    if (review === 'blocked' || review === 'failed') { await finish(job.id, 'failed', null, null, review === 'blocked' ? 'output_blocked' : 'review_failed'); await cleanupReview(job); return; }
   } catch (error) {
     if (!(error instanceof FontValidationError) && !(error instanceof FontSpecimenError)) throw error;
     // A completed but invalid font cannot be delivered. The existing atomic
     // failure function restores exactly the reserved customer credits once.
-    await finish(job.id, 'failed');
+    await finish(job.id, 'failed', null, null, 'output_invalid');
     await cleanupReview(job);
     return;
   }

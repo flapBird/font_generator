@@ -85,3 +85,44 @@ test('healthy account responses preserve saved data and omit private credit-even
   assert.ok(!JSON.stringify(result.creditEvents).includes('private-payment-id'));
   assert.deepEqual(logs, []);
 }));
+
+test('a rolling deployment without failure columns still returns the saved library', async () => configured(async () => {
+  database();
+  const fetch = globalThis.fetch;
+  let attempts = 0;
+  globalThis.fetch = async (input, init) => {
+    const url = new URL(String(input));
+    if (url.pathname.endsWith('/ai_font_jobs')) {
+      attempts++;
+      if (url.searchParams.get('select')?.includes('failure_code')) return Response.json({ code: '42703', message: 'missing column' }, { status: 400 });
+    }
+    return fetch(input, init);
+  };
+  const result = await loadAccount(user);
+  assert.equal(attempts, 2);
+  assert.equal(result.jobs[0].name, 'Saved font');
+  assert.equal(result.billingUnavailable, false);
+}));
+
+test('slow database sections are bounded and never erase healthy account records', async context => configured(async () => {
+  const controller = new AbortController();
+  context.mock.method(AbortSignal, 'timeout', () => controller.signal);
+  database();
+  const fetch = globalThis.fetch;
+  globalThis.fetch = async (input, init) => {
+    if (new URL(String(input)).pathname.endsWith('/ai_font_jobs')) {
+      assert.ok(init?.signal);
+      if (init.signal.aborted) throw new DOMException('timeout', 'AbortError');
+      return new Promise((_resolve, reject) => init.signal!.addEventListener('abort', () => reject(new DOMException('timeout', 'AbortError')), { once: true }));
+    }
+    return fetch(input, init);
+  };
+  const loading = loadAccount(user);
+  await new Promise(resolve => setImmediate(resolve));
+  controller.abort();
+  const result = await loading;
+  assert.equal(result.user.displayName, 'Saved Name');
+  assert.equal(result.credits, 300);
+  assert.deepEqual(result.unavailableSections, ['fonts']);
+  assert.equal(result.services.generation, false);
+}));

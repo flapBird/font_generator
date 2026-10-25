@@ -8,7 +8,8 @@ export async function GET() {
   return endpoint(async () => {
     const services = availability();
     if (!services.auth) return json({ user: null, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], analytics: analyticsIdentity(null), services });
-    const { data: { user }, error: authError } = await (await authClient()).auth.getUser();
+    const { data: { user }, error: authError } = await (await authClient(AbortSignal.timeout(6000))).auth.getUser();
+    if (authError && (authError.name === 'AuthRetryableFetchError' || authError.status === 0 || (authError.status ?? 0) >= 500)) return json({ error: 'Your sign-in service could not be reached. Please try again.' }, 503);
     if (authError || !user) return json({ user: null, credits: 0, jobs: [], orders: [], creditEvents: [], subscriptions: [], analytics: analyticsIdentity(null), services });
     return json(await loadAccount(user));
   });

@@ -140,10 +140,11 @@ function pipeline(context: TestContext, scenario: Scenario = 'valid') {
       check.provider_task_id = body.p_task_id ?? check.provider_task_id;
       return Response.json(true);
     }
-    assert.equal(url.pathname, '/rest/v1/rpc/ai_font_finish_job');
+    assert.equal(url.pathname, '/rest/v1/rpc/ai_font_finish_job_with_reason');
     assert.equal(body.p_id, job.id);
     finished.push(body.p_status); job.status = body.p_status;
     assert.equal(body.p_path, body.p_status === 'succeeded' ? 'test-user/test-job.ttf' : null);
+    assert.equal(body.p_reason, body.p_status === 'succeeded' ? null : scenario === 'blocked' || scenario === 'immediate-blocked' ? 'output_blocked' : 'output_invalid');
     return Response.json(null);
   });
   return { job, events, uploads, objects, checks, finished, providerRequests, expireVendor: () => { expiredVendor = true; }, run: () => reconcileJob({ ...job }) };
@@ -193,6 +194,32 @@ test('reconciliation bounds provider concurrency and continues after a failed jo
       else process.env[key] = originalEnv[index];
     });
   }
+});
+
+test('an upstream 402 records a service failure and settles once; missing diagnostic RPC alone uses legacy settlement', async context => {
+  for (const missingMigration of [false, true]) await context.test(String(missingMigration), async child => {
+    const job: StoredJob = { id: 'funding-job', user_id: 'user', prompt: 'A friendly font', status: 'reserved', external_id: null, storage_path: null, name: null, output_hash: null, review_page_count: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+    const calls: string[] = [];
+    child.mock.method(console, 'error', () => {});
+    configure(child, async (input, init) => {
+      const url = new URL(String(input)); calls.push(url.pathname);
+      if (url.hostname === 'api.mixfont.com') return new Response('private provider body', { status: 402 });
+      const body = JSON.parse(String(init?.body));
+      if (url.pathname.endsWith('ai_font_claim_job')) return Response.json(true);
+      if (url.pathname.endsWith('ai_font_finish_job_with_reason')) {
+        assert.equal(body.p_reason, 'service_unavailable'); assert.equal(body.p_status, 'failed');
+        if (missingMigration) return Response.json({ code: 'PGRST202' }, { status: 404 });
+        return Response.json(null);
+      }
+      assert.equal(url.pathname, '/rest/v1/rpc/ai_font_finish_job');
+      assert.ok(missingMigration); assert.equal(body.p_status, 'failed');
+      return Response.json(null);
+    });
+    await reconcileJob(job);
+    assert.equal(calls.filter(path => path === '/v1/font-generations/text').length, 1);
+    assert.equal(calls.filter(path => path.endsWith('/ai_font_finish_job')).length, missingMigration ? 1 : 0);
+    assert.equal(calls.filter(path => path.endsWith('/ai_font_finish_job_with_reason')).length, 1);
+  });
 });
 
 test('invalid font downloads fail without moderation; transient download/storage errors remain recoverable', async (context) => {

@@ -643,3 +643,81 @@ test('the private font library has its own sign-in return path', async ({ page }
   await expect(page.getByRole('link', { name: 'Continue to Google sign-in' })).toHaveAttribute('href', '/login?next=%2Fmy-fonts');
   await expect(page.getByLabel('Font description')).toHaveCount(0);
 });
+
+test('account workspace keeps its structure while loading and shares recent data with the font library', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const failed = { id: '10000000-0000-4000-8000-000000000071', name: null, prompt: 'A romantic Roman serif font', status: 'failed', credit_cost: 100, failure_code: 'service_unavailable', created_at: '2026-10-25T12:00:00Z', updated_at: '2026-10-25T12:00:08Z' };
+  const fixture = { user: { email: 'jamie@example.com', displayName: 'Jamie Chen', avatarUrl: null, provider: 'Google', createdAt: '2026-10-01T00:00:00Z' }, credits: 300, billingUnavailable: false, unavailableSections: [],
+    jobs: [failed, { ...failed, id: '10000000-0000-4000-8000-000000000072', name: 'Sunday Serif', status: 'succeeded', failure_code: null }], orders: [], subscriptions: [],
+    creditEvents: [{ id: 1, kind: 'restore', delta: 100, created_at: failed.updated_at }, { id: 2, kind: 'job', delta: -100, created_at: failed.created_at }],
+    services: { auth: true, generation: true, checkout: true, sandbox: true } };
+  let requests = 0, release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/api/ai-font/account', async route => { requests++; await gate; await route.fulfill({ json: fixture }); });
+  const paid: string[] = [];
+  page.on('request', req => { if (req.method() === 'POST' && /\/api\/ai-font\/(jobs|orders)/.test(req.url())) paid.push(req.url()); });
+  await page.goto('/account');
+  await expect(page.getByRole('navigation', { name: 'Account navigation' })).toBeVisible();
+  await expect(page.getByRole('status', { name: 'Loading account' })).toBeVisible();
+  await page.screenshot({ path: '/tmp/font-generator-account-loading.png', fullPage: true });
+  release();
+  await expect(page.getByLabel('Display name')).toHaveValue('Jamie Chen');
+  await expect(page.getByRole('heading', { name: 'Your credits', exact: true })).toBeVisible();
+  await page.screenshot({ path: '/tmp/font-generator-account-workspace.png', fullPage: true });
+  await page.screenshot({ path: '/tmp/font-generator-account-preview.png' });
+  await page.getByRole('link', { name: 'My fonts & purchases', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'My fonts & purchases', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Sunday Serif', exact: true })).toBeVisible();
+  expect(requests).toBe(1);
+  await page.screenshot({ path: '/tmp/font-generator-library-preview.png' });
+  await page.getByRole('button', { name: 'View details for Custom English font' }).click();
+  const details = page.getByRole('dialog');
+  await expect(details).toBeVisible();
+  await expect(details.getByRole('heading', { name: 'Generation service unavailable' })).toBeVisible();
+  await expect(details.getByText('100 credits restored.', { exact: false })).toBeVisible();
+  await expect(details.getByText(failed.id, { exact: true })).toBeVisible();
+  await page.screenshot({ path: '/tmp/font-generator-task-details.png', fullPage: true });
+  await page.screenshot({ path: '/tmp/font-generator-task-details-preview.png' });
+  await details.getByRole('button', { name: 'Close task details' }).press('Escape');
+  await expect(details).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'View details for Custom English font' })).toBeFocused();
+  await page.getByRole('group', { name: 'Filter fonts' }).getByRole('button', { name: 'Failed 1' }).click();
+  await expect(page.getByRole('heading', { name: 'Sunday Serif', exact: true })).toHaveCount(0);
+  await page.screenshot({ path: '/tmp/font-generator-font-library-workspace.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/font-generator-font-library-mobile.png', fullPage: true });
+  await page.getByRole('button', { name: 'View details for Custom English font' }).click();
+  expect(await details.evaluate(element => element.scrollWidth <= innerWidth)).toBe(true);
+  await details.getByRole('button', { name: 'Back to fonts' }).click();
+  await page.getByRole('link', { name: 'Account & billing', exact: true }).click();
+  await expect(page.getByLabel('Display name')).toHaveValue('Jamie Chen');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/font-generator-account-mobile.png', fullPage: true });
+  expect(paid).toEqual([]);
+});
+
+test('old failures stay unknown and an uncertain task never claims a refund', async ({ page }) => {
+  const base = { id: '10000000-0000-4000-8000-000000000081', name: 'Older attempt', prompt: 'A friendly rounded font', status: 'failed', created_at: '2026-10-24T10:00:00Z' };
+  await page.route('**/api/ai-font/account', route => route.fulfill({ json: {
+    user: { email: 'user@example.com' }, credits: 200, orders: [], creditEvents: [],
+    jobs: [base, { ...base, id: '10000000-0000-4000-8000-000000000082', name: 'Awaiting confirmation', status: 'needs_review', credit_cost: 100 }],
+    services: { auth: true, generation: true, checkout: true, sandbox: true },
+  } }));
+  await page.goto('/my-fonts');
+  await page.getByRole('button', { name: 'View details for Older attempt' }).click();
+  await expect(page.getByRole('dialog').getByText('A detailed reason was not recorded for this task.')).toBeVisible();
+  await page.getByRole('button', { name: 'Close task details' }).click();
+  await page.getByRole('button', { name: 'View details for Awaiting confirmation' }).click();
+  await expect(page.getByRole('dialog').getByText('Credits remain reserved while the outcome is checked; a refund has not been confirmed.')).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Restored', { exact: false })).toHaveCount(0);
+});
+
+test('account loading times out with retry instead of spinning forever', async ({ page }) => {
+  await page.route('**/api/ai-font/account', () => {});
+  await page.goto('/account');
+  await expect(page.getByText('Taking longer than usual.', { exact: false })).toBeVisible({ timeout: 6000 });
+  await expect(page.getByRole('alert').filter({ hasText: 'taking longer than expected' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('status', { name: 'Loading account' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Retry', exact: true })).toBeEnabled();
+});

@@ -25,6 +25,9 @@ export type FontJob = {
   status: 'reserved' | 'starting' | 'processing' | 'needs_review' | 'succeeded' | 'failed';
   name: string | null;
   created_at: string;
+  updated_at?: string;
+  credit_cost?: number;
+  failure_code?: string | null;
 };
 
 export function validatePrompt(value: unknown): string {

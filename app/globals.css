@@ -4,6 +4,9 @@
  
  :root {
    color-scheme: light;
+   --font-sans: ui-sans-serif;
+   --font-geist-sans: ui-sans-serif;
+   --font-geist-mono: ui-monospace;
    --background: #f4f6f8;
    --foreground: #0f172a;
    --muted: #edf1f4;
