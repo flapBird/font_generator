@@ -2,7 +2,7 @@
 
 import { useGeneratorText } from '@/lib/use-generator-text';
 
-import Link from 'next/link';
+import Link from '@/components/IntentLink';
 import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import type { GeneratorPageConfig, GeneratorStyleCategory } from '@/lib/generator';
 import {

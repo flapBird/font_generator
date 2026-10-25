@@ -1,5 +1,23 @@
 import { test, expect } from '@playwright/test';
 
+test('Workers returns the requested RSC tree or page segment from the static cache', async ({ request }) => {
+  for (const [path, segment, marker] of [
+    ['/weird-text-generator', '/_tree', '"tree":'],
+    ['/weird-text-generator', '/$d$slug/__PAGE__', 'Weird Text Generator'],
+    ['/guides', '/_tree', '"tree":'],
+  ]) {
+    const response = await request.get(`${path}?_rsc=offline-transport-check`, {
+      headers: { RSC: '1', 'Next-Router-Prefetch': '1', 'Next-Router-Segment-Prefetch': segment },
+    });
+    expect(response.status(), `${path} ${segment}`).toBe(200);
+    expect(response.headers()['content-type']).toContain('text/x-component');
+    expect(response.headers()['x-nextjs-postponed']).toBe('2');
+    const body = await response.text();
+    expect(body).toContain(marker);
+    expect(body).not.toContain('<!DOCTYPE html>');
+  }
+});
+
 test('Cloudflare scheduled entry runs safely without AI credentials', async ({ request }) => {
   const response = await request.get('/__scheduled?cron=*/5%20*%20*%20*%20*');
   expect(response.status()).toBe(200);

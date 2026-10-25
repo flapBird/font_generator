@@ -7,6 +7,42 @@ test.beforeEach(async ({ context }) => {
   await context.route('https://**/*', route => route.abort());
 });
 
+test('homepage stays idle while browsing links and prefetches a destination on hover', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const prefetches: string[] = [];
+  page.on('request', request => {
+    if (request.headers()['next-router-prefetch'] === '1') prefetches.push(new URL(request.url()).pathname);
+  });
+  await page.goto('/');
+  await page.getByLabel('Enter your text', { exact: true }).fill('Hello');
+  await expect(page.getByText('𝐇𝐞𝐥𝐥𝐨', { exact: true }).first()).toBeVisible();
+  await page.waitForTimeout(1000);
+  expect(prefetches).toEqual([]);
+  await page.locator('footer').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(1000);
+  expect(prefetches).toEqual([]);
+  const guides = page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', { name: 'Guides', exact: true }).first();
+  await guides.hover();
+  await expect.poll(() => prefetches.includes('/guides')).toBe(true);
+  await guides.click();
+  await expect(page).toHaveURL(/\/guides$/);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+});
+
+test('keyboard focus prefetches the chosen header link and preserves navigation', async ({ page }) => {
+  const prefetches: string[] = [];
+  page.on('request', request => {
+    if (request.headers()['next-router-prefetch'] === '1') prefetches.push(new URL(request.url()).pathname);
+  });
+  await page.goto('/');
+  const styles = page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('link', { name: 'Font Styles', exact: true }).first();
+  await styles.focus();
+  await expect.poll(() => prefetches.includes('/styles')).toBe(true);
+  await styles.press('Enter');
+  await expect(page).toHaveURL(/\/styles$/);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+});
+
 test('free AI references require no account, payment or generation API', async ({ page }) => {
   const paidCalls: string[] = [];
   page.on('request', (request) => {

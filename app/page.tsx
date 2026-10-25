@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/IntentLink';
 import GeneratorTool from '@/components/GeneratorTool';
 import { generatorStyles, getGeneratorPageConfig } from '@/lib/generator';
 import { generatorRegistry, isFontStyleGenerator } from '@/lib/generator-registry';

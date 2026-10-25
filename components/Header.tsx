@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/IntentLink';
 import { useEffect, useRef, useState, type FocusEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AccountMenu from '@/components/AccountMenu';
