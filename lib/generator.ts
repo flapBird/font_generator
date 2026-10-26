@@ -1,3 +1,4 @@
+import { strikeText } from './text-effects';
 import { convertToFancyText } from './fonts';
 import { joinGraphemes, reverseGraphemeLines, segmentGraphemes } from './unicode';
 
@@ -114,7 +115,9 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
     description: 'Reverses the text and rotates supported characters for a true upside-down result.',
     transform: inverseText,
   },
-  baseStyle('strikethrough', 'Strikethrough', 'effects', 'A line runs through every visible character.'),
+  { id: 'strikethrough', name: 'Long Strikethrough', category: 'effects', description: 'A long Unicode overlay crosses out letters, digits, and punctuation; emoji stay intact.', transform: (text) => strikeText(text) },
+  { id: 'shortStrike', name: 'Short Strikethrough', category: 'effects', description: 'A short stroke through each visible character.', transform: (text) => strikeText(text, '\u0335') },
+  { id: 'tildeStrike', name: 'Tilde Strikethrough', category: 'effects', description: 'A wavy overlay through each visible character.', transform: (text) => strikeText(text, '\u0334') },
   {
     id: 'sans',
     name: 'Clean Sans',
@@ -398,6 +401,10 @@ export const generateStyleVariants = (text: string, styleIds: string[]) =>
     }));
 
 const packs: Record<string, string[]> = {
+  'bold-text-generator': ['sansBold', 'bold', 'sansBoldItalic', 'boldItalic', 'boldScript', 'boldFraktur'],
+  'strikethrough-text-generator': ['strikethrough', 'shortStrike', 'tildeStrike'],
+  'discord-font-generator': ['sansBold', 'bold', 'smallCaps', 'monospace', 'script', 'boldScript', 'fraktur', 'circled'],
+  'zalgo-text-generator': ['glitch'],
   'small-text-generator': ['smallCaps', 'superscript', 'subscript', 'tinyWave', 'wave', 'dotDivider', 'brackets', 'dotted', 'spaced'],
   'weird-text-generator': ['inverted', 'backwards', 'glitch', 'slash', 'wave', 'ransom', 'randomCase', 'parenthesized', 'darkCircled', 'cross'],
   'upside-down-text-generator': ['inverted', 'upsideFrame'],

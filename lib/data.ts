@@ -1,3 +1,4 @@
+ import { priorityKeywordPages } from './priority-keyword-pages';
  import { additionalGuidePages } from './additional-guides';
  import { newKeywordFandomPages, newKeywordStylePages } from './new-keyword-pages';
 
@@ -768,7 +769,7 @@
        { q: 'Will my Facebook friends see the fancy text on mobile? a: Yes — the Facebook mobile app renders Unicode characters correctly on both iOS and Android. Test on both platforms if you are using less common character blocks like fraktur or double-struck.', a: 'Yes — the Facebook mobile app renders Unicode characters correctly on both iOS and Android. Test on both platforms if you are using less common character blocks like fraktur or double-struck.' },
        { q: 'Can I use fancy text in Facebook Marketplace listings? a: Yes — but use it sparingly. A bold title can help your listing stand out, but overly decorated text in the description may look unprofessional to buyers.', a: 'Yes — but use it sparingly. A bold title can help your listing stand out, but overly decorated text in the description may look unprofessional to buyers.' },
      ],
-     relatedSlugs: ['linkedin-font-generator', 'tiktok-font-generator', 'brat-text-generator'],
+     relatedSlugs: ['bold-text-generator', 'discord-font-generator', 'tiktok-font-generator', 'linkedin-font-generator'],
      icon: '👍',
      defaultStyleIds: ['bold', 'script', 'circled'],
    },
@@ -845,6 +846,7 @@
      defaultStyleIds: ['fraktur'],
    },
    ...newKeywordStylePages,
+   ...priorityKeywordPages,
  ];
  
  export const fandomPages: PageDefinition[] = [

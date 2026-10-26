@@ -33,9 +33,9 @@
        icon: page.icon,
        description,
        kind,
-       badge: isAscii ? '6 ASCII styles' : visualConfig ? `${visualConfig.presets.length} presets` : `${config.styleIds.length} styles`,
-       metaLabel: isAscii ? 'ASCII + downloads' : visualConfig ? 'Rendered artwork + downloads' : preview?.name ?? 'Copy & paste',
-       previewText: visualConfig?.presets[0]?.name ?? (isAscii ? 'Block · Outline · Shadow' : preview?.text ?? 'Your Text'),
+       badge: page.slug === 'zalgo-text-generator' ? 'Adjustable intensity' : page.slug === 'discord-font-generator' ? 'Unicode + Markdown' : isAscii ? '6 ASCII styles' : visualConfig ? `${visualConfig.presets.length} presets` : `${config.styleIds.length} styles`,
+       metaLabel: page.slug === 'zalgo-text-generator' ? 'Above · Through · Below' : isAscii ? 'ASCII + downloads' : visualConfig ? 'Rendered artwork + downloads' : preview?.name ?? 'Copy & paste',
+       previewText: page.slug === 'zalgo-text-generator' ? 'Choose your level of corruption' : visualConfig?.presets[0]?.name ?? (isAscii ? 'Block · Outline · Shadow' : preview?.text ?? 'Your Text'),
        searchText: [
          page.title,
          page.slug,

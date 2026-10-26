@@ -47,7 +47,11 @@ export default async function GeneratorPage({ params }: { params: Promise<{ slug
   if (!page || !definition) notFound();
 
   const config = getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds);
-  const featureList = getSpecializedFeatureList(page.slug) ?? config.styleIds
+  const textFeatures: Record<string, string[]> = {
+    'zalgo-text-generator': ['Adjustable intensity', 'Above, through, and below mark controls', 'Randomize marks', 'Copy Unicode text'],
+    'discord-font-generator': ['Unicode display-name styles', 'Native Discord Markdown', 'Message formatting preview', 'Copy text'],
+  };
+  const featureList = textFeatures[page.slug] ?? getSpecializedFeatureList(page.slug) ?? config.styleIds
     .map((styleId) => getStyleDefinition(styleId)?.name)
     .filter((name): name is string => Boolean(name));
   const isFontStyle = isFontStyleGenerator(definition);

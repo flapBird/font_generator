@@ -1,3 +1,5 @@
+import DiscordGeneratorTool from './DiscordGeneratorTool';
+import ZalgoGeneratorTool from './ZalgoGeneratorTool';
 import Link from 'next/link';
 import GeneratorTool from './GeneratorTool';
 import VisualGeneratorTool from './VisualGeneratorTool';
@@ -105,6 +107,8 @@ export default function PageTemplate({
   const definition = getGeneratorDefinition(page.slug);
   const baseVisualConfig = getVisualGeneratorConfig(page.slug);
   const visualConfig = baseVisualConfig;
+  const isZalgo = page.slug === 'zalgo-text-generator';
+  const isDiscord = page.slug === 'discord-font-generator';
   const isAsciiGenerator = definition?.kind === 'ascii';
   const isThreeDGenerator = page.slug === '3d-font-generator';
   const isSanFrancisco = page.slug === 'san-francisco-font-generator';
@@ -124,7 +128,13 @@ export default function PageTemplate({
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
-  const workflowSteps = isThreeDGenerator
+  const workflowSteps = isZalgo || isDiscord
+    ? [
+        ['1', 'Enter text', 'Type a short phrase in the input.'],
+        ['2', isZalgo ? 'Adjust the effect' : 'Choose the destination', isZalgo ? 'Set intensity and mark directions; randomize to try another arrangement.' : 'Use Unicode for display names or choose native Markdown formatting for messages.'],
+        ['3', 'Copy and test', 'Copy the output and check it in the intended app or field.'],
+      ]
+    : isThreeDGenerator
     ? [
         ['1', 'Enter text', 'Type a short title or up to three manual lines. The 3D preview updates immediately.'],
         ['2', 'Choose a 3D style', 'Apply a complete preset such as Gold, Chrome, Neon, Gaming, Bubble, or Retro.'],
@@ -152,6 +162,7 @@ export default function PageTemplate({
   const supplement = getPageSupplement(page.slug);
   const relatedLinks = getRelatedLinks(page.relatedSlugs).slice(0, 4);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
+    if (isZalgo || isDiscord) return example;
     const styleId = config.styleIds[index % config.styleIds.length];
     const style = getStyleDefinition(styleId);
     return {
@@ -193,7 +204,11 @@ export default function PageTemplate({
           )}
         </header>
 
-        {isThreeDGenerator ? (
+        {isZalgo ? (
+          <ZalgoGeneratorTool />
+        ) : isDiscord ? (
+          <DiscordGeneratorTool config={config} />
+        ) : isThreeDGenerator ? (
           <ThreeDFontGeneratorTool key={page.slug} />
         ) : isAsciiGenerator ? (
           <AsciiGeneratorTool

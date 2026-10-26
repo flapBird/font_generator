@@ -241,7 +241,7 @@ export const newKeywordStylePages: PageDefinition[] = [
       { q: 'Why does glitch text look different after pasting?', a: 'Apps and operating systems use different fallback fonts, clipping rules, filters, and line-height calculations for combining marks.' },
       { q: 'Is lighter glitch text better for usernames?', a: 'Usually. It is easier to read and less likely to be rejected or clipped, though every platform has its own character rules.' },
     ],
-    relatedSlugs: ['creepy-scary-font-generator', 'y2k-font-generator', 'weird-text-generator'],
+    relatedSlugs: ['zalgo-text-generator', 'weird-text-generator', 'strikethrough-text-generator', 'y2k-font-generator'],
     icon: '📺',
     defaultStyleIds: ['glitch', 'slash', 'strikethrough', 'monospace'],
   },

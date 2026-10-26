@@ -16,6 +16,9 @@ export type GeneratorOutput = 'text' | 'png' | 'svg' | 'txt' | 'game-code';
 export type GeneratorCapability =
   | 'copy'
   | 'style-filter'
+  | 'mark-directions'
+  | 'intensity-control'
+  | 'markdown-format'
   | 'grapheme-safe'
   | 'font-availability'
   | 'font-specimen'
@@ -62,6 +65,24 @@ export interface GeneratorDefinition {
 type GeneratorOverride = Partial<Omit<GeneratorDefinition, 'id' | 'slug' | 'title' | 'icon' | 'category' | 'canonicalPath'>>;
 
 const overrides: Record<string, GeneratorOverride> = {
+  'discord-font-generator': {
+    intent: {
+      primary: 'Create copyable Unicode styles for Discord display names and bios, or native Markdown for chat messages.',
+      secondary: ['Keep unique username restrictions distinct from display-name styling.'],
+      expectedOutputs: ['text'],
+    },
+    capabilities: ['copy', 'grapheme-safe', 'markdown-format'],
+    acceptanceCriteria: ['Separate Unicode display text from message Markdown.', 'Preserve blank lines and escape input formatting symbols.', 'Explain that decorative Unicode is not valid in unique usernames.'],
+  },
+  'zalgo-text-generator': {
+    intent: {
+      primary: 'Create Zalgo Unicode text with intensity, independent above/through/below marks, and randomization; accepts up to 1,000 input characters.',
+      secondary: ['Preserve emoji, complex scripts, and original accents; does not strip existing Zalgo marks.'],
+      expectedOutputs: ['text'],
+    },
+    capabilities: ['copy', 'grapheme-safe', 'mark-directions', 'intensity-control'],
+    acceptanceCriteria: ['Make intensity and mark directions independently adjustable.', 'Keep output stable until input, settings, or randomization changes.', 'Keep unsupported graphemes and line breaks intact.', 'Reject oversized drafts visibly without silently truncating text.'],
+  },
   '3d-font-generator': {
     kind: 'theme-logo',
     tags: ['3d text', '3d letters', '3d lettering', '3d font maker', 'transparent png'],

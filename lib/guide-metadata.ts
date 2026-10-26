@@ -91,7 +91,7 @@ const metadataBySlug: Record<string, GuideMetadata> = {
         url: 'https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline',
       },
     ],
-    toolLink: { href: '/', label: 'Create text to test in Discord' },
+    toolLink: { href: '/discord-font-generator', label: 'Open the Discord Font Generator' },
   },
   'fancy-text-troubleshooting-guide': {
     updatedAt: '2026-08-27',
