@@ -40,9 +40,9 @@ test('Discord retains input across modes and copies escaped multiline Markdown',
   await page.goto('/discord-font-generator');
   await page.getByLabel('Your text', { exact: true }).fill(' A*b \n\nNext');
   await page.getByRole('button', { name: 'Messages (Markdown)', exact: true }).click();
-  await page.getByLabel('Message format', { exact: true }).selectOption('underlineBold');
+  await page.getByRole('button', { name: 'Underline bold', exact: true }).click();
   const expected = ' __**A\\*b**__ \n\n__**Next**__';
-  await expect(page.getByLabel('Discord Markdown output')).toHaveValue(expected);
+  await expect(page.getByLabel('Discord Markdown output')).toHaveText(expected);
   await page.getByRole('button', { name: 'Copy Discord Markdown', exact: true }).click();
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
   await page.getByRole('button', { name: 'Names & bios (Unicode)', exact: true }).click();
@@ -57,21 +57,21 @@ test('Zalgo controls, clipboard, empty input and clipboard failure work', async 
   await page.goto('/zalgo-text-generator');
   await page.getByLabel('Your text', { exact: true }).fill('Hello\n👨‍👩‍👧‍👦 é');
   const result = page.getByLabel('Zalgo text output');
-  const original = await result.inputValue();
+  const original = await result.textContent();
   await page.getByRole('button', { name: 'Randomize marks' }).click();
-  await expect(result).not.toHaveValue(original);
+  await expect(result).not.toHaveText(original!);
   await page.getByRole('button', { name: 'Copy Zalgo text', exact: true }).click();
-  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(await result.inputValue());
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(await result.textContent());
   await page.getByLabel('Above letters', { exact: true }).uncheck();
   await page.getByLabel('Through letters', { exact: true }).uncheck();
   await page.getByLabel('Below letters', { exact: true }).uncheck();
-  await expect(result).toHaveValue('Hello\n👨‍👩‍👧‍👦 é');
+  await expect(result).toHaveText('Hello\n👨‍👩‍👧‍👦 é');
   await page.evaluate(() => Object.defineProperty(navigator.clipboard, 'writeText', { value: () => Promise.reject(new Error('denied')) }));
   await page.getByRole('button', { name: 'Copy Zalgo text', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Text selected');
-  await expect(result).toBeFocused();
+  await expect(page.getByLabel('Zalgo text manual copy')).toBeFocused();
   await page.getByRole('button', { name: 'Clear text' }).click();
-  await expect(result).toHaveValue('');
+  await expect(result).toHaveText('Type above to see this style');
   await expect(page.getByRole('button', { name: 'Copy Zalgo text', exact: true })).toBeDisabled();
 });
 
@@ -80,7 +80,7 @@ test('Zalgo rejects oversized saved drafts without dropping their contents', asy
   await page.goto('/zalgo-text-generator');
   await expect(page.getByRole('alert').filter({ hasText: 'This saved draft' })).toContainText('has not been cut');
   await expect(page.getByLabel('Your text', { exact: true })).toHaveValue('a'.repeat(1001));
-  await expect(page.getByLabel('Zalgo text output')).toHaveValue('');
+  await expect(page.getByLabel('Zalgo text output')).toHaveText('Type above to see this style');
 });
 
 test('new workspaces stay within mobile viewport', async ({ page }) => {

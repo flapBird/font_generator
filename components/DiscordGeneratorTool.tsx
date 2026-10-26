@@ -20,8 +20,12 @@ export default function DiscordGeneratorTool({ config }: { config: GeneratorPage
       <label htmlFor="discord-input" className="font-bold text-slate-950 dark:text-white">Your text</label>
       <textarea id="discord-input" rows={3} value={text} onChange={(event) => setText(event.target.value)} className="mb-5 mt-2 w-full rounded-xl border border-slate-300 bg-white p-4 text-lg text-slate-950 focus:outline-violet-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white" />
       {mode === 'unicode' ? <div className="grid gap-4 md:grid-cols-2">{generateStyleVariants(text, config.styleIds).map((style) => <TextOutputCard key={style.id} title={style.name} text={style.text} />)}</div> : <>
-        <label htmlFor="discord-format" className="font-semibold text-slate-950 dark:text-white">Message format</label>
-        <select id="discord-format" value={format} onChange={(event) => setFormat(event.target.value as DiscordFormat)} className="mb-5 mt-2 block w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-white">{discordFormats.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
+        <fieldset className="mb-5">
+          <legend className="mb-2 text-sm font-medium text-slate-950 dark:text-white">Message format</legend>
+          <div className="flex flex-wrap gap-2">
+            {discordFormats.map((item) => <button key={item.id} type="button" aria-pressed={format === item.id} onClick={() => setFormat(item.id)} className={`min-h-11 rounded-xl border px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${item.className} ${format === item.id ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:border-violet-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'}`}>{item.name}</button>)}
+          </div>
+        </fieldset>
         <div className="mb-5 rounded-2xl bg-white p-5 dark:bg-slate-950">
           <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-400">Formatting preview</h3>
           <p className={`mt-3 whitespace-pre-wrap break-words text-xl text-slate-950 dark:text-white ${selected.className}`}>{text || 'Enter text to preview'}</p>
