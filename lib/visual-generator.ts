@@ -118,6 +118,20 @@ const bundledPreset = (
 };
 
 const configs: Record<string, VisualGeneratorConfig> = {
+  'handwriting-font-generator': {
+    engine: 'font-renderer',
+    initialText: 'A little note',
+    fitTextToCanvas: true,
+    intentLabel: 'Handwritten text artwork',
+    resultIntro: 'Render short notes with Caveat and Patrick Hand, customize ink and background, and export PNG or SVG. Separate Unicode script alternatives are available below.',
+    bestFor: ['Short notes', 'Card headings', 'Personal labels'],
+    compatibilityNote: 'Caveat and Patrick Hand are bundled under SIL OFL 1.1. Latin text is supported by the bundled subsets; other scripts may use fallback fonts. This tool does not clone your handwriting or create a TTF. Editable SVG needs the same fonts; PNG and faithful SVG preserve the rendering.',
+    presets: [
+      bundledPreset('hand-caveat', 'Caveat — Ink', 'Loose, informal pen lettering on a warm white background.', 'Caveat', 'cursive', { fontWeight: 400, textColor: '#1e293b', backgroundColor: '#fffdf6' }),
+      bundledPreset('hand-caveat-blue', 'Caveat — Blue Pen', 'A heavier handwritten note in blue ink.', 'Caveat', 'cursive', { fontWeight: 700, textColor: '#1d4ed8', backgroundColor: '#ffffff' }),
+      bundledPreset('hand-patrick', 'Patrick Hand — Print', 'Upright, rounded hand-printed letters with a steady rhythm.', 'Patrick Hand', 'cursive', { fontWeight: 400, textColor: '#292524', backgroundColor: '#fafaf9' }),
+    ],
+  },
   'times-new-roman-font-generator': {
     engine: 'font-renderer',
     initialText: 'The quick brown fox',
@@ -441,6 +455,7 @@ export const getSpecializedDescription = (slug: string): string | null => {
 };
 
 export const getSpecializedAbout = (slug: string, pageTitle: string): string[] | null => {
+  if (slug === 'handwriting-font-generator') return null;
   if (slug === 'big-font-generator') {
     return [
       'This Big Font Generator turns ordinary letters into genuinely oversized, multi-line ASCII art. Each output is built from text characters arranged into a seven-row banner, so the result can be copied into terminals, code blocks, forum posts, chat messages, and plain-text files.',
@@ -491,6 +506,7 @@ export const getSpecializedAbout = (slug: string, pageTitle: string): string[] |
 };
 
 export const getSpecializedFaq = (slug: string, pageTitle: string) => {
+  if (slug === 'handwriting-font-generator') return null;
   if (slug === 'big-font-generator') {
     return [
       { q: 'Is the generated big text really larger than normal text?', a: 'Yes. The copied result is multi-line ASCII art built from block characters, rather than normal-size letters swapped for bold Unicode symbols.' },
@@ -536,6 +552,7 @@ export const getSpecializedFaq = (slug: string, pageTitle: string) => {
 };
 
 export const getSpecializedHowTo = (slug: string): string | null => {
+  if (slug === 'handwriting-font-generator') return null;
   if (slug === 'big-font-generator') {
     return 'Enter up to 72 characters with manual line breaks, choose an ASCII banner style, and set the alignment and colors. Copy the plain-text result for monospace destinations, or download TXT, PNG, or SVG for a portable layout.';
   }
@@ -587,6 +604,6 @@ export const getSpecializedFeatureList = (slug: string): string[] | null => {
   if (config.capabilities?.includes('font-specimen')) features.splice(1, 0, 'Typeface availability and specimen');
   if (config.capabilities?.includes('game-codes')) features.splice(1, 0, 'Copyable Minecraft formatting code');
   if (config.capabilities?.includes('copyable-name')) features.splice(1, 0, 'Copyable Unicode player-name alternative');
-  if (['brat-text-generator', 'fire-font-generator', 'glitter-font-generator', 'ransom-note-font-generator'].includes(slug)) features.splice(1, 0, 'Copyable Unicode alternatives');
+  if (['handwriting-font-generator', 'brat-text-generator', 'fire-font-generator', 'glitter-font-generator', 'ransom-note-font-generator'].includes(slug)) features.splice(1, 0, 'Copyable Unicode alternatives');
   return features;
 };

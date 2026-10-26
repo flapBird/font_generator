@@ -1,3 +1,4 @@
+ import { expansionStylePages, expansionFandomPages } from './expansion-keyword-pages';
  import { priorityKeywordPages } from './priority-keyword-pages';
  import { additionalGuidePages } from './additional-guides';
  import { newKeywordFandomPages, newKeywordStylePages } from './new-keyword-pages';
@@ -42,7 +43,7 @@
        { q: 'Why are some letters missing in the small text output?', a: 'Unicode does not provide a complete parallel superscript or subscript alphabet, and newer modifier letters may not have broad font support. This generator currently keeps unsupported or compatibility-sensitive letters, including superscript q and subscript b, as ordinary text.' },
        { q: 'What is the difference between superscript and small caps?', a: 'Superscript characters sit above the baseline and are commonly used for footnotes or exponents. Small caps are uppercase-like letters drawn at a reduced size but aligned to the regular baseline. Small caps have better coverage with fewer missing letters.' },
      ],
-     relatedSlugs: ['weird-text-generator', 'big-font-generator', 'upside-down-text-generator'],
+     relatedSlugs: ['small-caps-generator', 'weird-text-generator', 'big-font-generator', 'upside-down-text-generator'],
      icon: '🔠',
      defaultStyleIds: ['superscript', 'subscript', 'smallCaps'],
    },
@@ -162,7 +163,7 @@
        { q: 'What is double-struck in Unicode?', a: 'Double-struck letters (also called blackboard bold) are characters with two vertical strokes, mimicking chalkboard writing. The capitals (𝔸𝔹ℂ𝔻𝔼𝔽𝔾) have a distinct serif appearance and are commonly used in mathematics to denote number sets.' },
        { q: 'Are serif Unicode letters readable on mobile?', a: 'Yes, most modern mobile browsers and apps include fonts with adequate serif Unicode coverage. Some older Android devices may show simplified fallback glyphs, but the text remains readable.' },
      ],
-     relatedSlugs: ['italics-font-generator', 'times-new-roman-font-generator', 'fraktur-font-generator'],
+     relatedSlugs: ['double-struck-font-generator', 'bold-text-generator', 'italics-font-generator', 'fraktur-font-generator'],
      icon: '🔤',
      defaultStyleIds: ['doubleStruck', 'boldItalic', 'fraktur'],
    },
@@ -234,7 +235,7 @@
        { q: 'Does Y2K Unicode text work in Discord?', a: 'Yes — Discord handles monospace text particularly well, and the circled and fullwidth styles render correctly in both chat and server names.' },
        { q: 'Which Unicode style is most associated with the Matrix?', a: 'The monospace mathematical style (𝚑𝚎𝚕𝚕𝚘) is the closest Unicode gets to the cascading green code from The Matrix. The fullwidth style (ｈｅｌｌｏ) is a close second for that late-90s terminal look.' },
      ],
-     relatedSlugs: ['retro-font-generator', 'glitter-font-generator', 'bubble-font-generator'],
+     relatedSlugs: ['vaporwave-font-generator', 'aesthetic-font-generator', 'retro-font-generator', 'glitch-font-generator'],
      icon: '💿',
      defaultStyleIds: ['monospace', 'circled', 'smallCaps', 'fullwidth'],
    },
@@ -402,7 +403,7 @@
        { q: 'What is the difference between script and cursive italic? a: Script (𝒶𝒷𝒸𝒹) has looped, handwritten letter shapes with flourishes. Italic (𝑎𝑏𝑐𝑑) is simply slanted — the letter shapes themselves do not change. Script looks like handwriting; italic looks like computer text that is tilted.', a: 'Script (𝒶𝒷𝒸𝒹) has looped, handwritten letter shapes with flourishes. Italic (𝑎𝑏𝑐𝑑) is simply slanted — the letter shapes themselves do not change. Script looks like handwriting; italic looks like computer text that is tilted.' },
        { q: 'Will cursive Unicode characters show up in Windows programs? a: Most Windows applications that support Unicode (Word, Notepad, browser fields) will render script characters correctly. Very old applications or custom software may show blank squares for uncommon glyphs.', a: 'Most Windows applications that support Unicode (Word, Notepad, browser fields) will render script characters correctly. Very old applications or custom software may show blank squares for uncommon glyphs.' },
      ],
-     relatedSlugs: ['italics-font-generator', 'comic-font-generator', 'cursive-tattoo-font-generator'],
+     relatedSlugs: ['handwriting-font-generator', 'cursive-tattoo-font-generator', 'name-font-generator', 'small-caps-generator'],
      icon: '✍️',
      defaultStyleIds: ['script', 'boldItalic'],
    },
@@ -793,7 +794,7 @@
        { q: 'Does LinkedIn support Unicode characters in the headline? a: Yes — LinkedIn\'s headline field accepts Unicode characters. However, the headline is also used in search results and recruiter tools, so make sure the text is still readable in plain-text view.', a: 'Yes — LinkedIn\'s headline field accepts Unicode characters. However, the headline is also used in search results and recruiter tools, so make sure the text is still readable in plain-text view.' },
        { q: 'Can ATS software parse Unicode text in LinkedIn profiles? a: Most Applicant Tracking Systems that read LinkedIn profiles will see the Unicode characters as regular characters. However, some older ATS systems may garble rare Unicode codepoints. Stick to common blocks (bold, italic, script) for job-seeking profiles.', a: 'Most Applicant Tracking Systems that read LinkedIn profiles will see the Unicode characters as regular characters. However, some older ATS systems may garble rare Unicode codepoints. Stick to common blocks (bold, italic, script) for job-seeking profiles.' },
      ],
-     relatedSlugs: ['facebook-font-generator', 'serif-font-generator', 'cursive-font-generator'],
+     relatedSlugs: ['twitter-font-generator', 'bold-text-generator', 'small-caps-generator', 'facebook-font-generator'],
      icon: '💼',
      defaultStyleIds: ['boldItalic', 'smallCaps', 'script', 'doubleStruck'],
    },
@@ -847,6 +848,7 @@
    },
    ...newKeywordStylePages,
    ...priorityKeywordPages,
+   ...expansionStylePages,
  ];
  
  export const fandomPages: PageDefinition[] = [
@@ -950,6 +952,7 @@
      disclaimer: 'This is an unofficial fan-made tool. Stranger Things is a trademark of Netflix Studios, LLC. This site is not affiliated with, endorsed by, or sponsored by Netflix.',
    },
    ...newKeywordFandomPages,
+   ...expansionFandomPages,
  ];
  
  export const guidePages: PageDefinition[] = [

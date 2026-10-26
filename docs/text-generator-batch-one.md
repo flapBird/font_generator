@@ -26,4 +26,4 @@ Zalgo accepts up to 1,000 UTF-16 input units, with at most 10 above, 2 middle, a
 
 The production build, lint, generator regressions, and all seven browser checks passed. Desktop and 390px mobile screenshots were inspected. Browser tests required permission to bind a localhost preview port; the first test run also needed selector corrections for the existing workspace card and Next.js route announcer.
 
-Remaining batches: Roblox, Twitter/X, Underline, Small Caps; then Double-struck, Vaporwave, Twitch, Handwriting, and Adopt Me after their own intent checks.
+The remaining nine tools are implemented and verified in [batches two and three](./text-generator-batches-two-three.md), including their separate intent checks.

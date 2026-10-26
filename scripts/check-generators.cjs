@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const ts = require('typescript');
 require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
 }).outputText, filename);
 const { generatorStyles } = require('../lib/generator.ts');
 const { generateAsciiArt, asciiStyleLabels } = require('../lib/ascii-font.ts');
@@ -79,3 +79,49 @@ assert.equal(formatDiscordMessage('a*b_~`|\\', 'bold'), '**a\\*b\\_\\~\\`\\|\\\\
 assert.equal(formatDiscordMessage('', 'bold'), '');
 assert.equal(formatDiscordMessage(' \n', 'italic'), ' \n');
 console.log('Priority text regressions passed: registry, strike coverage, bounded Zalgo, grapheme preservation, Discord Markdown escaping.');
+
+const { underlineText, vaporwaveText } = require('../lib/text-effects.ts');
+const { styleSocialText, xPostLength, framePetName } = require('../lib/social-text.ts');
+const { validateVisualGeneratorConfigs, getVisualGeneratorConfig } = require('../lib/visual-generator.ts');
+const { stylePages, fandomPages } = require('../lib/data.ts');
+const { validateContentUpdateCoverage } = require('../lib/content-updates.ts');
+assert.deepEqual(validateVisualGeneratorConfigs(), []);
+for (const double of [false, true]) {
+  const mark = double ? '\u0333' : '\u0332';
+  assert.equal(underlineText('A1!\n é', double), `A${mark}1${mark}!${mark}\n é${mark}`);
+  assert.equal(underlineText(underlineText('A', double), double), `A${mark}`);
+  for (const emoji of ['👨‍👩‍👧‍👦', '🇨🇳', '👍🏽', '1️⃣']) assert.equal(underlineText(emoji, double), emoji);
+}
+assert.equal(vaporwaveText('Ab 19!?\nNext'), 'Ａｂ　１９！？\nＮｅｘｔ');
+assert.equal(vaporwaveText('é\n👨‍👩‍👧‍👦 1️⃣ 中文'), 'ｅ\u0301\n👨‍👩‍👧‍👦　1️⃣　中文');
+assert.equal(vaporwaveText('Été abc', true), 'Ｅ\u0301ＴＥ\u0301　ＡＢＣ');
+assert.equal(vaporwaveText('ab cd\nef', false, true), 'ａ ｂ　ｃ ｄ\nｅ ｆ');
+assert.equal(vaporwaveText(''), '');
+const transform = (id, text) => generatorStyles.find((style) => style.id === id).transform(text);
+assert.equal(transform('smallCapsInitials', 'Alice NASA Émile 123'), 'Aʟɪᴄᴇ NASA Éᴍɪʟᴇ 123');
+assert.equal(transform('doubleStruck', 'CHNPQRZ 0123456789'), 'ℂℍℕℙℚℝℤ 𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡');
+const socialInput = '👨‍👩‍👧‍👦 Hi @artist https://example.com/a?q=1 #Design $USD';
+assert.equal(styleSocialText(socialInput, (text) => transform('bold', text)), '👨‍👩‍👧‍👦 𝐇𝐢 @artist https://example.com/a?q=1 #Design $USD');
+assert.equal(xPostLength('𝐀'), 2);
+assert.equal(xPostLength('👨‍👩‍👧‍👦'), 2);
+assert.equal(xPostLength('https://example.com/very/long/path'), 23);
+assert.equal(xPostLength('a'.repeat(280)), 280);
+assert.equal(xPostLength(transform('bold', 'a'.repeat(141))), 282);
+assert.equal(framePetName(''), '');
+assert.equal(framePetName(' \n', 'hearts'), '');
+assert.equal(framePetName('Luna\n\nSunny', 'hearts'), '♡ Luna ♡\n\n♡ Sunny ♡');
+assert.equal(framePetName('Luna', 'none'), 'Luna');
+const allPages = [...stylePages, ...fandomPages];
+const { guidePages } = require('../lib/data.ts');
+const knownSlugs = new Set([...allPages, ...guidePages].map((page) => page.slug));
+for (const page of allPages) for (const related of page.relatedSlugs) assert.ok(knownSlugs.has(related), `${page.slug} links to missing ${related}`);
+for (const slug of ['underline-text-generator', 'small-caps-generator', 'double-struck-font-generator', 'vaporwave-font-generator', 'twitter-font-generator', 'twitch-font-generator', 'roblox-font-generator', 'adopt-me-font-generator', 'handwriting-font-generator']) {
+  assert.equal(generatorRegistry.filter((entry) => entry.slug === slug).length, 1, `${slug}: registered once`);
+}
+validateContentUpdateCoverage([
+  '/', '/about', '/contact', '/privacy', '/terms', '/styles', '/visual-art', '/fandom', '/guides',
+  ...allPages.map((page) => `/${page.slug}`), ...guidePages.map((page) => `/guides/${page.slug}`),
+]);
+assert.equal(getVisualGeneratorConfig('handwriting-font-generator').presets.length, 3);
+assert.deepEqual(generatorRegistry.find((entry) => entry.slug === 'handwriting-font-generator').intent.expectedOutputs, ['text', 'png', 'svg']);
+console.log('Expansion regressions passed: underline, fullwidth punctuation/spacing, small caps, double-struck exceptions/digits, protected social entities, weighted X lengths, pet frames, links and sitemap dates.');

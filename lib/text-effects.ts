@@ -8,6 +8,23 @@ export function strikeText(text: string, mark = '\u0336') {
   )).join('');
 }
 
+export const underlineText = (text: string, double = false) => strikeText(text, double ? '\u0333' : '\u0332');
+
+/** Fullwidth ASCII, without splitting emoji or changing other scripts. */
+export function vaporwaveText(text: string, uppercase = false, spaced = false) {
+  const parts = segmentGraphemes(text);
+  return parts.map((part, index) => {
+    if (part === ' ') return '\u3000';
+    const match = /^([\x21-\x7e])(\p{Mark}*)$/u.exec(part.normalize('NFD'));
+    if (!match || /\u20e3|\ufe0f/u.test(part)) return part;
+    const base = uppercase ? match[1].toUpperCase() : match[1];
+    const glyph = String.fromCodePoint(base.charCodeAt(0) + 0xfee0) + match[2];
+    const previous = parts[index - 1];
+    const gap = spaced && previous && !/\s/u.test(previous) ? ' ' : '';
+    return gap + glyph;
+  }).join('');
+}
+
 export const ZALGO_INPUT_LIMIT = 1000;
 export const zalgoMarks = {
   above: ['\u0300', '\u0301', '\u0302', '\u0303', '\u0304', '\u0306', '\u0307', '\u0308', '\u030a', '\u030b', '\u030c', '\u0311'],

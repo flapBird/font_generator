@@ -19,6 +19,8 @@ export type GeneratorCapability =
   | 'mark-directions'
   | 'intensity-control'
   | 'markdown-format'
+  | 'post-length-estimate'
+  | 'pet-name-frames'
   | 'grapheme-safe'
   | 'font-availability'
   | 'font-specimen'
@@ -65,6 +67,43 @@ export interface GeneratorDefinition {
 type GeneratorOverride = Partial<Omit<GeneratorDefinition, 'id' | 'slug' | 'title' | 'icon' | 'category' | 'canonicalPath'>>;
 
 const overrides: Record<string, GeneratorOverride> = {
+  'handwriting-font-generator': {
+    ...hybridIntent('Render handwritten text with bundled Caveat and Patrick Hand fonts, export PNG/SVG, or copy separately labelled Unicode script alternatives.'),
+    tags: ['handwritten', 'handwriting', 'pen', 'notes', 'png'],
+  },
+  'twitter-font-generator': {
+    intent: {
+      primary: 'Create Unicode text for Twitter/X posts, bios, and display names while preserving detected links and mentions.',
+      secondary: ['Estimate standard 280-character post length with twitter-text; does not model longer-post subscriptions or reply context.'],
+      expectedOutputs: ['text'],
+    },
+    tags: ['twitter', 'x', 'tweets', 'bio'],
+    capabilities: ['copy', 'grapheme-safe', 'post-length-estimate'],
+  },
+  'roblox-font-generator': {
+    intent: {
+      primary: 'Create unofficial Unicode labels and profile-text ideas for Roblox, with an unchanged original fallback.',
+      secondary: ['Acceptance depends on the exact Roblox field and experience; not a validated username or logo generator.'],
+      expectedOutputs: ['text'],
+    },
+    capabilities: ['copy', 'grapheme-safe'],
+  },
+  'adopt-me-font-generator': {
+    intent: {
+      primary: 'Create unofficial Adopt Me pet-name ideas with Unicode lettering and optional hearts, stars, or bracket frames.',
+      secondary: ['Browser previews do not verify acceptance by Roblox or Adopt Me; original text stays available.'],
+      expectedOutputs: ['text'],
+    },
+    capabilities: ['copy', 'grapheme-safe', 'pet-name-frames'],
+  },
+  'twitch-font-generator': {
+    intent: {
+      primary: 'Create Unicode accents for Twitch stream titles, bios, and chat while preserving detected links and mentions.',
+      secondary: ['Does not change Twitch account-name rules, install fonts, or reproduce the Twitch logo.'],
+      expectedOutputs: ['text'],
+    },
+    capabilities: ['copy', 'grapheme-safe'],
+  },
   'discord-font-generator': {
     intent: {
       primary: 'Create copyable Unicode styles for Discord display names and bios, or native Markdown for chat messages.',

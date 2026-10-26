@@ -1,3 +1,5 @@
+import PlatformTextGeneratorTool from './PlatformTextGeneratorTool';
+import { platformTextConfigs } from '@/lib/social-text';
 import DiscordGeneratorTool from './DiscordGeneratorTool';
 import ZalgoGeneratorTool from './ZalgoGeneratorTool';
 import Link from 'next/link';
@@ -107,6 +109,7 @@ export default function PageTemplate({
   const definition = getGeneratorDefinition(page.slug);
   const baseVisualConfig = getVisualGeneratorConfig(page.slug);
   const visualConfig = baseVisualConfig;
+  const isPlatform = Boolean(platformTextConfigs[page.slug]);
   const isZalgo = page.slug === 'zalgo-text-generator';
   const isDiscord = page.slug === 'discord-font-generator';
   const isAsciiGenerator = definition?.kind === 'ascii';
@@ -128,10 +131,10 @@ export default function PageTemplate({
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
-  const workflowSteps = isZalgo || isDiscord
+  const workflowSteps = isZalgo || isDiscord || isPlatform
     ? [
         ['1', 'Enter text', 'Type a short phrase in the input.'],
-        ['2', isZalgo ? 'Adjust the effect' : 'Choose the destination', isZalgo ? 'Set intensity and mark directions; randomize to try another arrangement.' : 'Use Unicode for display names or choose native Markdown formatting for messages.'],
+        ['2', isZalgo ? 'Adjust the effect' : 'Choose the destination', isZalgo ? 'Set intensity and mark directions; randomize to try another arrangement.' : isDiscord ? 'Use Unicode for display names or choose native Markdown formatting for messages.' : 'Choose the intended field and review its limitations before picking a style.'],
         ['3', 'Copy and test', 'Copy the output and check it in the intended app or field.'],
       ]
     : isThreeDGenerator
@@ -162,7 +165,7 @@ export default function PageTemplate({
   const supplement = getPageSupplement(page.slug);
   const relatedLinks = getRelatedLinks(page.relatedSlugs).slice(0, 4);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
-    if (isZalgo || isDiscord) return example;
+    if (isZalgo || isDiscord || isPlatform) return example;
     const styleId = config.styleIds[index % config.styleIds.length];
     const style = getStyleDefinition(styleId);
     return {
@@ -204,7 +207,9 @@ export default function PageTemplate({
           )}
         </header>
 
-        {isZalgo ? (
+        {isPlatform ? (
+          <PlatformTextGeneratorTool key={page.slug} slug={page.slug} config={config} pageTitle={page.title} />
+        ) : isZalgo ? (
           <ZalgoGeneratorTool />
         ) : isDiscord ? (
           <DiscordGeneratorTool config={config} />
@@ -248,6 +253,12 @@ export default function PageTemplate({
             recommendedLabel="Recommended styles"
             generatorSearchItems={generatorNavigationItems}
           />
+        )}
+
+        {page.slug === 'handwriting-font-generator' && (
+          <p className="mt-4 text-center text-sm text-slate-600 dark:text-slate-400">
+            Bundled font licenses: <a href="/licenses/caveat-OFL.txt" className="underline">Caveat OFL 1.1</a> · <a href="/licenses/patrick-hand-OFL.txt" className="underline">Patrick Hand OFL 1.1</a>
+          </p>
         )}
 
         <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">

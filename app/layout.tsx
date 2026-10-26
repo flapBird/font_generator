@@ -1,3 +1,6 @@
+ import '@fontsource/caveat/latin-400.css';
+ import '@fontsource/caveat/latin-700.css';
+ import '@fontsource/patrick-hand/latin-400.css';
  import type { Metadata } from "next";
  import Script from "next/script";
  import "@fontsource/anton/latin-400.css";

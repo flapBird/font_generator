@@ -1,5 +1,5 @@
  import Link from 'next/link';
- import { stylePages } from '@/lib/data';
+ import { stylePages, fandomPages } from '@/lib/data';
  import type { Metadata } from 'next';
  import { generateStyleVariants, getGeneratorPageConfig } from '@/lib/generator';
  import { getSpecializedDescription, getVisualGeneratorConfig } from '@/lib/visual-generator';
@@ -15,7 +15,7 @@
  };
  
  export default function StylesIndexPage() {
-   const cards: StyleDirectoryCard[] = stylePages.filter((page) => {
+   const cards: StyleDirectoryCard[] = [...stylePages, ...fandomPages].filter((page) => {
      const definition = getGeneratorDefinition(page.slug);
      return definition ? isFontStyleGenerator(definition) : false;
    }).map((page) => {

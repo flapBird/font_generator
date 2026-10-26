@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     : [],
   async redirects() {
     return [
+      { source: '/x-font-generator', destination: '/twitter-font-generator', statusCode: 301 },
       {
         source: '/style',
         destination: '/styles',

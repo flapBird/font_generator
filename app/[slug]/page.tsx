@@ -50,6 +50,10 @@ export default async function GeneratorPage({ params }: { params: Promise<{ slug
   const textFeatures: Record<string, string[]> = {
     'zalgo-text-generator': ['Adjustable intensity', 'Above, through, and below mark controls', 'Randomize marks', 'Copy Unicode text'],
     'discord-font-generator': ['Unicode display-name styles', 'Native Discord Markdown', 'Message formatting preview', 'Copy text'],
+    'twitter-font-generator': ['Unicode text styles', 'Detected links and mentions preserved', 'Weighted standard-post length estimate', 'Original text fallback'],
+    'roblox-font-generator': ['Unicode labels and profile text', 'Field-specific compatibility guidance', 'Original text fallback'],
+    'twitch-font-generator': ['Unicode title, bio, and chat accents', 'Detected links and mentions preserved', 'Account-name limitations explained'],
+    'adopt-me-font-generator': ['Pet-name Unicode styles', 'Optional heart, star, and bracket frames', 'Original text fallback'],
   };
   const featureList = textFeatures[page.slug] ?? getSpecializedFeatureList(page.slug) ?? config.styleIds
     .map((styleId) => getStyleDefinition(styleId)?.name)

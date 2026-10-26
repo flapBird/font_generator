@@ -1,4 +1,4 @@
-import { strikeText } from './text-effects';
+import { strikeText, underlineText, vaporwaveText } from './text-effects';
 import { convertToFancyText } from './fonts';
 import { joinGraphemes, reverseGraphemeLines, segmentGraphemes } from './unicode';
 
@@ -106,6 +106,10 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
   baseStyle('emojiMix', 'Emoji Mix', 'symbols', 'Replaces supported Latin letters with familiar emoji and symbol lookalikes.'),
   baseStyle('emojiCute', 'Cute Emoji Mix', 'symbols', 'Turns supported Latin letters into a playful sequence of cute emoji.'),
   baseStyle('smallCaps', 'Small Caps', 'classic', 'Uses available phonetic small capitals; a few letters use the closest readable form.'),
+  { id: 'smallCapsInitials', name: 'Small Caps — Preserve Uppercase', category: 'classic', description: 'Keeps existing uppercase Latin letters and converts supported lowercase letters to small capitals.', transform: (text) => segmentGraphemes(text).map((part) => /^[A-Z]/.test(part.normalize('NFD')) ? part : convertToFancyText(part, 'smallCaps')).join('') },
+  { id: 'vaporwave', name: 'Vaporwave Fullwidth', category: 'modern', description: 'Fullwidth ASCII letters, digits, punctuation, and wide spaces.', transform: (text) => vaporwaveText(text) },
+  { id: 'vaporwaveUpper', name: 'Vaporwave Uppercase', category: 'modern', description: 'Uppercase fullwidth Latin letters with matching digits and punctuation.', transform: (text) => vaporwaveText(text, true) },
+  { id: 'vaporwaveSpaced', name: 'Vaporwave Extra Spacing', category: 'modern', description: 'Fullwidth characters with additional gaps for spacious titles.', transform: (text) => vaporwaveText(text, false, true) },
   baseStyle('superscript', 'Superscript', 'decorative', 'Raised miniature characters where Unicode provides them; unsupported letters stay readable.'),
   baseStyle('subscript', 'Subscript', 'decorative', 'Lowered miniature characters with partial Unicode coverage.'),
   {
@@ -180,14 +184,14 @@ export const generatorStyles: GeneratorStyleDefinition[] = [
     name: 'Underline',
     category: 'effects',
     description: 'Copy-paste underline created with Unicode combining marks.',
-    transform: (text) => decorateCharacters(text, '\u0332'),
+    transform: (text) => underlineText(text),
   },
   {
     id: 'doubleUnderline',
     name: 'Double Underline',
     category: 'effects',
     description: 'A stronger double-line treatment beneath the text.',
-    transform: (text) => decorateCharacters(text, '\u0333'),
+    transform: (text) => underlineText(text, true),
   },
   {
     id: 'overline',
@@ -401,6 +405,15 @@ export const generateStyleVariants = (text: string, styleIds: string[]) =>
     }));
 
 const packs: Record<string, string[]> = {
+  'underline-text-generator': ['underline', 'doubleUnderline'],
+  'small-caps-generator': ['smallCaps', 'smallCapsInitials'],
+  'double-struck-font-generator': ['doubleStruck'],
+  'vaporwave-font-generator': ['vaporwave', 'vaporwaveUpper', 'vaporwaveSpaced'],
+  'handwriting-font-generator': ['script', 'boldScript', 'italic'],
+  'roblox-font-generator': ['sansBold', 'smallCaps', 'monospace', 'fullwidth', 'script', 'squared'],
+  'adopt-me-font-generator': ['smallCaps', 'sansBold', 'script', 'boldScript', 'circled', 'monospace'],
+  'twitter-font-generator': ['sansBold', 'bold', 'italic', 'smallCaps', 'monospace', 'script'],
+  'twitch-font-generator': ['sansBold', 'smallCaps', 'monospace', 'boldItalic', 'fullwidth', 'script'],
   'bold-text-generator': ['sansBold', 'bold', 'sansBoldItalic', 'boldItalic', 'boldScript', 'boldFraktur'],
   'strikethrough-text-generator': ['strikethrough', 'shortStrike', 'tildeStrike'],
   'discord-font-generator': ['sansBold', 'bold', 'smallCaps', 'monospace', 'script', 'boldScript', 'fraktur', 'circled'],
