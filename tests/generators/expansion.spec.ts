@@ -43,7 +43,7 @@ test('four precise styles copy their actual Unicode results', async ({ page, con
   ]) {
     await page.goto(`/${slug}`);
     await page.locator('#generator-input').fill(input);
-    await page.getByRole('button', { name: `Preview and copy ${style} Font result`, exact: true }).click();
+    await page.getByRole('button', { name: `Copy ${style}`, exact: true }).click();
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
   }
 });

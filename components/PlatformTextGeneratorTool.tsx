@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useRef, useState } from 'react';
 import { getStyleDefinition, type GeneratorPageConfig } from '@/lib/generator';
 import { framePetName, petFrames, platformTextConfigs, styleSocialText, xPostLength, type PetFrame } from '@/lib/social-text';
@@ -81,6 +82,7 @@ export default function PlatformTextGeneratorTool({ slug, config, pageTitle }: {
           <div className="flex flex-wrap gap-4 font-medium text-violet-700 dark:text-violet-300">{platform.sources.map((source) => <a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.title} ↗</a>)}</div>
         </div>
       </details>
+      <Link href="/styles" className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-violet-700 dark:text-violet-300">View all text generators →</Link>
     </section>
   );
 }

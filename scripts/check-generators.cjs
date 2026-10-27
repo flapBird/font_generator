@@ -125,3 +125,11 @@ validateContentUpdateCoverage([
 assert.equal(getVisualGeneratorConfig('handwriting-font-generator').presets.length, 3);
 assert.deepEqual(generatorRegistry.find((entry) => entry.slug === 'handwriting-font-generator').intent.expectedOutputs, ['text', 'png', 'svg']);
 console.log('Expansion regressions passed: underline, fullwidth punctuation/spacing, small caps, double-struck exceptions/digits, protected social entities, weighted X lengths, pet frames, links and sitemap dates.');
+
+const { generatorShortcutSlugs, isGeneratorShortcut, focusedTextSlugs } = require('../lib/generator-navigation.ts');
+assert.ok(generatorShortcutSlugs.length <= 12, 'Shortcut navigation stays bounded');
+assert.equal(new Set(generatorShortcutSlugs).size, generatorShortcutSlugs.length);
+for (const slug of generatorShortcutSlugs) assert.ok(knownSlugs.has(slug), `Shortcut points to real page: ${slug}`);
+for (const slug of ['bold-text-generator', 'strikethrough-text-generator', 'discord-font-generator', 'zalgo-text-generator', 'roblox-font-generator', 'twitter-font-generator', 'underline-text-generator', 'small-caps-generator', 'vaporwave-font-generator', 'double-struck-font-generator', 'twitch-font-generator', 'handwriting-font-generator', 'adopt-me-font-generator', 'future-font-generator']) assert.equal(isGeneratorShortcut(`/${slug}`), false, `${slug} must not auto-join shortcuts`);
+for (const slug of ['small-text-generator', 'cursive-font-generator', 'impact-font-generator']) assert.equal(focusedTextSlugs.has(slug), false, `${slug} retains its existing workspace`);
+console.log('Navigation regressions passed: bounded opt-in shortcuts, real destinations, new pages excluded, old workspace opt-in unchanged.');

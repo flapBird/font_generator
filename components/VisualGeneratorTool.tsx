@@ -10,6 +10,8 @@ import { segmentGraphemes } from '@/lib/unicode';
 interface VisualGeneratorToolProps {
   config: VisualGeneratorConfig;
   pageTitle: string;
+  /** Opt in without changing the preset layout of existing artwork tools. */
+  prominentPresets?: boolean;
 }
 
 type CanvasFormat = 'banner' | 'social' | 'square';
@@ -74,6 +76,7 @@ const applyPreset = (preset: VisualFontPreset) => ({
 export default function VisualGeneratorTool({
   config,
   pageTitle,
+  prominentPresets = false,
 }: VisualGeneratorToolProps) {
   const isSanFrancisco = pageTitle === 'San Francisco Font Generator';
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -742,11 +745,62 @@ export default function VisualGeneratorTool({
     );
   }
 
+  const presetControls = (
+    <div>
+      {prominentPresets ? <h3 className="text-sm font-medium text-slate-950 dark:text-white">Choose handwriting</h3> : <>
+      <label htmlFor="visual-preset" className="text-sm font-semibold text-slate-900 dark:text-white">Style preset</label>
+      <select id="visual-preset" value={presetId} onChange={(event) => {
+        const next = config.presets.find((item) => item.id === event.target.value);
+        if (next) selectPreset(next);
+      }} className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
+        {config.presets.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+      </select>
+      </>}
+      <p className="mt-2 text-xs leading-5 text-slate-500">{currentPreset.description}</p>
+      <div className="mt-3 grid grid-cols-2 gap-2" aria-label="Preset gallery">
+        {config.presets.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => selectPreset(item)}
+            aria-pressed={item.id === presetId}
+            className={`overflow-hidden rounded-xl border p-2 text-left transition ${item.id === presetId ? prominentPresets ? 'border-violet-600 bg-violet-50 ring-2 ring-violet-500/30 dark:bg-violet-950/40' : 'border-violet-500 ring-2 ring-violet-500/20' : 'border-slate-200 hover:border-violet-300 dark:border-slate-700'}`}
+          >
+            <span
+              className="block truncate rounded-lg px-2 py-3 text-center text-base"
+              style={{
+                background: item.gradient ? `linear-gradient(${item.backgroundColor}, ${item.backgroundColor})` : item.backgroundColor,
+                color: item.textColor,
+                fontFamily: item.fontFamily,
+                fontWeight: item.fontWeight ?? 700,
+              }}
+            >
+              {item.uppercase ? 'STYLE' : 'Style'}
+            </span>
+            <span className="mt-1.5 block truncate text-[11px] font-semibold text-slate-600 dark:text-slate-300">{item.name}</span>
+          </button>
+        ))}
+      </div>
+      {currentPreset.targetFont && (
+        <p className={`mt-2 rounded-lg px-3 py-2 text-xs font-semibold ${fontAvailable ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'}`}>
+          {fontAvailable
+            ? currentPreset.fontSource === 'bundled'
+              ? `${currentPreset.targetFont} loaded from this site.`
+              : `${currentPreset.targetFont} detected on this device.`
+            : currentPreset.fontSource === 'bundled'
+              ? `${currentPreset.targetFont} is still loading; the fallback is shown temporarily.`
+              : `${currentPreset.targetFont} was not detected; the labelled fallback is shown.`}
+        </p>
+      )}
+    </div>
+  );
+
   return (
     <section id="generator" aria-labelledby="visual-generator-heading" className="mt-8 rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-48px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-950">
       <div className="rounded-t-[2rem] bg-slate-950 px-5 py-4 text-white sm:px-8 sm:py-5">
         <h2 id="visual-generator-heading" className="text-xl font-bold sm:text-2xl">Create {pageTitle.replace(/\s+Generator$/i, '')}</h2>
-        <p className="mt-1.5 max-w-4xl text-sm leading-5 text-slate-300 sm:leading-6">{config.resultIntro}</p>
+        <p className="mt-1.5 max-w-4xl text-sm leading-5 text-slate-300 sm:leading-6">{prominentPresets ? 'Choose a handwriting style, preview your text, and download PNG or SVG.' : config.resultIntro}</p>
+        {prominentPresets && <a href="#copyable-styles" className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-violet-200 underline underline-offset-4">Need copyable text? Jump to script styles ↓</a>}
       </div>
 
       <div className="grid items-start gap-7 p-5 sm:p-8 xl:grid-cols-[330px_minmax(0,1fr)]">
@@ -757,6 +811,8 @@ export default function VisualGeneratorTool({
             <div className="mt-2 flex justify-between gap-3 text-xs text-slate-500"><span>{hasCapability('meme-layout') ? useMemeLayout ? 'First line goes on top; the final line goes on the bottom.' : 'Lines stay together in the center. Choose Top & bottom for meme captions.' : 'Canvas grows with additional lines'}</span><span>{inputText.length}/120</span></div>
             <p className="mt-1 text-xs text-slate-500">Rendered locally—your text isn&apos;t uploaded.</p>
           </div>
+
+          {prominentPresets && presetControls}
 
           {hasCapability('meme-layout') && (
             <div>
@@ -789,51 +845,7 @@ export default function VisualGeneratorTool({
             {statusMessage && <p className="mt-3 rounded-lg bg-violet-50 px-3 py-2 text-xs font-medium text-violet-800 dark:bg-violet-950/40 dark:text-violet-300" aria-live="polite">{statusMessage}</p>}
           </div>
 
-          <div>
-            <label htmlFor="visual-preset" className="text-sm font-semibold text-slate-900 dark:text-white">Style preset</label>
-            <select id="visual-preset" value={presetId} onChange={(event) => {
-              const next = config.presets.find((item) => item.id === event.target.value);
-              if (next) selectPreset(next);
-            }} className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
-              {config.presets.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-            </select>
-            <p className="mt-2 text-xs leading-5 text-slate-500">{currentPreset.description}</p>
-            <div className="mt-3 grid grid-cols-2 gap-2" aria-label="Preset gallery">
-              {config.presets.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => selectPreset(item)}
-                  aria-pressed={item.id === presetId}
-                  className={`overflow-hidden rounded-xl border p-2 text-left transition ${item.id === presetId ? 'border-violet-500 ring-2 ring-violet-500/20' : 'border-slate-200 hover:border-violet-300 dark:border-slate-700'}`}
-                >
-                  <span
-                    className="block truncate rounded-lg px-2 py-3 text-center text-base"
-                    style={{
-                      background: item.gradient ? `linear-gradient(${item.backgroundColor}, ${item.backgroundColor})` : item.backgroundColor,
-                      color: item.textColor,
-                      fontFamily: item.fontFamily,
-                      fontWeight: item.fontWeight ?? 700,
-                    }}
-                  >
-                    {item.uppercase ? 'STYLE' : 'Style'}
-                  </span>
-                  <span className="mt-1.5 block truncate text-[11px] font-semibold text-slate-600 dark:text-slate-300">{item.name}</span>
-                </button>
-              ))}
-            </div>
-            {currentPreset.targetFont && (
-              <p className={`mt-2 rounded-lg px-3 py-2 text-xs font-semibold ${fontAvailable ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'}`}>
-                {fontAvailable
-                  ? currentPreset.fontSource === 'bundled'
-                    ? `${currentPreset.targetFont} loaded from this site.`
-                    : `${currentPreset.targetFont} detected on this device.`
-                  : currentPreset.fontSource === 'bundled'
-                    ? `${currentPreset.targetFont} is still loading; the fallback is shown temporarily.`
-                    : `${currentPreset.targetFont} was not detected; the labelled fallback is shown.`}
-              </p>
-            )}
-          </div>
+          {!prominentPresets && presetControls}
 
           <div className="grid grid-cols-2 gap-3">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Font size

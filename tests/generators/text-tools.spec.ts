@@ -25,8 +25,8 @@ test('new pages expose canonical URLs, text outputs, sitemap and llms entries', 
 test('bold and strike copy actual Unicode including digits and preserve emoji', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   for (const [slug, button, expected] of [
-    ['bold-text-generator', 'Preview and copy Bold Sans Font result', '𝗔𝗯 𝟭𝟮 👨‍👩‍👧‍👦'],
-    ['strikethrough-text-generator', 'Preview and copy Long Strikethrough Font result', 'A̶b̶ 1̶2̶ 👨‍👩‍👧‍👦'],
+    ['bold-text-generator', 'Copy Bold Sans', '𝗔𝗯 𝟭𝟮 👨‍👩‍👧‍👦'],
+    ['strikethrough-text-generator', 'Copy Long Strikethrough', 'A̶b̶ 1̶2̶ 👨‍👩‍👧‍👦'],
   ]) {
     await page.goto(`/${slug}`);
     await page.locator('#generator-input').fill('Ab 12 👨‍👩‍👧‍👦');

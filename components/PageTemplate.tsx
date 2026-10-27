@@ -1,3 +1,5 @@
+import FocusedTextGeneratorTool from './FocusedTextGeneratorTool';
+import { focusedTextSlugs } from '@/lib/generator-navigation';
 import PlatformTextGeneratorTool from './PlatformTextGeneratorTool';
 import { platformTextConfigs } from '@/lib/social-text';
 import DiscordGeneratorTool from './DiscordGeneratorTool';
@@ -228,8 +230,11 @@ export default function PageTemplate({
               key={`${page.slug}-visual`}
               config={visualConfig}
               pageTitle={page.title}
+              prominentPresets={page.slug === 'handwriting-font-generator'}
             />
-            {isHybridGenerator && (
+            {isHybridGenerator && (page.slug === 'handwriting-font-generator' ? (
+              <div className="mt-6"><FocusedTextGeneratorTool config={config} pageTitle="Handwriting Font Generator" handwriting /></div>
+            ) : (
               <GeneratorTool
                 key={`${page.slug}-copyable`}
                 config={{ ...config, initialText: visualConfig.initialText }}
@@ -238,8 +243,10 @@ export default function PageTemplate({
                 sectionId="copyable-styles"
                 recommendedLabel="Copyable alternatives"
               />
-            )}
+            ))}
           </>
+        ) : focusedTextSlugs.has(page.slug) ? (
+          <FocusedTextGeneratorTool key={page.slug} config={config} pageTitle={page.title} />
         ) : (
           <GeneratorTool
             key={page.slug}
