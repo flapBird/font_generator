@@ -51,6 +51,8 @@ interface GeneratorToolProps {
     footer?: ReactNode;
     preview: { id: string; name: string; text: string; category: GeneratorStyleCategory; formattedText?: { text: string; className: string } };
     outputLabel?: string;
+    // Explicit opt-in: keep the existing mobile order for all other tools.
+    mobileDirectoryAfterResults?: boolean;
   };
 }
 
@@ -574,6 +576,33 @@ export default function GeneratorTool({
   ) : undefined;
 
   if (workspaceMode) {
+    const directory = (
+      <aside
+        data-generator-directory-scroll
+        className={`${customWorkspace?.mobileDirectoryAfterResults ? 'order-4' : 'order-2'} min-w-0 xl:sticky xl:top-24 xl:col-start-1 xl:row-start-1 xl:row-span-2 xl:max-h-[calc(100vh-7rem)] xl:self-start xl:overflow-y-auto xl:pr-1`}
+        aria-label="Generator directory"
+      >
+        <MobileGeneratorRail
+          query={generatorQuery}
+          onQueryChange={setGeneratorQuery}
+          fontItems={filteredFontGeneratorItems}
+          visualItems={filteredVisualGeneratorItems}
+          currentPageTitle={normalizedPageTitle}
+          temporaryCurrentItem={temporaryCurrentItem}
+        />
+        <div className="hidden xl:block">
+          <GeneratorDirectoryContent
+            searchId="desktop-generator-search"
+            query={generatorQuery}
+            onQueryChange={setGeneratorQuery}
+            fontItems={filteredFontGeneratorItems}
+            visualItems={filteredVisualGeneratorItems}
+            currentPageTitle={normalizedPageTitle}
+            temporaryCurrentItem={temporaryCurrentItem}
+          />
+        </div>
+      </aside>
+    );
     return (
       <section
         id={sectionId}
@@ -631,31 +660,7 @@ export default function GeneratorTool({
               </div>
               )}
 
-              <aside
-                data-generator-directory-scroll
-                className="order-2 min-w-0 xl:sticky xl:top-24 xl:col-start-1 xl:row-start-1 xl:row-span-2 xl:max-h-[calc(100vh-7rem)] xl:self-start xl:overflow-y-auto xl:pr-1"
-                aria-label="Generator directory"
-              >
-                <MobileGeneratorRail
-                  query={generatorQuery}
-                  onQueryChange={setGeneratorQuery}
-                  fontItems={filteredFontGeneratorItems}
-                  visualItems={filteredVisualGeneratorItems}
-                  currentPageTitle={normalizedPageTitle}
-                  temporaryCurrentItem={temporaryCurrentItem}
-                />
-                <div className="hidden xl:block">
-                  <GeneratorDirectoryContent
-                    searchId="desktop-generator-search"
-                    query={generatorQuery}
-                    onQueryChange={setGeneratorQuery}
-                    fontItems={filteredFontGeneratorItems}
-                    visualItems={filteredVisualGeneratorItems}
-                    currentPageTitle={normalizedPageTitle}
-                    temporaryCurrentItem={temporaryCurrentItem}
-                  />
-                </div>
-              </aside>
+              {!customWorkspace?.mobileDirectoryAfterResults && directory}
 
               <div className="order-3 min-w-0 xl:col-start-2 xl:row-start-2">
                 {customWorkspace ? <div className="space-y-3">{customWorkspace.results}</div> : <>
@@ -754,6 +759,8 @@ export default function GeneratorTool({
                 )}
                 </>}
               </div>
+
+              {customWorkspace?.mobileDirectoryAfterResults && directory}
 
               <aside className="hidden xl:sticky xl:top-24 xl:col-start-3 xl:row-start-1 xl:row-span-2 xl:block xl:self-start" aria-label="Selected font preview">
                 <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_24px_70px_-46px_rgba(91,33,182,0.65)] dark:border-slate-800 dark:bg-slate-950">

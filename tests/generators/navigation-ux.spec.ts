@@ -38,6 +38,8 @@ test('original navigation entries, order, search and collection-link placement a
       } else {
         // The original mobile rail has no injected directory-link block above its chips.
         await expect(rail.locator('a[href="/styles"]')).not.toBeVisible();
+        const firstResult = page.getByRole('button', { name: /^Preview and copy / }).first();
+        expect((await rail.boundingBox())!.y).toBeLessThan((await firstResult.boundingBox())!.y);
       }
       if (path === '/bubble-font-generator') {
         await page.screenshot({ path: `/tmp/restored-navigation-${width}.png`, animations: 'disabled' });

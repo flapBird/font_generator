@@ -16,7 +16,8 @@ test('October pages have canonical URLs, accurate outputs and distinct text/art 
   expect(llms).toContain('whole-line RTL shaping');
   expect(llms).toContain('62 portable Unicode');
   expect(llms).toContain('without a direction selector');
-  expect(llms).toContain('labelled visual examples');
+  expect(llms).toContain('compact decoration chips with icons and labels');
+  expect(llms).toContain('mobile results appear before the full generator navigation');
   expect(llms).toMatch(/halloween-font-generator\).*Outputs: copyable text, PNG\./);
   expect(llms).toMatch(/arabic-font-generator\).*Outputs: PNG\./);
   for (const [directory, included, excluded] of [['/styles', octoberTextSlugs, octoberArtSlugs], ['/visual-art', octoberArtSlugs, octoberTextSlugs]] as const) {
@@ -91,7 +92,7 @@ test('page-specific controls preserve language, empty lines, emoji clusters and 
   await expect(page.getByRole('button', { name: /^(Letters → Symbols|Symbols → Letters)$/ })).toHaveCount(0);
   const mixed = await page.getByLabel('Letters → Symbols output', { exact: true }).textContent();
   await expect(page.getByLabel('Symbols → Letters output', { exact: true })).toHaveText('Hello');
-  await page.getByLabel('Gaster mode').check();
+  await page.getByRole('switch', { name: 'Gaster mode', exact: true }).check();
   await expect(page.getByLabel('Letters → Symbols output', { exact: true })).toHaveText('☟☜☹☹⚐');
   await expect(page.getByLabel('Symbols → Letters output', { exact: true })).toHaveText('Hello');
   await encoded.click();
@@ -107,30 +108,73 @@ test('page-specific controls preserve language, empty lines, emoji clusters and 
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('✌');
 });
 
-test('decoration choices show their symbols and selection on desktop and mobile', async ({ page }) => {
-  for (const width of [1440, 390]) {
-    await page.setViewportSize({ width, height: 1000 });
+test('compact controls prioritize results and retain touch targets on desktop and mobile', async ({ page }) => {
+  test.setTimeout(90000);
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
     for (const slug of ['k-pop', 'preppy', 'emoji', 'gaming']) {
       await page.goto(`/${slug}-font-generator`);
       await page.locator('#generator-input').fill('Name');
       const decorations = page.getByRole('group', { name: 'Decoration', exact: true });
       const options = slug === 'gaming'
-        ? [['No frame', 'Name'], ['Clan brackets', '【Name】'], ['Stars', '✦ Name ✦']]
-        : [['No frame', 'Name'], ['Hearts', '♡ Name ♡'], ['Stars', '✦ Name ✦'], ['Bows', '🎀 Name 🎀']];
+        ? [['No frame', 'Aa'], ['Clan brackets', '【】'], ['Stars', '✦']]
+        : [['No frame', 'Aa'], ['Hearts', '♡'], ['Stars', '✦'], ['Bows', '🎀']];
       await expect(decorations.getByRole('button')).toHaveCount(options.length);
       for (const [label, sample] of options) {
         const button = decorations.getByRole('button', { name: label, exact: true });
-        await expect(button.locator('[data-frame-preview]')).toHaveText(sample);
+        await expect(button.locator('[data-decoration-icon]')).toHaveText(sample);
+        const bounds = (await button.boundingBox())!;
+        expect(bounds.height).toBeGreaterThanOrEqual(44);
+        expect(bounds.height).toBeLessThanOrEqual(48);
         await button.click();
         await expect(button).toHaveAttribute('aria-pressed', 'true');
         await expect(decorations.locator('[aria-pressed="true"]')).toHaveCount(1);
       }
-      await page.screenshot({ path: `/tmp/font-options-${slug}-${width}.png`, animations: 'disabled' });
+      if (width >= 390) {
+        const rows = await decorations.getByRole('button').evaluateAll((buttons) => new Set(buttons.map((button) => Math.round(button.getBoundingClientRect().top))).size);
+        expect(rows).toBe(1);
+      }
+      const tips = page.locator('details').filter({ has: page.getByText('Tips & compatibility', { exact: true }) });
+      await expect(tips).not.toHaveAttribute('open', '');
+      if (width < 1280) {
+        const firstResult = page.getByRole('button', { name: 'Copy Original text', exact: true });
+        const resultY = (await firstResult.boundingBox())!.y;
+        const navigationY = (await page.getByRole('complementary', { name: 'Generator directory' }).boundingBox())!.y;
+        expect(resultY).toBeLessThan(navigationY);
+        await page.evaluate(() => scrollTo(0, 0));
+        await expect(firstResult).toBeInViewport();
+      }
+      await page.evaluate(() => scrollTo(0, 0));
+      await page.screenshot({ path: `/tmp/font-controls-${slug}-${width}.png`, animations: 'disabled' });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+    await page.goto('/wingdings-font-generator');
+    await page.locator('#generator-input').fill('Hello');
+    const gaster = page.getByRole('switch', { name: 'Gaster mode', exact: true });
+    await expect(gaster).not.toBeChecked();
+    await expect(gaster).toContainText('Off');
+    await gaster.focus(); await page.keyboard.press('Space');
+    await expect(gaster).toBeChecked();
+    await expect(gaster).toContainText('On');
+    await expect(page.getByLabel('Letters → Symbols output', { exact: true })).toHaveText('☟☜☹☹⚐');
+    await expect(page.getByLabel('Symbols → Letters output', { exact: true })).toHaveText('Hello');
+    const about = page.locator('details').filter({ has: page.getByText('About these symbols', { exact: true }) });
+    await expect(about.locator('p')).not.toBeVisible();
+    await about.locator('summary').click();
+    await expect(about.locator('p')).toContainText('Decoding assumes');
+    await about.locator('summary').click();
+    await page.evaluate(() => scrollTo(0, 0));
+    await expect(page.getByRole('button', { name: 'Copy Letters → Symbols', exact: true })).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `/tmp/font-controls-wingdings-${width}.png`, animations: 'disabled' });
+    if (width === 390) {
+      await page.evaluate(() => document.documentElement.classList.add('dark'));
+      await page.screenshot({ path: '/tmp/font-controls-wingdings-dark-390.png', animations: 'disabled' });
+      await page.evaluate(() => document.documentElement.classList.remove('dark'));
     }
   }
   await page.goto('/halloween-font-generator');
-  await expect(page.locator('[data-frame-preview]')).toHaveCount(0);
+  await expect(page.locator('[data-decoration-icon]')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Pumpkins', exact: true })).toBeVisible();
 });
 

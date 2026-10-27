@@ -11,6 +11,7 @@ export type TextWorkspace = {
   navigationItems: GeneratorSearchItem[];
   preview: NonNullable<ComponentProps<typeof GeneratorTool>['customWorkspace']>['preview'];
   outputLabel?: string;
+  mobileDirectoryAfterResults?: boolean;
 };
 
 /** Layout for the new text tools only; older generator workspaces opt in separately. */
@@ -20,7 +21,7 @@ export default function TextToolLayout({ label, controls, children, footer, id, 
   if (workspace) return <GeneratorTool
     config={workspace.config} pageTitle={workspace.pageTitle} generatorSearchItems={workspace.navigationItems}
     workspaceMode sectionId={id}
-    customWorkspace={{ controls, results: children, footer, preview: workspace.preview, outputLabel: workspace.outputLabel }}
+    customWorkspace={{ controls, results: children, footer, preview: workspace.preview, outputLabel: workspace.outputLabel, mobileDirectoryAfterResults: workspace.mobileDirectoryAfterResults }}
   />;
   return <section id={id} aria-label={label} className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-3 sm:p-5 dark:border-slate-800 dark:bg-slate-950">
     <div className="grid items-start gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
