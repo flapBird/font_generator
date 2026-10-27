@@ -86,7 +86,7 @@ const body = [
   '- Hybrid generators lead with downloadable artwork and provide a separate, clearly labelled Unicode alternative for text-only destinations.',
   '- Fandom and brand-inspired tools are unofficial. They use system fonts, bundled open-source alternatives, and original effects rather than distributing official logos or proprietary font assets.',
   '',
-  '- Workspace sidebars and mobile shortcut rails use a fixed set of up to 12 selected generators; new pages are not added automatically. View all text generators opens /styles, and View all visual & art tools opens /visual-art. These directories, related links, and the sitemap continue to list the public generators. New pure-text pages focus on their relevant styles without an embedded generator directory. Handwriting presents visible typeface presets and a jump link to its separate copyable script section.',
+  '- Workspace sidebars and mobile navigation retain the existing generator entries, order, search, and collection-link placement. The 13 newly added generators are excluded from these navigation lists only; their canonical pages remain in /styles or /visual-art, related links, and the sitemap. New pure-text pages focus on their relevant styles without an embedded generator directory. Handwriting presents visible typeface presets and a jump link to its separate copyable script section.',
   '',
   '## Main navigation',
   '',

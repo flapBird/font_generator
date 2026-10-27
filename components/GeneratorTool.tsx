@@ -1,6 +1,6 @@
 'use client';
 
-import { isGeneratorShortcut } from '@/lib/generator-navigation';
+import { isVisibleInGeneratorNavigation } from '@/lib/generator-navigation';
 import { useGeneratorText } from '@/lib/use-generator-text';
 
 import Link from '@/components/IntentLink';
@@ -129,8 +129,8 @@ const getGeneratorDisplayName = (title: string) =>
     .replace(/\s+(?:Font|Text)\s+Generator$/i, '')
     .replace(/\s+Generator$/i, '');
 
-const generatorDirectoryScrollKey = 'font-generators-shortcuts-scroll-v1';
-const mobileGeneratorRailScrollKey = 'font-generators-mobile-shortcuts-scroll-v1';
+const generatorDirectoryScrollKey = 'font-generators-directory-scroll';
+const mobileGeneratorRailScrollKey = 'font-generators-mobile-rail-scroll';
 
 const generatorKindLabels: Record<string, string> = {
   ascii: 'ASCII',
@@ -215,19 +215,14 @@ function GeneratorDirectoryContent({
 
   return (
     <div ref={contentRef} className="space-y-4">
-      <div className="space-y-1 border-b border-slate-200 pb-3 dark:border-slate-800">
-        <Link href="/styles" className="flex min-h-11 items-center text-sm font-semibold text-violet-700 dark:text-violet-300">View all text generators →</Link>
-        <Link href="/visual-art" className="flex min-h-11 items-center text-sm text-slate-600 dark:text-slate-300">View all visual & art tools →</Link>
-        <p className="text-xs text-slate-500">Quick links</p>
-      </div>
       <div className="relative">
         <input
           id={searchId}
           type="search"
-          aria-label="Search shortcuts"
+          aria-label="Search generators"
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Search shortcuts…"
+          placeholder="Search generators…"
           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 pr-11 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 [&::-webkit-search-cancel-button]:hidden xl:bg-slate-50 xl:text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-white xl:dark:bg-slate-900"
           autoComplete="off"
         />
@@ -250,6 +245,11 @@ function GeneratorDirectoryContent({
             <span className="text-[10px] font-semibold text-slate-400">{fontItems.length}</span>
           </div>
           <ul className="mt-1.5 space-y-0.5">{fontItems.map((item) => renderGeneratorLink(item, false))}</ul>
+          {!query && (
+            <Link href="/styles" className="mt-2 flex min-h-10 items-center justify-center rounded-lg text-xs font-bold text-violet-700 transition hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/30">
+              Browse text collection&nbsp; →
+            </Link>
+          )}
         </nav>
       )}
 
@@ -260,14 +260,19 @@ function GeneratorDirectoryContent({
             <span className="text-[10px] font-semibold text-slate-400">{visualItems.length}</span>
           </div>
           <ul className="mt-1.5 space-y-0.5">{visualItems.map((item) => renderGeneratorLink(item, true))}</ul>
+          {!query && (
+            <Link href="/visual-art" className="mt-2 flex min-h-10 items-center justify-center rounded-lg text-xs font-bold text-violet-700 transition hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/30">
+              Browse art collection&nbsp; →
+            </Link>
+          )}
         </nav>
       )}
 
       {query && fontItems.length === 0 && visualItems.length === 0 && (
         <div className="rounded-xl border border-dashed border-slate-300 px-3 py-6 text-center dark:border-slate-700">
-          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No matching shortcuts</p>
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No matching generators</p>
           <button type="button" onClick={() => onQueryChange('')} className="mt-2 text-xs font-bold text-violet-700 dark:text-violet-300">
-            Clear shortcut search
+            Show all generators
           </button>
         </div>
       )}
@@ -307,10 +312,10 @@ function MobileGeneratorRail({
         <input
           id="mobile-generator-search"
           type="search"
-          aria-label="Search shortcuts"
+          aria-label="Search generators"
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Search shortcuts…"
+          placeholder="Search generators…"
           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 pr-11 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 [&::-webkit-search-cancel-button]:hidden dark:border-slate-700 dark:bg-slate-950 dark:text-white"
           autoComplete="off"
         />
@@ -326,10 +331,6 @@ function MobileGeneratorRail({
         )}
       </div>
 
-      <div className="mt-2 flex flex-wrap gap-x-4 text-xs font-semibold text-violet-700 dark:text-violet-300">
-        <Link href="/styles" className="inline-flex min-h-11 items-center">View all text generators →</Link>
-        <Link href="/visual-art" className="inline-flex min-h-11 items-center">View all visual & art tools →</Link>
-      </div>
       {items.length > 0 ? (
         <nav aria-label="Choose a generator" className="mt-3">
           <div ref={railRef} className="mobile-chip-scroll flex snap-x gap-2 overflow-x-auto pb-1">
@@ -356,7 +357,7 @@ function MobileGeneratorRail({
           </div>
         </nav>
       ) : (
-        <p className="px-2 py-4 text-center text-sm font-semibold text-slate-600 dark:text-slate-300">No matching shortcuts</p>
+        <p className="px-2 py-4 text-center text-sm font-semibold text-slate-600 dark:text-slate-300">No matching generators</p>
       )}
     </div>
   );
@@ -477,8 +478,8 @@ export default function GeneratorTool({
     });
   };
 
-  const filteredFontGeneratorItems = filterGeneratorItems(fontGeneratorItems.filter((item) => isGeneratorShortcut(item.href)));
-  const filteredVisualGeneratorItems = filterGeneratorItems(visualGeneratorItems.filter((item) => isGeneratorShortcut(item.href)));
+  const filteredFontGeneratorItems = filterGeneratorItems(fontGeneratorItems.filter((item) => isVisibleInGeneratorNavigation(item.href)));
+  const filteredVisualGeneratorItems = filterGeneratorItems(visualGeneratorItems.filter((item) => isVisibleInGeneratorNavigation(item.href)));
 
   const visibleVisualGeneratorItems = useMemo(
     () => visualGeneratorItems.slice(0, visibleGeneratorLimit),

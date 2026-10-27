@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { generatorRegistry, isFontStyleGenerator } from '../../lib/generator-registry';
 
 const newSlugs = [
   'bold-text-generator', 'strikethrough-text-generator', 'underline-text-generator',
@@ -7,21 +8,44 @@ const newSlugs = [
   'adopt-me-font-generator', 'discord-font-generator', 'zalgo-text-generator', 'handwriting-font-generator',
 ];
 
-test('shortcuts stay bounded, exclude new pages and retain access to complete directories', async ({ page }) => {
-  await page.addInitScript(() => sessionStorage.setItem('font-generators-directory-scroll', '900'));
+test('original navigation entries, order, search and collection-link placement are restored; only additions are hidden', async ({ page }) => {
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto('/');
-    const rail = page.getByRole('complementary', { name: 'Generator directory' });
-    const links = rail.locator('a:visible');
-    expect(await links.count()).toBeLessThanOrEqual(14); // 12 shortcuts + 2 directories
-    for (const slug of newSlugs) await expect(rail.locator(`a[href="/${slug}"]`)).toHaveCount(0);
-    await expect(rail.getByRole('link', { name: 'View all text generators →', exact: true }).filter({ visible: true })).toBeVisible();
-    await page.screenshot({ path: `/tmp/fixed-shortcuts-${width}.png`, animations: 'disabled' });
-    await rail.getByRole('searchbox', { name: 'Search shortcuts' }).filter({ visible: true }).fill('Roblox');
-    await expect(rail.getByText('No matching shortcuts').filter({ visible: true })).toBeVisible();
-    await rail.getByRole('link', { name: 'View all text generators →', exact: true }).filter({ visible: true }).click();
-    await expect(page).toHaveURL(/\/styles$/);
+    for (const path of ['/', '/bubble-font-generator']) {
+      await page.goto(path);
+      const rail = page.getByRole('complementary', { name: 'Generator directory' });
+      const baseline = generatorRegistry.filter((item) => item.kind !== 'directory' && (path !== '/' || item.homepage.enabled) && !newSlugs.includes(item.slug));
+      const expected = [...baseline.filter(isFontStyleGenerator), ...baseline.filter((item) => !isFontStyleGenerator(item))].map((item) => item.canonicalPath);
+      const actual = await rail.locator('a:visible').evaluateAll((links) => links.map((link) => link.getAttribute('href')).filter((href) => href !== '/styles' && href !== '/visual-art'));
+      expect(actual).toEqual(expected);
+      expect(actual.length).toBeGreaterThan(12);
+      for (const slug of newSlugs) await expect(rail.locator(`a[href="/${slug}"]`)).toHaveCount(0);
+      await expect(rail.getByText('Quick links', { exact: true })).toHaveCount(0);
+      const search = rail.getByRole('searchbox', { name: 'Search generators' }).filter({ visible: true });
+      await search.fill('Serif');
+      await expect(rail.locator('a[href="/serif-font-generator"]').filter({ visible: true })).toBeVisible();
+      await search.fill('Roblox');
+      await expect(rail.getByText('No matching generators').filter({ visible: true })).toBeVisible();
+      await search.fill('');
+      if (width === 1440) {
+        const collection = rail.getByRole('link', { name: /Browse text collection/ });
+        await expect(collection).toHaveAttribute('href', '/styles');
+        expect(await collection.evaluate((link) => link.previousElementSibling?.tagName)).toBe('UL');
+        const artCollection = rail.getByRole('link', { name: /Browse art collection/ });
+        expect(await artCollection.evaluate((link) => link.previousElementSibling?.tagName)).toBe('UL');
+      } else {
+        // The original mobile rail has no injected directory-link block above its chips.
+        await expect(rail.locator('a[href="/styles"]')).not.toBeVisible();
+      }
+      if (path === '/bubble-font-generator') {
+        await page.screenshot({ path: `/tmp/restored-navigation-${width}.png`, animations: 'disabled' });
+        if (width === 1440) {
+          await rail.getByRole('link', { name: /Browse text collection/ }).click();
+          await expect(page).toHaveURL(/\/styles$/);
+        }
+      }
+    }
+    await page.goto('/styles');
     for (const slug of newSlugs.filter((slug) => slug !== 'handwriting-font-generator')) await expect(page.locator(`a[href="/${slug}"]`).first()).toBeVisible();
     await page.goto('/visual-art');
     await expect(page.locator('a[href="/handwriting-font-generator"]').first()).toBeVisible();

@@ -2,7 +2,7 @@
 
 ## Navigation policy
 
-Desktop and mobile shortcuts are an explicit selection of 12 existing tools in `lib/generator-navigation.ts`. None of the 13 additions joins that list, even when searching shortcuts. Persistent links open the full text and visual/art directories; canonical routes, related links, sitemap entries and llms listings are retained. Old unbounded-list scroll offsets are not reused for the new fixed list. AGENTS.md records that future additions must not expand shortcuts automatically.
+Desktop and mobile navigation preserve the original entries, order, search UI, scroll behavior and collection-link positions. Only the 13 additions are excluded through `lib/generator-navigation.ts`; there is no 12-item cap or curated replacement of older entries. Their canonical routes, full-directory listings, related links, sitemap entries and llms listings remain available. AGENTS.md records this scope to prevent unrelated navigation changes.
 
 ## Coverage of the 13 additions
 
@@ -16,13 +16,13 @@ Desktop and mobile shortcuts are an explicit selection of 12 existing tools in `
 
 ## Existing generator impact
 
-The requested shortcut-list reduction applies to the homepage and older workspaces. Their conversion engines, result sets, input behavior and export logic are unchanged. The focused text layout is enabled only for the six listed new text pages and the handwriting alternative section. Prominent artwork presets are an explicit handwriting-only prop; existing visual tools keep the prior selector and layout.
+The earlier 12-item reduction has been corrected: homepage and older workspace navigation restore all original entries, excluding only the 13 additions. Their conversion engines, result sets, input behavior and export logic are unchanged. The focused text layout is enabled only for the six listed new text pages and the handwriting alternative section. Prominent artwork presets are an explicit handwriting-only prop; existing visual tools keep the prior selector and layout.
 
 ## Verification
 
-- Generator regression checks cover transforms, draft behavior, text effects, social entities and bounded shortcut selection.
+- Generator regression checks cover transforms, draft behavior, text effects, social entities and the exact navigation exclusion list and preservation of older entries.
 - The 20-test production-browser suite checks all 13 additions at desktop and mobile widths, actual clipboard values, absence of embedded navigation, complete-directory access, metadata, llms output, and exports.
 - Older homepage, Small Text and Cursive clipboard outputs and clearing behavior are checked. Impact retains its preset selector and PNG download. These are targeted regression checks, not a claim that every old page has been manually audited.
-- Screenshots are captured as `/tmp/<slug>-<width>-unified.png`; the fixed navigation is captured as `/tmp/fixed-shortcuts-<width>.png`. Representative mobile and desktop screenshots are inspected alongside behavior checks.
+- Screenshots are captured as `/tmp/<slug>-<width>-unified.png`; the restored navigation is captured as `/tmp/restored-navigation-<width>.png`. Representative mobile and desktop screenshots are inspected alongside behavior checks.
 
-Final validation passed: ESLint, generator regressions, the production build, and all 20 Playwright browser tests. The final desktop shortcut list, Bold and Discord workspaces, and mobile Zalgo result placement were visually inspected.
+Final validation passed: ESLint, generator regressions and the production build. The browser suite passed 19 checks initially; its navigation expectation incorrectly included a directory landing page that the original sidebar also excludes. After correcting that test expectation, the navigation check passed on desktop and mobile for both the homepage and Bubble workspace, completing all 20 checks. Desktop and mobile navigation screenshots were inspected: the desktop text list again contains the original 33 entries. Collection-link placement and full-directory access were also verified. Bold and Discord workspaces and mobile Zalgo result placement were visually inspected in the earlier workspace update.
