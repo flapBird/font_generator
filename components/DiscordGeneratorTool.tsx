@@ -15,7 +15,10 @@ export default function DiscordGeneratorTool({ config, navigationItems }: { conf
   const [format, setFormat] = useState<DiscordFormat>('bold');
   const [selectedId, setSelectedId] = useState(config.styleIds[0]);
   const results = generateStyleVariants(text, config.styleIds);
-  const preview = mode === 'message' ? { id: 'markdown', name: `${discordFormats.find((item) => item.id === format)!.name} (Markdown)`, text: formatDiscordMessage(text, format), category: 'classic' as const } : (results.find((style) => style.id === selectedId) ?? results[0]);
+  const selectedFormat = discordFormats.find((item) => item.id === format)!;
+  // Tailwind scans components, not lib/text-effects.ts; keep the unique strike utility discoverable.
+  const previewClassName = format === 'strike' ? 'line-through' : selectedFormat.className;
+  const preview = mode === 'message' ? { id: 'markdown', name: `${selectedFormat.name} (Markdown)`, text: formatDiscordMessage(text, format), category: 'classic' as const, formattedText: { text, className: previewClassName } } : (results.find((style) => style.id === selectedId) ?? results[0]);
   const messageResults = discordFormats.map((item) => ({ ...item, title: `${item.name} (Markdown)`, text: formatDiscordMessage(text, item.id) }));
   const optionClass = (active: boolean) => `min-h-11 rounded-xl border px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${active ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:border-violet-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'}`;
   return <TextToolLayout workspace={{ pageTitle: 'Discord Font Generator', config, navigationItems, preview, outputLabel: mode === 'message' ? 'Markdown source' : 'Copyable text' }} label="Discord text workspace" controls={<>
@@ -35,8 +38,7 @@ export default function DiscordGeneratorTool({ config, navigationItems }: { conf
     <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">{mode === 'unicode' ? `${config.styleIds.length} styles · Tap a result to copy` : '6 message formats · Tap a result to copy'}</h3>
     {mode === 'unicode' ? results.map((style) => <TextOutputCard key={style.id} title={style.name} text={style.text} selected={preview.id === style.id} onPreview={() => setSelectedId(style.id)} />) : messageResults.map((item) => (
       <TextOutputCard key={item.id} title={item.title} text={item.text}
-        selected={format === item.id} onPreview={() => setFormat(item.id)}
-        formattedPreview={{ text, className: item.className }} />
+        selected={format === item.id} onPreview={() => setFormat(item.id)} />
     ))}
   </TextToolLayout>;
 }

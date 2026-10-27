@@ -49,7 +49,7 @@ interface GeneratorToolProps {
     controls: ReactNode;
     results: ReactNode;
     footer?: ReactNode;
-    preview: { id: string; name: string; text: string; category: GeneratorStyleCategory };
+    preview: { id: string; name: string; text: string; category: GeneratorStyleCategory; formattedText?: { text: string; className: string } };
     outputLabel?: string;
   };
 }
@@ -485,6 +485,7 @@ export default function GeneratorTool({
   );
 
   const previewVariant = customWorkspace?.preview ?? defaultPreviewVariant;
+  const formattedPreview = customWorkspace?.preview.formattedText;
 
   const visualGeneratorItems = useMemo(
     () => generatorSearchItems.filter((item) => item.collection === 'visual-art' && item.kind !== 'directory'),
@@ -778,22 +779,22 @@ export default function GeneratorTool({
 
                     <div className="relative flex min-h-48 flex-col justify-center py-6">
                       <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-100">
-                        {previewVariant ? categoryLabels[previewVariant.category] : 'Preview'} collection
+                        {formattedPreview ? 'Message preview' : `${previewVariant ? categoryLabels[previewVariant.category] : 'Preview'} collection`}
                       </p>
-                      <p className={`mt-3 break-words text-3xl leading-[1.25] ${inputText && previewVariant?.text ? '' : 'text-white/65'}`}>
-                        {inputText && previewVariant?.text ? previewVariant.text : 'Your text, your style.'}
+                      <p aria-label={formattedPreview ? 'Formatted message preview' : undefined} className={`mt-3 break-words text-3xl leading-[1.25] ${formattedPreview ? `whitespace-pre-wrap ${formattedPreview.className}` : ''} ${inputText && previewVariant?.text ? '' : 'text-white/65'}`}>
+                        {inputText && previewVariant?.text ? (formattedPreview?.text ?? previewVariant.text) : 'Your text, your style.'}
                       </p>
                     </div>
 
                     <div className="relative flex items-end justify-between gap-3 border-t border-white/20 pt-4 text-[9px] uppercase tracking-[0.14em] text-white/70">
                       <span>font-generators.org</span>
-                      <span>Unicode / 2026</span>
+                      <span>{formattedPreview ? 'Markdown' : 'Unicode'} / 2026</span>
                     </div>
                   </div>
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-900">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Characters</p>
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{formattedPreview ? 'Source characters' : 'Characters'}</p>
                       <p className="mt-1 text-lg font-black text-slate-950 dark:text-white">{previewVariant?.text?.length ?? 0}</p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-900">

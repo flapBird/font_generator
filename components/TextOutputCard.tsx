@@ -2,14 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-export default function TextOutputCard({ title, text, description, spacious = false, onPreview, selected = false, formattedPreview }: {
+export default function TextOutputCard({ title, text, description, spacious = false, onPreview, selected = false }: {
   title: string;
   text: string;
   description?: string;
   spacious?: boolean;
   onPreview?: () => void;
   selected?: boolean;
-  formattedPreview?: { text: string; className: string };
 }) {
   const outputRef = useRef<HTMLTextAreaElement>(null);
   const [notice, setNotice] = useState<{ text: string; kind: 'copied' | 'error' } | null>(null);
@@ -52,11 +51,6 @@ export default function TextOutputCard({ title, text, description, spacious = fa
           <span className="font-medium text-slate-900 dark:text-white">{title}</span>
           <span className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${copied ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-violet-50 text-violet-700 group-disabled:text-slate-400 dark:bg-violet-950/50 dark:text-violet-300'}`}>{copied ? 'Copied!' : 'Copy'}</span>
         </span>
-        {formattedPreview && <span className="mt-4 block rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
-          <span className="block text-xs text-slate-500 dark:text-slate-400">Formatting preview</span>
-          <span aria-label={`${title} formatting preview`} className={`mt-2 block whitespace-pre-wrap break-words text-xl text-slate-950 [overflow-wrap:anywhere] dark:text-white ${formattedPreview.className}`}>{formattedPreview.text || 'Enter text to preview'}</span>
-        </span>}
-        {formattedPreview && <span className="mt-4 block text-xs text-slate-500 dark:text-slate-400">Markdown source · copied as shown below</span>}
         <span aria-label={`${title} output`} className={`block select-text whitespace-pre-wrap break-words text-xl text-slate-950 [overflow-wrap:anywhere] dark:text-white sm:text-2xl ${spacious ? 'my-4 max-h-96 overflow-auto px-2 py-10 leading-[3]' : 'mt-4 min-h-8 leading-8'}`}>{text || <span className="text-base italic text-slate-400">Type above to see this style</span>}</span>
         {description && <span className="mt-2 block text-xs leading-5 text-slate-500 dark:text-slate-400">{description}</span>}
         <span className={`mt-4 block border-t border-slate-100 pt-3 text-xs dark:border-slate-800 ${copied ? 'font-semibold text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}`}>{copied ? 'Copied to clipboard' : text.trim() ? 'Tap anywhere to copy' : 'Enter text to copy'}</span>

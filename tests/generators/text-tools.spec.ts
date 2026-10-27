@@ -48,15 +48,23 @@ test('Discord retains input across modes and copies escaped multiline Markdown',
   await expect(page.getByLabel('Underline bold (Markdown) output')).toHaveText(expected);
   await page.getByRole('button', { name: 'Copy Underline bold (Markdown)', exact: true }).click();
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
+  expect(await page.getByLabel('Formatted message preview', { exact: true }).textContent()).toBe(' A*b \n\nNext');
+  await expect(page.getByLabel('Formatted message preview', { exact: true })).toHaveCSS('white-space', 'pre-wrap');
   await page.getByLabel('Your text', { exact: true }).fill('Hello');
   for (const [format, source] of [['Bold', '**Hello**'], ['Italic', '*Hello*'], ['Bold italic', '***Hello***'], ['Underline', '__Hello__'], ['Underline bold', '__**Hello**__'], ['Strikethrough', '~~Hello~~']]) {
-    await expect(page.getByLabel(`${format} (Markdown) formatting preview`, { exact: true })).toHaveText('Hello');
     const card = page.getByRole('button', { name: `Copy ${format} (Markdown)`, exact: true });
     await card.focus();
     await page.keyboard.press('Enter');
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(source);
-    await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toContainText(source);
+    const rendered = page.getByLabel('Formatted message preview', { exact: true });
+    await expect(rendered).toHaveText('Hello');
+    await expect(rendered).toHaveCSS('font-weight', ['Bold', 'Bold italic', 'Underline bold'].includes(format) ? '700' : '400');
+    await expect(rendered).toHaveCSS('font-style', ['Italic', 'Bold italic'].includes(format) ? 'italic' : 'normal');
+    await expect(rendered).toHaveCSS('text-decoration-line', format.startsWith('Underline') ? 'underline' : format === 'Strikethrough' ? 'line-through' : 'none');
+    await expect(card).not.toContainText('Formatting preview');
+    await expect(card.locator('[aria-label$=" output"]')).toHaveText(source);
   }
+  await page.getByRole('button', { name: 'Copy Underline bold (Markdown)', exact: true }).focus();
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 1000 });
     await page.evaluate(() => scrollTo(0, 0));
@@ -71,6 +79,7 @@ test('Discord retains input across modes and copies escaped multiline Markdown',
   await expect(page.getByText('These are not valid for your unique @username.', { exact: false })).toBeVisible();
   await page.getByLabel('Your text', { exact: true }).fill('');
   await expect(page.getByRole('button', { name: 'Copy Bold Sans', exact: true })).toBeDisabled();
+  await expect(page.getByLabel('Formatted message preview', { exact: true })).toHaveCount(0);
 });
 
 test('Zalgo lists five strengths and preserves custom controls, clipboard and empty behavior', async ({ page, context }) => {
