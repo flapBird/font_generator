@@ -27,7 +27,7 @@ Competitor descriptions are treated as intent evidence, not authority for platfo
 - Standard Unicode style inputs retain the existing 240-unit limit. Underline no longer attaches new marks to emoji; repeat application does not duplicate the same underline mark.
 - Handwriting uses `@fontsource/caveat` 400/700 and `@fontsource/patrick-hand` 400 Latin subsets, served by the site. OFL notices are included under `public/licenses` and linked from the page. Unsupported scripts can fall back to other browser fonts.
 - The handwriting artwork input retains the existing 120-unit limit and manual line handling. Editable SVG retains text and needs its font; faithful SVG embeds raster pixels. Copyable script alternatives do not reproduce the rendered typefaces.
-- The generator registry determines sitemap, canonical metadata, full directories and llms listings. Workspace navigation retains older entries and excludes this batch through a separate exclusion list; the full directories still include every public generator. Unicode game pages now appear in both the style directory and fandom directory; handwriting appears in Visual & Art.
+- The generator registry determines sitemap, canonical metadata, full directories and llms listings. Permanent workspace navigation retains older entries and excludes this batch through a separate exclusion list; active new text pages show a separate temporary HERE item; the full directories still include every public generator. Unicode game pages now appear in both the style directory and fandom directory; handwriting appears in Visual & Art.
 
 ## Verification
 

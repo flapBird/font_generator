@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-export default function TextOutputCard({ title, text, description, spacious = false }: {
+export default function TextOutputCard({ title, text, description, spacious = false, onPreview, selected = false }: {
   title: string;
   text: string;
   description?: string;
   spacious?: boolean;
+  onPreview?: () => void;
+  selected?: boolean;
 }) {
   const outputRef = useRef<HTMLTextAreaElement>(null);
   const [notice, setNotice] = useState<{ text: string; kind: 'copied' | 'error' } | null>(null);
@@ -39,11 +41,12 @@ export default function TextOutputCard({ title, text, description, spacious = fa
 
   return (
     <article className="min-w-0">
-      <button type="button" disabled={!text.trim()} aria-label={`Copy ${title}`} onClick={(event) => {
+      <button type="button" disabled={!text.trim()} aria-label={`Copy ${title}`} onFocus={onPreview} onClick={(event) => {
         // Keep drag-selection available; keyboard activation always copies.
         if (event.detail && window.getSelection()?.toString()) return;
+        onPreview?.();
         void copy();
-      }} className={`group block w-full min-w-0 rounded-2xl border bg-white p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-default dark:bg-slate-950 dark:focus-visible:ring-offset-slate-950 ${copied ? 'border-emerald-400 ring-2 ring-emerald-500/10 dark:border-emerald-600' : 'border-slate-200 enabled:hover:border-violet-400 enabled:hover:shadow-sm dark:border-slate-800 dark:enabled:hover:border-violet-500'}`}>
+      }} className={`group block w-full min-w-0 rounded-2xl border bg-white p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-default dark:bg-slate-950 dark:focus-visible:ring-offset-slate-950 ${copied ? 'border-emerald-400 ring-2 ring-emerald-500/10 dark:border-emerald-600' : selected ? 'border-violet-400 ring-2 ring-violet-500/10 dark:border-violet-600' : 'border-slate-200 enabled:hover:border-violet-400 enabled:hover:shadow-sm dark:border-slate-800 dark:enabled:hover:border-violet-500'}`}>
         <span className="flex items-center justify-between gap-3">
           <span className="font-medium text-slate-900 dark:text-white">{title}</span>
           <span className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${copied ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-violet-50 text-violet-700 group-disabled:text-slate-400 dark:bg-violet-950/50 dark:text-violet-300'}`}>{copied ? 'Copied!' : 'Copy'}</span>

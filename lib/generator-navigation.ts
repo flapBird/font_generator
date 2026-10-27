@@ -1,4 +1,4 @@
-// Hide only this batch of additions from the existing navigation.
+// Hide this batch from permanent navigation; the active text workspace may show a separate temporary current item.
 // Preserve every older entry, its order, search behavior and collection-link placement.
 export const hiddenNavigationSlugs = [
   'bold-text-generator', 'strikethrough-text-generator', 'underline-text-generator',

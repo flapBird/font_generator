@@ -6,15 +6,17 @@ import { useGeneratorText } from '@/lib/use-generator-text';
 import TextOutputCard from './TextOutputCard';
 import TextToolInput from './TextToolInput';
 import TextToolLayout from './TextToolLayout';
+import type { GeneratorSearchItem } from './GeneratorTool';
+import type { GeneratorPageConfig } from '@/lib/generator';
 
-export default function ZalgoGeneratorTool() {
+export default function ZalgoGeneratorTool({ config, navigationItems }: { config: GeneratorPageConfig; navigationItems: GeneratorSearchItem[] }) {
   const [text, setText] = useGeneratorText('Zalgo Text Generator');
   const [intensity, setIntensity] = useState(3);
   const [zones, setZones] = useState({ above: true, middle: true, below: true });
   const [seed, setSeed] = useState(42);
   const output = useMemo(() => generateZalgo(text, { intensity, ...zones, seed }), [text, intensity, zones, seed]);
   const tooLong = text.length > ZALGO_INPUT_LIMIT;
-  return <TextToolLayout label="Zalgo text workspace" controls={<>
+  return <TextToolLayout workspace={{ pageTitle: 'Zalgo Text Generator', config, navigationItems, preview: { id: 'zalgo', name: 'Zalgo text', text: output, category: 'effects' } }} label="Zalgo text workspace" controls={<>
     <TextToolInput id="zalgo-input" text={text} onChange={setText} limit={ZALGO_INPUT_LIMIT} />
     {tooLong && <p role="alert" className="text-sm text-red-600">This saved draft is too long. Shorten it to 1,000 characters to generate; your text has not been cut.</p>}
     <fieldset><legend className="mb-2 text-sm font-medium text-slate-950 dark:text-white">Effect strength</legend>
@@ -24,7 +26,7 @@ export default function ZalgoGeneratorTool() {
     </fieldset>
   </>} footer={<details className="mt-5 border-t border-slate-200 pt-4 text-sm leading-6 text-slate-600 dark:border-slate-800 dark:text-slate-400"><summary className="cursor-pointer py-2 font-medium">Zalgo tips & compatibility</summary><p className="mt-3">Heavy results can overlap or be rejected by the destination app; start mild for names and chat. Emoji and complex scripts stay unchanged. None or no directions returns your original input. It does not remove accents or clean previously pasted Zalgo text. Text is processed in your browser.</p></details>}>
     <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">Live result · Tap to copy</h3><button type="button" onClick={() => setSeed((value) => value + 1)} className="min-h-11 rounded-xl bg-violet-600 px-4 py-3 text-sm font-medium text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500">Randomize marks</button></div>
-    <TextOutputCard title="Zalgo text" text={output} spacious />
+    <TextOutputCard title="Zalgo text" text={output} selected spacious />
     <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
     <div><label htmlFor="zalgo-intensity" className="text-sm font-medium text-slate-950 dark:text-white">Intensity: {intensity} / 10</label><input id="zalgo-intensity" type="range" min="0" max="10" value={intensity} onChange={(event) => setIntensity(Number(event.target.value))} className="mt-2 block w-full accent-violet-600" /></div>
     <fieldset><legend className="mb-2 text-sm font-medium text-slate-950 dark:text-white">Mark directions</legend>

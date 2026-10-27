@@ -4,14 +4,14 @@ import { isVisibleInGeneratorNavigation } from '@/lib/generator-navigation';
 import { useGeneratorText } from '@/lib/use-generator-text';
 
 import Link from '@/components/IntentLink';
-import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 import type { GeneratorPageConfig, GeneratorStyleCategory } from '@/lib/generator';
 import {
   generateStyleVariants,
   generatorStyles,
 } from '@/lib/generator';
 
-interface GeneratorSearchItem {
+export interface GeneratorSearchItem {
   id: string;
   title: string;
   href: string;
@@ -44,6 +44,14 @@ interface GeneratorToolProps {
   workspaceMode?: boolean;
   generatorSearchItems?: GeneratorSearchItem[];
   sectionId?: string;
+  // New text tools supply their specialized controls/results without changing older workspaces.
+  customWorkspace?: {
+    controls: ReactNode;
+    results: ReactNode;
+    footer?: ReactNode;
+    preview: { id: string; name: string; text: string; category: GeneratorStyleCategory };
+    outputLabel?: string;
+  };
 }
 
 const categoryLabels: Record<GeneratorStyleCategory, string> = {
@@ -156,6 +164,7 @@ interface GeneratorDirectoryContentProps {
   fontItems: GeneratorSearchItem[];
   visualItems: GeneratorSearchItem[];
   currentPageTitle: string;
+  temporaryCurrentItem?: GeneratorSearchItem;
 }
 
 function GeneratorDirectoryContent({
@@ -165,6 +174,7 @@ function GeneratorDirectoryContent({
   fontItems,
   visualItems,
   currentPageTitle,
+  temporaryCurrentItem,
 }: GeneratorDirectoryContentProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const isCurrentGenerator = (title: string) => normalizeSearchText(title) === currentPageTitle;
@@ -172,13 +182,14 @@ function GeneratorDirectoryContent({
   useLayoutEffect(() => {
     const scroller = contentRef.current?.closest<HTMLElement>('[data-generator-directory-scroll]');
     if (!scroller) return;
+    if (temporaryCurrentItem) { scroller.scrollTop = 0; return; }
 
     try {
       const savedScrollTop = Number(window.sessionStorage.getItem(generatorDirectoryScrollKey));
       if (!Number.isFinite(savedScrollTop) || savedScrollTop <= 0) return;
       scroller.scrollTop = savedScrollTop;
     } catch {}
-  }, []);
+  }, [temporaryCurrentItem]);
 
   const preserveScrollPosition = (event: MouseEvent<HTMLAnchorElement>) => {
     const scroller = event.currentTarget.closest<HTMLElement>('[data-generator-directory-scroll]');
@@ -238,6 +249,10 @@ function GeneratorDirectoryContent({
         )}
       </div>
 
+      {temporaryCurrentItem && (
+        <nav aria-label="Current generator"><ul>{renderGeneratorLink(temporaryCurrentItem, false)}</ul></nav>
+      )}
+
       {fontItems.length > 0 && (
         <nav aria-label="Copyable text generators">
           <div className="flex items-center justify-between gap-2 px-1">
@@ -286,6 +301,7 @@ function MobileGeneratorRail({
   fontItems,
   visualItems,
   currentPageTitle,
+  temporaryCurrentItem,
 }: Omit<GeneratorDirectoryContentProps, 'searchId'>) {
   const railRef = useRef<HTMLDivElement>(null);
   const items = [...fontItems, ...visualItems];
@@ -330,6 +346,16 @@ function MobileGeneratorRail({
           </button>
         )}
       </div>
+
+      {temporaryCurrentItem && (
+        <nav aria-label="Current generator" className="mt-3">
+          <Link href={temporaryCurrentItem.href} aria-current="page" className="flex min-h-11 items-center gap-2 rounded-xl border border-violet-500 bg-violet-50 px-3 py-2 text-sm font-medium text-violet-700 dark:bg-violet-950/40 dark:text-violet-200">
+            <span aria-hidden="true">{temporaryCurrentItem.icon}</span>
+            <span className="flex-1">{getGeneratorDisplayName(temporaryCurrentItem.title)}</span>
+            <span className="text-[9px] font-black uppercase tracking-wide">Here</span>
+          </Link>
+        </nav>
+      )}
 
       {items.length > 0 ? (
         <nav aria-label="Choose a generator" className="mt-3">
@@ -377,6 +403,7 @@ export default function GeneratorTool({
   workspaceMode = false,
   generatorSearchItems = [],
   sectionId = 'generator',
+  customWorkspace,
 }: GeneratorToolProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [inputText, setInputText] = useGeneratorText(pageTitle.replace(/ copyable text$/, ' Generator'));
@@ -449,13 +476,15 @@ export default function GeneratorTool({
     [allVariants, visibleLimit],
   );
 
-  const previewVariant = useMemo(
+  const defaultPreviewVariant = useMemo(
     () => (
       (previewStyleId ? allVariants.find((variant) => variant.id === previewStyleId) : undefined)
       ?? variants[0]
     ),
     [allVariants, previewStyleId, variants],
   );
+
+  const previewVariant = customWorkspace?.preview ?? defaultPreviewVariant;
 
   const visualGeneratorItems = useMemo(
     () => generatorSearchItems.filter((item) => item.collection === 'visual-art' && item.kind !== 'directory'),
@@ -539,6 +568,10 @@ export default function GeneratorTool({
   ];
   const normalizedPageTitle = normalizeSearchText(pageTitle);
 
+  const temporaryCurrentItem = workspaceMode ? generatorSearchItems.find((item) =>
+    !isVisibleInGeneratorNavigation(item.href) && normalizeSearchText(item.title) === normalizedPageTitle
+  ) : undefined;
+
   if (workspaceMode) {
     return (
       <section
@@ -556,6 +589,9 @@ export default function GeneratorTool({
 
         <div className="p-3 sm:p-5 lg:p-6">
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[220px_minmax(0,1fr)_300px]">
+              {customWorkspace ? (
+                <div className="order-1 min-w-0 space-y-4 xl:col-start-2 xl:row-start-1">{customWorkspace.controls}</div>
+              ) : (
               <div className="order-1 min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.5)] sm:p-5 xl:col-start-2 xl:row-start-1 dark:border-slate-800 dark:bg-slate-900">
                 <label htmlFor={inputId} className="block text-sm font-medium text-slate-900 dark:text-white">
                   Enter your text
@@ -592,6 +628,7 @@ export default function GeneratorTool({
                   <span>{inputText.length}/240</span>
                 </div>
               </div>
+              )}
 
               <aside
                 data-generator-directory-scroll
@@ -604,6 +641,7 @@ export default function GeneratorTool({
                   fontItems={filteredFontGeneratorItems}
                   visualItems={filteredVisualGeneratorItems}
                   currentPageTitle={normalizedPageTitle}
+                  temporaryCurrentItem={temporaryCurrentItem}
                 />
                 <div className="hidden xl:block">
                   <GeneratorDirectoryContent
@@ -613,11 +651,13 @@ export default function GeneratorTool({
                     fontItems={filteredFontGeneratorItems}
                     visualItems={filteredVisualGeneratorItems}
                     currentPageTitle={normalizedPageTitle}
+                    temporaryCurrentItem={temporaryCurrentItem}
                   />
                 </div>
               </aside>
 
               <div className="order-3 min-w-0 xl:col-start-2 xl:row-start-2">
+                {customWorkspace ? <div className="space-y-3">{customWorkspace.results}</div> : <>
                 <div className="flex items-end justify-between gap-4">
                   <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
                     {searchedStyleIds.length} {inputText ? 'generated' : 'available'} styles
@@ -711,6 +751,7 @@ export default function GeneratorTool({
                     </button>
                   </div>
                 )}
+                </>}
               </div>
 
               <aside className="hidden xl:sticky xl:top-24 xl:col-start-3 xl:row-start-1 xl:row-span-2 xl:block xl:self-start" aria-label="Selected font preview">
@@ -719,7 +760,7 @@ export default function GeneratorTool({
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">Font Studio</p>
                       <p className="mt-1 max-w-48 truncate text-sm font-bold text-slate-950 dark:text-white">
-                        {previewVariant ? getFontDisplayName(previewVariant.name) : 'Select a font'}
+                        {previewVariant ? (customWorkspace ? previewVariant.name : getFontDisplayName(previewVariant.name)) : 'Select a font'}
                       </p>
                     </div>
                     <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
@@ -757,7 +798,7 @@ export default function GeneratorTool({
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-900">
                       <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Output</p>
-                      <p className="mt-1 text-sm font-bold text-emerald-600">Copyable text</p>
+                      <p className="mt-1 text-sm font-bold text-emerald-600">{customWorkspace?.outputLabel ?? 'Copyable text'}</p>
                     </div>
                   </div>
                   <p className="mt-3 text-center text-[11px] text-slate-500 dark:text-slate-400">Select any card to update the specimen.</p>
@@ -765,6 +806,7 @@ export default function GeneratorTool({
               </aside>
             </div>
 
+          {customWorkspace?.footer}
           <div className="mt-7 grid gap-3 border-t border-slate-200 pt-6 sm:grid-cols-3 dark:border-slate-800">
             {config.bestFor.map((item) => (
               <div key={item} className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-900">

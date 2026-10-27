@@ -52,7 +52,7 @@ test('original navigation entries, order, search and collection-link placement a
   }
 });
 
-test('all thirteen additions expose direct copy cards without an embedded directory on desktop and mobile', async ({ page, context }) => {
+test('new text tools share the workspace with a temporary current item; handwriting retains artwork and script sections', async ({ page, context }) => {
   test.setTimeout(120000);
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   const errors: string[] = [];
@@ -61,7 +61,18 @@ test('all thirteen additions expose direct copy cards without an embedded direct
     await page.setViewportSize({ width, height: 900 });
     for (const slug of newSlugs) {
       await page.goto(`/${slug}`);
-      await expect(page.getByRole('complementary', { name: 'Generator directory' })).toHaveCount(0);
+      const rail = page.getByRole('complementary', { name: 'Generator directory' });
+      if (slug === 'handwriting-font-generator') {
+        await expect(rail).toHaveCount(0);
+      } else {
+        await expect(rail).toBeVisible();
+        const current = rail.getByRole('navigation', { name: 'Current generator', exact: true }).filter({ visible: true });
+        await expect(current.locator('a[aria-current="page"]')).toHaveAttribute('href', `/${slug}`);
+        await expect(current).toContainText('Here');
+        // Temporary current item is separate from the unchanged persistent list.
+        await expect(rail.getByRole('navigation', { name: 'Copyable text generators', exact: true }).locator(`a[href="/${slug}"]`)).toHaveCount(0);
+        for (const other of newSlugs.filter((item) => item !== slug)) await expect(rail.locator(`a[href="/${other}"]`)).toHaveCount(0);
+      }
       const input = page.locator(slug === 'handwriting-font-generator' ? '#copyable-styles textarea' : 'main textarea').first();
       await input.fill('Ab 12!');
       const copy = page.getByRole('button', { name: /^Copy / }).first();
@@ -69,6 +80,20 @@ test('all thirteen additions expose direct copy cards without an embedded direct
       await copy.click();
       await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
       await expect(copy).toContainText('Copied!');
+      if (width === 1440 && slug !== 'handwriting-font-generator') {
+        const preview = page.getByRole('complementary', { name: 'Selected font preview' });
+        await expect(preview).toContainText(expected!);
+        const cards = page.getByRole('button', { name: /^Copy / });
+        if (await cards.count() > 1) {
+          const another = cards.nth(1);
+          const anotherOutput = await another.locator('[aria-label$=" output"]').textContent();
+          await another.focus();
+          await expect(preview).toContainText(anotherOutput!);
+          await page.keyboard.press('Enter');
+          await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(anotherOutput);
+          await copy.click();
+        }
+      }
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       if (slug !== 'handwriting-font-generator') await page.evaluate(() => scrollTo(0, 0));
       await page.screenshot({ path: `/tmp/${slug}-${width}-unified.png`, animations: 'disabled' });
@@ -111,4 +136,32 @@ test('handwriting opts into prominent presets while an existing visual tool keep
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download PNG', exact: true }).click();
   expect((await download).suggestedFilename()).toMatch(/\.png$/);
+});
+
+
+test('client-side switching keeps drafts, old HERE behavior and independent canonical pages', async ({ page }) => {
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/bold-text-generator');
+    await page.locator('#generator-input').fill('Keep my words 12');
+    await page.evaluate(() => { (window as unknown as Record<string, unknown>).__workspaceNavigation = 'same-document'; });
+    let rail = page.getByRole('complementary', { name: 'Generator directory' });
+    await rail.locator('a[href="/italics-font-generator"]').filter({ visible: true }).click();
+    await expect(page).toHaveURL(/\/italics-font-generator$/);
+    await expect(page.locator('#generator-input')).toHaveValue('Keep my words 12');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://font-generators.org/italics-font-generator');
+    rail = page.getByRole('complementary', { name: 'Generator directory' });
+    await expect(rail.getByRole('navigation', { name: 'Current generator', exact: true })).toHaveCount(0);
+    await expect(rail.locator('a[aria-current="page"]').filter({ visible: true })).toHaveAttribute('href', '/italics-font-generator');
+    await expect(rail.locator('a[href="/bold-text-generator"]')).toHaveCount(0);
+    expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).__workspaceNavigation)).toBe('same-document');
+    await page.goBack();
+    await expect(page).toHaveURL(/\/bold-text-generator$/);
+    await expect(page.locator('#generator-input')).toHaveValue('Keep my words 12');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://font-generators.org/bold-text-generator');
+    await expect(page.getByRole('navigation', { name: 'Current generator', exact: true }).filter({ visible: true })).toContainText('Bold');
+    expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).__workspaceNavigation)).toBe('same-document');
+    await page.getByRole('button', { name: 'Clear text', exact: true }).click();
+    await expect(page.locator('#generator-input')).toHaveValue('');
+  }
 });

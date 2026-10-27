@@ -22,6 +22,8 @@ test('nine pages have canonical metadata, discoverable links, sitemap and accura
   expect(llms).toMatch(/handwriting-font-generator\).*Outputs: copyable text, PNG, SVG/);
   expect(llms).toContain('does not');
   expect(llms).toContain('do not verify in-game acceptance');
+  expect(llms).toContain('temporary current-page item marked HERE');
+  expect(llms).toContain('Client-side links preserve the text draft');
   const redirect = await request.get('/x-font-generator', { maxRedirects: 0 });
   expect(redirect.status()).toBe(301);
   expect(redirect.headers().location).toBe('/twitter-font-generator');
@@ -173,6 +175,8 @@ test('platform layout exposes input, decoration previews and results on desktop 
   await page.screenshot({ path: '/tmp/adopt-me-copy-desktop.png', animations: 'disabled' });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole('button', { name: 'Hearts', exact: true })).toBeInViewport();
+  await expect(page.getByRole('complementary', { name: 'Generator directory' })).toBeVisible();
+  await firstResult.scrollIntoViewIfNeeded();
   await expect(firstResult).toBeInViewport({ ratio: 1 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: '/tmp/adopt-me-copy-mobile.png', animations: 'disabled' });
@@ -181,6 +185,7 @@ test('platform layout exposes input, decoration previews and results on desktop 
   await page.screenshot({ path: '/tmp/adopt-me-copy-feedback-mobile.png', animations: 'disabled' });
   await page.goto('/twitter-font-generator');
   await page.getByLabel('Your text', { exact: true }).fill('Hello @artist #Design');
+  await page.getByRole('button', { name: 'Copy Bold Sans', exact: true }).scrollIntoViewIfNeeded();
   await expect(page.getByRole('button', { name: 'Copy Bold Sans', exact: true })).toBeInViewport();
   await page.screenshot({ path: '/tmp/twitter-copy-mobile.png', animations: 'disabled' });
 });

@@ -210,11 +210,11 @@ export default function PageTemplate({
         </header>
 
         {isPlatform ? (
-          <PlatformTextGeneratorTool key={page.slug} slug={page.slug} config={config} pageTitle={page.title} />
+          <PlatformTextGeneratorTool navigationItems={generatorNavigationItems} key={page.slug} slug={page.slug} config={config} pageTitle={page.title} />
         ) : isZalgo ? (
-          <ZalgoGeneratorTool />
+          <ZalgoGeneratorTool config={config} navigationItems={generatorNavigationItems} />
         ) : isDiscord ? (
-          <DiscordGeneratorTool config={config} />
+          <DiscordGeneratorTool config={config} navigationItems={generatorNavigationItems} />
         ) : isThreeDGenerator ? (
           <ThreeDFontGeneratorTool key={page.slug} />
         ) : isAsciiGenerator ? (
@@ -246,7 +246,7 @@ export default function PageTemplate({
             ))}
           </>
         ) : focusedTextSlugs.has(page.slug) ? (
-          <FocusedTextGeneratorTool key={page.slug} config={config} pageTitle={page.title} />
+          <FocusedTextGeneratorTool navigationItems={generatorNavigationItems} key={page.slug} config={config} pageTitle={page.title} />
         ) : (
           <GeneratorTool
             key={page.slug}
