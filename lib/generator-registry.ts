@@ -83,7 +83,7 @@ const overrides: Record<string, GeneratorOverride> = {
   ...Object.fromEntries(octoberTextSlugs.map((slug) => [slug, {
     intent: {
       primary: slug === 'wingdings-font-generator'
-        ? 'Encode and decode 62 Latin letters and digits using portable Wingdings-style Unicode counterparts, with a searchable character chart and optional Gaster uppercase mode. Punctuation remains unchanged.'
+        ? 'Encode and decode 62 Latin letters and digits using portable Wingdings-style Unicode counterparts, with both results shown together, a searchable character chart and optional Gaster uppercase encoding. Punctuation remains unchanged.'
         : slug === 'emoji-font-generator'
           ? 'Create emoji letter lookalikes, themed letter-substitution codes, and readable decorations; not semantic translation or an emoji keyboard.'
           : slug === 'gaming-font-generator'

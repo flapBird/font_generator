@@ -1,8 +1,12 @@
 const updateGroups = {
+  '2026-10-28': [
+    '/k-pop-font-generator', '/wingdings-font-generator', '/preppy-font-generator',
+    '/emoji-font-generator', '/gaming-font-generator',
+  ],
   '2026-10-27': [
-    '/halloween-font-generator', '/korean-font-generator', '/k-pop-font-generator',
-    '/chinese-font-generator', '/wingdings-font-generator', '/graffiti-font-generator',
-    '/arabic-font-generator', '/preppy-font-generator', '/emoji-font-generator', '/gaming-font-generator',
+    '/halloween-font-generator', '/korean-font-generator',
+    '/chinese-font-generator', '/graffiti-font-generator',
+    '/arabic-font-generator',
     '/styles', '/visual-art',
     '/',
     '/bold-text-generator',

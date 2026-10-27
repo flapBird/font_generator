@@ -141,7 +141,7 @@ export default function PageTemplate({
   const workflowSteps = octoberArt
     ? [['1', 'Enter your text', 'Type up to 120 characters, including manual line breaks.'], ['2', 'Choose a typeface', 'Select a real font, then customize size, alignment, canvas and colors.'], ['3', 'Download PNG', 'Wait for the preview to be ready and download the artwork. Copying characters does not preserve the typeface.']]
     : octoberText
-    ? [['1', 'Enter text', 'Type a name or message in the shared workspace.'], ['2', 'Choose your options', 'Adjust decorations or the symbol conversion direction where available.'], ['3', 'Copy and test', 'Tap a result card to copy, then test in the destination field.']]
+    ? [['1', 'Enter text', 'Type a name or message in the shared workspace.'], ['2', 'Compare the results', page.slug === 'wingdings-font-generator' ? 'See letters-to-symbols and symbols-to-letters results together. Gaster mode affects encoding only.' : 'Choose a decoration using its visual example, then compare the text styles.'], ['3', 'Copy and test', 'Tap a result card to copy, then test in the destination field.']]
     : isZalgo || isDiscord || isPlatform
     ? [
         ['1', 'Enter text', 'Type a short phrase in the input.'],

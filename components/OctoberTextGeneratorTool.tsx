@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { GeneratorPageConfig } from '@/lib/generator';
 import { useGeneratorText } from '@/lib/use-generator-text';
-import { octoberTextResults, textFrames, type OctoberFrame } from '@/lib/october-text';
+import { frameLines, octoberTextResults, textFrames, type OctoberFrame } from '@/lib/october-text';
 import { convertWingdings, wingdingsEntries } from '@/lib/wingdings';
 import type { GeneratorSearchItem } from './GeneratorTool';
 import TextToolLayout from './TextToolLayout';
@@ -18,15 +18,18 @@ export default function OctoberTextGeneratorTool({ slug, pageTitle, config, navi
   const [text, setText] = useGeneratorText(pageTitle);
   const [frame, setFrame] = useState<OctoberFrame>('none');
   const [selectedId, setSelectedId] = useState('original');
-  const [direction, setDirection] = useState<'encode' | 'decode'>('encode');
   const [gaster, setGaster] = useState(false);
   const [search, setSearch] = useState('');
   const isWingdings = slug === 'wingdings-font-generator';
   const overLimit = text.length > 1000;
-  const results = isWingdings ? [{ id: 'wingdings', name: direction === 'encode' ? 'Wingdings symbols' : 'Decoded letters', text: overLimit ? '' : convertWingdings(text, direction, gaster), category: 'symbols' as const, description: 'Portable Unicode approximations; punctuation and unmapped characters remain unchanged.' }]
+  const results = isWingdings ? [
+    { id: 'wingdings-encode', name: 'Letters → Symbols', text: overLimit ? '' : convertWingdings(text, 'encode', gaster), category: 'symbols' as const, description: 'Turn letters and digits into copyable Wingdings-style symbols. Gaster mode uppercases Latin letters in this result only.' },
+    { id: 'wingdings-decode', name: 'Symbols → Letters', text: overLimit ? '' : convertWingdings(text, 'decode'), category: 'symbols' as const, description: 'Read symbols from this mapping as letters and digits. Punctuation and unmapped characters stay unchanged.' },
+  ]
     : octoberTextResults(overLimit ? '' : text, slug, frame);
   const preview = results.find((item) => item.id === selectedId) ?? results[0];
   const frames: OctoberFrame[] = slug === 'halloween-font-generator' ? ['none', 'pumpkins', 'ghosts'] : slug === 'gaming-font-generator' ? ['none', 'clan', 'stars'] : ['none', 'hearts', 'stars', 'bows'];
+  const visualFrames = ['k-pop-font-generator', 'preppy-font-generator', 'emoji-font-generator', 'gaming-font-generator'].includes(slug);
   return <TextToolLayout id={embedded ? 'copyable-styles' : 'generator'} label={`${pageTitle} workspace`}
     workspace={!embedded && navigationItems ? { pageTitle, config, navigationItems, preview } : undefined}
     controls={<>
@@ -34,18 +37,23 @@ export default function OctoberTextGeneratorTool({ slug, pageTitle, config, navi
       <TextToolInput id={embedded ? 'halloween-text-input' : 'generator-input'} text={text} onChange={setText} limit={1000} />
       {overLimit && <p role="alert" className="text-sm text-red-700">Your saved draft exceeds 1,000 characters. Shorten it to generate results; your text has not been truncated.</p>}
       {isWingdings ? <>
-        <fieldset><legend className="mb-2 text-sm font-semibold">Conversion direction</legend><div className="flex flex-wrap gap-2">
-          {(['encode', 'decode'] as const).map((value) => <button key={value} type="button" aria-pressed={direction === value} className={`${buttonClass} ${direction === value ? 'border-violet-500 bg-violet-50 text-violet-900' : 'border-slate-300'}`} onClick={() => setDirection(value)}>{value === 'encode' ? 'Letters → Symbols' : 'Symbols → Letters'}</button>)}
-        </div></fieldset>
-        <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={gaster} disabled={direction === 'decode'} onChange={(event) => setGaster(event.target.checked)} />Gaster mode — uppercase Latin input</label>
-        <p className="text-sm leading-6 text-slate-500">Maps A–Z, a–z and 0–9 separately. This is a Unicode symbol converter, not the original Microsoft font or an official Undertale tool. Decoding assumes the symbols came from this mapping.</p>
+        <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={gaster} onChange={(event) => setGaster(event.target.checked)} />Gaster mode — uppercase Latin input</label>
+        <p className="text-sm leading-6 text-slate-500">Type letters or paste symbols; both results update below. Maps A–Z, a–z and 0–9 separately using portable Unicode approximations. This is not the original Microsoft font or an official Undertale tool.</p>
       </> : <>
-        <fieldset><legend className="mb-2 text-sm font-semibold">Decoration</legend><div className="flex flex-wrap gap-2">{frames.map((value) => <button key={value} type="button" aria-pressed={frame === value} onClick={() => setFrame(value)} className={`${buttonClass} ${frame === value ? 'border-violet-500 bg-violet-50 text-violet-900' : 'border-slate-300'}`}>{textFrames[value][0]}</button>)}</div></fieldset>
+        <fieldset><legend className="mb-2 text-sm font-semibold">Decoration</legend>
+          {visualFrames ? <div className={`grid grid-cols-2 gap-2 ${frames.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-4'}`}>
+            {frames.map((value) => <button key={value} type="button" aria-label={textFrames[value][0]} aria-pressed={frame === value} onClick={() => setFrame(value)} className={`relative min-h-20 min-w-0 rounded-xl border px-2 py-3 text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 ${frame === value ? 'border-violet-600 bg-violet-50 text-violet-900 ring-1 ring-violet-600 dark:border-violet-400 dark:bg-violet-950/60 dark:text-violet-100 dark:ring-violet-400' : 'border-slate-200 bg-white text-slate-700 hover:border-violet-400 hover:bg-violet-50/50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-violet-950/30'}`}>
+              {frame === value && <svg aria-hidden="true" className="absolute right-1.5 top-1.5 h-3.5 w-3.5 text-violet-600 dark:text-violet-300" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m4 10 4 4 8-8" /></svg>}
+              <span aria-hidden="true" data-frame-preview className="block whitespace-nowrap text-lg leading-7">{frameLines('Name', value)}</span>
+              <span className="mt-1 block text-xs font-medium">{textFrames[value][0]}</span>
+            </button>)}
+          </div> : <div className="flex flex-wrap gap-2">{frames.map((value) => <button key={value} type="button" aria-pressed={frame === value} onClick={() => setFrame(value)} className={`${buttonClass} ${frame === value ? 'border-violet-500 bg-violet-50 text-violet-900' : 'border-slate-300'}`}>{textFrames[value][0]}</button>)}</div>}
+        </fieldset>
         <p className="text-sm leading-6 text-slate-500">{slug === 'k-pop-font-generator' ? 'Style a nickname or a multiline fan bio. Hangul, detected links and mentions stay intact. These are fan-made text styles, not official group logos.' : slug === 'gaming-font-generator' ? 'For display-name ideas and clan labels. Games and account fields may reject styled characters; keep the original fallback and test in the exact field.' : slug === 'emoji-font-generator' ? 'Emoji codes substitute letters for fun; they do not translate sentences. Existing emoji stay intact. Emoji appearance varies by device.' : embedded ? 'These are Unicode text alternatives. Copying them does not copy the horror typefaces in the artwork above.' : 'Use a short name or bio line. Copyable Unicode and decorations may look different across apps.'}</p>
       </>}
     </>}
     footer={slug === 'gaming-font-generator' ? <div className="mt-5 rounded-xl bg-violet-50 p-4 dark:bg-violet-950/30"><h3 className="font-semibold">Choose a game or destination</h3><div className="mt-2 flex flex-wrap gap-x-5 gap-y-2">{[['roblox-font-generator', 'Roblox text'], ['minecraft-font-generator', 'Minecraft artwork & codes'], ['discord-font-generator', 'Discord text'], ['twitch-font-generator', 'Twitch text'], ['fortnite-font-generator', 'Fortnite artwork']].map(([href, label]) => <Link key={href} href={`/${href}`} className="py-2 text-sm text-violet-700 underline dark:text-violet-300">{label}</Link>)}</div></div> : undefined}>
-      <div className="flex justify-between gap-2 text-sm text-slate-500"><h3>{isWingdings ? 'Conversion result' : 'Choose your text style'}</h3><span>Tap a result to copy</span></div>
+      <div className="flex justify-between gap-2 text-sm text-slate-500"><h3>{isWingdings ? 'Both conversion results' : 'Choose your text style'}</h3><span>Tap a result to copy</span></div>
       {results.map((result) => <TextOutputCard key={result.id} title={result.name} text={result.text} description={result.description} selected={preview.id === result.id} onPreview={() => setSelectedId(result.id)} />)}
       {isWingdings && <details className="rounded-xl border border-slate-200 p-4 dark:border-slate-800"><summary className="cursor-pointer py-2 font-semibold">Wingdings character chart · 62 characters</summary>
         <label className="mt-4 block text-sm">Find a letter or symbol<input value={search} onChange={(event) => setSearch(event.target.value)} className="mt-2 block w-full rounded-lg border border-slate-300 bg-transparent p-3" type="search" /></label>
