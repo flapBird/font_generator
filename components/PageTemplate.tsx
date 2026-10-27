@@ -136,7 +136,7 @@ export default function PageTemplate({
   const workflowSteps = isZalgo || isDiscord || isPlatform
     ? [
         ['1', 'Enter text', 'Type a short phrase in the input.'],
-        ['2', isZalgo ? 'Adjust the effect' : isDiscord ? 'Choose the destination' : 'Choose a style', isZalgo ? 'Set intensity and mark directions; randomize to try another arrangement.' : isDiscord ? 'Use Unicode for display names or choose native Markdown formatting for messages.' : 'Compare the live results and try any available styling options.'],
+        ['2', isZalgo ? 'Compare the strengths' : isDiscord ? 'Choose the destination' : 'Choose a style', isZalgo ? 'Compare five strength cards; open Advanced settings for custom intensity and mark directions.' : isDiscord ? 'Use Unicode for display names or compare all six Markdown result cards for messages.' : 'Compare the live results and try any available styling options.'],
         ['3', 'Copy and test', 'Copy the output and check it in the intended app or field.'],
       ]
     : isThreeDGenerator
