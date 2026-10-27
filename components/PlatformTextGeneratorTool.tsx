@@ -46,7 +46,7 @@ export default function PlatformTextGeneratorTool({ slug, config, pageTitle, nav
           </div>
           {isPet && <fieldset>
             <legend className="mb-2 text-sm font-medium text-slate-950 dark:text-white">Name decoration</legend>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
               {Object.entries(petFrames).map(([id, item]) => <button key={id} type="button" aria-label={item.label} aria-pressed={frame === id} onClick={() => setFrame(id as PetFrame)} className={optionClass(frame === id)}>
                 <span aria-hidden="true" className="block text-lg">{framePetName('ɴᴀᴍᴇ', id as PetFrame)}</span>
                 <span className="mt-1 block text-xs">{item.label}</span>

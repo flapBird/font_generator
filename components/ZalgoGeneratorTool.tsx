@@ -20,7 +20,7 @@ export default function ZalgoGeneratorTool({ config, navigationItems }: { config
     <TextToolInput id="zalgo-input" text={text} onChange={setText} limit={ZALGO_INPUT_LIMIT} />
     {tooLong && <p role="alert" className="text-sm text-red-600">This saved draft is too long. Shorten it to 1,000 characters to generate; your text has not been cut.</p>}
     <fieldset><legend className="mb-2 text-sm font-medium text-slate-950 dark:text-white">Effect strength</legend>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2 lg:grid-cols-5">
         {([['None', 0], ['Mild', 1], ['Medium', 3], ['Strong', 6], ['Extreme', 10]] as const).map(([name, amount]) => <button key={name} type="button" aria-pressed={intensity === amount} onClick={() => setIntensity(amount)} className={`min-h-11 rounded-xl border px-2 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${intensity === amount ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:border-violet-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'}`}>{name}</button>)}
       </div>
     </fieldset>

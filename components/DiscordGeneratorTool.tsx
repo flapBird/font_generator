@@ -21,12 +21,12 @@ export default function DiscordGeneratorTool({ config, navigationItems }: { conf
   return <TextToolLayout workspace={{ pageTitle: 'Discord Font Generator', config, navigationItems, preview, outputLabel: mode === 'message' ? 'Markdown source' : 'Copyable text' }} label="Discord text workspace" controls={<>
     <TextToolInput id="discord-input" text={text} onChange={setText} />
     <fieldset><legend className="mb-2 text-sm font-medium text-slate-950 dark:text-white">Use text for</legend>
-      <div role="group" aria-label="Text destination" className="grid gap-2">
+      <div role="group" aria-label="Text destination" className="grid gap-2 lg:grid-cols-2">
         {([['unicode', 'Names & bios (Unicode)'], ['message', 'Messages (Markdown)']] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)} className={optionClass(mode === value)}>{label}</button>)}
       </div>
     </fieldset>
     {mode === 'message' && <fieldset><legend className="mb-2 text-sm font-medium text-slate-950 dark:text-white">Message format</legend>
-      <div className="grid grid-cols-2 gap-2">{discordFormats.map((item) => <button key={item.id} type="button" aria-pressed={format === item.id} onClick={() => setFormat(item.id)} className={`${optionClass(format === item.id)} ${item.className}`}>{item.name}</button>)}</div>
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">{discordFormats.map((item) => <button key={item.id} type="button" aria-pressed={format === item.id} onClick={() => setFormat(item.id)} className={`${optionClass(format === item.id)} ${item.className}`}>{item.name}</button>)}</div>
     </fieldset>}
     <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">{mode === 'unicode' ? 'For display names and bios. These are not valid for your unique @username.' : 'Native Markdown works in messages, not display names.'}</p>
   </>} footer={<details className="mt-5 border-t border-slate-200 pt-4 text-sm leading-6 text-slate-600 dark:border-slate-800 dark:text-slate-400">
