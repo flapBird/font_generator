@@ -127,12 +127,63 @@ assert.deepEqual(generatorRegistry.find((entry) => entry.slug === 'handwriting-f
 console.log('Expansion regressions passed: underline, fullwidth punctuation/spacing, small caps, double-struck exceptions/digits, protected social entities, weighted X lengths, pet frames, links and sitemap dates.');
 
 const { hiddenNavigationSlugs, isVisibleInGeneratorNavigation, focusedTextSlugs } = require('../lib/generator-navigation.ts');
-assert.equal(hiddenNavigationSlugs.length, 13);
-assert.equal(new Set(hiddenNavigationSlugs).size, 13);
+assert.equal(hiddenNavigationSlugs.length, 23);
+assert.equal(new Set(hiddenNavigationSlugs).size, 23);
 for (const slug of hiddenNavigationSlugs) {
   assert.ok(knownSlugs.has(slug), `Hidden navigation entry is still a real page: ${slug}`);
   assert.equal(isVisibleInGeneratorNavigation(`/${slug}`), false);
 }
 for (const page of allPages.filter((page) => !hiddenNavigationSlugs.includes(page.slug))) assert.equal(isVisibleInGeneratorNavigation(`/${page.slug}`), true, `${page.slug} retains its navigation entry`);
 for (const slug of ['small-text-generator', 'cursive-font-generator', 'impact-font-generator']) assert.equal(focusedTextSlugs.has(slug), false, `${slug} retains its existing workspace`);
-console.log('Navigation regressions passed: only 13 additions hidden, all older entries preserved, old workspace opt-in unchanged.');
+console.log('Navigation regressions passed: 13 previous and 10 October additions hidden, all older entries preserved, old workspace opt-in unchanged.');
+
+// Baseline captured before the October expansion. Changes to older transforms,
+// preset lists, defaults, output declarations or homepage priorities must be deliberate.
+const { createHash } = require('node:crypto');
+const baseline = require('../tests/generators/fixtures/pre-october-baseline.json');
+const { getGeneratorPageConfig } = require('../lib/generator.ts');
+const digest = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+assert.deepEqual(generatorStyles.map((style) => style.id), Object.keys(baseline.styles), 'No new global styles or changed homepage style order');
+for (const style of generatorStyles) assert.equal(digest(baseline.inputs.map(style.transform)), baseline.styles[style.id], `${style.id}: existing conversion results`);
+for (const [slug, expected] of Object.entries(baseline.pages)) {
+  const page = allPages.find((entry) => entry.slug === slug);
+  assert.ok(page, `${slug}: existing page preserved`);
+  assert.equal(digest({ config: getGeneratorPageConfig(slug, page.title, page.defaultStyleIds), visual: getVisualGeneratorConfig(slug), registry: generatorRegistry.find((entry) => entry.slug === slug) }), expected, `${slug}: existing config, presets and registry`);
+}
+const { octoberTextResults, frameLines } = require('../lib/october-text.ts');
+const { convertWingdings, wingdingsEntries } = require('../lib/wingdings.ts');
+const { octoberSlugs, octoberArtSlugs, octoberTextSlugs, octoberArtwork } = require('../lib/october-catalog.ts');
+const { isFontStyleGenerator } = require('../lib/generator-registry.ts');
+for (const slug of octoberSlugs) {
+  const entry = generatorRegistry.find((item) => item.slug === slug);
+  assert.ok(entry);
+  assert.equal(entry.homepage.enabled, false, `${slug}: no homepage feature/list changes`);
+  assert.equal(isFontStyleGenerator(entry), octoberTextSlugs.includes(slug), `${slug}: correct directory`);
+  assert.equal(isVisibleInGeneratorNavigation(`/${slug}`), false);
+}
+assert.equal(wingdingsEntries.length, 62);
+assert.equal(new Set(wingdingsEntries.map((entry) => entry.symbol)).size, 62, 'Unambiguous reverse mapping');
+const alphabet = wingdingsEntries.map((entry) => entry.key).join('');
+assert.equal(convertWingdings(convertWingdings(alphabet, 'encode'), 'decode'), alphabet);
+assert.equal(convertWingdings('Hello 123!', 'encode', true), convertWingdings('HELLO 123!', 'encode'));
+assert.equal(convertWingdings('✌️', 'decode'), 'A', 'Accept presentation selectors on known symbols');
+for (const direction of ['encode', 'decode']) assert.equal(convertWingdings('中文 한글 العربية 👨‍👩‍👧‍👦 👍🏽 1️⃣\n!', direction), '中文 한글 العربية 👨‍👩‍👧‍👦 👍🏽 1️⃣\n!');
+assert.equal(frameLines('A\n\nB', 'hearts'), '♡ A ♡\n\n♡ B ♡');
+assert.equal(frameLines(' \n', 'bows'), '');
+for (const slug of [...octoberTextSlugs.filter((slug) => slug !== 'wingdings-font-generator'), 'halloween-font-generator']) {
+  for (const result of octoberTextResults('', slug, 'hearts')) assert.equal(result.text, '', `${slug}: empty output`);
+  for (const result of octoberTextResults('中文 한글 العربية 👨‍👩‍👧‍👦 👍🏽 1️⃣\n', slug)) assert.equal(result.text.includes('中文 한글 العربية 👨‍👩‍👧‍👦 👍🏽 1️⃣'), true, `${slug}: grapheme preservation`);
+}
+const bio = 'Hi 사랑해 @artist https://example.com #Kpop';
+for (const result of octoberTextResults(bio, 'k-pop-font-generator')) assert.ok(result.text.includes('사랑해 @artist https://example.com #Kpop'), 'K-pop preserves Hangul/social entities');
+assert.equal(octoberTextResults('DD', 'emoji-font-generator').find((item) => item.id === 'emojiMix').text, '🄳🄳', 'No accidental regional-indicator pairing');
+const fonts = JSON.parse(fs.readFileSync('public/fonts/artwork/sources.json', 'utf8'));
+for (const slug of octoberArtSlugs) for (const font of octoberArtwork[slug].fonts) {
+  assert.ok(fonts.some((entry) => entry.id === font.id && ['OFL-1.1', 'Apache-2.0'].includes(entry.license)), `${font.id}: recorded source/license`);
+  const folder = `public/fonts/artwork/${font.id}`;
+  const css = fs.readFileSync(`${folder}/400.css`, 'utf8');
+  assert.ok(css.includes(`font-family: 'Artwork ${font.family}'`), 'Isolated family name');
+  assert.ok(fs.readFileSync(`${folder}/LICENSE.txt`, 'utf8').length > 500);
+  for (const [, filename] of css.matchAll(/url\(\.\/files\/([^)]*)\)/g)) assert.ok(fs.statSync(`${folder}/files/${filename}`).size > 0, `${font.id}: bundled file ${filename}`);
+}
+console.log('October regressions passed: all 59 old transforms and 65 page definitions unchanged; 10 new routes, directory assignments, fonts, text clusters, Wingdings round-trip and empty states.');

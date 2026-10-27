@@ -1,5 +1,6 @@
 import { fandomPages, stylePages, type PageDefinition } from './data';
 import { generatorStyles } from './generator';
+import { octoberArtSlugs, octoberTextSlugs } from './october-catalog';
 
 export type GeneratorKind =
   | 'unicode'
@@ -67,6 +68,35 @@ export interface GeneratorDefinition {
 type GeneratorOverride = Partial<Omit<GeneratorDefinition, 'id' | 'slug' | 'title' | 'icon' | 'category' | 'canonicalPath'>>;
 
 const overrides: Record<string, GeneratorOverride> = {
+  ...Object.fromEntries(octoberArtSlugs.map((slug) => [slug, {
+    kind: slug === 'halloween-font-generator' ? 'hybrid' : 'font-preview',
+    intent: {
+      primary: slug === 'halloween-font-generator'
+        ? 'Render three bundled horror typefaces as PNG, with a separate copyable Halloween text section and optional pumpkin or ghost frames.'
+        : `Render ${slug.replace('-font-generator', '')} text in four locally hosted typefaces and download transparent PNG artwork; copying original text does not preserve the font.`,
+      secondary: ['Artwork accepts up to 120 characters per edit. Fonts load on demand; missing glyphs may use device fallback. No translation or font-file generation.'],
+      expectedOutputs: slug === 'halloween-font-generator' ? ['text', 'png'] : ['png'],
+    },
+    capabilities: ['font-availability', 'preset-gallery', 'png-export'],
+    homepage: { enabled: false, featured: false, priority: 1000 },
+  } satisfies GeneratorOverride])),
+  ...Object.fromEntries(octoberTextSlugs.map((slug) => [slug, {
+    intent: {
+      primary: slug === 'wingdings-font-generator'
+        ? 'Encode and decode 62 Latin letters and digits using portable Wingdings-style Unicode counterparts, with a searchable character chart and optional Gaster uppercase mode. Punctuation remains unchanged.'
+        : slug === 'emoji-font-generator'
+          ? 'Create emoji letter lookalikes, themed letter-substitution codes, and readable decorations; not semantic translation or an emoji keyboard.'
+          : slug === 'gaming-font-generator'
+            ? 'Create gaming display-name ideas with optional clan brackets and original fallback, and discover dedicated game tools; platform acceptance is not verified.'
+            : slug === 'k-pop-font-generator'
+              ? 'Create fan nicknames and multiline bios with Unicode lettering and optional frames while preserving Hangul and detected social entities; not official group logos.'
+              : 'Create preppy Unicode names and bios with optional heart, star or bow frames and an unchanged original fallback.',
+      secondary: ['Uses the shared text workspace and draft. Accepts up to 1,000 characters per edit; oversized drafts are not silently truncated.'],
+      expectedOutputs: ['text'],
+    },
+    capabilities: ['copy', 'grapheme-safe'],
+    homepage: { enabled: false, featured: false, priority: 1000 },
+  } satisfies GeneratorOverride])),
   'handwriting-font-generator': {
     ...hybridIntent('Render handwritten text with bundled Caveat and Patrick Hand fonts, export PNG/SVG, or copy separately labelled Unicode script alternatives.'),
     tags: ['handwritten', 'handwriting', 'pen', 'notes', 'png'],
@@ -306,7 +336,7 @@ const buildDefinition = (page: PageDefinition, priority: number): GeneratorDefin
 
 export const generatorRegistry: GeneratorDefinition[] = [
   ...stylePages.map((page, index) => buildDefinition(page, index)),
-  ...fandomPages.map((page, index) => buildDefinition(page, stylePages.length + index)),
+  ...fandomPages.map((page, index) => buildDefinition(page, stylePages.length - octoberArtSlugs.length - octoberTextSlugs.length + index)),
 ];
 
 export const validateGeneratorRegistry = (definitions: GeneratorDefinition[] = generatorRegistry) => {

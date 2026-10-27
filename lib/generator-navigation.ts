@@ -6,6 +6,9 @@ export const hiddenNavigationSlugs = [
   'roblox-font-generator', 'twitter-font-generator', 'twitch-font-generator',
   'adopt-me-font-generator', 'discord-font-generator', 'zalgo-text-generator',
   'handwriting-font-generator',
+  'halloween-font-generator', 'korean-font-generator', 'k-pop-font-generator',
+  'chinese-font-generator', 'wingdings-font-generator', 'graffiti-font-generator',
+  'arabic-font-generator', 'preppy-font-generator', 'emoji-font-generator', 'gaming-font-generator',
 ] as const;
 
 const hiddenPaths = new Set(hiddenNavigationSlugs.map((slug) => `/${slug}`));

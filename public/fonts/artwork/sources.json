@@ -1,0 +1,173 @@
+[
+  {
+    "id": "creepster",
+    "family": "Creepster",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/creepster/-/creepster-5.3.0.tgz",
+    "integrity": "sha512-k1Y03cPd2QnoVBygqfYd/y1Byx1Rl3vDLuq3TrmujwaSgFh8hFy2e1ar7/zhillaaCwweLDI9AlvhIBA+VlsWg=="
+  },
+  {
+    "id": "nosifer",
+    "family": "Nosifer",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/nosifer/-/nosifer-5.3.0.tgz",
+    "integrity": "sha512-Skc2HV+WdwWDqbAhbRwqFIrIhDxZDlA1fKa8gVlUkapruvy031DSJVRUlJCV9J+s5iu77GKViXTNxT/uxSQJSw=="
+  },
+  {
+    "id": "eater",
+    "family": "Eater",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/eater/-/eater-5.3.0.tgz",
+    "integrity": "sha512-Mec3aZ0vvsebG3EZbcT2whkWI9aQP/SiegZG0b4y+NNPw0HaqzJ6jbSiDu/VOJiHS0/Ux+UYwauGUAEmcql93w=="
+  },
+  {
+    "id": "jua",
+    "family": "Jua",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/jua/-/jua-5.3.0.tgz",
+    "integrity": "sha512-k9ZTVYVqY4WxiDl55Udf2mLHca+voxTeIZ7qvLZUmR3VaUqM+RCZDYigEj1iKgV0Gx90NvzJy4CQpEPjDHBisA=="
+  },
+  {
+    "id": "gaegu",
+    "family": "Gaegu",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/gaegu/-/gaegu-5.3.0.tgz",
+    "integrity": "sha512-eSVEXay02/DAB5BtH/gpsujvpT78EjO6XVuNA1ap1G+xvr3zokU2HoLoaW+CfzykRuVgDQ2oZ1oe7VAlmGZt/A=="
+  },
+  {
+    "id": "nanum-pen-script",
+    "family": "Nanum Pen Script",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/nanum-pen-script/-/nanum-pen-script-5.3.0.tgz",
+    "integrity": "sha512-at9MFL8ga0A3Xce1+CO6/56F/SHIlf++D4vVKw3yCNRPKh6JU0UgZ3r9un0qHPVxx0Miq2bGZ35RRRlu/4BIDg=="
+  },
+  {
+    "id": "black-han-sans",
+    "family": "Black Han Sans",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/black-han-sans/-/black-han-sans-5.3.0.tgz",
+    "integrity": "sha512-HZtn51La10fZU1DdnbY06YcvLxF9NAkNk/GdA6rKDWPztH9zWLqVcfVvCKNmosBuFrhToGbw/pMNJ/TjdC296Q=="
+  },
+  {
+    "id": "noto-sans-sc",
+    "family": "Noto Sans SC",
+    "version": "5.3.1",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/noto-sans-sc/-/noto-sans-sc-5.3.1.tgz",
+    "integrity": "sha512-YxZ/VWAWo9FWzH08Q6fGTzIW6vYNP2TMhUFCnfhlimbhdXnWrxJLrzX3KWt2FKnV0s8XiM5vjpGHQiyFRlTj0w=="
+  },
+  {
+    "id": "noto-serif-tc",
+    "family": "Noto Serif TC",
+    "version": "5.3.1",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/noto-serif-tc/-/noto-serif-tc-5.3.1.tgz",
+    "integrity": "sha512-bX+7aXbMU9IyncD2v00P4E+aciwQl2e9F9qmHp3H3By+hQVh6bwa4rR2RD0QP/Vtt+9mwgjEPzsnEKb2oyIxog=="
+  },
+  {
+    "id": "ma-shan-zheng",
+    "family": "Ma Shan Zheng",
+    "version": "5.3.1",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/ma-shan-zheng/-/ma-shan-zheng-5.3.1.tgz",
+    "integrity": "sha512-cGGn7Yje2RSduXVxEk+rCfNZyD/T/7FMGj03LNPiK8TRL9Sing0tq1zJF3n+W29szPqgb2RNs5oIvmm+ikeI+Q=="
+  },
+  {
+    "id": "zhi-mang-xing",
+    "family": "Zhi Mang Xing",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/zhi-mang-xing/-/zhi-mang-xing-5.3.0.tgz",
+    "integrity": "sha512-V21yCCm5o2PHdXF2P9KKh7uiqL8QFFuII4DRQkpG24tfyDzJPchXKsxkcvKM43xEPvQKdbhHCBbXEFjcm/TUCQ=="
+  },
+  {
+    "id": "amiri",
+    "family": "Amiri",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/amiri/-/amiri-5.3.0.tgz",
+    "integrity": "sha512-i4SWJnVIphj8556EdVzNrEG/Qu82k6JXjXTtSUIohx3tHmo2GHw1Kv60TWo+xjk7Yf1Etb2Gskh0lUFclTKyUw=="
+  },
+  {
+    "id": "cairo",
+    "family": "Cairo",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/cairo/-/cairo-5.3.0.tgz",
+    "integrity": "sha512-MdY6+gee1DVz4eUvx1Dd8Y1f50WcRELRKwKBarYZA3zT8dMhkuTWbcoE1LzezAy97h/9rob87s02NI6L8MaDgA=="
+  },
+  {
+    "id": "lateef",
+    "family": "Lateef",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/lateef/-/lateef-5.3.0.tgz",
+    "integrity": "sha512-GdLQqylMupFHukxvMdppJNYeYmg/EwiKNqVbe67N+USixebnRxTUhD5JxRolIjU8aYoL3RhtdOJL58NLaQTsIA=="
+  },
+  {
+    "id": "reem-kufi",
+    "family": "Reem Kufi",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/reem-kufi/-/reem-kufi-5.3.0.tgz",
+    "integrity": "sha512-LO5YIWIQeZWb4oSpm9eAoGqLHMLvBknVamRBFQHuz+suz3TjXiO5bhE/ITlCswENbNpYKMkMPcpf6yzWDWVJoQ=="
+  },
+  {
+    "id": "rubik-spray-paint",
+    "family": "Rubik Spray Paint",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/rubik-spray-paint/-/rubik-spray-paint-5.3.0.tgz",
+    "integrity": "sha512-LyBjEpt22JySVawJGCS3KNwZImP1Q5e6qcW341lmNjQq8lWXvqDWuo6rPDNLgNAROi+SMIwEo5El8k28ZNPMKQ=="
+  },
+  {
+    "id": "permanent-marker",
+    "family": "Permanent Marker",
+    "version": "5.3.0",
+    "license": "Apache-2.0",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/permanent-marker/-/permanent-marker-5.3.0.tgz",
+    "integrity": "sha512-ZO/NtYW4SCc/iY8N3dmjWyDITcXJ/vhWZFgnwRcvzwCKKnScMrM/a2/6VHlsjCVuIgmPzNrCFbedEYhv+/jJBg=="
+  },
+  {
+    "id": "rubik-bubbles",
+    "family": "Rubik Bubbles",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/rubik-bubbles/-/rubik-bubbles-5.3.0.tgz",
+    "integrity": "sha512-b0ZQsu6LTUFziwzdicuDNQnPI8+2ovufGMuAwjI+dMmjtsGz2u4ndYu+WSiNEF/XEgCU7f6B7HH45oqNAstUuw=="
+  },
+  {
+    "id": "sedgwick-ave-display",
+    "family": "Sedgwick Ave Display",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/sedgwick-ave-display/-/sedgwick-ave-display-5.3.0.tgz",
+    "integrity": "sha512-dMK26R4CmjHERtZlgwwZP/qQ68lGmF0WhM2AOxMo6E0WUR05CftL1pvFQzHRwVNeg4NParh2i/2B/Nia/+vPzg=="
+  }
+]

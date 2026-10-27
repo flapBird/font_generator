@@ -1,5 +1,9 @@
 const updateGroups = {
   '2026-10-27': [
+    '/halloween-font-generator', '/korean-font-generator', '/k-pop-font-generator',
+    '/chinese-font-generator', '/wingdings-font-generator', '/graffiti-font-generator',
+    '/arabic-font-generator', '/preppy-font-generator', '/emoji-font-generator', '/gaming-font-generator',
+    '/styles', '/visual-art',
     '/',
     '/bold-text-generator',
     '/strikethrough-text-generator',
@@ -16,7 +20,6 @@ const updateGroups = {
     '/zalgo-text-generator',
   ],
   '2026-10-26': [
-    '/visual-art',
     '/fandom',
     '/small-text-generator',
     '/cursive-font-generator',
@@ -28,7 +31,6 @@ const updateGroups = {
     '/glitch-font-generator',
     '/facebook-font-generator',
     '/guides/discord-font-guide',
-    '/styles',
   ],
   '2026-10-23': [
     '/impact-font-generator',

@@ -1,0 +1,108 @@
+import type { PageDefinition } from './data';
+
+const artFaq = [
+  { q: 'Will copying text preserve the typeface?', a: 'No. Copying keeps the original Unicode characters. Download the PNG to preserve the chosen typeface, color and layout.' },
+  { q: 'Is the artwork free, and is my text uploaded?', a: 'Rendering and PNG export run in your browser without sign-in, payment or a watermark. Fonts are hosted by this site and loaded as needed. Your text is not sent to a font or generation service.' },
+  { q: 'What happens when a font does not cover a character?', a: 'The browser may use a device fallback for unsupported characters. Check the coverage label and preview. If a font fails to load, export stays disabled until it loads successfully.' },
+];
+const textFaq = [
+  { q: 'Do I need to install a font?', a: 'No. The results use Unicode characters that can be copied into supported text fields. Their appearance and acceptance depend on the destination app and device.' },
+  { q: 'Does this tool require an account?', a: 'No. Conversion and copying run in your browser for free. Inputs accept up to 1,000 characters per edit; oversized drafts stay visible so you can shorten them without silent truncation.' },
+];
+type Entry = Omit<PageDefinition, 'category' | 'metaTitle' | 'metaDescription'> & { artwork?: boolean };
+const entries: Entry[] = [
+  {
+    slug: 'halloween-font-generator', title: 'Halloween Font Generator', icon: '🎃', artwork: true,
+    description: 'Create Halloween lettering with Creepster, Nosifer and Eater, export transparent PNG artwork, or copy separate spooky Unicode text with pumpkins and ghosts.',
+    content: 'A Halloween title can serve two different destinations. Invitations, party posters, video thumbnails and printable signs need the shape of a real horror typeface. Social bios and chat messages need copyable characters. This page keeps those outputs separate: the artwork workspace renders Creepster, Nosifer or Eater, while the text section offers blackletter and light glitch alternatives.\n\nStart with Creepster for readable monster lettering, Nosifer for a dripping title, or Eater for rough haunted shapes. Change the fill and background, add an outline or shadow, and export a transparent PNG. For a short caption, use the copyable section and add optional pumpkin or ghost frames. These frames do not reproduce the image fonts.\n\nKeep dates, addresses and other important invitation details in readable text. Font files are locally hosted with their licenses; the tool creates artwork, not a new downloadable TTF.',
+    howToUse: 'Enter a short title, select a horror typeface, customize colors and effects, then download PNG. For bios and messages, jump to Copyable Halloween text and copy a result card.',
+    examples: [{ before: 'Happy Halloween', after: 'Creepster monster lettering as PNG', note: 'Artwork' }, { before: 'Trick or Treat', after: 'Nosifer dripping title as PNG', note: 'Artwork' }, { before: 'Boo', after: '🎃 𝔅𝔬𝔬 🎃', note: 'Copyable Fraktur with pumpkins' }],
+    faq: [{ q: 'Can I copy a dripping Halloween font into my bio?', a: 'Dripping typeface artwork is an image. Use the separately labelled blackletter or glitch text for copy-and-paste destinations, or download the PNG for an invitation or graphic.' }, ...artFaq],
+    relatedSlugs: ['horror-font-generator', 'zalgo-text-generator', 'graffiti-font-generator', 'christmas-font-generator'], defaultStyleIds: ['fraktur', 'boldFraktur', 'glitch'],
+  },
+  {
+    slug: 'korean-font-generator', title: 'Korean Font Generator', icon: '한', artwork: true,
+    description: 'Preview Hangul in Jua, Gaegu, Nanum Pen Script and Black Han Sans. Customize Korean lettering and download a free transparent PNG.',
+    content: 'Korean lettering needs fonts that actually include Hangul. This workspace renders your own Korean text in four contrasting families: rounded Jua, playful Gaegu, handwritten Nanum Pen Script and heavy Black Han Sans. Compare a name, greeting or short fan message by switching typefaces while retaining your text and image settings.\n\nThe selected font and required character subsets load only when needed. PNG export preserves the rendered lettering for profile graphics, banners and fan projects. Copying the original characters instead leaves the destination app in control of the font.\n\nThis is a lettering tool, not a translator or a Korean-name service. Enter Korean directly; English text remains English. For copyable fan bios, use the separate K-pop tool, which preserves Hangul while styling supported Latin letters.',
+    howToUse: 'Enter Hangul, choose a Korean typeface, set the size, color and background, and download PNG. Use Original characters to copy the plain spelling.',
+    examples: [{ before: '사랑해', after: 'Rounded Hangul in Jua', note: 'PNG artwork' }, { before: '안녕하세요', after: 'Pen lettering in Nanum Pen Script', note: 'PNG artwork' }],
+    faq: [{ q: 'Does this convert English names into Korean?', a: 'No. It renders the text you enter. Translation and name transliteration require separate language decisions and are not included.' }, ...artFaq],
+    relatedSlugs: ['k-pop-font-generator', 'chinese-font-generator', 'handwriting-font-generator', 'arabic-font-generator'], defaultStyleIds: [],
+  },
+  {
+    slug: 'k-pop-font-generator', title: 'K-pop Font Generator', icon: '🎤',
+    description: 'Create copyable K-pop fan names and multiline bios with script, bold, Y2K fullwidth letters, hearts, stars and bows. Hangul and detected links stay intact.',
+    content: 'A K-pop fan profile often combines a short styled name with readable information about an artist, a favorite song or a fan project. This tool offers soft script, bold lettering, fullwidth Y2K-style characters, small caps and monospace text, with optional hearts, stars or bows. You can enter several lines for a bio instead of limiting the result to a nickname.\n\nSupported Latin letters change into Unicode counterparts. Hangul stays in its original form; detected links, mentions, hashtags and cashtags are preserved so a decorative bio does not needlessly rewrite them. Test the complete result in the target app because length limits and character support differ.\n\nThese are unofficial fan text treatments, not official group logos or licensed album typefaces. For a Korean title whose actual letter shapes change, open the Korean Font Generator and export an image.',
+    howToUse: 'Type a fan name or multiline bio, choose a decoration, compare the text cards and tap one to copy it. Keep important contact details in the original text.',
+    examples: [{ before: 'My Bias', after: '♡ ℳ𝓎 ℬ𝒾𝒶𝓈 ♡', note: 'Soft fan name' }, { before: 'Seoul', after: 'Ｓｅｏｕｌ', note: 'Fullwidth lettering' }],
+    faq: [{ q: 'Does it change Hangul into a different font?', a: 'No. Hangul remains readable text. Use the Korean artwork generator for real Korean typefaces and PNG export.' }, { q: 'Can I make a multiline fan bio?', a: 'Yes. Line breaks are preserved, and the optional frame is applied to each nonblank line. Detected links and mentions remain unchanged.' }, ...textFaq],
+    relatedSlugs: ['korean-font-generator', 'preppy-font-generator', 'instagram-font-generator', 'aesthetic-font-generator'], defaultStyleIds: ['script', 'sansBold', 'fullwidth', 'smallCaps', 'boldScript', 'monospace'],
+  },
+  {
+    slug: 'chinese-font-generator', title: 'Chinese Font Generator', icon: '字', artwork: true,
+    description: 'Preview Chinese text in brush, handwriting, sans-serif and Traditional serif fonts. Customize colors and export transparent PNG lettering.',
+    content: 'Chinese font generation on this page means rendering the Chinese characters you supply in real typefaces. Ma Shan Zheng and Zhi Mang Xing offer brush and handwriting directions, Noto Sans SC supplies modern Simplified Chinese lettering, and Noto Serif TC provides a Traditional Chinese serif direction. The tool does not replace English letters with unrelated Han characters.\n\nUse a name or short phrase to compare the strokes, then choose a banner or square canvas, alignment, size and color. PNG export preserves the chosen appearance. Font coverage labels help you select a family, but characters outside that font may use a device fallback; inspect the finished preview, especially for uncommon names.\n\nSelecting a Simplified or Traditional font does not convert your wording. This version provides horizontal layout with manual line breaks. It does not translate names, perform Simplified–Traditional conversion or generate a personal font file.',
+    howToUse: 'Paste your Chinese name or phrase, select a font with suitable character coverage, adjust the artwork and download PNG. Copy Original characters when you only need the plain text.',
+    examples: [{ before: '春风得意', after: 'Brush lettering in Ma Shan Zheng', note: 'Simplified Chinese artwork' }, { before: '歲月靜好', after: 'Serif lettering in Noto Serif TC', note: 'Traditional Chinese artwork' }],
+    faq: [{ q: 'Will choosing a Traditional font convert Simplified Chinese?', a: 'No. A typeface changes letter shapes, not the underlying characters. Supply the exact spelling and character forms you want to render.' }, ...artFaq],
+    relatedSlugs: ['korean-font-generator', 'arabic-font-generator', 'handwriting-font-generator', 'graffiti-font-generator'], defaultStyleIds: [],
+  },
+  {
+    slug: 'wingdings-font-generator', title: 'Wingdings Font Generator', icon: '☞',
+    description: 'Convert A–Z, a–z and 0–9 to portable Wingdings-style Unicode symbols and decode them back. Includes a 62-character chart and Gaster uppercase mode.',
+    content: 'Wingdings is a symbol font, whereas a plain-text field stores characters. This converter uses portable Unicode counterparts for 62 Latin letters and digits so the results can be copied without installing the Microsoft font. Some shapes are approximate, and the receiving device controls their appearance. Punctuation, spaces and unsupported characters remain unchanged.\n\nSwitch between Letters to Symbols and Symbols to Letters. Uppercase and lowercase letters have separate mappings. Gaster mode explicitly uppercases Latin input before conversion for Undertale-inspired fan messages; it does not reproduce game graphics or audio. The searchable chart shows each supported letter and its output code point.\n\nDecoding assumes that the pasted symbols represent this mapping. An ordinary symbol such as a sun or zodiac sign can also have its own meaning, so this is not a universal language translator. No original Wingdings font file is distributed.',
+    howToUse: 'Choose a conversion direction, enter letters or mapped symbols, and copy the result. Optionally enable Gaster mode for uppercase Latin input, or open the character chart to copy individual symbols.',
+    examples: [{ before: 'HELLO', after: '☟☜☹☹⚐', note: 'Uppercase mapping' }, { before: '☟☜☹☹⚐', after: 'HELLO', note: 'Decoded letters' }],
+    faq: [{ q: 'Is this the exact Microsoft Wingdings font?', a: 'No. It uses corresponding or approximate Unicode symbols, not the proprietary font file. Glyph shapes and some symbol details can differ between devices.' }, { q: 'Does it translate numbers and punctuation?', a: 'This version maps A–Z, a–z and 0–9. Punctuation and unmapped characters are retained without conversion.' }, { q: 'What does Gaster mode do?', a: 'It uppercases ASCII Latin letters before encoding. This is an unofficial fan convenience, not an Undertale asset or a separate language.' }, ...textFaq],
+    relatedSlugs: ['gaming-font-generator', 'papyrus-font-generator', 'emoji-font-generator', 'weird-text-generator'], defaultStyleIds: ['monospace'],
+  },
+  {
+    slug: 'graffiti-font-generator', title: 'Graffiti Font Generator', icon: '🎨', artwork: true,
+    description: 'Make graffiti text with spray, marker, bubble and hand-drawn tag fonts. Adjust gradients, outlines and shadows, then download a transparent PNG.',
+    content: 'Graffiti lettering is visual artwork rather than a Unicode alphabet. This tool renders your words in Rubik Spray Paint, Permanent Marker, Rubik Bubbles or Sedgwick Ave Display. The choices cover a rough spray texture, marker strokes, rounded bubble forms and hand-drawn tag lettering, so changing fonts changes the actual letter shapes.\n\nChoose a short tag or title, then adjust the fill, gradient, outline and offset shadow. A transparent PNG can be placed on a sticker layout, cover image or poster. The preview uses the same canvas as the downloaded image, with no interface elements or checkerboard included in the export.\n\nThese are typeface-based designs. They do not generate custom interlocking wildstyle, a new font file or an AI illustration. Each bundled typeface has an accessible license link; use the original plain spelling when sharing the name as searchable text.',
+    howToUse: 'Enter a tag, choose a graffiti typeface, customize colors and optional effects, then download the finished banner or square as PNG.',
+    examples: [{ before: 'FRESH', after: 'Spray-textured lettering in Rubik Spray Paint', note: 'PNG artwork' }, { before: 'Your Tag', after: 'Marker lettering in Permanent Marker', note: 'PNG artwork' }],
+    faq: [{ q: 'Can I copy the graffiti effect as plain text?', a: 'No. The real typeface, outline and gradient are visual properties. Download PNG for the effect, or copy the unchanged original characters.' }, ...artFaq],
+    relatedSlugs: ['halloween-font-generator', '3d-font-generator', 'bubble-font-generator', 'gaming-font-generator'], defaultStyleIds: [],
+  },
+  {
+    slug: 'arabic-font-generator', title: 'Arabic Font Generator', icon: 'ع', artwork: true,
+    description: 'Preview Arabic names and greetings in Amiri, Cairo, Lateef and Reem Kufi. Preserve RTL joining and diacritics, then export transparent PNG artwork.',
+    content: 'Arabic letters change shape according to their neighbors, so a useful font preview must preserve connected text and right-to-left layout. This workspace draws complete lines using the browser shaping engine. Amiri provides a Naskh book direction, Cairo a modern geometric option, Lateef a flowing calligraphic style and Reem Kufi a display alternative.\n\nEnter Arabic directly, including any diacritics you want to keep. The input can also contain Latin text and numbers. The preview defaults to right alignment; changing alignment moves the text block without reversing the characters. There is no per-letter spacing or per-letter color effect that would break joining.\n\nDownload PNG to preserve the rendered appearance. Copying plain Arabic characters lets the receiving app choose its own font. This tool does not translate English, invent Arabic names or produce hand-composed calligraphy beyond the selected typeface.',
+    howToUse: 'Type Arabic text, choose a typeface, inspect joining and diacritics, adjust color and canvas, then download PNG. Keep the original spelling available separately.',
+    examples: [{ before: 'أهلاً وسهلاً', after: 'Joined Arabic lettering in Amiri', note: 'RTL PNG artwork' }, { before: 'عيد مبارك', after: 'Kufi-style lettering in Reem Kufi', note: 'RTL PNG artwork' }],
+    faq: [{ q: 'Does this preserve Arabic joining and diacritics?', a: 'Yes. Complete lines are rendered with the browser text engine and a right-to-left base direction. Original characters and diacritics are retained; inspect mixed-language text in the preview before export.' }, ...artFaq],
+    relatedSlugs: ['chinese-font-generator', 'korean-font-generator', 'handwriting-font-generator', 'graffiti-font-generator'], defaultStyleIds: [],
+  },
+  {
+    slug: 'preppy-font-generator', title: 'Preppy Font Generator', icon: '🎀',
+    description: 'Make cute preppy names and bios with circled letters, script, small caps, hearts, stars and bows. Copy a result instantly without installing a font.',
+    content: 'Preppy profile text combines a readable short name with a small set of playful decorations. This generator brings together circled letters, script, small caps, bold lettering and double-struck characters, with optional hearts, stars or bows. Use one alphabet and one frame for a consistent bio or pet-name idea.\n\nThe results remain text, not pink lettering images or a downloadable typeface. Color is controlled by the destination app, while Unicode letter forms and symbols can usually be pasted into supported display fields. Account usernames and individual games may enforce stricter rules than bios.\n\nFor Adopt Me pet-name options, follow the related tool. For fan-profile styling with protected links and mentions, use K-pop Font Generator. Blank lines remain blank, and clearing the input removes the decorative output as well.',
+    howToUse: 'Enter a short name or bio, choose a frame, compare the result cards and tap one to copy. Try the result in your destination before saving.',
+    examples: [{ before: 'Luna', after: '🎀 Ⓛⓤⓝⓐ 🎀', note: 'Circled letters with bows' }, { before: 'Sunny', after: '♡ sᴜɴɴʏ ♡', note: 'Small caps with hearts' }],
+    faq: [{ q: 'Will this make my text pink?', a: 'No. Plain text cannot carry the selected text color across apps. This tool creates copyable letter styles and decorations; your app chooses the text color.' }, ...textFaq],
+    relatedSlugs: ['adopt-me-font-generator', 'k-pop-font-generator', 'heart-font-generator', 'emoji-font-generator'], defaultStyleIds: ['circled', 'script', 'smallCaps', 'boldScript', 'sansBold', 'doubleStruck'],
+  },
+  {
+    slug: 'emoji-font-generator', title: 'Emoji Font Generator', icon: '😎',
+    description: 'Turn letters into emoji lookalikes or cute, animal, food and nature emoji codes. Keep words readable with separate sparkle decorations and copy any result.',
+    content: 'An emoji font can mean either letter-shaped symbols or a playful code made from pictures. This tool separates those choices: Emoji letter lookalikes aims at recognizable shapes, while Cute, Animal, Food and Nature codes replace supported Latin letters with themed emoji. These substitutions are not translations of the meaning of a sentence.\n\nIf readability matters, keep the original words and use the separate sparkle decoration instead. Existing family emoji, flags, skin-tone modifiers and other combined emoji are kept together. Letters that lack a themed replacement remain unchanged.\n\nEmoji artwork varies across operating systems and apps. This tool does not replace your phone keyboard, install an emoji font or combine emoji into new sticker images. It provides copyable text for short messages, captions and playful labels.',
+    howToUse: 'Enter text, compare letter lookalikes with themed codes, optionally add a frame, then copy a card. Choose Original text or Sparkle decoration when the words must remain easy to read.',
+    examples: [{ before: 'AB', after: '🅰🅱', note: 'Emoji letter lookalikes' }, { before: 'Hi', after: '✦ Hi ✦', note: 'Readable sparkle decoration' }],
+    faq: [{ q: 'Does it translate my sentence into emoji meaning?', a: 'No. The themed codes substitute individual Latin letters. Sparkle decoration retains the original wording when semantic readability matters.' }, ...textFaq],
+    relatedSlugs: ['preppy-font-generator', 'k-pop-font-generator', 'gaming-font-generator', 'weird-text-generator'], defaultStyleIds: ['emojiMix', 'emojiCute'],
+  },
+  {
+    slug: 'gaming-font-generator', title: 'Gaming Font Generator', icon: '🎮',
+    description: 'Create copyable gaming display-name ideas with small caps, bold, boxed and gothic text, optional clan brackets, and links to dedicated game tools.',
+    content: 'A gaming name should remain recognizable in a compact player list. This generator compares small caps, bold sans, boxed capitals, monospace, fullwidth and blackletter output, with optional clan brackets or stars. The original text stays available as a fallback when a game rejects a decorative result.\n\nA display name is not the same as an account username, and a screenshot preview cannot verify a platform filter. Test the result in the exact game and field. This tool does not check name availability, bypass moderation or guarantee that a name meets every game length limit.\n\nUse the destination links for more specific tasks: Roblox text labels, Discord display names or message Markdown, Twitch text, Minecraft artwork and formatting codes, or Fortnite-inspired title images. These dedicated tools keep their own behavior and output formats.',
+    howToUse: 'Type your nickname, compare readable styles, optionally add clan brackets and copy a result. Open a dedicated game tool when you need its specific artwork or formatting features.',
+    examples: [{ before: 'Nova', after: '【ɴᴏᴠᴀ】', note: 'Clan brackets and small caps' }, { before: 'GG', after: '𝗚𝗚', note: 'Readable bold display name' }],
+    faq: [{ q: 'Will every style work as a game username?', a: 'No. Acceptance, length counting and available glyphs depend on the game and field. Use the original fallback and test the result where you intend to save it.' }, ...textFaq],
+    relatedSlugs: ['roblox-font-generator', 'minecraft-font-generator', 'discord-font-generator', 'twitch-font-generator'], defaultStyleIds: ['smallCaps', 'sansBold', 'squared', 'monospace', 'fullwidth', 'boldFraktur'],
+  },
+];
+
+export const octoberKeywordPages: PageDefinition[] = entries.map(({ artwork, ...entry }) => ({
+  ...entry, category: 'styles', metaTitle: `${entry.title} — ${artwork ? 'Preview & Download PNG' : 'Copy & Paste'}`, metaDescription: entry.description,
+}));

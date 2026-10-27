@@ -1,4 +1,7 @@
 import FocusedTextGeneratorTool from './FocusedTextGeneratorTool';
+import OctoberToolBoundary from './OctoberToolBoundary';
+import { isOctoberArt, isOctoberText } from '@/lib/october-catalog';
+
 import { focusedTextSlugs } from '@/lib/generator-navigation';
 import PlatformTextGeneratorTool from './PlatformTextGeneratorTool';
 import { platformTextConfigs } from '@/lib/social-text';
@@ -109,6 +112,8 @@ export default function PageTemplate({
     initialText: page.title,
   };
   const definition = getGeneratorDefinition(page.slug);
+  const octoberArt = isOctoberArt(page.slug);
+  const octoberText = isOctoberText(page.slug);
   const baseVisualConfig = getVisualGeneratorConfig(page.slug);
   const visualConfig = baseVisualConfig;
   const isPlatform = Boolean(platformTextConfigs[page.slug]);
@@ -120,7 +125,7 @@ export default function PageTemplate({
   const isHybridGenerator = definition?.kind === 'hybrid';
   const isMinecraftGenerator = visualConfig?.engine === 'minecraft-renderer';
   const requiresVisualConfig = definition
-    ? !isThreeDGenerator && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
+    ? !isThreeDGenerator && !octoberArt && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
     : false;
   if (requiresVisualConfig && !visualConfig) {
     throw new Error(`Generator ${page.slug} is registered as ${definition?.kind} but has no visual configuration.`);
@@ -128,12 +133,16 @@ export default function PageTemplate({
   if (visualConfig && definition?.kind === 'unicode') {
     throw new Error(`Generator ${page.slug} has a visual configuration but is still registered as Unicode-only.`);
   }
-  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator;
+  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator || octoberArt;
   const usesFontWorkspace = !isSpecializedGenerator;
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
-  const workflowSteps = isZalgo || isDiscord || isPlatform
+  const workflowSteps = octoberArt
+    ? [['1', 'Enter your text', 'Type up to 120 characters, including manual line breaks.'], ['2', 'Choose a typeface', 'Select a real font, then customize size, alignment, canvas and colors.'], ['3', 'Download PNG', 'Wait for the preview to be ready and download the artwork. Copying characters does not preserve the typeface.']]
+    : octoberText
+    ? [['1', 'Enter text', 'Type a name or message in the shared workspace.'], ['2', 'Choose your options', 'Adjust decorations or the symbol conversion direction where available.'], ['3', 'Copy and test', 'Tap a result card to copy, then test in the destination field.']]
+    : isZalgo || isDiscord || isPlatform
     ? [
         ['1', 'Enter text', 'Type a short phrase in the input.'],
         ['2', isZalgo ? 'Compare the strengths' : isDiscord ? 'Choose the destination' : 'Choose a style', isZalgo ? 'Compare five strength cards; open Advanced settings for custom intensity and mark directions.' : isDiscord ? 'Use Unicode for display names or compare all six Markdown result cards for messages.' : 'Compare the live results and try any available styling options.'],
@@ -167,7 +176,7 @@ export default function PageTemplate({
   const supplement = getPageSupplement(page.slug);
   const relatedLinks = getRelatedLinks(page.relatedSlugs).slice(0, 4);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
-    if (isZalgo || isDiscord || isPlatform) return example;
+    if (isZalgo || isDiscord || isPlatform || octoberArt || octoberText) return example;
     const styleId = config.styleIds[index % config.styleIds.length];
     const style = getStyleDefinition(styleId);
     return {
@@ -209,7 +218,9 @@ export default function PageTemplate({
           )}
         </header>
 
-        {isPlatform ? (
+        {octoberArt || octoberText ? (
+          <OctoberToolBoundary key={page.slug} artwork={octoberArt} slug={page.slug} pageTitle={page.title} config={config} navigationItems={generatorNavigationItems} />
+        ) : isPlatform ? (
           <PlatformTextGeneratorTool navigationItems={generatorNavigationItems} key={page.slug} slug={page.slug} config={config} pageTitle={page.title} />
         ) : isZalgo ? (
           <ZalgoGeneratorTool config={config} navigationItems={generatorNavigationItems} />

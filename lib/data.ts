@@ -1,3 +1,4 @@
+ import { octoberKeywordPages } from './october-keyword-pages';
  import { expansionStylePages, expansionFandomPages } from './expansion-keyword-pages';
  import { priorityKeywordPages } from './priority-keyword-pages';
  import { additionalGuidePages } from './additional-guides';
@@ -849,6 +850,7 @@
    ...newKeywordStylePages,
    ...priorityKeywordPages,
    ...expansionStylePages,
+   ...octoberKeywordPages,
  ];
  
  export const fandomPages: PageDefinition[] = [
