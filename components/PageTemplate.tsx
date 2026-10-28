@@ -138,7 +138,9 @@ export default function PageTemplate({
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
-  const workflowSteps = octoberArt
+  const workflowSteps = page.slug === 'halloween-font-generator'
+    ? [['1', 'Enter your message', 'Type once and choose Artwork or Copyable text. Your draft stays with you.'], ['2', 'Explore the styles', 'Filter 24 artwork designs or 24 text styles. Artwork uses real typefaces with original scenes and effects.'], ['3', 'Copy or download', 'Copy a text card, download a PNG directly, or open Customize for colors, layout and transparent export.']]
+    : octoberArt
     ? [['1', 'Enter your text', 'Type up to 120 characters, including manual line breaks.'], ['2', 'Choose a typeface', 'Select a real font, then customize size, alignment, canvas and colors.'], ['3', 'Download PNG', 'Wait for the preview to be ready and download the artwork. Copying characters does not preserve the typeface.']]
     : octoberText
     ? [['1', 'Enter text', 'Type a name or message in the shared workspace.'], ['2', 'Compare the results', page.slug === 'wingdings-font-generator' ? 'See letters-to-symbols and symbols-to-letters results together. Gaster mode affects encoding only.' : 'Choose a decoration using its icon and label, then compare the text styles.'], ['3', 'Copy and test', 'Tap a result card to copy, then test in the destination field.']]
@@ -464,6 +466,8 @@ export default function PageTemplate({
                   ? 'PNG export preserves the exact browser-rendered depth, color, outline, highlight, and shadow. Choose Transparent before downloading when you want to place the artwork over another design.'
                   : isMinecraftGenerator
                   ? 'PNG and faithful SVG both preserve the exact rendered canvas. Copy formatting-code text separately when the destination supports Minecraft § or & codes.'
+                  : page.slug === 'halloween-font-generator'
+                  ? 'PNG preserves the lettering and scene. Choose Transparent in Customize to export only the lettering effects, or use the Copyable text tab for bios and messages.'
                   : isSpecializedGenerator
                     ? 'PNG preserves the current rendered appearance. SVG keeps editable text, so its font can change when opened on a device without the same typeface.'
                   : 'Fancy text changes characters, not the installed font. That is why the result can be copied into many apps, but rendering may vary by device.'}

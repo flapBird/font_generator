@@ -8,10 +8,12 @@ import type { GeneratorSearchItem } from './GeneratorTool';
 // imports otherwise preload both new workspaces on older PageTemplate routes.
 const Artwork = dynamic(() => import('./OctoberArtworkTool'));
 const Text = dynamic(() => import('./OctoberTextGeneratorTool'));
+const Halloween = dynamic(() => import('./HalloweenGeneratorTool'));
 
 export default function OctoberToolBoundary({ artwork, slug, pageTitle, config, navigationItems }: {
   artwork: boolean; slug: string; pageTitle: string; config: GeneratorPageConfig; navigationItems: GeneratorSearchItem[];
 }) {
+  if (slug === 'halloween-font-generator') return <Halloween />;
   return artwork ? <Artwork slug={slug} pageTitle={pageTitle} textConfig={config} />
     : <Text slug={slug} pageTitle={pageTitle} config={config} navigationItems={navigationItems} />;
 }

@@ -169,5 +169,86 @@
     "upstream": "https://github.com/google/fonts",
     "archive": "https://registry.npmjs.org/@fontsource/sedgwick-ave-display/-/sedgwick-ave-display-5.3.0.tgz",
     "integrity": "sha512-dMK26R4CmjHERtZlgwwZP/qQ68lGmF0WhM2AOxMo6E0WUR05CftL1pvFQzHRwVNeg4NParh2i/2B/Nia/+vPzg=="
+  },
+  {
+    "id": "butcherman",
+    "family": "Butcherman",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/butcherman/-/butcherman-5.3.0.tgz",
+    "integrity": "sha512-iLEuKsHsUiSq3yjERsiGVlSvaZGzHCJflv2B1ZInfooBAEWUetI+JJ0iEEw6jBAKtMPiTw8D9Eq+BxsGUwxcEg=="
+  },
+  {
+    "id": "metal-mania",
+    "family": "Metal Mania",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/metal-mania/-/metal-mania-5.3.0.tgz",
+    "integrity": "sha512-hybb4kFojVLobGVSHMzb5OLaVwPAFmiLm09QCJn/H7l3HAMFpceDld5hevLGhjiqFhQ1li3Q9kFetEYD4WEAOA=="
+  },
+  {
+    "id": "new-rocker",
+    "family": "New Rocker",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/new-rocker/-/new-rocker-5.3.0.tgz",
+    "integrity": "sha512-m2Tx0gXPSyN41vNd4l9LbPwxxDwzi+HKYzSJO3ExRFhJIPvPAJ/y7CUgFs6OIv8QvmHoa3o9u4mbKU2+iWIsDQ=="
+  },
+  {
+    "id": "pirata-one",
+    "family": "Pirata One",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/pirata-one/-/pirata-one-5.3.0.tgz",
+    "integrity": "sha512-qeaDy+F+TcCVdODaIvD4U0ZoaWPejpkXwHAAHIBtauwP/9mf+Sj8ORX5UYcnBpnyhd7ihYPpW+WWPbz9FryrJQ=="
+  },
+  {
+    "id": "frijole",
+    "family": "Frijole",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/frijole/-/frijole-5.3.0.tgz",
+    "integrity": "sha512-F2Vcvz2v5wjm9EMTM5IaPj/BH/0vJTlWofvYwMcRy9u1gckY1SvI10FK0xK+dXxjgGKBUKRWY4V615fSeQ7Nyg=="
+  },
+  {
+    "id": "rubik-wet-paint",
+    "family": "Rubik Wet Paint",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/rubik-wet-paint/-/rubik-wet-paint-5.3.0.tgz",
+    "integrity": "sha512-nPEMWjlPzZgXd8E1N5zXJuIYfjjuKEa209rhEaTLlVZJAklmtGOPIauUuTT0U0m4nDPR8BOFd0WZoaru8plTMg=="
+  },
+  {
+    "id": "lacquer",
+    "family": "Lacquer",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/lacquer/-/lacquer-5.3.0.tgz",
+    "integrity": "sha512-4xCHyYtvo7HuTd0oLhMNXJzdH7fTjkAESTIpl28MmNeNGRJ3eXOrOUlEVFSoPWR04pZkyKWbmINKW4TLmPoOiQ=="
+  },
+  {
+    "id": "trade-winds",
+    "family": "Trade Winds",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/trade-winds/-/trade-winds-5.3.0.tgz",
+    "integrity": "sha512-naBDVpikfFKjv9j27ihn423wuLNRveaXiIO5INIWzGwGANhl4DeG9vE2Vc+lz9kbGGLPKPw+lX1TtSKIUcsz7Q=="
+  },
+  {
+    "id": "unifrakturmaguntia",
+    "family": "UnifrakturMaguntia",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "upstream": "https://github.com/google/fonts",
+    "archive": "https://registry.npmjs.org/@fontsource/unifrakturmaguntia/-/unifrakturmaguntia-5.3.0.tgz",
+    "integrity": "sha512-z8NGOUeAu0T534Z8tEyuNbuUZsUiRoQKzg3gRB5sb2o2DipxEqmYQqHdlwxsbN0gpwhgcClKrCuB/AhVeY2UOQ=="
   }
 ]

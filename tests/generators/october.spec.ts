@@ -175,13 +175,13 @@ test('compact controls prioritize results and retain touch targets on desktop an
   }
   await page.goto('/halloween-font-generator');
   await expect(page.locator('[data-decoration-icon]')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Pumpkins', exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Aa Copyable text · 24', exact: true })).toBeVisible();
 });
 
-test('all 19 real fonts render, PNG equals the preview, alpha and artwork bounds survive export', async ({ page }) => {
+test('all 16 sibling artwork fonts render, PNG equals the preview, alpha and artwork bounds survive export', async ({ page }) => {
   test.setTimeout(150000);
   const errors: string[] = []; page.on('pageerror', (error) => errors.push(error.message));
-  for (const slug of octoberArtSlugs) {
+  for (const slug of octoberArtSlugs.filter((slug) => slug !== 'halloween-font-generator')) {
     const config = octoberArtwork[slug];
     await page.goto(`/${slug}`);
     await page.locator('#artwork-input').fill(config.sample);
@@ -213,7 +213,7 @@ test('all 19 real fonts render, PNG equals the preview, alpha and artwork bounds
 
 test('Arabic shapes whole lines; CJK mixed input and art controls work on desktop/mobile', async ({ page }) => {
   test.setTimeout(90000);
-  for (const slug of ['arabic-font-generator', 'chinese-font-generator', 'graffiti-font-generator', 'halloween-font-generator']) {
+  for (const slug of ['arabic-font-generator', 'chinese-font-generator', 'graffiti-font-generator']) {
     await page.goto(`/${slug}`);
     await page.locator('#artwork-input').fill(slug.startsWith('arabic') ? 'السَّلَامُ عَلَيْكُمْ 2026\nHello مرحباً' : slug.startsWith('chinese') ? '春风得意 歲月靜好\nHello 123' : 'A Long Title\nSecond line');
     await expect(page.getByTestId('artwork-status')).toContainText('Ready to download');
@@ -237,27 +237,22 @@ test('Arabic shapes whole lines; CJK mixed input and art controls work on deskto
       await page.screenshot({ path: `/tmp/october-${slug}-${width}.png`, animations: 'disabled' });
     }
     await page.locator('canvas').first().screenshot({ path: `/tmp/october-${slug}-artwork.png` });
-    if (slug.startsWith('halloween')) {
-      await expect(page.locator('#copyable-styles')).toBeVisible();
-      await page.getByRole('button', { name: 'Pumpkins', exact: true }).click();
-      await expect(page.getByLabel('Classic Fraktur output')).toContainText('🎃');
-    }
   }
 });
 
 test('font loading failure blocks stale export and retry recovers', async ({ page }) => {
-  await page.route('**/fonts/artwork/creepster/400.css', (route) => route.abort());
-  await page.goto('/halloween-font-generator');
+  await page.route('**/fonts/artwork/rubik-spray-paint/400.css', (route) => route.abort());
+  await page.goto('/graffiti-font-generator');
   await expect(page.getByTestId('artwork-status')).toContainText('could not load');
   await expect(page.getByRole('button', { name: 'Download PNG', exact: true })).toBeDisabled();
-  await page.unroute('**/fonts/artwork/creepster/400.css');
+  await page.unroute('**/fonts/artwork/rubik-spray-paint/400.css');
   await page.getByRole('button', { name: 'Retry font loading', exact: true }).click();
   await expect(page.getByTestId('artwork-status')).toContainText('Ready to download');
-  await page.route('**/fonts/artwork/nosifer/files/*.woff2', (route) => route.abort());
-  await page.getByRole('button', { name: /^Nosifer/ }).click();
+  await page.route('**/fonts/artwork/permanent-marker/files/*.woff2', (route) => route.abort());
+  await page.getByRole('button', { name: /^Permanent Marker/ }).click();
   await expect(page.getByTestId('artwork-status')).toContainText('could not load');
   await expect(page.getByRole('button', { name: 'Download PNG', exact: true })).toBeDisabled();
-  await page.unroute('**/fonts/artwork/nosifer/files/*.woff2');
+  await page.unroute('**/fonts/artwork/permanent-marker/files/*.woff2');
   await page.getByRole('button', { name: 'Retry font loading', exact: true }).click();
   await expect(page.getByTestId('artwork-status')).toContainText('Ready to download');
 });
@@ -266,7 +261,7 @@ test('new resources never load on existing pages; oversized drafts are preserved
   const chunkFiles = (await readdir('.next/static/chunks')).filter((file) => file.endsWith('.js'));
   const newChunks = new Set((await Promise.all(chunkFiles.map(async (file) => {
     const source = await readFile(`.next/static/chunks/${file}`, 'utf8');
-    return source.includes('Font download timed out.') || source.includes('Wingdings character chart') ? file : '';
+    return source.includes('Font download timed out.') || source.includes('Wingdings character chart') || source.includes('Halloween style studio') ? file : '';
   }))).filter(Boolean));
   expect(newChunks.size).toBeGreaterThan(0);
   const newRequests: string[] = []; page.on('request', (request) => {

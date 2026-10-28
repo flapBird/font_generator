@@ -187,3 +187,28 @@ for (const slug of octoberArtSlugs) for (const font of octoberArtwork[slug].font
   for (const [, filename] of css.matchAll(/url\(\.\/files\/([^)]*)\)/g)) assert.ok(fs.statSync(`${folder}/files/${filename}`).size > 0, `${font.id}: bundled file ${filename}`);
 }
 console.log('October regressions passed: all 59 old transforms and 65 page definitions unchanged; 10 new routes, directory assignments, fonts, text clusters, Wingdings round-trip and empty states.');
+
+const { halloweenFonts, halloweenPresets } = require('../lib/halloween-catalog.ts');
+const { halloweenTextResults } = require('../lib/halloween-text.ts');
+assert.equal(new Set(halloweenPresets.map((preset) => preset.id)).size, 24);
+assert.equal(new Set(halloweenPresets.map((preset) => preset.font.id)).size, 12);
+for (const font of halloweenFonts) {
+  assert.ok(fonts.some((entry) => entry.id === font.id && entry.license === 'OFL-1.1'));
+  const folder = `public/fonts/artwork/${font.id}`;
+  const css = fs.readFileSync(`${folder}/400.css`, 'utf8');
+  assert.ok(css.includes(`font-family: 'Artwork ${font.family}'`));
+  assert.ok(fs.readFileSync(`${folder}/LICENSE.txt`, 'utf8').length > 500);
+  for (const [, filename] of css.matchAll(/url\(\.\/files\/([^)]*)\)/g)) assert.ok(fs.statSync(`${folder}/files/${filename}`).size > 0);
+}
+const halloweenResults = halloweenTextResults('Boo\n\n中文 한글 العربية 👨‍👩‍👧‍👦 👍🏽 1️⃣');
+assert.equal(new Set(halloweenResults.map((result) => result.id)).size, 24);
+assert.equal(new Set(halloweenResults.map((result) => result.text)).size, 24);
+for (const result of halloweenResults) {
+  assert.ok(result.text.includes('\n\n'));
+  assert.ok(result.text.includes('中文 한글 العربية 👨‍👩‍👧‍👦 👍🏽 1️⃣'));
+  if (result.category === 'Glitch') assert.match(result.text, /[\u0300-\u036f]/u);
+}
+assert.deepEqual(halloweenTextResults('Boo'), halloweenTextResults('Boo'), 'Stable Halloween glitch outputs');
+assert.equal(halloweenTextResults('Original spelling').at(-1).text, 'Original spelling');
+for (const result of halloweenTextResults(' \n')) assert.equal(result.text, '');
+console.log('Halloween regressions passed: 24 distinct designs, 12 licensed fonts, 24 distinct text styles, Unicode preservation and deterministic glitch marks.');

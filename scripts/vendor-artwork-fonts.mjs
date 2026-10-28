@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const fontIds = ['creepster', 'nosifer', 'eater', 'jua', 'gaegu', 'nanum-pen-script', 'black-han-sans', 'noto-sans-sc', 'noto-serif-tc', 'ma-shan-zheng', 'zhi-mang-xing', 'amiri', 'cairo', 'lateef', 'reem-kufi', 'rubik-spray-paint', 'permanent-marker', 'rubik-bubbles', 'sedgwick-ave-display'];
+const fontIds = ['creepster', 'nosifer', 'eater', 'jua', 'gaegu', 'nanum-pen-script', 'black-han-sans', 'noto-sans-sc', 'noto-serif-tc', 'ma-shan-zheng', 'zhi-mang-xing', 'amiri', 'cairo', 'lateef', 'reem-kufi', 'rubik-spray-paint', 'permanent-marker', 'rubik-bubbles', 'sedgwick-ave-display', 'butcherman', 'metal-mania', 'new-rocker', 'pirata-one', 'frijole', 'rubik-wet-paint', 'lacquer', 'trade-winds', 'unifrakturmaguntia'];
 const destination = path.join(root, 'public/fonts/artwork');
 await mkdir(destination, { recursive: true });
 const previous = await readFile(path.join(destination, 'sources.json'), 'utf8').then(JSON.parse).catch(() => []);

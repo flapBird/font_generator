@@ -72,9 +72,9 @@ const overrides: Record<string, GeneratorOverride> = {
     kind: slug === 'halloween-font-generator' ? 'hybrid' : 'font-preview',
     intent: {
       primary: slug === 'halloween-font-generator'
-        ? 'Render three bundled horror typefaces as PNG, with a separate copyable Halloween text section and optional pumpkin or ghost frames.'
+        ? 'Browse 24 Halloween artwork presets using 12 locally hosted typefaces, customize and download PNG, or copy 24 separate Unicode text styles.'
         : `Render ${slug.replace('-font-generator', '')} text in four locally hosted typefaces and download transparent PNG artwork; copying original text does not preserve the font.`,
-      secondary: ['Artwork accepts up to 120 characters per edit. Fonts load on demand; missing glyphs may use device fallback. No translation or font-file generation.'],
+      secondary: [slug === 'halloween-font-generator' ? 'Artwork accepts 120 characters; text styles accept 1,000. Filter the gallery, download a preset directly or customize it with theme or transparent backgrounds. Fonts load as thumbnails enter view. No AI images or font files are generated.' : 'Artwork accepts up to 120 characters per edit. Fonts load on demand; missing glyphs may use device fallback. No translation or font-file generation.'],
       expectedOutputs: slug === 'halloween-font-generator' ? ['text', 'png'] : ['png'],
     },
     capabilities: ['font-availability', 'preset-gallery', 'png-export'],
