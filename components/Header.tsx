@@ -25,7 +25,7 @@ const primaryLinks = [
 ];
 
 const desktopLinkClass =
-  'flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-[560] text-slate-700 transition-colors hover:bg-muted hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200 dark:hover:text-white';
+  'flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium [font-family:system-ui,sans-serif] text-slate-600 transition-colors hover:bg-muted hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200 dark:hover:text-white';
 
 const compactGeneratorLabel = (label: string) =>
   label.replace(/\s+Generator$/i, '');
