@@ -23,7 +23,7 @@ test('nine pages have canonical metadata, discoverable links, sitemap and accura
   expect(llms).toContain('does not');
   expect(llms).toContain('do not verify in-game acceptance');
   expect(llms).toContain('temporary current-page item marked HERE');
-  expect(llms).toContain('Client-side links preserve the text draft');
+  expect(llms).toContain('Client-side links open each tool with its own input');
   const redirect = await request.get('/x-font-generator', { maxRedirects: 0 });
   expect(redirect.status()).toBe(301);
   expect(redirect.headers().location).toBe('/twitter-font-generator');

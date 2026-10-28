@@ -24,6 +24,9 @@ export default function OctoberArtworkTool({ slug, pageTitle, textConfig }: { sl
   const [failure, setFailure] = useState<{ key: string; message: string } | null>(null);
   const [downloadNotice, setDownloadNotice] = useState('');
   const [settings, setSettings] = useState<ArtworkSettings>({ size: 140, color: config.color, background: config.background, transparent: true, outline: 0, outlineColor: '#18181b', shadow: false, gradient: false, accent: '#a855f7', format: 'banner', align: config.direction === 'rtl' ? 'right' : 'center' });
+  const expectedScript = slug === 'arabic-font-generator' ? /\p{Script=Arabic}/u : slug === 'korean-font-generator' ? /\p{Script=Hangul}/u : slug === 'chinese-font-generator' ? /\p{Script=Han}/u : null;
+  const languageName = slug === 'arabic-font-generator' ? 'Arabic' : slug === 'korean-font-generator' ? 'Korean' : 'Chinese';
+  const needsLanguageHint = expectedScript && text.trim() && !expectedScript.test(text);
   const overLimit = text.length > 120;
   const signature = JSON.stringify([slug, fontId, text, settings, retry]);
   const ready = loaded === signature && !overLimit && Boolean(text.trim());
@@ -69,6 +72,7 @@ export default function OctoberArtworkTool({ slug, pageTitle, textConfig }: { sl
           <div className="order-first lg:order-none"><div className="flex items-center justify-between gap-2"><label htmlFor="artwork-input" className="text-sm font-semibold">Your text</label><button type="button" className="min-h-11 px-2 text-sm text-violet-700 dark:text-violet-300" onClick={() => { setText(''); input.current?.focus(); }}>Clear text</button></div>
             <textarea id="artwork-input" ref={input} lang={config.language} dir="auto" maxLength={120} rows={3} value={text} onChange={(event) => setText(event.target.value)} className={`${controlClass} resize-y text-xl`} />
             <p className="mt-2 text-xs text-slate-500">{text.length} / 120 characters · Manual line breaks supported</p>
+            {needsLanguageHint && <p role="status" className="mt-2 text-sm text-slate-600 dark:text-slate-400">Enter {languageName} text to compare these typefaces, or try a sample below. Fonts style your characters; they do not translate them. Other scripts may use a fallback font.</p>}
             {overLimit && <p role="alert" className="mt-2 text-sm text-red-700">Your saved draft is longer than 120 characters. Shorten it to render artwork; nothing has been truncated.</p>}
             <div className="mt-3 flex flex-wrap gap-2">{config.samples.map((sample) => <button type="button" key={sample} onClick={() => setText(sample)} className="min-h-11 rounded-lg bg-slate-100 px-3 text-sm dark:bg-slate-900">{sample}</button>)}</div>
           </div>

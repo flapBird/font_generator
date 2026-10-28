@@ -139,7 +139,7 @@ export default function PageTemplate({
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
   const workflowSteps = page.slug === 'halloween-font-generator'
-    ? [['1', 'Enter your message', 'Type once and choose Artwork or Copyable text. Your draft stays with you.'], ['2', 'Explore the styles', 'Filter 24 artwork designs or 24 text styles. Artwork uses real typefaces with original scenes and effects.'], ['3', 'Copy or download', 'Copy a text card, download a PNG directly, or open Customize for colors, layout and transparent export.']]
+    ? [['1', 'Enter your message', 'Type once and choose Artwork or Copyable text. Both tabs use the same input.'], ['2', 'Explore the styles', 'Filter 24 artwork designs or 24 text styles. Artwork uses real typefaces with original scenes and effects.'], ['3', 'Copy or download', 'Copy a text card, download a PNG directly, or open Customize for colors, layout and transparent export.']]
     : octoberArt
     ? [['1', 'Enter your text', 'Type up to 120 characters, including manual line breaks.'], ['2', 'Choose a typeface', 'Select a real font, then customize size, alignment, canvas and colors.'], ['3', 'Download PNG', 'Wait for the preview to be ready and download the artwork. Copying characters does not preserve the typeface.']]
     : octoberText

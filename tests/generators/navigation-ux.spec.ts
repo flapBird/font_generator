@@ -143,7 +143,7 @@ test('handwriting opts into prominent presets while an existing visual tool keep
 });
 
 
-test('client-side switching keeps drafts, old HERE behavior and independent canonical pages', async ({ page }) => {
+test('client-side switching resets input and keeps old HERE behavior and independent canonical pages', async ({ page }) => {
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/bold-text-generator');
@@ -152,7 +152,7 @@ test('client-side switching keeps drafts, old HERE behavior and independent cano
     let rail = page.getByRole('complementary', { name: 'Generator directory' });
     await rail.locator('a[href="/italics-font-generator"]').filter({ visible: true }).click();
     await expect(page).toHaveURL(/\/italics-font-generator$/);
-    await expect(page.locator('#generator-input')).toHaveValue('Keep my words 12');
+    await expect(page.locator('#generator-input')).not.toHaveValue('Keep my words 12');
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://font-generators.org/italics-font-generator');
     rail = page.getByRole('complementary', { name: 'Generator directory' });
     await expect(rail.getByRole('navigation', { name: 'Current generator', exact: true })).toHaveCount(0);
@@ -161,7 +161,7 @@ test('client-side switching keeps drafts, old HERE behavior and independent cano
     expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).__workspaceNavigation)).toBe('same-document');
     await page.goBack();
     await expect(page).toHaveURL(/\/bold-text-generator$/);
-    await expect(page.locator('#generator-input')).toHaveValue('Keep my words 12');
+    await expect(page.locator('#generator-input')).not.toHaveValue('Keep my words 12');
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://font-generators.org/bold-text-generator');
     await expect(page.getByRole('navigation', { name: 'Current generator', exact: true }).filter({ visible: true })).toContainText('Bold');
     expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).__workspaceNavigation)).toBe('same-document');

@@ -27,7 +27,7 @@ test('October pages have canonical URLs, accurate outputs and distinct text/art 
   }
 });
 
-test('all five text workspaces preserve drafts, temporary HERE, clipboard, keyboard preview and mobile layout', async ({ page, context }) => {
+test('all five text workspaces isolate inputs and preserve temporary HERE, clipboard, keyboard preview and mobile layout', async ({ page, context }) => {
   test.setTimeout(90000);
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   const errors: string[] = []; page.on('pageerror', (error) => errors.push(error.message));
@@ -46,15 +46,15 @@ test('all five text workspaces preserve drafts, temporary HERE, clipboard, keybo
       await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(output);
       if (width === 1440) await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toContainText(output!);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-      // Client-side link, then Back: draft and navigation state must survive.
+      // Client-side link and Back reset input while preserving client navigation.
       await page.evaluate(() => { (window as Window & { navigationSentinel?: number }).navigationSentinel = 42; });
       await rail.locator('a[href="/small-text-generator"]').filter({ visible: true }).first().click();
       await expect(page).toHaveURL(/\/small-text-generator$/);
-      await expect(page.locator('#generator-input')).toHaveValue('Hello 12 👨‍👩‍👧‍👦');
+      await expect(page.locator('#generator-input')).not.toHaveValue('Hello 12 👨‍👩‍👧‍👦');
       await expect(page.getByRole('navigation', { name: 'Current generator', exact: true })).toHaveCount(0);
       expect(await page.evaluate(() => (window as Window & { navigationSentinel?: number }).navigationSentinel)).toBe(42);
       await page.goBack();
-      await expect(page.locator('#generator-input')).toHaveValue('Hello 12 👨‍👩‍👧‍👦');
+      await expect(page.locator('#generator-input')).not.toHaveValue('Hello 12 👨‍👩‍👧‍👦');
       await page.getByRole('button', { name: 'Clear text', exact: true }).click();
       await expect(page.getByRole('button', { name: /^Copy / }).first()).toBeDisabled();
       if (slug === 'wingdings-font-generator') {
@@ -175,7 +175,7 @@ test('compact controls prioritize results and retain touch targets on desktop an
   }
   await page.goto('/halloween-font-generator');
   await expect(page.locator('[data-decoration-icon]')).toHaveCount(0);
-  await expect(page.getByRole('tab', { name: 'Aa Copyable text · 24', exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Copyable text', exact: true })).toBeVisible();
 });
 
 test('all 16 sibling artwork fonts render, PNG equals the preview, alpha and artwork bounds survive export', async ({ page }) => {
@@ -257,7 +257,7 @@ test('font loading failure blocks stale export and retry recovers', async ({ pag
   await expect(page.getByTestId('artwork-status')).toContainText('Ready to download');
 });
 
-test('new resources never load on existing pages; oversized drafts are preserved', async ({ page }) => {
+test('new resources never load on existing pages; cross-tool drafts are ignored', async ({ page }) => {
   const chunkFiles = (await readdir('.next/static/chunks')).filter((file) => file.endsWith('.js'));
   const newChunks = new Set((await Promise.all(chunkFiles.map(async (file) => {
     const source = await readFile(`.next/static/chunks/${file}`, 'utf8');
@@ -275,7 +275,7 @@ test('new resources never load on existing pages; oversized drafts are preserved
   await page.goto('/k-pop-font-generator');
   await page.locator('#generator-input').fill('A'.repeat(200));
   await page.goto('/korean-font-generator');
-  await expect(page.locator('#artwork-input')).toHaveValue('A'.repeat(200));
-  await expect(page.locator('main').getByRole('alert')).toContainText('longer than 120');
-  await expect(page.getByRole('button', { name: 'Download PNG', exact: true })).toBeDisabled();
+  await expect(page.locator('#artwork-input')).not.toHaveValue('A'.repeat(200));
+  await expect(page.locator('main').getByRole('alert')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Download PNG', exact: true })).toBeEnabled();
 });

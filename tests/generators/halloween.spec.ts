@@ -121,9 +121,9 @@ test('Halloween text copying, filters, empty input and oversized drafts remain u
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/halloween-font-generator');
   await page.locator('#halloween-input').fill('Boo\n\n中文 👨‍👩‍👧‍👦');
-  await page.getByRole('tab', { name: '🎨 Artwork · 24', exact: true }).focus();
+  await page.getByRole('tab', { name: 'Artwork', exact: true }).focus();
   await page.keyboard.press('ArrowRight');
-  await expect(page.getByRole('tab', { name: 'Aa Copyable text · 24' })).toBeFocused();
+  await expect(page.getByRole('tab', { name: 'Copyable text' })).toBeFocused();
   await expect(page.getByRole('button', { name: /^Copy / })).toHaveCount(24);
   const output = '🎃 𝔅𝔬𝔬 🎃\n\n🎃 中文 👨‍👩‍👧‍👦 🎃';
   await expect(page.getByLabel('Pumpkin Blackletter output', { exact: true })).toHaveText(output);
@@ -132,16 +132,16 @@ test('Halloween text copying, filters, empty input and oversized drafts remain u
   await page.getByRole('group', { name: 'Text categories' }).getByRole('button', { name: 'Glitch', exact: true }).click();
   await expect(page.getByRole('button', { name: /^Copy / })).toHaveCount(4);
   await page.locator('#halloween-input').fill('A'.repeat(200));
-  await page.getByRole('tab', { name: '🎨 Artwork · 24', exact: true }).click();
+  await page.getByRole('tab', { name: 'Artwork', exact: true }).click();
   await expect(page.locator('#halloween-input')).toHaveValue('A'.repeat(200));
   await expect(page.locator('main').getByRole('alert')).toContainText('nothing has been truncated');
   await expect(page.getByRole('button', { name: 'Download Pumpkin Pop PNG' })).toBeDisabled();
   await page.goto('/small-text-generator');
-  await expect(page.locator('#generator-input')).toHaveValue('A'.repeat(200));
-  await page.goBack(); await expect(page.locator('#halloween-input')).toHaveValue('A'.repeat(200));
+  await expect(page.locator('#generator-input')).not.toHaveValue('A'.repeat(200));
+  await page.goBack(); await expect(page.locator('#halloween-input')).toHaveValue('Happy Halloween');
   await page.getByRole('button', { name: 'Clear text', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Download Pumpkin Pop PNG' })).toBeDisabled();
-  await page.getByRole('tab', { name: 'Aa Copyable text · 24' }).click();
+  await page.getByRole('tab', { name: 'Copyable text' }).click();
   await expect(page.getByRole('button', { name: /^Copy / }).first()).toBeDisabled();
 });
 

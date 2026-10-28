@@ -128,12 +128,12 @@ test('Zalgo lists five strengths and preserves custom controls, clipboard and em
   await expect(page.getByRole('button', { name: 'Copy Zalgo — Medium', exact: true })).toBeDisabled();
 });
 
-test('Zalgo rejects oversized saved drafts without dropping their contents', async ({ page }) => {
+test('Zalgo ignores legacy cross-tool session drafts', async ({ page }) => {
   await page.addInitScript(() => sessionStorage.setItem('font-generators-text-draft', 'a'.repeat(1001)));
   await page.goto('/zalgo-text-generator');
-  await expect(page.getByRole('alert').filter({ hasText: 'This saved draft' })).toContainText('has not been cut');
-  await expect(page.getByLabel('Your text', { exact: true })).toHaveValue('a'.repeat(1001));
-  await expect(page.getByLabel('Zalgo — Medium output')).toHaveText('Type above to see this style');
+  await expect(page.getByRole('alert').filter({ hasText: 'This saved draft' })).toHaveCount(0);
+  await expect(page.getByLabel('Your text', { exact: true })).toHaveValue('Zalgo Text Generator');
+  await expect(page.getByLabel('Zalgo — Medium output')).not.toHaveText('Type above to see this style');
 });
 
 test('new workspaces stay within mobile viewport', async ({ page }) => {
