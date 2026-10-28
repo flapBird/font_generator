@@ -8,6 +8,8 @@ import { framePetName, petFrames, platformTextConfigs, styleSocialText, xPostLen
 import { useGeneratorText } from '@/lib/use-generator-text';
 import TextOutputCard from './TextOutputCard';
 
+const petFrameIcons: Record<PetFrame, string> = { none: 'Aa', hearts: '♡', stars: '✦', brackets: '「」' };
+
 const destinationHints: Record<string, Record<string, string>> = {
   'twitter-font-generator': { post: 'Post length is estimated below; check the final X composer.', bio: 'Bios have a 160-character limit. Check the final profile field in X.', name: 'Display names allow up to 50 characters. Your @handle stays plain text.' },
   'roblox-font-generator': { experience: 'Try the result in your experience; filtering varies by field.', profile: 'Preview your description in Roblox before saving.', name: 'These styles are not verified as valid account names. Keep a plain-text fallback.' },
@@ -45,11 +47,11 @@ export default function PlatformTextGeneratorTool({ slug, config, pageTitle, nav
             <div className="mt-2 flex justify-between gap-2 text-xs text-slate-500 dark:text-slate-400"><span>Styles update as you type</span><span>{text.length} / 1,000</span></div>
           </div>
           {isPet && <fieldset>
-            <legend className="mb-2 text-sm font-medium text-slate-950 dark:text-white">Name decoration</legend>
-            <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-              {Object.entries(petFrames).map(([id, item]) => <button key={id} type="button" aria-label={item.label} aria-pressed={frame === id} onClick={() => setFrame(id as PetFrame)} className={optionClass(frame === id)}>
-                <span aria-hidden="true" className="block text-lg">{framePetName('ɴᴀᴍᴇ', id as PetFrame)}</span>
-                <span className="mt-1 block text-xs">{item.label}</span>
+            <legend className="mb-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">Name decoration</legend>
+            <div className="flex flex-wrap gap-1.5">
+              {Object.entries(petFrames).map(([id, item]) => <button key={id} type="button" aria-label={item.label} aria-pressed={frame === id} onClick={() => setFrame(id as PetFrame)} className={`inline-flex min-h-11 items-center justify-center gap-1 rounded-full border px-2 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 sm:gap-1.5 sm:px-3 sm:text-sm dark:focus-visible:ring-offset-slate-950 ${frame === id ? 'border-violet-600 bg-violet-600 text-white dark:border-violet-500 dark:bg-violet-500' : 'border-slate-200 bg-white text-slate-700 hover:border-violet-400 hover:bg-violet-50/50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-violet-950/30'}`}>
+                <span aria-hidden="true" className={id === 'none' ? 'text-xs' : 'text-base leading-none'}>{petFrameIcons[id as PetFrame]}</span>
+                <span>{id === 'none' ? 'None' : item.label}</span>
               </button>)}
             </div>
           </fieldset>}

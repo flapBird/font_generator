@@ -164,7 +164,7 @@ test('platform cards copy from the preview and keyboard; decorations expose thei
   await expect(smallCaps).toBeDisabled();
 });
 
-test('platform layout exposes input, decoration previews and results on desktop and mobile', async ({ page, context }) => {
+test('platform layout exposes input, decoration controls and results on desktop and mobile', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/adopt-me-font-generator');
@@ -173,6 +173,13 @@ test('platform layout exposes input, decoration previews and results on desktop 
   const firstResult = page.getByRole('button', { name: 'Copy Small Caps', exact: true });
   await expect(firstResult).toBeInViewport();
   await page.screenshot({ path: '/tmp/adopt-me-copy-desktop.png', animations: 'disabled' });
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.evaluate(() => scrollTo(0, 0));
+    await expect(page.getByRole('button', { name: 'Brackets', exact: true })).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.screenshot({ path: `/tmp/adopt-me-options-${width}.png`, animations: 'disabled' });
+  }
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole('button', { name: 'Hearts', exact: true })).toBeInViewport();
   await expect(page.getByRole('complementary', { name: 'Generator directory' })).toBeVisible();
