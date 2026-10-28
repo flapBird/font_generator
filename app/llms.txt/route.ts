@@ -100,7 +100,7 @@ const body = [
   `- [Text Style Generators](${SITE_URL}/styles): Browse copy-and-paste text tools, including Bold, Strikethrough, Discord, and Zalgo generators.`,
   `- [Visual & Art Generators](${SITE_URL}/visual-art): Browse ASCII, font-preview, meme, and visual artwork tools.`,
   `- [Fandom Font Generators](${SITE_URL}/fandom): Browse unofficial game, film, television, and pop-culture-inspired generators.`,
-  `- [Guides](${SITE_URL}/guides): Read compatibility, accessibility, troubleshooting, and Unicode reference material.`,
+  `- [Guides](${SITE_URL}/guides): Read compatibility, accessibility, troubleshooting, and Unicode reference material. Available from the footer; omitted from desktop and mobile header navigation.`,
   '',
   ...generatorSections,
   '## Guides and reference material',
