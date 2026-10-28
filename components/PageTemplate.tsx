@@ -1,4 +1,6 @@
 import FocusedTextGeneratorTool from './FocusedTextGeneratorTool';
+import DiscoveryToolBoundary from './DiscoveryToolBoundary';
+import { isDiscoveryArt, isDiscoveryText, discoveryStyleIds, discoverySamples, discoveryRelatedLinks } from '@/lib/discovery-catalog';
 import OctoberToolBoundary from './OctoberToolBoundary';
 import { isOctoberArt, isOctoberText } from '@/lib/october-catalog';
 
@@ -114,6 +116,13 @@ export default function PageTemplate({
   const definition = getGeneratorDefinition(page.slug);
   const octoberArt = isOctoberArt(page.slug);
   const octoberText = isOctoberText(page.slug);
+  const discoveryArt = isDiscoveryArt(page.slug);
+  const discoveryText = isDiscoveryText(page.slug);
+  if (discoveryArt || discoveryText) {
+    config.styleIds = discoveryStyleIds[page.slug] ?? [];
+    config.initialText = discoverySamples[page.slug];
+    config.resultIntro = page.description;
+  }
   const baseVisualConfig = getVisualGeneratorConfig(page.slug);
   const visualConfig = baseVisualConfig;
   const isPlatform = Boolean(platformTextConfigs[page.slug]);
@@ -125,7 +134,7 @@ export default function PageTemplate({
   const isHybridGenerator = definition?.kind === 'hybrid';
   const isMinecraftGenerator = visualConfig?.engine === 'minecraft-renderer';
   const requiresVisualConfig = definition
-    ? !isThreeDGenerator && !octoberArt && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
+    ? !isThreeDGenerator && !octoberArt && !discoveryArt && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
     : false;
   if (requiresVisualConfig && !visualConfig) {
     throw new Error(`Generator ${page.slug} is registered as ${definition?.kind} but has no visual configuration.`);
@@ -133,12 +142,16 @@ export default function PageTemplate({
   if (visualConfig && definition?.kind === 'unicode') {
     throw new Error(`Generator ${page.slug} has a visual configuration but is still registered as Unicode-only.`);
   }
-  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator || octoberArt;
+  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator || octoberArt || discoveryArt;
   const usesFontWorkspace = !isSpecializedGenerator;
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
-  const workflowSteps = page.slug === 'halloween-font-generator'
+  const workflowSteps = discoveryArt
+    ? [['1', 'Enter your title', 'Use up to 120 characters for artwork, including manual line breaks.'], ['2', 'Choose your look', 'Pick a preset and adjust its colors, effects and layout.'], ['3', 'Download PNG', 'Wait for the preview to be ready, then save the banner or square artwork.']]
+    : discoveryText
+    ? [['1', 'Enter your text', 'Use the page example or enter your own short phrase.'], ['2', 'Choose the output', 'Compare styles and any page-specific decoration or formatting controls.'], ['3', 'Copy and check', 'Tap a result card and test it in the destination field.']]
+    : page.slug === 'halloween-font-generator'
     ? [['1', 'Enter your message', 'Type once and choose Artwork or Copyable text. Both tabs use the same input.'], ['2', 'Explore the styles', 'Filter 24 artwork designs or 24 text styles. Artwork uses real typefaces with original scenes and effects.'], ['3', 'Copy or download', 'Copy a text card, download a PNG directly, or open Customize for colors, layout and transparent export.']]
     : octoberArt
     ? [['1', 'Enter your text', 'Type up to 120 characters, including manual line breaks.'], ['2', 'Choose a typeface', 'Select a real font, then customize size, alignment, canvas and colors.'], ['3', 'Download PNG', 'Wait for the preview to be ready and download the artwork. Copying characters does not preserve the typeface.']]
@@ -177,8 +190,9 @@ export default function PageTemplate({
       ];
   const supplement = getPageSupplement(page.slug);
   const relatedLinks = getRelatedLinks(page.relatedSlugs).slice(0, 4);
+  const additionalLinks = getRelatedLinks(discoveryRelatedLinks[page.slug] ?? []);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
-    if (isZalgo || isDiscord || isPlatform || octoberArt || octoberText) return example;
+    if (isZalgo || isDiscord || isPlatform || octoberArt || octoberText || discoveryArt || discoveryText) return example;
     const styleId = config.styleIds[index % config.styleIds.length];
     const style = getStyleDefinition(styleId);
     return {
@@ -220,7 +234,9 @@ export default function PageTemplate({
           )}
         </header>
 
-        {octoberArt || octoberText ? (
+        {discoveryArt || discoveryText ? (
+          <DiscoveryToolBoundary key={page.slug} artwork={discoveryArt} slug={page.slug} pageTitle={page.title} config={config} navigationItems={generatorNavigationItems} />
+        ) : octoberArt || octoberText ? (
           <OctoberToolBoundary key={page.slug} artwork={octoberArt} slug={page.slug} pageTitle={page.title} config={config} navigationItems={generatorNavigationItems} />
         ) : isPlatform ? (
           <PlatformTextGeneratorTool navigationItems={generatorNavigationItems} key={page.slug} slug={page.slug} config={config} pageTitle={page.title} />
@@ -428,6 +444,8 @@ export default function PageTemplate({
                 </div>
               </section>
             )}
+
+            {additionalLinks.length > 0 && <nav aria-label="More related tools" className="mt-6 flex flex-wrap gap-x-5 gap-y-2">{additionalLinks.map((item) => <Link key={item.slug} href={item.href} className="inline-flex min-h-11 items-center text-sm font-medium text-violet-700 underline dark:text-violet-300">{item.title} →</Link>)}</nav>}
 
             {(page.disclaimer || (!isSpecializedGenerator && page.fontNote)) && (
               <section className="mt-10 space-y-3" aria-label="Important notes">

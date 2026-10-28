@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { readFile, readdir } from 'node:fs/promises';
 import { octoberSlugs, octoberTextSlugs, octoberArtSlugs, octoberArtwork } from '../../lib/october-catalog';
 

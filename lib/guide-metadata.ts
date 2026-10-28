@@ -30,8 +30,8 @@ const unicodeNormalization: GuideSource = {
 
 const metadataBySlug: Record<string, GuideMetadata> = {
   'reddit-fancy-text-guide': {
-    updatedAt: '2026-08-27',
-    updatedLabel: 'August 27, 2026',
+    updatedAt: '2026-10-28',
+    updatedLabel: 'October 28, 2026',
     sources: [
       {
         title: 'Reddit Help: Formatting Guide',
@@ -42,7 +42,7 @@ const metadataBySlug: Record<string, GuideMetadata> = {
         url: 'https://support.reddithelp.com/hc/en-us/articles/205242695-How-do-I-get-user-flair',
       },
     ],
-    toolLink: { href: '/', label: 'Try the Fancy Text Generator' },
+    toolLink: { href: '/reddit-font-generator', label: 'Try the Reddit Font Generator' },
   },
   'how-unicode-text-works-guide': {
     updatedAt: '2026-08-27',

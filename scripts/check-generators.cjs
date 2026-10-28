@@ -127,15 +127,61 @@ assert.deepEqual(generatorRegistry.find((entry) => entry.slug === 'handwriting-f
 console.log('Expansion regressions passed: underline, fullwidth punctuation/spacing, small caps, double-struck exceptions/digits, protected social entities, weighted X lengths, pet frames, links and sitemap dates.');
 
 const { hiddenNavigationSlugs, isVisibleInGeneratorNavigation, focusedTextSlugs } = require('../lib/generator-navigation.ts');
-assert.equal(hiddenNavigationSlugs.length, 23);
-assert.equal(new Set(hiddenNavigationSlugs).size, 23);
+assert.equal(hiddenNavigationSlugs.length, 33);
+assert.equal(new Set(hiddenNavigationSlugs).size, 33);
 for (const slug of hiddenNavigationSlugs) {
   assert.ok(knownSlugs.has(slug), `Hidden navigation entry is still a real page: ${slug}`);
   assert.equal(isVisibleInGeneratorNavigation(`/${slug}`), false);
 }
 for (const page of allPages.filter((page) => !hiddenNavigationSlugs.includes(page.slug))) assert.equal(isVisibleInGeneratorNavigation(`/${page.slug}`), true, `${page.slug} retains its navigation entry`);
 for (const slug of ['small-text-generator', 'cursive-font-generator', 'impact-font-generator']) assert.equal(focusedTextSlugs.has(slug), false, `${slug} retains its existing workspace`);
-console.log('Navigation regressions passed: 13 previous and 10 October additions hidden, all older entries preserved, old workspace opt-in unchanged.');
+console.log('Navigation regressions passed: 23 previous and 10 discovery additions hidden, all older entries preserved, old workspace opt-in unchanged.');
+
+const { discoverySlugs, discoveryTextSlugs, discoveryArtSlugs } = require('../lib/discovery-catalog.ts');
+const { discoveryTextResults, squareText, messageResults, frameDiscoveryText, styleDiscoveryText } = require('../lib/discovery-text.ts');
+const { discoveryArtPresets, discoveryFonts } = require('../lib/discovery-art.ts');
+for (const slug of discoverySlugs) {
+  const definition = generatorRegistry.find((entry) => entry.slug === slug);
+  assert.ok(definition, `${slug}: registered`);
+  assert.equal(definition.homepage.enabled, false);
+  assert.equal(definition.kind === 'unicode', discoveryTextSlugs.includes(slug));
+  assert.equal(isVisibleInGeneratorNavigation(`/${slug}`), false);
+}
+assert.equal(squareText('Ab é 19!? 中文 👨‍👩‍👧‍👦', 'outline'), '🄰🄱 🄴\u0301 19!? 中文 👨‍👩‍👧‍👦');
+assert.equal(squareText('Hello', 'filled'), '🅷🅴🅻🅻🅾');
+assert.equal(squareText('Hello', 'alternating'), '🅷🄴🅻🄻🅾');
+assert.equal(squareText('ab cd\nef', 'outline', true), '🄰 🄱 🄲 🄳\n🄴 🄵');
+const protectedReferences = 'Hi u/Alice r/fonts /r/Design https://example.com/a?q=1 test@example.com @artist #Design';
+const protectedOutput = styleDiscoveryText(protectedReferences, (value) => transform('bold', value));
+for (const reference of ['u/Alice', 'r/fonts', '/r/Design', 'https://example.com/a?q=1', 'test@example.com', '@artist', '#Design']) assert.ok(protectedOutput.includes(reference));
+assert.ok(protectedOutput.startsWith('𝐇𝐢'));
+assert.equal(frameDiscoveryText('A\n\nB', 'broken'), '💔 A 💔\n\n💔 B 💔');
+for (const slug of [...discoveryTextSlugs, 'anime-font-generator', 'cyberpunk-font-generator']) {
+  for (const result of discoveryTextResults(protectedReferences, slug)) for (const reference of ['u/Alice', 'r/fonts', '/r/Design', 'https://example.com/a?q=1', 'test@example.com', '@artist', '#Design']) assert.ok(result.text.includes(reference), `${slug}: preserves ${reference}`);
+  for (const result of discoveryTextResults('', slug, 'broken')) assert.equal(result.text, '');
+  for (const result of discoveryTextResults('a'.repeat(1001), slug)) assert.equal(result.text, '');
+  for (const result of discoveryTextResults('中文 한글 العربية हिन्दी 👨‍👩‍👧‍👦 👍🏽 1️⃣\n', slug)) assert.equal(result.text, '中文 한글 العربية हिन्दी 👨‍👩‍👧‍👦 👍🏽 1️⃣\n', `${slug}: preserve unsupported scripts and emoji`);
+  const original = discoveryTextResults('Café\n\nA', slug, 'broken').find((item) => item.id === 'original');
+  assert.equal(original.text, 'Café\n\nA');
+}
+assert.equal(messageResults('Hi', 'whatsapp')[0].text, '*Hi*');
+assert.equal(messageResults('Hi', 'reddit')[0].text, '**Hi**');
+assert.equal(messageResults('a*b', 'whatsapp')[0].text, '');
+assert.equal(messageResults('a*b', 'reddit')[0].text, '**a\\*b**');
+assert.equal(messageResults(' a \n\n b\r\n', 'whatsapp')[0].text, ' *a* \n\n *b*\r\n');
+assert.equal(messageResults('a`b', 'reddit').find((item) => item.id === 'code').text, '`` a`b ``');
+assert.equal(messageResults('Hi', 'whatsapp').find((item) => item.id === 'monospace').text, '```Hi```');
+for (const platform of ['whatsapp', 'reddit']) for (const result of messageResults('', platform)) assert.equal(result.text, '');
+for (const slug of discoveryArtSlugs) {
+  assert.equal(discoveryArtPresets[slug].length, 4);
+  assert.equal(new Set(discoveryArtPresets[slug].map((item) => item.id)).size, 4);
+  for (const preset of discoveryArtPresets[slug]) assert.ok(discoveryFonts[preset.font]);
+}
+for (const id of Object.keys(discoveryFonts)) {
+  assert.ok(fs.statSync(`public/fonts/discovery/${id}/latin.woff2`).size > 1000);
+  assert.ok(fs.readFileSync(`public/fonts/discovery/${id}/LICENSE.txt`, 'utf8').length > 500);
+}
+console.log('Discovery regressions passed: ten routes, square alphabets, protected references, platform-specific delimiters, empty/oversized input, grapheme preservation and twelve licensed artwork presets.');
 
 // Baseline captured before the October expansion. Changes to older transforms,
 // preset lists, defaults, output declarations or homepage priorities must be deliberate.

@@ -1,4 +1,5 @@
-import { test, expect, type Locator } from '@playwright/test';
+import { test, expect } from './fixtures';
+import type { Locator } from '@playwright/test';
 import { readFile, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { halloweenFonts, halloweenPresets } from '../../lib/halloween-catalog';

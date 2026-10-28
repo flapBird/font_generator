@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { discoverySlugs } from '@/lib/discovery-catalog';
 import { isOctoberArt, isOctoberText } from '@/lib/october-catalog';
 import { notFound } from 'next/navigation';
 import PageTemplate from '@/components/PageTemplate';
@@ -56,7 +57,7 @@ export default async function GeneratorPage({ params }: { params: Promise<{ slug
     'twitch-font-generator': ['Unicode title, bio, and chat accents', 'Detected links and mentions preserved', 'Account-name limitations explained'],
     'adopt-me-font-generator': ['Pet-name Unicode styles', 'Optional heart, star, and bracket frames', 'Original text fallback'],
   };
-  const featureList = isOctoberArt(page.slug) || isOctoberText(page.slug)
+  const featureList = isOctoberArt(page.slug) || isOctoberText(page.slug) || discoverySlugs.some((slug) => slug === page.slug)
     ? [definition.intent.primary, ...definition.intent.secondary]
     : textFeatures[page.slug] ?? getSpecializedFeatureList(page.slug) ?? config.styleIds
     .map((styleId) => getStyleDefinition(styleId)?.name)

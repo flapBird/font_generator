@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import fs from 'node:fs/promises';
 
 const slugs = ['underline-text-generator', 'small-caps-generator', 'double-struck-font-generator', 'vaporwave-font-generator', 'twitter-font-generator', 'twitch-font-generator', 'roblox-font-generator', 'adopt-me-font-generator', 'handwriting-font-generator'];

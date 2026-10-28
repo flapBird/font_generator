@@ -1,6 +1,7 @@
 import { fandomPages, stylePages, type PageDefinition } from './data';
 import { generatorStyles } from './generator';
 import { octoberArtSlugs, octoberTextSlugs } from './october-catalog';
+import { discoverySlugs, discoveryArtSlugs, discoveryTextSlugs } from './discovery-catalog';
 
 export type GeneratorKind =
   | 'unicode'
@@ -68,6 +69,26 @@ export interface GeneratorDefinition {
 type GeneratorOverride = Partial<Omit<GeneratorDefinition, 'id' | 'slug' | 'title' | 'icon' | 'category' | 'canonicalPath'>>;
 
 const overrides: Record<string, GeneratorOverride> = {
+  ...Object.fromEntries(discoveryTextSlugs.map((slug) => [slug, {
+    kind: 'unicode',
+    intent: {
+      primary: stylePages.find((page) => page.slug === slug)!.description,
+      secondary: ['Page-local input accepts 1,000 characters. Results include unchanged original text. No font installation or platform login.', ...(slug === 'reddit-font-generator' ? ['Markdown source is for desktop editors; mobile Reddit uses rich text controls. Detected u/name, r/community and URLs are preserved in Unicode mode.'] : [])],
+      expectedOutputs: ['text'],
+    },
+    capabilities: ['copy', 'grapheme-safe', ...(['whatsapp-font-generator', 'reddit-font-generator'].includes(slug) ? ['markdown-format' as const] : [])],
+    homepage: { enabled: false, featured: false, priority: 1000 },
+  } satisfies GeneratorOverride])),
+  ...Object.fromEntries(discoveryArtSlugs.map((slug) => [slug, {
+    kind: slug === 'neon-font-generator' ? 'theme-logo' : 'hybrid',
+    intent: {
+      primary: stylePages.find((page) => page.slug === slug)!.description,
+      secondary: ['Four original presets per page. Artwork accepts 120 characters and exports 2000 × 1000 or 1600 × 1600 PNG with optional transparency. Locally hosted Latin fonts load on demand; other scripts may use device fallback. No SVG, AI or font-file export.', ...(slug === 'neon-font-generator' ? [] : ['Separate copyable text mode accepts 1,000 characters and keeps input when switching modes.'])],
+      expectedOutputs: slug === 'neon-font-generator' ? ['png'] : ['text', 'png'],
+    },
+    capabilities: ['preset-gallery', 'font-availability', 'png-export', ...(slug === 'neon-font-generator' ? [] : ['copy' as const])],
+    homepage: { enabled: false, featured: false, priority: 1000 },
+  } satisfies GeneratorOverride])),
   ...Object.fromEntries(octoberArtSlugs.map((slug) => [slug, {
     kind: slug === 'halloween-font-generator' ? 'hybrid' : 'font-preview',
     intent: {
@@ -336,7 +357,7 @@ const buildDefinition = (page: PageDefinition, priority: number): GeneratorDefin
 
 export const generatorRegistry: GeneratorDefinition[] = [
   ...stylePages.map((page, index) => buildDefinition(page, index)),
-  ...fandomPages.map((page, index) => buildDefinition(page, stylePages.length - octoberArtSlugs.length - octoberTextSlugs.length + index)),
+  ...fandomPages.map((page, index) => buildDefinition(page, stylePages.length - octoberArtSlugs.length - octoberTextSlugs.length - discoverySlugs.length + index)),
 ];
 
 export const validateGeneratorRegistry = (definitions: GeneratorDefinition[] = generatorRegistry) => {

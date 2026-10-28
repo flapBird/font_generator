@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test('inputs stay local across client navigation and Halloween tabs remain usable on mobile', async ({ page }) => {
   await page.goto('/small-text-generator');

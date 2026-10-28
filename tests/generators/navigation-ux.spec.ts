@@ -1,6 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { generatorRegistry, isFontStyleGenerator } from '../../lib/generator-registry';
 import { octoberSlugs } from '../../lib/october-catalog';
+import { discoverySlugs } from '../../lib/discovery-catalog';
 
 const newSlugs = [
   'bold-text-generator', 'strikethrough-text-generator', 'underline-text-generator',
@@ -15,7 +16,7 @@ test('original navigation entries, order, search and collection-link placement a
     for (const path of ['/', '/bubble-font-generator']) {
       await page.goto(path);
       const rail = page.getByRole('complementary', { name: 'Generator directory' });
-      const hiddenSlugs: string[] = [...newSlugs, ...octoberSlugs];
+      const hiddenSlugs: string[] = [...newSlugs, ...octoberSlugs, ...discoverySlugs];
       const baseline = generatorRegistry.filter((item) => item.kind !== 'directory' && (path !== '/' || item.homepage.enabled) && !hiddenSlugs.includes(item.slug));
       const expected = [...baseline.filter(isFontStyleGenerator), ...baseline.filter((item) => !isFontStyleGenerator(item))].map((item) => item.canonicalPath);
       const actual = await rail.locator('a:visible').evaluateAll((links) => links.map((link) => link.getAttribute('href')).filter((href) => href !== '/styles' && href !== '/visual-art'));

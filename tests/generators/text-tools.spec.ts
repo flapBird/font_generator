@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 const slugs = ['bold-text-generator', 'strikethrough-text-generator', 'discord-font-generator', 'zalgo-text-generator'];
 
