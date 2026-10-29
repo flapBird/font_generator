@@ -33,6 +33,7 @@ test('library and Unicode pages contain server-rendered content, exact canonical
   for (const generator of generatorRegistry) expect(sitemap).toContain(`https://font-generators.org${generator.canonicalPath}`);
   expect(llms).toContain('261 curated symbol sequences');
   expect(llms).toContain('five page-specific FAQs');
+  expect(llms).toContain('without the font generator sidebar or artwork preview');
   expect(llms).toContain('The combination editor is hidden initially');
   expect(llms).toContain('not a complete Unicode inspector or remover');
   expect(llms).toContain('Signature Generator uses an independent image workspace');
@@ -172,19 +173,23 @@ test('all blank types copy exactly, invalid counts are rejected and inspection p
   await expect(page.getByTestId('blank-counts')).toHaveText('0 code points · 0 grapheme clusters · 0 UTF-16 units');
 });
 
-test('new utility uses temporary HERE and client navigation never carries input into old generators', async ({ page }) => {
+test('invisible character uses utility navigation and leaves old generator inputs independent', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/invisible-character');
   await page.evaluate(() => { (window as unknown as Record<string, unknown>).libraryNavigationMarker = true; });
-  const current = page.getByRole('navigation', { name: 'Current generator', exact: true }).filter({ visible: true });
-  await expect(current).toContainText('Invisible Character');
-  await expect(current).toContainText(/here/i);
+  const navigation = page.getByRole('navigation', { name: 'Unicode tool navigation', exact: true });
+  await expect(navigation.locator('a[aria-current="page"]')).toHaveAttribute('href', '/invisible-character');
+  await expect(page.getByRole('navigation', { name: 'Current generator', exact: true })).toHaveCount(0);
+  await expect(page.getByPlaceholder('Search generators...')).toHaveCount(0);
   await page.locator('#blank-inspector').fill('Private test input');
-  await page.getByRole('navigation', { name: 'Copyable text generators', exact: true }).filter({ visible: true }).locator('a[href="/small-text-generator"]').click();
+  await navigation.locator('a[href="/unicode-character-inspector"]').click();
+  await expect(page.locator('#unicode-utility-input')).not.toHaveValue('Private test input');
+  await page.getByRole('navigation', { name: 'Primary navigation', exact: true }).getByRole('link', { name: 'Home', exact: true }).click();
   await expect(page.locator('#generator-input')).not.toHaveValue('Private test input');
   await expect(page.getByRole('navigation', { name: 'Current generator', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).libraryNavigationMarker)).toBe(true);
-  await page.goBack();
+  await page.locator('footer').getByRole('link', { name: 'Unicode Tools', exact: true }).click();
+  await page.getByRole('navigation', { name: 'Unicode tool navigation', exact: true }).locator('a[href="/invisible-character"]').click();
   await expect(page.locator('#blank-inspector')).toHaveValue('');
   await expect(page.getByLabel('Repeat count (1–100)')).toHaveValue('1');
 });

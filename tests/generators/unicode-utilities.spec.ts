@@ -48,17 +48,34 @@ test('normalization preserves unsupported text, accents and emoji; options keep 
   await expect(page.getByRole('button', { name: 'Copy result', exact: true })).toBeDisabled();
 });
 
-test('all Unicode utilities retain temporary HERE, input isolation and compact mobile layouts', async ({ page }) => {
-  for (const path of ['/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text']) {
-    for (const width of [390, 1440]) {
+test('Unicode workspaces have their own navigation, keep inputs separate and fit phone and desktop', async ({ page }) => {
+  const paths = ['/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text'];
+  for (const path of paths) {
+    for (const width of [320, 390, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(path);
-      await expect(page.getByRole('navigation', { name: 'Current generator', exact: true }).filter({ visible: true })).toContainText(/here/i);
+      const navigation = page.getByRole('navigation', { name: 'Unicode tool navigation', exact: true });
+      await expect(navigation.locator('a[aria-current="page"]')).toHaveAttribute('href', path);
+      await expect(navigation.getByRole('link')).toHaveCount(5);
+      await expect(page.getByRole('navigation', { name: 'Current generator', exact: true })).toHaveCount(0);
+      await expect(page.getByPlaceholder('Search generators...')).toHaveCount(0);
+      await expect(page.getByText('Font studio', { exact: true })).toHaveCount(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       await page.locator('#unicode-utility-input').fill('Only this page');
-      await page.getByRole('navigation', { name: width < 1280 ? 'Choose a generator' : 'Copyable text generators', exact: true }).filter({ visible: true }).locator('a[href="/small-text-generator"]').click();
-      await expect(page.locator('#generator-input')).not.toHaveValue('Only this page');
-      await expect(page.getByRole('navigation', { name: 'Current generator', exact: true })).toHaveCount(0);
+      const next = paths[(paths.indexOf(path) + 1) % paths.length];
+      await page.evaluate(() => { (window as unknown as Record<string, unknown>).unicodeNavigationMarker = true; });
+      await navigation.locator(`a[href="${next}"]`).click();
+      await expect(page.locator('#unicode-utility-input')).not.toHaveValue('Only this page');
+      expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).unicodeNavigationMarker)).toBe(true);
+      await page.getByRole('button', { name: 'Clear input', exact: true }).click();
+      if (width === 390 || width === 1440) {
+        await page.goto(path);
+        await page.screenshot({ path: `/tmp/unicode-workspace-${path.slice(1)}-${width}.png`, animations: 'disabled' });
+      }
     }
   }
+  await page.goto('/unicode-character-inspector');
+  await page.locator('#unicode-utility-input').fill('Only Unicode');
+  await page.getByRole('navigation', { name: 'Primary navigation', exact: true }).getByRole('link', { name: 'Home', exact: true }).click();
+  await expect(page.locator('#generator-input')).not.toHaveValue('Only Unicode');
 });

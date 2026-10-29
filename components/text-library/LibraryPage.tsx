@@ -7,6 +7,7 @@ import SymbolBrowser from './SymbolBrowser';
 import LibraryLink from './LibraryLink';
 import CollectionContent from './CollectionContent';
 import { getCollectionGuide } from '@/lib/text-library/guides';
+import UnicodeToolNavigation from './UnicodeToolNavigation';
 
 export function libraryMetadata(id: LibraryId): Metadata {
   const page = getLibraryPage(id);
@@ -46,6 +47,7 @@ export function LibraryPageShell({ id, children }: { id: LibraryId; children: Re
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{page.title}</h1>
         <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">{page.intro}</p>
       </header>
+      {isUnicode && <UnicodeToolNavigation current={id} />}
       {children}
       <CollectionContent page={page} />
       <section aria-labelledby="library-related-heading" className="mt-10 border-t border-slate-200 pt-8">
