@@ -1,59 +1,33 @@
-# AI Font and shared UI visual QA
-
-Date: 2026-10-13
+# 导航设计复核 · 2026-10-30
 
 final result: passed
 
-## Target and scope
+## 比较目标与证据
 
-Selected direction: the second displayed design, “Describe a font. Make it real.”
-Reference: `/Users/admin/.codex/generated_images/01a13496-fda4-78e3-aeaa-cb68adca0836/exec-7716c9e5-a1d5-468b-8ad0-38d30a3d478e.png`.
-Implementation: `http://localhost:3000/ai-font-generator`.
-After user review, the shared purple brand palette, gradient headings, homepage specimen and card depth are restored to the pre-redesign appearance. The white surface and neutral tokens are scoped to the AI Font page. Individual generator layouts and generation/payment behavior are retained.
+用户要求吸收 FontSpace 的搜索位置、主题与账户操作，以及分类分层方式；这是现有站点的适配改造，不是复制对方品牌、字体下载业务或逐像素复刻。
 
-## Evidence and comparison
+- 来源：https://www.fontspace.com/new/fonts；本轮已在内置浏览器打开并检查顶部导航。
+- 用户提供的视觉参考：`/var/folders/ll/zfhgnxpx1sl87rndkww8r32w0000gq/T/codex-clipboard-8f627e44-006b-4070-a181-816901ee9623.png`，2172 × 582 像素的桌面局部截图。原始 CSS viewport/DPR 未提供，不假设截图像素等于 CSS 像素。
+- 浅色实现：`/tmp/site-navigation-1440.png`，1440 × 900 CSS px，截图密度 1；未登录、Symbols 页面、搜索框保留 signature、结果弹层关闭。
+- 搜索实现：`/tmp/site-search-1440.png`，同尺寸，结果弹层展开；与来源截图一起检查位置、层次和操作可达性。
+- 手机实现：`/tmp/site-navigation-390.png`，390 × 900 CSS px，密度 1；另验证 320、768、1024 和 1280 宽度。
+- 暗色实现：`/tmp/site-symbols-dark.png`，1440 × 1000 CSS px，密度 1。
+- 页脚：`/tmp/site-footer-1440.png`，1440 × 402 像素的组件截图。
 
-- Desktop: 1440 CSS px wide, logged out, empty generation description, light mode. Capture: `/tmp/ai-font-redesign-full.jpg` (1432 px content width excluding scrollbar).
-- Side-by-side source/result: `/tmp/ai-font-design-comparison-final.png`. Both content regions normalized to 720 px wide; the source is square and the implementation comparison uses its first 1432 px of content. The implementation continues below with the existing free tools.
-- Mobile: `/tmp/ai-font-redesign-mobile.jpg`, 390 CSS px wide; reference matching expanded and transparent artwork selected. Also checked 320 px overflow and menu opening/closing.
-- Homepage interaction: `/tmp/font-home-refined.jpg`; typing and copying update the selected font preview. Font Styles directory also inspected at desktop width.
+来源与本站页面内容及配色有意不同；按用户要求比较导航关系和操作顺序，不据不同视口截图宣称逐像素一致。完整页面截图包含所有导航区域，不需要另裁切局部作为判断依据。
 
-## Findings and resolution
+## 检查与修正
 
-1. P2: initial specimens were visually too small relative to the selected design. Increased the page/content width, enlarged specimen type, loaded the regular EB Garamond face and shortened example prompts. Compared the revised capture side by side; the type samples now lead their panels without overflow.
-2. P2: changing a sample could retain the previous reference-match notice. Sample and example selections now clear that stale notice.
-3. Mobile: alternating desktop rows collapse into description followed by specimen; artwork preview precedes its controls. No horizontal overflow at 390 or 320 CSS px in the checked states.
+1. 站名右侧直接搜索，主题与登录在右侧；第二行分类与辅助入口分开。四个分类为固定精选入口，完整工具收录到 /tools，页脚固定为品牌、工具目录、帮助三块及独立政策行。
+2. 搜索能打开结果、键盘选择、Escape 关闭和跳到完整目录；空结果有反馈。手机搜索单独占行，菜单使用原有三横线图标。菜单展开时背后的搜索区域不可聚焦。
+3. 第一轮暗色截图发现 All items 标签浅底搭配浅紫文字，对比不足（P2）。为独立工具页面补充局部紫色底色映射，最终截图确认已改成深紫底和浅紫字。没有覆盖生成器画布或全局转换样式。
+4. 首屏符号卡片因新增搜索行下移 48px，390px 屏幕第一张卡片 y=558，仍在首屏。原测试 550px 阈值按新增行调整为 598px；其余溢出和交互检查保留并通过。
+5. 默认浅色；切换后刷新与跨页保持偏好，存储写入被拒时仍可切换。已验证小字体生成器的输入和结果不变。
 
-## Fidelity surfaces
+## 验证与边界
 
-- Typography: neutral system UI face, clear display hierarchy, live bundled Luckiest Guy and EB Garamond specimens. The generated mock's invented letterforms are deliberately replaced with identified real reference fonts, not images masquerading as downloadable AI results.
-- Spacing: compact prompt surface, alternating use-case rows, lightly separated output explanations. Additional anchors preserve access to existing tools.
-- Colors: the AI Font page retains its white base, dark headings and purple actions/selection. The shared site retains purple gradient branding and the homepage retains its saturated purple specimen and soft card shadows.
-- Image quality: specimens are native font rendering, so remain crisp and selectable. No raster asset is needed for these font UI previews.
-- Copy: prompt, example use and file output are connected. TTF, 72 English glyphs, PNG export and reference-vs-AI distinction are explicit. Actual navigation and authentication controls are retained instead of the mock's generic Get started button.
-
-## Verified behavior
-
-- Use editorial prompt fills and focuses the generation description.
-- Local keyword matching selects Arcade while preserving a separately entered paid prompt.
-- Custom preview text updates, artwork input and transparent format selection work; Download PNG produced `Arcade-transparent.png` without sign-in.
-- Logged-out generation remains disabled.
-- Mobile menu opens/closes at 320 px.
-- Homepage typing and copy action update the preview and show copied feedback.
-- Final AI page console check reported no errors.
-- TypeScript, ESLint, production build, 19 AI Font unit/integration tests and generator regression checks passed.
-- Actual HTTP `/llms.txt` output checked for its title, AI behavior, output descriptions and 69 site URL occurrences. Existing private/noindex policy retained.
-
-## Limits and follow-up
-
-No paid generation, purchase or signed-in account flow was performed in the browser. Real generated-font quality and a publishable sample library remain outside this visual change. Existing AI backend tests cover credit, generation and payment safeguards. The standalone Playwright browser suite was not run; interaction checks used the in-app browser.
-
-## Follow-up: restore shared brand presence
-
-The user found the neutral shared UI too plain and supplied the earlier homepage screenshot. Restored the shared colors, brand weight, gradient headings, background treatment, homepage workspace/preview styling and navigation depth. Kept the selected AI Font layout and reference examples, with a page wrapper isolating its colors from global tokens. Reduced-motion scrolling support remains.
-
-- Desktop homepage (1280 CSS px): `/tmp/font-home-brand-restored.jpg`; purple headline, saturated specimen and elevated cards visually checked against the user's screenshot.
-- AI Font full page: `/tmp/ai-font-brand-isolated.jpg`; white content surface and selected layout retained.
-- Mobile homepage: `/tmp/font-home-brand-mobile.jpg`; homepage and AI page inspected at 390 CSS px, neither has horizontal overflow.
-- ESLint, TypeScript and production build passed again for this correction. Final homepage console check showed no errors.
-- Reviewed the generated `/llms.txt` source and build output; functionality, routes and output formats are unchanged, so no content update is needed.
+- 最终生产构建、lint、旧转换/导航回归脚本和 13 项工具单元检查通过。
+- 全量生成器浏览器检查初次 66 项通过、1 项旧首屏阈值失败；修正后最终 9 项导航/目录/布局针对性复测全部通过。
+- 另外 5 项 AI/账户相关浏览器回归通过：预加载、键盘导航、免费参考字体导出、无登录免费工具和多尺寸登录入口。
+- 未改变转换函数、样式注册表、原侧栏顺序、默认输入、草稿或导出实现。公共 Header/Footer 布局和用户选择的主题外观会发生变化。
+- 本轮未测试真实登录支付、所有浏览器或所有辅助技术；没有声称全站每个暗色页面均通过完整无障碍审计。

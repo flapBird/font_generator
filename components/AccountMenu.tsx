@@ -7,7 +7,7 @@ import { setAnalyticsIdentity, trackLoginResult } from '@/lib/analytics/browser'
 import { authChangedEvent, authReturnPath } from '@/lib/ai-font/auth-navigation';
 
 const authConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
-const control = 'flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-5';
+const control = 'flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full border border-border bg-background px-3 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-5';
 
 function AccountIcon() {
   return <svg aria-hidden="true" className="h-5 w-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5" /><path strokeLinecap="round" d="M4.5 21v-2a7.5 7.5 0 0 1 15 0v2" /></svg>;
@@ -72,17 +72,17 @@ export default function AccountMenu() {
 
   return <details ref={menu} className="relative">
     <summary aria-label="Account" title={user.displayName || user.email || 'Account'} className="flex h-11 w-11 shrink-0 cursor-pointer list-none items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 [&::-webkit-details-marker]:hidden"><span aria-hidden="true">{initial}</span></summary>
-    <div className="absolute right-0 top-full z-50 mt-3 w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-lg shadow-slate-900/10">
-      <div className="border-b border-slate-100 px-4 py-3.5">
-        <p className="truncate text-sm font-semibold text-slate-900">{user.displayName || 'Your account'}</p>
-        <p className="mt-1 truncate text-xs text-slate-500" title={user.email}>{user.email}</p>
+    <div className="absolute right-0 top-full z-50 mt-3 w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-lg shadow-slate-900/10">
+      <div className="border-b border-border px-4 py-3.5">
+        <p className="truncate text-sm font-semibold text-foreground">{user.displayName || 'Your account'}</p>
+        <p className="mt-1 truncate text-xs text-muted-foreground" title={user.email}>{user.email}</p>
       </div>
       <div className="space-y-1 p-2">
-        <Link href="/account" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-slate-100 focus-visible:bg-slate-100" onClick={() => { if (menu.current) menu.current.open = false; }}><svg aria-hidden="true" className="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg>Account & billing</Link>
-        <Link href="/my-fonts" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-slate-100 focus-visible:bg-slate-100" onClick={() => { if (menu.current) menu.current.open = false; }}><svg aria-hidden="true" className="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path strokeLinejoin="round" d="M3 7V4h7l2 3h9v13H3Z" /></svg>My fonts & purchases</Link>
+        <Link href="/account" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted focus-visible:bg-muted" onClick={() => { if (menu.current) menu.current.open = false; }}><svg aria-hidden="true" className="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg>Account & billing</Link>
+        <Link href="/my-fonts" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted focus-visible:bg-muted" onClick={() => { if (menu.current) menu.current.open = false; }}><svg aria-hidden="true" className="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path strokeLinejoin="round" d="M3 7V4h7l2 3h9v13H3Z" /></svg>My fonts & purchases</Link>
       </div>
-      <div className="border-t border-slate-100 p-2">
-        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors hover:bg-slate-100 focus-visible:bg-slate-100 disabled:opacity-50" disabled={busy} onClick={signOut}><svg aria-hidden="true" className="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path strokeLinecap="round" strokeLinejoin="round" d="M9 4H4v16h5m6-12 4 4-4 4m-7-4h11" /></svg>{busy ? 'Signing out…' : 'Sign out'}</button>
+      <div className="border-t border-border p-2">
+        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted focus-visible:bg-muted disabled:opacity-50" disabled={busy} onClick={signOut}><svg aria-hidden="true" className="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path strokeLinecap="round" strokeLinejoin="round" d="M9 4H4v16h5m6-12 4 4-4 4m-7-4h11" /></svg>{busy ? 'Signing out…' : 'Sign out'}</button>
         {error && <p role="alert" className="px-3 py-2 text-xs text-red-600">{error}</p>}
       </div>
     </div>

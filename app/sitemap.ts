@@ -8,6 +8,7 @@
    
    const staticPages = [
      { path: '/', url: baseUrl, changeFrequency: 'weekly' as const, priority: 1 },
+     { path: '/tools', url: `${baseUrl}/tools`, changeFrequency: 'weekly' as const, priority: 0.8 },
      { path: '/about', url: `${baseUrl}/about`, changeFrequency: 'monthly' as const, priority: 0.5 },
      { path: '/contact', url: `${baseUrl}/contact`, changeFrequency: 'monthly' as const, priority: 0.4 },
      { path: '/privacy', url: `${baseUrl}/privacy`, changeFrequency: 'monthly' as const, priority: 0.3 },

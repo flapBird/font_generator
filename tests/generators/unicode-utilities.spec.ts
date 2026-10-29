@@ -76,6 +76,6 @@ test('Unicode workspaces have their own navigation, keep inputs separate and fit
   }
   await page.goto('/unicode-character-inspector');
   await page.locator('#unicode-utility-input').fill('Only Unicode');
-  await page.getByRole('navigation', { name: 'Primary navigation', exact: true }).getByRole('link', { name: 'Home', exact: true }).click();
+  await page.getByRole('navigation', { name: 'Primary navigation', exact: true }).getByRole('link', { name: 'Font Generators', exact: true }).click();
   await expect(page.locator('#generator-input')).not.toHaveValue('Only Unicode');
 });

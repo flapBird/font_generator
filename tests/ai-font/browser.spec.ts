@@ -67,7 +67,7 @@ test('free AI references require no account, payment or generation API', async (
   await page.evaluate(() => localStorage.setItem('font-generators-theme-v2', 'dark'));
   await page.reload();
   await expect(page.locator('html')).not.toHaveClass(/dark/);
-  await expect(page.getByRole('button', { name: /Switch to .* mode/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Switch to dark mode' })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByLabel('Font description')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

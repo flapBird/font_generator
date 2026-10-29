@@ -1,0 +1,32 @@
+/* Only the standalone text-tool pages need these legacy light-token mappings.
+   Generator artwork, canvases and the shared generator workspace are outside this scope. */
+:global(.dark) .surface { background: var(--background); color: var(--foreground); }
+:global(.dark) .surface :global(.bg-white) { background-color: var(--card-bg); }
+:global(.dark) .surface :global(.bg-slate-50),
+:global(.dark) .surface :global(.bg-slate-100) { background-color: var(--muted); }
+:global(.dark) .surface :global(.text-slate-950),
+:global(.dark) .surface :global(.text-slate-900),
+:global(.dark) .surface :global(.text-slate-800),
+:global(.dark) .surface :global(.text-slate-700) { color: var(--foreground); }
+:global(.dark) .surface :global(.text-slate-600),
+:global(.dark) .surface :global(.text-slate-500) { color: var(--muted-foreground); }
+:global(.dark) .surface :global(.text-violet-700),
+:global(.dark) .surface :global(.text-violet-600) { color: #c4b5fd; }
+:global(.dark) .surface :global(.border-slate-100),
+:global(.dark) .surface :global(.border-slate-200),
+:global(.dark) .surface :global(.border-slate-300),
+:global(.dark) .surface :global(.border-violet-200) { border-color: var(--border); }
+:global(.dark) .surface :global(input),
+:global(.dark) .surface :global(textarea),
+:global(.dark) .surface :global(select) { color: var(--foreground); background-color: var(--muted); }
+:global(.dark) .surface :global(.bg-violet-50),
+:global(.dark) .surface :global(.bg-violet-100),
+:global(.dark) .surface :global(.bg-violet-50\/30),
+:global(.dark) .surface :global(.bg-violet-50\/40),
+:global(.dark) .surface :global(.bg-violet-50\/50),
+:global(.dark) .surface :global(.bg-violet-50\/60) { background-color: #29203d; }
+:global(.dark) .surface :global(.text-violet-800) { color: #ddd6fe; }
+:global(.dark) .surface :global(.hover\:bg-white:hover),
+:global(.dark) .surface :global(.hover\:bg-slate-50:hover) { background-color: var(--muted); }
+:global(.dark) .surface :global(.hover\:bg-violet-50\/30:hover),
+:global(.dark) .surface :global(.hover\:bg-violet-50\/40:hover) { background-color: #29203d; }

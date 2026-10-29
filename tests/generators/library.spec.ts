@@ -184,11 +184,11 @@ test('invisible character uses utility navigation and leaves old generator input
   await page.locator('#blank-inspector').fill('Private test input');
   await navigation.locator('a[href="/unicode-character-inspector"]').click();
   await expect(page.locator('#unicode-utility-input')).not.toHaveValue('Private test input');
-  await page.getByRole('navigation', { name: 'Primary navigation', exact: true }).getByRole('link', { name: 'Home', exact: true }).click();
+  await page.getByRole('navigation', { name: 'Primary navigation', exact: true }).getByRole('link', { name: 'Font Generators', exact: true }).click();
   await expect(page.locator('#generator-input')).not.toHaveValue('Private test input');
   await expect(page.getByRole('navigation', { name: 'Current generator', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).libraryNavigationMarker)).toBe(true);
-  await page.locator('footer').getByRole('link', { name: 'All Unicode tools', exact: true }).click();
+  await page.locator('footer').getByRole('link', { name: 'Unicode Tools', exact: true }).click();
   await page.getByRole('navigation', { name: 'Unicode tool navigation', exact: true }).locator('a[href="/invisible-character"]').click();
   await expect(page.locator('#blank-inspector')).toHaveValue('');
   await expect(page.getByLabel('Repeat count (1–100)')).toHaveValue('1');
@@ -206,9 +206,10 @@ test('mobile and desktop layouts stay within viewport and directory links remain
         await expect(page.getByRole('button', { name: 'Combine symbols', exact: true })).toBeVisible();
         await expect(page.locator('#combination-editor')).toBeHidden();
         const firstCard = await page.locator('[data-library-item]').first().boundingBox();
-        expect(firstCard!.y).toBeLessThan(550);
+        // The new global search row adds 48px; the first symbol row remains above the fold.
+        expect(firstCard!.y).toBeLessThan(598);
       }
-      if (path === '/' && width === 1024) {
+      if (path === '/' && width === 390) {
         const nav = page.getByRole('navigation', { name: 'Primary navigation', exact: true });
         const brand = await nav.getByRole('link', { name: 'Font Generators', exact: true }).boundingBox();
         const menu = await nav.getByRole('button', { name: 'Open menu', exact: true }).boundingBox();
@@ -230,8 +231,8 @@ test('mobile and desktop layouts stay within viewport and directory links remain
   }
   await page.setViewportSize({ width: 390, height: 900 });
   await page.getByRole('button', { name: 'Open menu', exact: true }).click();
-  await page.locator('#mobile-navigation').getByRole('button', { name: 'Symbols & Emoji', exact: true }).click();
-  await page.locator('#mobile-symbols-links').getByRole('link', { name: 'All symbols', exact: true }).click();
+  await page.locator('#mobile-navigation').getByRole('button', { name: 'Tools', exact: true }).click();
+  await page.locator('#mobile-tool-links').getByRole('link', { name: 'Symbols & Emoji', exact: true }).click();
   await expect(page).toHaveURL(/\/symbols$/);
   await expect(page.getByRole('button', { name: 'Open menu', exact: true })).toBeVisible();
   expect(errors).toEqual([]);

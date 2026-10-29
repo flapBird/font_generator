@@ -119,7 +119,7 @@ for (const slug of ['underline-text-generator', 'small-caps-generator', 'double-
   assert.equal(generatorRegistry.filter((entry) => entry.slug === slug).length, 1, `${slug}: registered once`);
 }
 validateContentUpdateCoverage([
-  '/', '/about', '/contact', '/privacy', '/terms', '/styles', '/visual-art', '/fandom', '/guides',
+  '/', '/tools', '/about', '/contact', '/privacy', '/terms', '/styles', '/visual-art', '/fandom', '/guides',
   ...allPages.map((page) => `/${page.slug}`), ...guidePages.map((page) => `/guides/${page.slug}`),
   ...require('../lib/text-library/catalog.ts').libraryPages.map((page) => page.path),
 ]);

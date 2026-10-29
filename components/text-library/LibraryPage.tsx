@@ -1,3 +1,4 @@
+import surface from '@/components/ToolSurface.module.css';
 import type { Metadata } from 'next';
 import Link from '@/components/IntentLink';
 import { getLibraryPage, type LibraryId } from '@/lib/text-library/catalog';
@@ -28,7 +29,7 @@ export function LibraryPageShell({ id, children }: { id: LibraryId; children: Re
     ...(parent.id !== id ? [{ '@type': 'ListItem', position: 2, name: parent.title, item: `https://font-generators.org${parent.path}` }] : []),
     { '@type': 'ListItem', position: parent.id === id ? 2 : 3, name: page.title, item: `https://font-generators.org${page.path}` },
   ];
-  return <div className="min-h-screen bg-white pb-16 pt-20 text-slate-950">
+  return <div className={`${surface.surface} min-h-screen bg-white pb-16 pt-20 text-slate-950`}>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
       '@context': 'https://schema.org', '@graph': [
         { '@type': id === 'unicode-tools' ? 'CollectionPage' : 'WebApplication', name: page.title, description: page.description, url: `https://font-generators.org${page.path}`,

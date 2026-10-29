@@ -19,7 +19,7 @@
  import AdvertisingScripts from "@/components/AdvertisingScripts";
  import GoogleAnalytics from "@/components/GoogleAnalytics";
  import { guidePages } from "@/lib/data";
- import { generatorRegistry, getFontStyleGenerators, getVisualArtGenerators } from "@/lib/generator-registry";
+ import { generatorRegistry } from "@/lib/generator-registry";
  
  // The core UI uses system fonts; fandom artwork faces above are self-hosted
  // packages, so production still makes zero external font requests.
@@ -34,24 +34,12 @@
    ...generatorRegistry.map((generator) => generator.canonicalPath),
    ...guidePages.map((page) => `/guides/${page.slug}`),
  ];
- const fontStyleNavigationLinks = getFontStyleGenerators()
-   .map((generator) => ({
-   href: generator.canonicalPath,
-   label: generator.title,
-   icon: generator.icon,
- }));
- const visualArtNavigationLinks = getVisualArtGenerators()
-   .map((generator) => ({
-   href: generator.canonicalPath,
-   label: generator.title,
-   icon: generator.icon,
- }));
  const themeInitializationScript = `
    (() => {
-     // Keep the site light while the theme switch is unavailable, including
-     // browsers that saved a dark preference before the switch was removed.
-     document.documentElement.classList.remove('dark');
-     document.documentElement.style.colorScheme = 'light';
+     let dark = false;
+     try { dark = localStorage.getItem('font-generators-theme-v3') === 'dark'; } catch {}
+     document.documentElement.classList.toggle('dark', dark);
+     document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
    })();
  `;
 
@@ -126,10 +114,7 @@ export default function RootLayout({
           `}
         </Script>
         
-        <Header
-          fontStyleLinks={fontStyleNavigationLinks}
-          visualArtLinks={visualArtNavigationLinks}
-        />
+        <Header />
         <div className="flex flex-col min-h-screen">
           <main className="flex-1">
             {children}

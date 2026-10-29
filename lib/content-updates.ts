@@ -2,6 +2,7 @@ import { discoverySlugs } from './discovery-catalog';
 
 const updateGroups = {
   '2026-10-30': [
+    '/tools',
     '/symbols', '/symbols/heart-symbols', '/symbols/star-symbols', '/symbols/arrow-symbols',
     '/kaomoji', '/emoji-combos',
   ],
