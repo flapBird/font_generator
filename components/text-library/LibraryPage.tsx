@@ -25,7 +25,7 @@ export function LibraryPageShell({ id, children }: { id: LibraryId; children: Re
     ...(parent.id !== id ? [{ '@type': 'ListItem', position: 2, name: parent.title, item: `https://font-generators.org${parent.path}` }] : []),
     { '@type': 'ListItem', position: parent.id === id ? 2 : 3, name: page.title, item: `https://font-generators.org${page.path}` },
   ];
-  return <div className="min-h-screen bg-slate-50/40 pb-16 pt-24 text-slate-950">
+  return <div className="min-h-screen bg-white pb-16 pt-20 text-slate-950">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
       '@context': 'https://schema.org', '@graph': [
         { '@type': id === 'unicode-tools' ? 'CollectionPage' : 'WebApplication', name: page.title, description: page.description, url: `https://font-generators.org${page.path}`,
@@ -35,16 +35,14 @@ export function LibraryPageShell({ id, children }: { id: LibraryId; children: Re
       ],
     }).replace(/</g, '\\u003c') }} />
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <nav aria-label="Breadcrumb" className="mb-3 flex flex-wrap items-center gap-2 text-xs text-slate-500 sm:mb-6">
+      <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-xs text-slate-500">
         <Link href="/" className="py-2 hover:text-violet-700">Font Generators</Link><span aria-hidden="true">/</span>
         {parent.id !== id && <><Link href={parent.path} className="py-2 hover:text-violet-700">{id === 'signature-generator' ? 'Visual & Art' : isUnicode ? 'Unicode Tools' : 'Symbols & Emoji'}</Link><span aria-hidden="true">/</span></>}
         <span aria-current="page">{page.title}</span>
       </nav>
-      <header className="mb-5 max-w-3xl sm:mb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">{id === 'signature-generator' ? 'Make your mark' : isUnicode ? 'Know your characters' : 'Small details. Your expression.'}</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">{page.title}</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600 sm:mt-4 sm:text-lg sm:leading-7">{page.intro}</p>
-        <p className="mt-3 text-xs font-medium text-slate-500">{id === 'signature-generator' ? 'Free · No sign-in · Transparent PNG' : id === 'unicode-tools' ? 'Browse free browser tools · No sign-in' : 'Free · No sign-in · Plain text output'}</p>
+      <header className="mb-6 max-w-3xl">
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{page.title}</h1>
+        <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">{page.intro}</p>
       </header>
       {children}
       <section aria-labelledby="library-related-heading" className="mt-10 border-t border-slate-200 pt-8">
@@ -68,12 +66,13 @@ export function LibraryPageShell({ id, children }: { id: LibraryId; children: Re
 
 export default function LibraryPage({ id }: { id: LibraryId }) {
   return <LibraryPageShell id={id}>
-    {id === 'symbols' && <nav aria-label="Symbol collections" className="mb-4 flex gap-2 overflow-x-auto pb-2 sm:mb-6 sm:flex-wrap">
-      {(['hearts', 'stars', 'arrows', 'kaomoji', 'emoji-combos', 'unicode-tools'] as LibraryId[]).map((target) => {
+    <nav aria-label="Symbol collections" className="mb-6 flex gap-1 overflow-x-auto border-b border-slate-200">
+      {(['symbols', 'hearts', 'stars', 'arrows', 'kaomoji', 'emoji-combos', 'unicode-tools'] as LibraryId[]).map((target) => {
         const page = getLibraryPage(target);
-        return <LibraryLink key={target} href={page.path} tool={id} targetId={target} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium hover:border-violet-400"><span aria-hidden="true">{page.icon}</span>{page.title.replace(' Copy and Paste', '')}</LibraryLink>;
+        const label = { symbols: 'All symbols', hearts: 'Hearts', stars: 'Stars', arrows: 'Arrows', kaomoji: 'Kaomoji', 'emoji-combos': 'Emoji combos', 'unicode-tools': 'Unicode tools' }[target as 'symbols' | 'hearts' | 'stars' | 'arrows' | 'kaomoji' | 'emoji-combos' | 'unicode-tools'];
+        return <LibraryLink key={target} href={page.path} tool={id} targetId={target} current={id === target} className={`inline-flex min-h-12 shrink-0 items-center border-b-2 px-4 text-sm transition-colors ${id === target ? 'border-violet-600 font-semibold text-violet-700' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-950'}`}>{label}</LibraryLink>;
       })}
-    </nav>}
+    </nav>
     <SymbolBrowser key={id} items={getLibraryItems(id)} tool={id} />
   </LibraryPageShell>;
 }

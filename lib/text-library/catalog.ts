@@ -51,7 +51,7 @@ export const libraryPages: LibraryPageDefinition[] = [
   {
     id: 'symbols', path: '/symbols', title: 'Symbols Copy and Paste', icon: '✦',
     description: 'Browse hearts, stars, arrows, brackets and decorative symbols. Search by name or code point, build a combination and copy it as plain text.',
-    intro: 'Find a small detail for a bio, a clear arrow for a caption, or a border for a message. Choose a collection below, or browse all symbols here.',
+    intro: 'Hearts, stars, arrows and more. Click any symbol to copy it.',
     sections: [
       { title: 'A symbol library, ready to use', text: 'Choose a category or search for a name such as “white heart”, “rightwards arrow” or a code point such as U+2605. Tap a card to copy the exact characters. Add several items to your combination, reorder them, and edit the final text before copying.' },
       { title: 'Text symbols and emoji are different', text: 'A text symbol usually takes its shape and color from the surrounding font. Emoji may appear in color and vary between devices. A variation selector can request a presentation, but a destination app or font may still display it differently. We keep those sequences intact when copying.' },
@@ -61,7 +61,7 @@ export const libraryPages: LibraryPageDefinition[] = [
   {
     id: 'hearts', path: '/symbols/heart-symbols', title: 'Heart Symbols Copy and Paste', icon: '♡',
     description: 'Copy outline hearts, filled hearts, heart emoji and small heart decorations. Compare exact characters and build your own love-themed text.',
-    intro: 'A simple ♡ for a quiet sign-off, a ♥ for a label, or a colorful heart for a message. Browse text hearts and emoji separately, then make your own combination.',
+    intro: 'Outline hearts, filled hearts and heart emoji. Click a heart to copy it.',
     sections: [
       { title: 'Choose an outline, a filled heart or an emoji', text: '♡ is WHITE HEART SUIT (U+2661), an outline text symbol. ♥ is BLACK HEART SUIT (U+2665), a filled text symbol whose appearance still depends on the app. ❤️ includes an emoji presentation selector; it is not the same sequence as ❤. The code points on each card identify what you copy.' },
       { title: 'Ideas for a heart accent', text: 'Try “Alex ♡”, “made with ♥”, or a pair of small hearts around a short greeting. For a colorful caption, add a heart from the Emoji category. The combination editor lets you include your own words without changing their letters.' },
@@ -101,7 +101,7 @@ export const libraryPages: LibraryPageDefinition[] = [
   {
     id: 'emoji-combos', path: '/emoji-combos', title: 'Emoji Combos Copy and Paste', icon: '🌙',
     description: 'Browse curated emoji combinations for cozy days, nature, travel, celebrations and more. Edit your combination and copy it without signing in.',
-    intro: 'Little collections for a caption, a mood or a moment. Pick a theme and make a combination your own before sharing it.',
+    intro: 'Ready-to-copy emoji combinations for captions, bios and messages. Browse by theme.',
     sections: [
       { title: 'Combinations for everyday moments', text: 'Pair coffee with a book for a quiet morning, a wave with a shell for a beach day, or a cake with confetti for a birthday. These are editorial suggestions, not emoji translations or universal meanings.' },
       { title: 'Build your own caption', text: 'Add one or more combinations, move the pieces into order, and choose a separator. You can also add words or edit the final text. The clipboard receives plain text; we do not merge emoji into a new image or sticker.' },

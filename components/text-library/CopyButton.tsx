@@ -4,9 +4,9 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { trackTextToolEvent } from '@/lib/analytics/text-tools';
 import type { LibraryId } from '@/lib/text-library/catalog';
 
-export default function CopyButton({ text, label, tool, itemId, onCopied, children, className = '' }: {
+export default function CopyButton({ text, label, tool, itemId, onCopied, children, className = '', feedback = 'inline' }: {
   text: string; label: string; tool: LibraryId; itemId?: string; onCopied?: () => void;
-  children?: ReactNode; className?: string;
+  children?: ReactNode; className?: string; feedback?: 'inline' | 'badge';
 }) {
   const [notice, setNotice] = useState<{ text: string; kind: 'success' | 'failure' } | null>(null);
   const fallback = useRef<HTMLTextAreaElement>(null);
@@ -32,13 +32,13 @@ export default function CopyButton({ text, label, tool, itemId, onCopied, childr
       trackTextToolEvent('tool_copy_failure', tool, itemId);
     }
   }
-  return <div className="min-w-0">
+  return <div className="relative min-w-0">
     <button type="button" aria-label={label} disabled={text.length === 0} onClick={() => void copy()}
       className={`min-h-11 w-full rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}>
       {children ?? <span className="block px-4 py-3 text-center font-semibold">{label}</span>}
     </button>
-    <p role="status" className={current ? 'mt-2 text-xs leading-5 text-violet-800' : 'sr-only'}>
-      {current === 'success' ? 'Copied to clipboard.' : current === 'failure' ? 'Copy unavailable. Select the text below and use your device’s Copy command.' : ''}
+    <p role="status" className={current === 'success' && feedback === 'badge' ? 'pointer-events-none absolute left-2 top-2 rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800' : current ? 'mt-2 text-xs leading-5 text-violet-800' : 'sr-only'}>
+      {current === 'success' ? feedback === 'badge' ? 'Copied' : 'Copied to clipboard.' : current === 'failure' ? 'Copy unavailable. Select the text below and use your device’s Copy command.' : ''}
     </p>
     {current === 'failure' && <textarea ref={fallback} aria-label={`Manual copy: ${label}`} readOnly value={text} rows={2}
       className="mt-2 w-full rounded-lg border border-violet-300 bg-white p-2 text-sm" onFocus={(event) => event.currentTarget.select()} />}

@@ -16,13 +16,23 @@ export default function CombinationEditor({ parts, separator, setSeparator, setP
     [next[index], next[index + direction]] = [next[index + direction], next[index]];
     setParts(next);
   }
-  return <section id="combination-editor" aria-labelledby="combination-heading" data-clarity-mask="true" className="scroll-mt-24 rounded-2xl border border-violet-200 bg-violet-50/60 px-4 py-2 sm:px-5">
+  function close() { setExpanded(false); document.getElementById('open-combination')?.focus({ preventScroll: true }); }
+  return <section id="combination-editor" hidden={!expanded} aria-labelledby="combination-heading" data-clarity-mask="true" onKeyDown={(event) => { if (event.key === 'Escape') { event.preventDefault(); close(); } }} className="fixed inset-x-0 bottom-0 z-40 max-h-[55dvh] overflow-y-auto border-t border-slate-200 bg-white px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] sm:inset-x-6 sm:bottom-4 sm:mx-auto sm:max-w-4xl sm:rounded-2xl sm:border sm:px-5">
     <div className="flex items-center justify-between gap-3">
-      <h2 id="combination-heading" className="text-base font-semibold text-slate-950">Your combination</h2>
-      <button type="button" aria-expanded={expanded} aria-controls="combination-controls" onClick={() => setExpanded(!expanded)} className="min-h-11 px-2 text-sm font-medium text-violet-800">{expanded ? 'Hide editor' : 'Open editor'}</button>
+      <div><h2 id="combination-heading" className="text-sm font-semibold text-slate-950">Combine symbols</h2><p className="mt-1 text-xs text-slate-500">Add symbols and your own text, then copy them together.</p></div>
+      <button type="button" onClick={close} className="min-h-11 px-2 text-sm text-slate-500">Close editor</button>
     </div>
-    <div id="combination-controls" hidden={!expanded} className="pb-3">
-    <p className="text-sm leading-6 text-slate-600">Add a card below, move the pieces, or type your own text. Editing the text merges the pieces into one.</p>
+    <div id="combination-controls">
+    <div className="mt-3 flex items-start gap-2">
+    <label htmlFor="combination-text" className="sr-only">Edit your combination</label>
+    <textarea id="combination-text" data-clarity-mask="true" value={text} rows={1} maxLength={COMBINATION_LIMIT}
+      onChange={(event) => setParts(event.target.value.length ? [{ key: -1, text: event.target.value, name: 'Edited text' }] : [])}
+      placeholder="e.g. ♡ Alex ✦" className="min-h-12 min-w-0 flex-1 resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-lg leading-8 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100" />
+    <CopyButton text={text} label="Copy combination" tool={tool} className="bg-violet-700 text-sm text-white hover:bg-violet-800" />
+    </div>
+    <details className="mt-2">
+    <summary className="w-fit cursor-pointer py-2 text-xs font-medium text-slate-600">Arrange pieces &amp; spacing{parts.length ? ` (${parts.length})` : ''}</summary>
+    <p className="text-xs text-slate-500">Editing the text merges your pieces into one.</p>
     {parts.length > 0 && <ol className="mt-3 flex max-h-48 flex-wrap gap-2 overflow-y-auto" aria-label="Combination pieces">
       {parts.map((part, index) => <li key={part.key} className="flex max-w-full items-center gap-1 rounded-lg border border-violet-200 bg-white px-2">
         <span className="max-w-32 truncate text-sm" title={part.name}>{part.text}</span>
@@ -37,14 +47,10 @@ export default function CombinationEditor({ parts, separator, setSeparator, setP
         <option value=" ">Space</option><option value="">Nothing</option><option value={'\n'}>New line</option>
       </select>
     </div>
-    <label htmlFor="combination-text" className="mt-3 block text-sm font-medium">Edit your combination</label>
-    <textarea id="combination-text" data-clarity-mask="true" value={text} rows={3} maxLength={COMBINATION_LIMIT}
-      onChange={(event) => setParts(event.target.value.length ? [{ key: -1, text: event.target.value, name: 'Edited text' }] : [])}
-      placeholder="Your words, symbols and little details…" className="mt-2 w-full resize-y rounded-xl border border-violet-200 bg-white p-3 text-xl leading-8 focus:outline-none focus:ring-2 focus:ring-violet-500" />
+    </details>
     <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-      <p className="text-xs leading-6 text-slate-500">{text.length} / {COMBINATION_LIMIT} UTF-16 units · stays in this page</p>
+      <p className="text-xs leading-6 text-slate-400" title="Length is measured in UTF-16 units">{text.length} / {COMBINATION_LIMIT}</p>
       <button type="button" disabled={!parts.length} onClick={() => setParts([])} className="min-h-11 px-2 text-sm text-violet-800 disabled:opacity-40">Clear combination</button>
-      <CopyButton text={text} label="Copy combination" tool={tool} className="bg-violet-700 text-white hover:bg-violet-800" />
     </div>
     <p role="status" className="mt-2 text-sm text-amber-800">{message}</p>
     </div>

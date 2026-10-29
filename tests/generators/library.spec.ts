@@ -22,6 +22,7 @@ test('library and Unicode pages contain server-rendered content, exact canonical
   }
   for (const generator of generatorRegistry) expect(sitemap).toContain(`https://font-generators.org${generator.canonicalPath}`);
   expect(llms).toContain('261 curated symbol sequences');
+  expect(llms).toContain('The combination editor is hidden initially');
   expect(llms).toContain('not a complete Unicode inspector or remover');
   expect(llms).toContain('Signature Generator uses an independent image workspace');
   expect((await request.get('/symbols/not-a-collection')).status()).toBe(404);
@@ -33,8 +34,15 @@ test('search, filters, keyboard copy and joined emoji preserve exact characters'
   await page.getByLabel('Search this collection').fill('U+2661');
   await expect(page.locator('[data-library-item]')).toHaveCount(1);
   const copy = page.getByRole('button', { name: 'Copy White heart suit', exact: true });
+  const initialCard = await page.locator('[data-library-item]').boundingBox();
   await copy.focus(); await page.keyboard.press('Enter');
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('♡');
+  await expect(page.getByText('Copied', { exact: true })).toBeVisible();
+  const copiedCard = await page.locator('[data-library-item]').boundingBox();
+  expect(copiedCard!.height).toBe(initialCard!.height);
+  const notice = await page.getByText('Copied', { exact: true }).boundingBox();
+  const add = await page.getByRole('button', { name: 'Add White heart suit to combination', exact: true }).boundingBox();
+  expect(notice!.y + notice!.height).toBeLessThan(add!.y);
   await page.getByLabel('Search this collection').fill('');
   await page.getByLabel('Category', { exact: true }).selectOption('Emoji hearts');
   await page.getByRole('button', { name: 'Copy Heart on fire', exact: true }).click();
@@ -48,9 +56,12 @@ test('search, filters, keyboard copy and joined emoji preserve exact characters'
 test('combination pieces reorder, remove and edit without corrupting text or exceeding limits', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/symbols/heart-symbols');
+  await expect(page.locator('#combination-editor')).toBeHidden();
+  await expect(page.getByText('Small details. Your expression.', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Add White heart suit to combination', exact: true }).click();
   await page.getByRole('button', { name: 'Add Heart on fire to combination', exact: true }).click();
   await expect(page.getByLabel('Edit your combination')).toHaveValue('♡ ❤️‍🔥');
+  await page.getByText(/Arrange pieces & spacing/).click();
   await page.getByRole('button', { name: 'Move piece 2 earlier' }).click();
   await page.getByLabel('Between pieces').selectOption('\n');
   await expect(page.getByLabel('Edit your combination')).toHaveValue('❤️‍🔥\n♡');
@@ -66,6 +77,12 @@ test('combination pieces reorder, remove and edit without corrupting text or exc
   await expect(page.getByText(/Nothing was added or removed/)).toBeVisible();
   await page.getByRole('button', { name: 'Clear combination', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Copy combination', exact: true })).toBeDisabled();
+  await page.getByLabel('Edit your combination').fill('♡ Alex ✦');
+  await page.getByLabel('Edit your combination').press('Escape');
+  await expect(page.locator('#combination-editor')).toBeHidden();
+  await expect(page.locator('#open-combination')).toBeFocused();
+  await page.locator('#open-combination').click();
+  await expect(page.getByLabel('Edit your combination')).toHaveValue('♡ Alex ✦');
 });
 
 test('favorites persist by ID, recent copies require success, and clearing spans collections', async ({ page, context }) => {
@@ -73,6 +90,8 @@ test('favorites persist by ID, recent copies require success, and clearing spans
   await page.goto('/symbols/heart-symbols');
   await page.getByRole('button', { name: 'Favorite White heart suit', exact: true }).click();
   await page.getByRole('button', { name: 'Copy White heart suit', exact: true }).click();
+  // Clipboard writes are asynchronous; leave the page only after a confirmed copy.
+  await expect(page.getByText('Copied', { exact: true })).toBeVisible();
   await page.goto('/symbols');
   await page.getByRole('button', { name: 'Favorites', exact: true }).click();
   await expect(page.locator('[data-library-item]')).toHaveCount(1);
@@ -164,13 +183,14 @@ test('mobile and desktop layouts stay within viewport and directory links remain
   page.on('pageerror', (error) => errors.push(error.message));
   for (const width of [320, 390, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ['/symbols', '/kaomoji', '/invisible-character', '/unicode-tools', '/']) {
+    for (const path of ['/symbols', '/symbols/heart-symbols', '/kaomoji', '/invisible-character', '/unicode-tools', '/']) {
       await page.goto(path);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${path} at ${width}`).toBe(true);
       if (path === '/symbols' && width === 390) {
-        await expect(page.getByRole('button', { name: 'Open editor', exact: true })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Combine symbols', exact: true })).toBeVisible();
+        await expect(page.locator('#combination-editor')).toBeHidden();
         const firstCard = await page.locator('[data-library-item]').first().boundingBox();
-        expect(firstCard!.y).toBeLessThan(800);
+        expect(firstCard!.y).toBeLessThan(550);
       }
       if (path === '/' && width === 1024) {
         const nav = page.getByRole('navigation', { name: 'Primary navigation', exact: true });
@@ -179,6 +199,17 @@ test('mobile and desktop layouts stay within viewport and directory links remain
         expect(brand!.x + brand!.width).toBeLessThanOrEqual(home!.x);
       }
       if (width === 390 || width === 1440) await page.screenshot({ path: `/tmp/text-library-${path.replace(/\//g, '-') || 'home'}-${width}.png`, animations: 'disabled' });
+      if (path === '/symbols/heart-symbols') {
+        await page.getByRole('button', { name: 'Add White heart suit to combination', exact: true }).click();
+        await expect(page.getByLabel('Edit your combination')).toHaveValue('♡');
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+        const panel = await page.locator('#combination-editor').boundingBox();
+        expect(panel!.y).toBeGreaterThanOrEqual(0);
+        expect(panel!.x + panel!.width).toBeLessThanOrEqual(width);
+        if (width === 390 || width === 1440) await page.screenshot({ path: `/tmp/symbol-combination-${width}.png`, animations: 'disabled' });
+        await page.getByRole('button', { name: 'Close editor', exact: true }).click();
+        await expect(page.locator('#combination-editor')).toBeHidden();
+      }
     }
   }
   await page.setViewportSize({ width: 390, height: 900 });
