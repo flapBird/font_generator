@@ -4,6 +4,7 @@ import Link from '@/components/IntentLink';
 import { useEffect, useRef, useState, type FocusEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AccountMenu from '@/components/AccountMenu';
+import { symbolNavigationLinks } from '@/lib/text-library/navigation-links';
 
 export interface HeaderLink {
   href: string;
@@ -16,7 +17,7 @@ interface HeaderProps {
   visualArtLinks: HeaderLink[];
 }
 
-type MenuKey = 'styles' | 'art';
+type MenuKey = 'styles' | 'art' | 'symbols';
 
 const primaryLinks = [
   { href: '/', label: 'Home' },
@@ -135,7 +136,8 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
     menu: MenuKey,
     label: string,
     indexHref: string,
-    links: HeaderLink[]
+    links: HeaderLink[],
+    indexLabel = `View all ${label.toLowerCase()}`
   ) => {
     const isOpen = openMobileSection === menu;
     const panelId = `mobile-${menu}-links`;
@@ -162,7 +164,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
                 className="mb-1 flex min-h-11 items-center justify-between rounded-xl px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-background"
                 onClick={closeAllMenus}
               >
-                View all {label.toLowerCase()}
+                {indexLabel}
                 <span aria-hidden="true">→</span>
               </Link>
               <ul className="space-y-0.5">
@@ -329,7 +331,36 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
               </div>
             </div>
 
-            <Link href="/symbols" className={desktopLinkClass}>Symbols &amp; Emoji</Link>
+            <div className="relative flex h-full items-center"
+              onMouseEnter={() => openDropdown('symbols', true)}
+              onMouseLeave={(event) => { if (!event.currentTarget.contains(document.activeElement)) closeDropdown('symbols'); }}
+              onFocus={(event) => { if (event.target.id !== 'symbols-menu-trigger') openDropdown('symbols'); }}
+              onBlur={(event) => handleDesktopBlur(event, 'symbols')}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                  event.preventDefault();
+                  document.getElementById('symbols-menu-trigger')?.focus();
+                  closeDropdown('symbols');
+                }
+                if (event.key === 'ArrowDown' && event.target === event.currentTarget.querySelector('button')) {
+                  event.preventDefault(); openDropdown('symbols');
+                  requestAnimationFrame(() => document.querySelector<HTMLAnchorElement>('#desktop-symbol-links a')?.focus());
+                }
+              }}>
+              <button id="symbols-menu-trigger" type="button" className={desktopLinkClass} aria-expanded={desktopMenu === 'symbols'} aria-controls="desktop-symbol-links"
+                onClick={() => desktopMenu === 'symbols' ? closeDropdown('symbols') : openDropdown('symbols')}>
+                Symbols &amp; Emoji<ChevronIcon className={`transition-transform ${desktopMenu === 'symbols' ? 'rotate-180' : ''}`} />
+              </button>
+              <div className="pointer-events-none absolute left-1/2 top-full w-[min(16rem,calc(100vw-2rem))] -translate-x-1/2">
+                <div className={dropdownClass('symbols')} data-origin="top-center">
+                  <nav id="desktop-symbol-links" aria-label="Symbols and Emoji categories" aria-hidden={desktopMenu !== 'symbols'} inert={desktopMenu !== 'symbols'} className="rounded-2xl border border-slate-200 bg-white p-2.5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950">
+                    {symbolNavigationLinks.map((item) => <Link key={item.href} href={item.href} onClick={closeAllMenus} className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200">
+                      <span aria-hidden="true" className="w-7 shrink-0 text-center">{item.icon}</span>{item.label}
+                    </Link>)}
+                  </nav>
+                </div>
+              </div>
+            </div>
 
             {primaryLinks.slice(1).map((item) => (
               <Link key={item.href} href={item.href} className={desktopLinkClass}>
@@ -376,7 +407,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
                 </Link>
                 {renderMobileSection('styles', 'Font Styles', '/styles', featuredStyleLinks)}
                 {renderMobileSection('art', 'Visual & Art', '/visual-art', featuredVisualArtLinks)}
-                <Link href="/symbols" className="block rounded-xl px-4 py-3 font-medium transition-colors hover:bg-muted" onClick={closeAllMenus}>Symbols &amp; Emoji</Link>
+                {renderMobileSection('symbols', 'Symbols & Emoji', '/symbols', symbolNavigationLinks.slice(1), 'All symbols')}
                 {primaryLinks.slice(1).map((item) => (
                   <Link
                     key={item.href}

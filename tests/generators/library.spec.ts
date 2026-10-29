@@ -2,6 +2,7 @@ import { test, expect } from './fixtures';
 import { libraryPages } from '../../lib/text-library/catalog';
 import { blankCharacters } from '../../lib/text-library/invisible';
 import { generatorRegistry } from '../../lib/generator-registry';
+import { getCollectionGuide } from '../../lib/text-library/guides';
 
 test('library and Unicode pages contain server-rendered content, exact canonicals and crawlable discovery', async ({ request }) => {
   const sitemap = await (await request.get('/sitemap.xml')).text();
@@ -18,10 +19,20 @@ test('library and Unicode pages contain server-rendered content, exact canonical
     expect(llms).toContain(`https://font-generators.org${definition.path}`);
     if (['symbols', 'hearts', 'stars', 'arrows', 'kaomoji', 'emoji-combos'].includes(definition.id)) {
       expect((html.match(/data-library-item=/g) ?? []).length).toBeGreaterThan(20);
+      const guide = getCollectionGuide(definition.id)!;
+      expect(html).toContain(guide.heading);
+      expect(html).toContain(guide.howToHeading);
+      expect(html).toContain('Frequently asked questions');
+      expect(html).toContain('"@type":"FAQPage"');
+      expect(html).toContain('data-testid="collection-guide"');
+      expect(html).not.toContain('https://www.unicode.org/');
+      expect(html).not.toContain('Character references:');
+      expect(html).not.toContain('Optional usage events record fixed tool');
     }
   }
   for (const generator of generatorRegistry) expect(sitemap).toContain(`https://font-generators.org${generator.canonicalPath}`);
   expect(llms).toContain('261 curated symbol sequences');
+  expect(llms).toContain('five page-specific FAQs');
   expect(llms).toContain('The combination editor is hidden initially');
   expect(llms).toContain('not a complete Unicode inspector or remover');
   expect(llms).toContain('Signature Generator uses an independent image workspace');
@@ -214,7 +225,8 @@ test('mobile and desktop layouts stay within viewport and directory links remain
   }
   await page.setViewportSize({ width: 390, height: 900 });
   await page.getByRole('button', { name: 'Open menu', exact: true }).click();
-  await page.locator('#mobile-navigation').getByRole('link', { name: 'Symbols & Emoji', exact: true }).click();
+  await page.locator('#mobile-navigation').getByRole('button', { name: 'Symbols & Emoji', exact: true }).click();
+  await page.locator('#mobile-symbols-links').getByRole('link', { name: 'All symbols', exact: true }).click();
   await expect(page).toHaveURL(/\/symbols$/);
   await expect(page.getByRole('button', { name: 'Open menu', exact: true })).toBeVisible();
   expect(errors).toEqual([]);

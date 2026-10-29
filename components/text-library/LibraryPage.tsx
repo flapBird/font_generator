@@ -5,6 +5,8 @@ import { getLibraryItems } from '@/lib/text-library/collections';
 import { getContentUpdatedAt } from '@/lib/content-updates';
 import SymbolBrowser from './SymbolBrowser';
 import LibraryLink from './LibraryLink';
+import CollectionContent from './CollectionContent';
+import { getCollectionGuide } from '@/lib/text-library/guides';
 
 export function libraryMetadata(id: LibraryId): Metadata {
   const page = getLibraryPage(id);
@@ -45,6 +47,7 @@ export function LibraryPageShell({ id, children }: { id: LibraryId; children: Re
         <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">{page.intro}</p>
       </header>
       {children}
+      <CollectionContent page={page} />
       <section aria-labelledby="library-related-heading" className="mt-10 border-t border-slate-200 pt-8">
         <h2 id="library-related-heading" className="text-xl font-semibold">Keep exploring</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{page.related.map((relatedId) => {
@@ -53,13 +56,22 @@ export function LibraryPageShell({ id, children }: { id: LibraryId; children: Re
             <span className="mr-2 text-violet-700" aria-hidden="true">{related.icon}</span><span className="text-sm font-semibold">{related.title}</span><p className="mt-2 text-xs leading-5 text-slate-500">{related.description}</p>
           </LibraryLink>;
         })}</div>
-        <div className="mt-4 flex flex-wrap gap-x-6 text-sm text-violet-700"><Link href="/styles" className="py-3">Browse font styles →</Link><Link href="/visual-art" className="py-3">Explore text artwork →</Link></div>
+        <div aria-label="More font and text tools" className="mt-8 grid gap-4 md:grid-cols-2">
+          <Link href="/styles" className="group flex flex-col justify-between rounded-2xl border border-violet-200 bg-violet-50/60 p-6 transition-colors hover:border-violet-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 sm:p-7">
+            <div className="mb-5 flex items-center justify-between gap-4"><span aria-hidden="true" className="text-4xl tracking-tight text-violet-700">Aa <span className="font-serif italic">Aa</span> 𝔄𝔞</span><span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-violet-700">Copy &amp; paste text</span></div>
+            <div><h3 className="text-2xl font-semibold tracking-tight text-slate-950">Font Styles</h3><p className="mt-2 max-w-md text-sm leading-6 text-slate-600">Turn your words into bold, cursive, bubble and other Unicode styles for bios and messages.</p></div>
+            <span className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-violet-700">Browse font styles <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">→</span></span>
+          </Link>
+          <Link href="/visual-art" className="group flex flex-col justify-between rounded-2xl border border-slate-700 bg-slate-900 p-6 transition-colors hover:border-violet-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 sm:p-7">
+            <div className="mb-5 flex items-center justify-between gap-4"><span aria-hidden="true" className="text-4xl font-bold tracking-tight text-white">Aa<span className="ml-2 font-serif italic text-violet-300">Aa</span></span><span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-violet-200">Images &amp; artwork</span></div>
+            <div><h3 className="text-2xl font-semibold tracking-tight text-white">Visual &amp; Art</h3><p className="mt-2 max-w-md text-sm leading-6 text-slate-300">Create text artwork with 3D, fire, glitter and more, then export it from the matching tool.</p></div>
+            <span className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-violet-200">Explore text artwork <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">→</span></span>
+          </Link>
+        </div>
       </section>
-      <div className="mt-10 grid gap-6 lg:grid-cols-3">{page.sections.map((section) => <section key={section.title} className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+      {!getCollectionGuide(id) && <div className="mt-10 grid gap-6 lg:grid-cols-3">{page.sections.map((section) => <section key={section.title} className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
         <h2 className="text-lg font-semibold">{section.title}</h2><p className="mt-3 text-sm leading-7 text-slate-600">{section.text}</p>
-      </section>)}</div>
-      <p className="mt-6 max-w-3xl text-xs leading-6 text-slate-500">{id === 'signature-generator' ? 'Names, strokes and image generation stay in your browser and are not saved or uploaded by this tool. Optional download events contain only the tool identifier, not the signature.' : 'Text is processed in your browser. Symbol favorites and recent copies store item IDs on this device; editable combinations and utility input are not saved. Availability depends on your browser storage settings. Optional usage events record fixed tool and item IDs, not your text.'} <Link href="/privacy" className="underline">Privacy details</Link>.</p>
-      {id !== 'signature-generator' && <p className="mt-2 text-xs leading-6 text-slate-500">Character references: <a href="https://www.unicode.org/charts/" className="underline">Unicode character charts</a> and <a href="https://www.unicode.org/reports/tr51/" className="underline">Unicode Emoji</a>. Face labels and emoji combinations are editorial suggestions.</p>}
+      </section>)}</div>}
     </div>
   </div>;
 }

@@ -93,7 +93,7 @@ export const libraryPages: LibraryPageDefinition[] = [
     description: 'Find happy, shy, sad, surprised, animal and action kaomoji. Copy complete faces, save favorites locally and combine them with your message.',
     intro: 'A little face for the feeling you want to share. Browse by mood, copy the whole expression, or add it to a message of your own.',
     sections: [
-      { title: 'What is a kaomoji?', text: 'Kaomoji are text faces built from punctuation, letters and symbols. Many are read upright, such as (^‿^), rather than sideways like :-). The mood labels here are suggestions for use, not fixed definitions.' },
+      { title: 'Read the face in context', text: 'Eyes, hands and posture can suggest a mood, but the same face may be playful in one conversation and confusing in another. Choose an expression that fits the words around it. The category labels help you browse; they do not give a face one fixed meaning.' },
       { title: 'Copy the whole expression', text: 'Each bracket, space and combining mark can contribute to a face. Copying a complete card keeps the sequence together. Wide faces may wrap in a narrow chat bubble; choose a shorter expression when space is limited.' },
       { title: 'A reply that still sounds like you', text: 'Add a cheerful face after a thank-you, a waving face to a greeting, or a sleepy face to a good-night message. Include words when the emotion might otherwise be unclear. Favorites are stored in this browser and can be cleared here.' },
     ], related: ['emoji-combos', 'hearts', 'symbols'],
