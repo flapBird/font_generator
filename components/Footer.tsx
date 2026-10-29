@@ -1,66 +1,69 @@
- import Link from '@/components/IntentLink';
- 
- export default function Footer() {
-   return (
-     <footer className="bg-muted/50 border-t border-border">
-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(17rem,1fr)_auto] lg:items-start lg:gap-16">
-           {/* Brand */}
-          <div className="max-w-sm">
-             <Link href="/" className="text-2xl font-bold gradient-text">
-               Font Generators
-             </Link>
-             <p className="mt-4 text-muted-foreground text-sm leading-relaxed">
-               Transform your text into fancy Unicode styles. Free online tool for creating stylish text for social media, bios, and creative projects.
-             </p>
-           </div>
- 
-          <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 sm:gap-x-10 lg:justify-self-end lg:gap-x-12">
-            <div className="min-w-0 sm:min-w-36">
-              <h3 className="mb-3 font-semibold text-foreground">Font Styles</h3>
-              <ul className="space-y-2">
-                <li><Link href="/styles" className="text-sm text-muted-foreground transition-colors hover:text-foreground">All Font Styles</Link></li>
-                <li><Link href="/small-text-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Small Text</Link></li>
-                <li><Link href="/cursive-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Cursive</Link></li>
-                <li><Link href="/bubble-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Bubble</Link></li>
-                <li><Link href="/fraktur-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Fraktur</Link></li>
-              </ul>
-            </div>
+import Link from '@/components/IntentLink';
+import { symbolNavigationLinks, unicodeNavigationLinks } from '@/lib/text-library/navigation-links';
 
-            <div className="min-w-0 sm:min-w-36">
-              <h3 className="mb-3 font-semibold text-foreground">Visual &amp; Art</h3>
-              <ul className="space-y-2">
-                <li><Link href="/visual-art" className="text-sm text-muted-foreground transition-colors hover:text-foreground">All Visual &amp; Art Generators</Link></li>
-                <li><Link href="/big-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">ASCII Art</Link></li>
-                <li><Link href="/fire-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Fire Text Art</Link></li>
-                <li><Link href="/disney-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Disney</Link></li>
-                <li><Link href="/minecraft-font-generator" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Minecraft</Link></li>
-              </ul>
-            </div>
+const toolGroups = [
+  {
+    title: 'Font Styles',
+    links: [
+      { href: '/styles', label: 'All Font Styles' },
+      { href: '/small-text-generator', label: 'Small Text' },
+      { href: '/cursive-font-generator', label: 'Cursive' },
+      { href: '/bubble-font-generator', label: 'Bubble' },
+      { href: '/fraktur-font-generator', label: 'Fraktur' },
+    ],
+  },
+  {
+    title: 'Visual & Art',
+    links: [
+      { href: '/visual-art', label: 'All Visual & Art Generators' },
+      { href: '/big-font-generator', label: 'ASCII Art' },
+      { href: '/fire-font-generator', label: 'Fire Text Art' },
+      { href: '/disney-font-generator', label: 'Disney' },
+      { href: '/minecraft-font-generator', label: 'Minecraft' },
+      { href: '/signature-generator', label: 'Signature Generator' },
+    ],
+  },
+  { title: 'Symbols & Emoji', links: symbolNavigationLinks },
+  { title: 'Unicode Tools', links: unicodeNavigationLinks },
+];
+const siteLinks = [
+  { href: '/#top', label: 'Home' },
+  { href: '/guides', label: 'Guides' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+];
+const policyLinks = [
+  { href: '/terms', label: 'Terms of Service' },
+  { href: '/privacy', label: 'Privacy Policy' },
+];
+const linkClass = 'inline-flex min-h-9 items-center text-sm leading-6 text-muted-foreground transition-colors hover:text-foreground focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500';
 
-            <div className="min-w-0 sm:min-w-36">
-              <h3 className="mb-3 font-semibold text-foreground">Site</h3>
-              <ul className="space-y-2">
-                <li><Link href="/#top" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Home</Link></li>
-                <li><Link href="/guides" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Guides</Link></li>
-                <li><Link href="/about" className="text-sm text-muted-foreground transition-colors hover:text-foreground">About</Link></li>
-                <li><Link href="/contact" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Contact</Link></li>
-                <li><Link href="/terms" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Terms of Service</Link></li>
-                <li><Link href="/privacy" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Privacy Policy</Link></li>
-                <li><Link href="/symbols" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Symbols &amp; Emoji</Link></li>
-                <li><Link href="/unicode-tools" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Unicode Tools</Link></li>
-              </ul>
-            </div>
-          </div>
-         </div>
- 
-         {/* Bottom */}
-         <div className="mt-12 pt-8 border-t border-border text-center">
-           <p className="text-muted-foreground text-sm">
-             &copy; {new Date().getFullYear()} font-generators.org. All rights reserved.
-           </p>
-         </div>
-       </div>
-     </footer>
-   );
- }
+export default function Footer() {
+  return <footer className="border-t border-border bg-muted/50">
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,3fr)] xl:gap-12">
+        <div className="max-w-sm">
+          <Link href="/" className="gradient-text text-2xl font-bold">Font Generators</Link>
+          <p className="mt-4 text-sm leading-7 text-muted-foreground">Font styles, text artwork, symbols and practical Unicode tools in one place.</p>
+        </div>
+        <nav aria-label="Font and text tools" className="grid min-w-0 grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4 md:gap-x-8">
+          {toolGroups.map((group) => <section key={group.title} aria-label={group.title} className="min-w-0">
+            <h3 className="mb-3 font-semibold text-foreground">{group.title}</h3>
+            <ul className="space-y-0.5">{group.links.map((item) => <li key={item.href}><Link href={item.href} className={linkClass}>{item.label}</Link></li>)}</ul>
+          </section>)}
+        </nav>
+      </div>
+      <div className="mt-10 flex flex-col justify-between gap-6 border-t border-border pt-6 sm:flex-row">
+        <nav aria-label="Site information">
+          <h3 className="text-xs font-semibold text-foreground">Site information</h3>
+          <div className="mt-1 flex flex-wrap gap-x-5">{siteLinks.map((item) => <Link key={item.href} href={item.href} className={linkClass}>{item.label}</Link>)}</div>
+        </nav>
+        <nav aria-label="Site policies">
+          <h3 className="text-xs font-semibold text-foreground">Policies</h3>
+          <div className="mt-1 flex flex-wrap gap-x-5">{policyLinks.map((item) => <Link key={item.href} href={item.href} className={linkClass}>{item.label}</Link>)}</div>
+        </nav>
+      </div>
+      <p className="mt-5 text-xs leading-6 text-muted-foreground">&copy; {new Date().getFullYear()} font-generators.org. All rights reserved.</p>
+    </div>
+  </footer>;
+}

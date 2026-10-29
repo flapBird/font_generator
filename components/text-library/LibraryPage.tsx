@@ -81,9 +81,9 @@ export function LibraryPageShell({ id, children }: { id: LibraryId; children: Re
 export default function LibraryPage({ id }: { id: LibraryId }) {
   return <LibraryPageShell id={id}>
     <nav aria-label="Symbol collections" className="mb-6 flex gap-1 overflow-x-auto border-b border-slate-200">
-      {(['symbols', 'hearts', 'stars', 'arrows', 'kaomoji', 'emoji-combos', 'unicode-tools'] as LibraryId[]).map((target) => {
+      {(['symbols', 'hearts', 'stars', 'arrows', 'kaomoji', 'emoji-combos'] as const).map((target) => {
         const page = getLibraryPage(target);
-        const label = { symbols: 'All symbols', hearts: 'Hearts', stars: 'Stars', arrows: 'Arrows', kaomoji: 'Kaomoji', 'emoji-combos': 'Emoji combos', 'unicode-tools': 'Unicode tools' }[target as 'symbols' | 'hearts' | 'stars' | 'arrows' | 'kaomoji' | 'emoji-combos' | 'unicode-tools'];
+        const label = { symbols: 'All symbols', hearts: 'Hearts', stars: 'Stars', arrows: 'Arrows', kaomoji: 'Kaomoji', 'emoji-combos': 'Emoji combos' }[target];
         return <LibraryLink key={target} href={page.path} tool={id} targetId={target} current={id === target} className={`inline-flex min-h-12 shrink-0 items-center border-b-2 px-4 text-sm transition-colors ${id === target ? 'border-violet-600 font-semibold text-violet-700' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-950'}`}>{label}</LibraryLink>;
       })}
     </nav>

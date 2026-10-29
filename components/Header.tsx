@@ -4,7 +4,7 @@ import Link from '@/components/IntentLink';
 import { useEffect, useRef, useState, type FocusEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AccountMenu from '@/components/AccountMenu';
-import { symbolNavigationLinks } from '@/lib/text-library/navigation-links';
+import { symbolNavigationLinks, unicodeNavigationLinks } from '@/lib/text-library/navigation-links';
 
 export interface HeaderLink {
   href: string;
@@ -17,7 +17,7 @@ interface HeaderProps {
   visualArtLinks: HeaderLink[];
 }
 
-type MenuKey = 'styles' | 'art' | 'symbols';
+type MenuKey = 'styles' | 'art' | 'symbols' | 'unicode';
 
 const primaryLinks = [
   { href: '/', label: 'Home' },
@@ -193,6 +193,43 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
   const featuredStyleLinks = fontStyleLinks.slice(0, 10);
   const featuredVisualArtLinks = visualArtLinks.slice(0, 7);
 
+  const renderUtilityDropdown = (menu: 'symbols' | 'unicode', label: string, links: HeaderLink[], navigationLabel: string) => {
+    const triggerId = `${menu}-menu-trigger`;
+    const panelId = menu === 'symbols' ? 'desktop-symbol-links' : 'desktop-unicode-links';
+    return (
+      <div className="relative flex h-full items-center"
+        onMouseEnter={() => openDropdown(menu, true)}
+        onMouseLeave={(event) => { if (!event.currentTarget.contains(document.activeElement)) closeDropdown(menu); }}
+        onFocus={(event) => { if (event.target.id !== triggerId) openDropdown(menu); }}
+        onBlur={(event) => handleDesktopBlur(event, menu)}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            document.getElementById(triggerId)?.focus();
+            closeDropdown(menu);
+          }
+          if (event.key === 'ArrowDown' && event.target === event.currentTarget.querySelector('button')) {
+            event.preventDefault(); openDropdown(menu);
+            requestAnimationFrame(() => document.querySelector<HTMLAnchorElement>(`#${panelId} a`)?.focus());
+          }
+        }}>
+        <button id={triggerId} type="button" className={desktopLinkClass} aria-expanded={desktopMenu === menu} aria-controls={panelId}
+          onClick={() => desktopMenu === menu ? closeDropdown(menu) : openDropdown(menu)}>
+          {label}<ChevronIcon className={`transition-transform ${desktopMenu === menu ? 'rotate-180' : ''}`} />
+        </button>
+        <div className="pointer-events-none absolute left-1/2 top-full w-[min(16rem,calc(100vw-2rem))] -translate-x-1/2">
+          <div className={dropdownClass(menu)} data-origin="top-center">
+            <nav id={panelId} aria-label={navigationLabel} aria-hidden={desktopMenu !== menu} inert={desktopMenu !== menu} className="rounded-2xl border border-slate-200 bg-white p-2.5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950">
+              {links.map((item) => <Link key={item.href} href={item.href} onClick={closeAllMenus} className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200">
+                <span aria-hidden="true" className="w-7 shrink-0 text-center">{item.icon}</span>{item.label}
+              </Link>)}
+            </nav>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Primary navigation">
@@ -206,7 +243,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
           </Link>
 
           <div className="flex h-full items-center gap-1">
-          <div className="hidden h-full items-center gap-1 lg:flex">
+          <div className="hidden h-full items-center gap-1 xl:flex">
             <Link href={primaryLinks[0].href} className={desktopLinkClass}>
               {primaryLinks[0].label}
             </Link>
@@ -331,36 +368,8 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
               </div>
             </div>
 
-            <div className="relative flex h-full items-center"
-              onMouseEnter={() => openDropdown('symbols', true)}
-              onMouseLeave={(event) => { if (!event.currentTarget.contains(document.activeElement)) closeDropdown('symbols'); }}
-              onFocus={(event) => { if (event.target.id !== 'symbols-menu-trigger') openDropdown('symbols'); }}
-              onBlur={(event) => handleDesktopBlur(event, 'symbols')}
-              onKeyDown={(event) => {
-                if (event.key === 'Escape') {
-                  event.preventDefault();
-                  document.getElementById('symbols-menu-trigger')?.focus();
-                  closeDropdown('symbols');
-                }
-                if (event.key === 'ArrowDown' && event.target === event.currentTarget.querySelector('button')) {
-                  event.preventDefault(); openDropdown('symbols');
-                  requestAnimationFrame(() => document.querySelector<HTMLAnchorElement>('#desktop-symbol-links a')?.focus());
-                }
-              }}>
-              <button id="symbols-menu-trigger" type="button" className={desktopLinkClass} aria-expanded={desktopMenu === 'symbols'} aria-controls="desktop-symbol-links"
-                onClick={() => desktopMenu === 'symbols' ? closeDropdown('symbols') : openDropdown('symbols')}>
-                Symbols &amp; Emoji<ChevronIcon className={`transition-transform ${desktopMenu === 'symbols' ? 'rotate-180' : ''}`} />
-              </button>
-              <div className="pointer-events-none absolute left-1/2 top-full w-[min(16rem,calc(100vw-2rem))] -translate-x-1/2">
-                <div className={dropdownClass('symbols')} data-origin="top-center">
-                  <nav id="desktop-symbol-links" aria-label="Symbols and Emoji categories" aria-hidden={desktopMenu !== 'symbols'} inert={desktopMenu !== 'symbols'} className="rounded-2xl border border-slate-200 bg-white p-2.5 shadow-[0_28px_80px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-950/5 dark:border-slate-700 dark:bg-slate-950">
-                    {symbolNavigationLinks.map((item) => <Link key={item.href} href={item.href} onClick={closeAllMenus} className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-slate-200">
-                      <span aria-hidden="true" className="w-7 shrink-0 text-center">{item.icon}</span>{item.label}
-                    </Link>)}
-                  </nav>
-                </div>
-              </div>
-            </div>
+            {renderUtilityDropdown('symbols', 'Symbols & Emoji', symbolNavigationLinks, 'Symbols and Emoji categories')}
+            {renderUtilityDropdown('unicode', 'Unicode Tools', unicodeNavigationLinks, 'Unicode tool categories')}
 
             {primaryLinks.slice(1).map((item) => (
               <Link key={item.href} href={item.href} className={desktopLinkClass}>
@@ -370,7 +379,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
           </div>
 
           <button
-            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring xl:hidden"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-controls="mobile-navigation"
             aria-expanded={isMobileMenuOpen}
@@ -395,7 +404,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden border-t border-slate-200 bg-white shadow-xl lg:hidden dark:border-slate-700 dark:bg-slate-950"
+              className="overflow-hidden border-t border-slate-200 bg-white shadow-xl xl:hidden dark:border-slate-700 dark:bg-slate-950"
             >
               <div className="max-h-[calc(100vh-4rem)] space-y-1 overflow-y-auto overscroll-y-contain py-3">
                 <Link
@@ -408,6 +417,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
                 {renderMobileSection('styles', 'Font Styles', '/styles', featuredStyleLinks)}
                 {renderMobileSection('art', 'Visual & Art', '/visual-art', featuredVisualArtLinks)}
                 {renderMobileSection('symbols', 'Symbols & Emoji', '/symbols', symbolNavigationLinks.slice(1), 'All symbols')}
+                {renderMobileSection('unicode', 'Unicode Tools', '/unicode-tools', unicodeNavigationLinks.slice(1), 'All Unicode tools')}
                 {primaryLinks.slice(1).map((item) => (
                   <Link
                     key={item.href}

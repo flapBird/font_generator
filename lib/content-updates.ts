@@ -1,9 +1,12 @@
 import { discoverySlugs } from './discovery-catalog';
 
 const updateGroups = {
-  '2026-10-29': [
+  '2026-10-30': [
     '/symbols', '/symbols/heart-symbols', '/symbols/star-symbols', '/symbols/arrow-symbols',
-    '/kaomoji', '/emoji-combos', '/unicode-tools', '/invisible-character', '/privacy',
+    '/kaomoji', '/emoji-combos',
+  ],
+  '2026-10-29': [
+    '/unicode-tools', '/invisible-character', '/privacy',
     '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',
     '/signature-generator', '/visual-art',
   ],

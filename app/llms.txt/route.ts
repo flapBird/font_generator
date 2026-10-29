@@ -138,6 +138,8 @@ const body = [
   '',
   '## Site information',
   '',
+  'Font Styles, Visual & Art, Symbols & Emoji, and Unicode Tools are peer tool categories in the primary navigation. Unicode Tools has its own directory and four utility links; it is not a symbol collection. The footer groups tool links under these four categories, keeps Home, Guides, About and Contact in a separate site-information area, and places Terms of Service and Privacy Policy in a policy area.',
+  '',
   'Google Analytics measures visits and sign-in or purchase steps using browser identifiers and a pseudonymous account identifier. Optional server-side checkout and confirmed-purchase events include the transaction identifier, product, amount, and currency; availability depends on analytics configuration and an available browser analytics identifier. Analytics events exclude account emails, names, font descriptions, and payment card details.',
   '',
   `- [About](${SITE_URL}/about): Free tools, optional paid AI fonts, output types, and service scope.`,

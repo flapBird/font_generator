@@ -7,3 +7,11 @@ export const symbolNavigationLinks = [
   { href: '/kaomoji', label: 'Kaomoji', icon: '☺' },
   { href: '/emoji-combos', label: 'Emoji combos', icon: '🌙' },
 ];
+
+export const unicodeNavigationLinks = [
+  { href: '/unicode-tools', label: 'All Unicode tools', icon: 'U+' },
+  { href: '/unicode-character-inspector', label: 'Character inspector', icon: '⌕' },
+  { href: '/invisible-character-remover', label: 'Invisible character remover', icon: '⌫' },
+  { href: '/fancy-text-to-normal-text', label: 'Fancy text to normal', icon: 'Aa' },
+  { href: '/invisible-character', label: 'Invisible character', icon: '␣' },
+];

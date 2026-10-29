@@ -188,7 +188,7 @@ test('invisible character uses utility navigation and leaves old generator input
   await expect(page.locator('#generator-input')).not.toHaveValue('Private test input');
   await expect(page.getByRole('navigation', { name: 'Current generator', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).libraryNavigationMarker)).toBe(true);
-  await page.locator('footer').getByRole('link', { name: 'Unicode Tools', exact: true }).click();
+  await page.locator('footer').getByRole('link', { name: 'All Unicode tools', exact: true }).click();
   await page.getByRole('navigation', { name: 'Unicode tool navigation', exact: true }).locator('a[href="/invisible-character"]').click();
   await expect(page.locator('#blank-inspector')).toHaveValue('');
   await expect(page.getByLabel('Repeat count (1–100)')).toHaveValue('1');
@@ -211,8 +211,8 @@ test('mobile and desktop layouts stay within viewport and directory links remain
       if (path === '/' && width === 1024) {
         const nav = page.getByRole('navigation', { name: 'Primary navigation', exact: true });
         const brand = await nav.getByRole('link', { name: 'Font Generators', exact: true }).boundingBox();
-        const home = await nav.getByRole('link', { name: 'Home', exact: true }).boundingBox();
-        expect(brand!.x + brand!.width).toBeLessThanOrEqual(home!.x);
+        const menu = await nav.getByRole('button', { name: 'Open menu', exact: true }).boundingBox();
+        expect(brand!.x + brand!.width).toBeLessThanOrEqual(menu!.x);
       }
       if (width === 390 || width === 1440) await page.screenshot({ path: `/tmp/text-library-${path.replace(/\//g, '-') || 'home'}-${width}.png`, animations: 'disabled' });
       if (path === '/symbols/heart-symbols') {
