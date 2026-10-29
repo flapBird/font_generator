@@ -1,6 +1,12 @@
 import { discoverySlugs } from './discovery-catalog';
 
 const updateGroups = {
+  '2026-10-29': [
+    '/symbols', '/symbols/heart-symbols', '/symbols/star-symbols', '/symbols/arrow-symbols',
+    '/kaomoji', '/emoji-combos', '/unicode-tools', '/invisible-character', '/privacy',
+    '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',
+    '/signature-generator', '/visual-art',
+  ],
   '2026-10-28': [
     '/fraktur-font-generator',
     '/goth-font-generator',
@@ -13,7 +19,7 @@ const updateGroups = {
     '/gaming-font-generator',
     '/guides/reddit-fancy-text-guide',
     ...discoverySlugs.map((slug) => `/${slug}`),
-    '/styles', '/visual-art',
+    '/styles',
     '/halloween-font-generator',
     '/k-pop-font-generator', '/wingdings-font-generator', '/preppy-font-generator',
     '/emoji-font-generator',
@@ -100,7 +106,7 @@ const updateGroups = {
     '/fortnite-font-generator',
   ],
   '2026-08-13': ['/about'],
-  '2026-08-01': ['/contact', '/privacy', '/terms'],
+  '2026-08-01': ['/contact', '/terms'],
   '2026-07-28': ['/guides'],
 } as const;
 

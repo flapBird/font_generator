@@ -1,6 +1,7 @@
  import { MetadataRoute } from 'next';
  import { stylePages, fandomPages, guidePages } from '@/lib/data';
  import { getContentLastModified, validateContentUpdateCoverage } from '@/lib/content-updates';
+ import { libraryPages } from '@/lib/text-library/catalog';
  
  export default function sitemap(): MetadataRoute.Sitemap {
    const baseUrl = 'https://font-generators.org';
@@ -43,6 +44,7 @@
      ...styleUrls,
      ...fandomUrls,
      ...guideUrls,
+     ...libraryPages.map((page) => ({ path: page.path, url: `${baseUrl}${page.path}`, changeFrequency: 'monthly' as const, priority: 0.7 })),
    ];
 
    validateContentUpdateCoverage(entries.map((entry) => entry.path));

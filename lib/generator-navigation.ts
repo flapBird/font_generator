@@ -14,7 +14,17 @@ export const hiddenNavigationSlugs = [
   ...discoverySlugs,
 ] as const;
 
-const hiddenPaths = new Set(hiddenNavigationSlugs.map((slug) => `/${slug}`));
+// Utility pages have their own catalog; do not register them as font styles or artwork.
+export const hiddenUtilityNavigationPaths = [
+  '/symbols', '/symbols/heart-symbols', '/symbols/star-symbols', '/symbols/arrow-symbols',
+  '/kaomoji', '/emoji-combos', '/unicode-tools', '/invisible-character',
+  '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',
+  '/signature-generator',
+] as const;
+
+const hiddenPaths = new Set<string>([
+  ...hiddenNavigationSlugs.map((slug) => `/${slug}`), ...hiddenUtilityNavigationPaths,
+]);
 export const isVisibleInGeneratorNavigation = (href: string) => !hiddenPaths.has(href);
 
 // Opt in only these new pure-text tools; existing generator workspaces keep their behavior.

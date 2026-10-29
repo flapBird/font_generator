@@ -329,6 +329,8 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
               </div>
             </div>
 
+            <Link href="/symbols" className={desktopLinkClass}>Symbols &amp; Emoji</Link>
+
             {primaryLinks.slice(1).map((item) => (
               <Link key={item.href} href={item.href} className={desktopLinkClass}>
                 {item.label}
@@ -374,6 +376,7 @@ export default function Header({ fontStyleLinks, visualArtLinks }: HeaderProps) 
                 </Link>
                 {renderMobileSection('styles', 'Font Styles', '/styles', featuredStyleLinks)}
                 {renderMobileSection('art', 'Visual & Art', '/visual-art', featuredVisualArtLinks)}
+                <Link href="/symbols" className="block rounded-xl px-4 py-3 font-medium transition-colors hover:bg-muted" onClick={closeAllMenus}>Symbols &amp; Emoji</Link>
                 {primaryLinks.slice(1).map((item) => (
                   <Link
                     key={item.href}

@@ -121,6 +121,7 @@ for (const slug of ['underline-text-generator', 'small-caps-generator', 'double-
 validateContentUpdateCoverage([
   '/', '/about', '/contact', '/privacy', '/terms', '/styles', '/visual-art', '/fandom', '/guides',
   ...allPages.map((page) => `/${page.slug}`), ...guidePages.map((page) => `/guides/${page.slug}`),
+  ...require('../lib/text-library/catalog.ts').libraryPages.map((page) => page.path),
 ]);
 assert.equal(getVisualGeneratorConfig('handwriting-font-generator').presets.length, 3);
 assert.deepEqual(generatorRegistry.find((entry) => entry.slug === 'handwriting-font-generator').intent.expectedOutputs, ['text', 'png', 'svg']);

@@ -47,6 +47,8 @@
                 <li><Link href="/contact" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Contact</Link></li>
                 <li><Link href="/terms" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Terms of Service</Link></li>
                 <li><Link href="/privacy" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Privacy Policy</Link></li>
+                <li><Link href="/symbols" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Symbols &amp; Emoji</Link></li>
+                <li><Link href="/unicode-tools" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Unicode Tools</Link></li>
               </ul>
             </div>
           </div>

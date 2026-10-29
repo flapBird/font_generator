@@ -52,6 +52,11 @@ export default function VisualArtPage() {
         </header>
 
         <VisualArtDirectory items={items} />
+        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
+          <h2 className="text-lg font-semibold">Signature images</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">Type a name in six handwriting fonts or draw your signature, then download a cropped transparent PNG.</p>
+          <Link href="/signature-generator" className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-violet-700">Open Signature Generator →</Link>
+        </section>
       </div>
     </div>
   );

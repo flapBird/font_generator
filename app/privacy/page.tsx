@@ -7,7 +7,7 @@ export default function PrivacyPolicyPage() {
         <header className="mb-12 text-center">
           <h1 className="text-3xl font-bold sm:text-4xl">Privacy Policy</h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Last updated: October 26, 2026
+            Last updated: October 29, 2026
           </p>
         </header>
 
@@ -46,6 +46,20 @@ export default function PrivacyPolicyPage() {
             API request logs are retained for 60 days. See the{' '}
             <Link href="/ai-font-generator/policy">AI font terms and privacy</Link>{' '}
             for account, payment, storage, review and deletion details.
+          </p>
+
+          <p>
+            The Symbols, Kaomoji and Emoji Combos libraries store favorite and
+            recently copied item identifiers in this browser&apos;s local storage,
+            when available. Use Clear saved items in a library to remove both
+            lists across collections. Editable combinations and Invisible
+            Character checker input remain in page memory and are not saved
+            by these tools or sent to a conversion server. Copying writes the
+            selected text to your device clipboard at your request.
+            The Unicode inspector, remover and normal-text tool likewise keep
+            input and results in page memory. Signature names, drawing strokes
+            and PNG generation are processed locally and are not saved or
+            uploaded by the signature tool.
           </p>
 
           <h2>3. Accounts, purchases and font storage</h2>
@@ -106,6 +120,16 @@ export default function PrivacyPolicyPage() {
             visitors complete or leave the purchase process. Server-side events
             depend on analytics configuration and an available browser analytics
             identifier; they do not include payment card details or font descriptions.
+          </p>
+
+          <p>
+            The symbol libraries and Unicode utilities may record copy success
+            or failure, combination actions, favorites, filter use and directory
+            navigation using fixed tool and item identifiers. These events do
+            not include search terms, edited combinations, pasted text or
+            clipboard contents.
+            Signature download events contain the tool identifier, not a name,
+            drawing, signature image or other input.
           </p>
 
           <h2>6. Google AdSense and advertising cookies</h2>
