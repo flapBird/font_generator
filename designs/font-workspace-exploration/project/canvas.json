@@ -1,0 +1,73 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-31T11:22:42.512276+00:00"
+  },
+  "title": "Font Generators · 首页设计探索",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1480,
+      "title": "A · 清晰轻盈 / Desktop",
+      "expand": "fill"
+    },
+    "A-Mobile.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "A · 清晰轻盈 / Mobile"
+    },
+    "B-Desktop.dc.html": {
+      "x": 0,
+      "y": 1800,
+      "w": 1440,
+      "h": 1480,
+      "title": "B · 字体标本工作台 / Desktop",
+      "expand": "fill"
+    },
+    "B-Mobile.dc.html": {
+      "x": 1520,
+      "y": 1800,
+      "w": 390,
+      "h": 844,
+      "title": "B · 字体标本工作台 / Mobile"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "A-Mobile.dc.html",
+    "B-Desktop.dc.html",
+    "B-Mobile.dc.html"
+  ],
+  "notes": {
+    "direction-a": {
+      "x": 0,
+      "y": -300,
+      "text": "A / 清晰轻盈",
+      "kind": "title1",
+      "maxW": 1910
+    },
+    "direction-b": {
+      "x": 0,
+      "y": 1500,
+      "text": "B / 字体标本工作台",
+      "kind": "title1",
+      "maxW": 1910
+    },
+    "brief": {
+      "x": 2020,
+      "y": 0,
+      "w": 400,
+      "text": "评审范围：同一首页的两种视觉方向，每版含桌面与手机。\nA 保留紫色品牌、柔和卡片，收紧间距。\nB 使用黑白排版、细线与较紧凑的结果列表。\n\n均为静态视觉稿；输入、筛选、复制和主题按钮没有接入业务逻辑。导航链接指向现有站点。手机完整目录可展开。\n\n所有现有侧栏入口按原顺序保留。当前只展示前六个结果的排版，不代表删减样式。\n\n本画布不改变线上页面、SEO 或生成器行为。"
+    }
+  },
+  "designSystems": []
+}

@@ -53,3 +53,7 @@ next-env.d.ts
 # 仅本地使用的 AI 字体接入说明与配置模板
 /docs/ai-font-module.md
 /docs/ai-font.env.example
+
+# Local design canvas preview server state
+/designs/font-workspace-exploration/.artifact-server.json
+/designs/font-workspace-exploration/.artifact-server.log
