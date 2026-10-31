@@ -6,9 +6,19 @@
   },
   "title": "Font Generators · 首页设计探索",
   "launch": {
-    "view": "canvas"
+    "view": "focused",
+    "file": "Wall.dc.html"
   },
-  "pages": [],
+  "pages": [
+    {
+      "id": "v2",
+      "name": "02 · 新版交互与主要页面"
+    },
+    {
+      "id": "v1",
+      "name": "01 · 上轮静态方案"
+    }
+  ],
   "boards": {
     "Main.dc.html": {
       "x": 0,
@@ -16,14 +26,16 @@
       "w": 1440,
       "h": 1480,
       "title": "A · 清晰轻盈 / Desktop",
-      "expand": "fill"
+      "expand": "fill",
+      "page": "v1"
     },
     "A-Mobile.dc.html": {
       "x": 1520,
       "y": 0,
       "w": 390,
       "h": 844,
-      "title": "A · 清晰轻盈 / Mobile"
+      "title": "A · 清晰轻盈 / Mobile",
+      "page": "v1"
     },
     "B-Desktop.dc.html": {
       "x": 0,
@@ -31,17 +43,83 @@
       "w": 1440,
       "h": 1480,
       "title": "B · 字体标本工作台 / Desktop",
-      "expand": "fill"
+      "expand": "fill",
+      "page": "v1"
     },
     "B-Mobile.dc.html": {
       "x": 1520,
       "y": 1800,
       "w": 390,
       "h": 844,
-      "title": "B · 字体标本工作台 / Mobile"
+      "title": "B · 字体标本工作台 / Mobile",
+      "page": "v1"
+    },
+    "Wall.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 2200,
+      "title": "01 / 字体样本墙 · 输入、筛选、复制与比较",
+      "page": "v2",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "TextDetail.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 1600,
+      "title": "02 / Cursive 专属生成器 · 独立输入",
+      "page": "v2",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Explore.dc.html": {
+      "x": 3040,
+      "y": 0,
+      "w": 1440,
+      "h": 2400,
+      "title": "03 / 工具目录 · 按任务寻找",
+      "page": "v2",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Artwork.dc.html": {
+      "x": 0,
+      "y": 2760,
+      "w": 1440,
+      "h": 1600,
+      "title": "04 / 图形工作区 · Neon PNG",
+      "page": "v2",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Phone.dc.html": {
+      "x": 1520,
+      "y": 2760,
+      "w": 390,
+      "h": 844,
+      "title": "05 / 手机 · 文字流程",
+      "page": "v2",
+      "is_interactive": true
+    },
+    "Phone-Art.dc.html": {
+      "x": 1990,
+      "y": 2760,
+      "w": 390,
+      "h": 844,
+      "title": "06 / 手机 · 图形流程",
+      "page": "v2",
+      "is_interactive": true
     }
   },
   "order": [
+    "Wall.dc.html",
+    "TextDetail.dc.html",
+    "Explore.dc.html",
+    "Artwork.dc.html",
+    "Phone.dc.html",
+    "Phone-Art.dc.html",
     "Main.dc.html",
     "A-Mobile.dc.html",
     "B-Desktop.dc.html",
@@ -53,20 +131,60 @@
       "y": -300,
       "text": "A / 清晰轻盈",
       "kind": "title1",
-      "maxW": 1910
+      "maxW": 1910,
+      "page": "v1"
     },
     "direction-b": {
       "x": 0,
       "y": 1500,
       "text": "B / 字体标本工作台",
       "kind": "title1",
-      "maxW": 1910
+      "maxW": 1910,
+      "page": "v1"
     },
     "brief": {
       "x": 2020,
       "y": 0,
       "w": 400,
-      "text": "评审范围：同一首页的两种视觉方向，每版含桌面与手机。\nA 保留紫色品牌、柔和卡片，收紧间距。\nB 使用黑白排版、细线与较紧凑的结果列表。\n\n均为静态视觉稿；输入、筛选、复制和主题按钮没有接入业务逻辑。导航链接指向现有站点。手机完整目录可展开。\n\n所有现有侧栏入口按原顺序保留。当前只展示前六个结果的排版，不代表删减样式。\n\n本画布不改变线上页面、SEO 或生成器行为。"
+      "text": "评审范围：同一首页的两种视觉方向，每版含桌面与手机。\nA 保留紫色品牌、柔和卡片，收紧间距。\nB 使用黑白排版、细线与较紧凑的结果列表。\n\n均为静态视觉稿；输入、筛选、复制和主题按钮没有接入业务逻辑。导航链接指向现有站点。手机完整目录可展开。\n\n所有现有侧栏入口按原顺序保留。当前只展示前六个结果的排版，不代表删减样式。\n\n本画布不改变线上页面、SEO 或生成器行为。",
+      "page": "v1"
+    },
+    "v2-title": {
+      "x": 0,
+      "y": -300,
+      "text": "先选对工具，再把文字变成作品。",
+      "kind": "title1",
+      "maxW": 4480,
+      "page": "v2"
+    },
+    "v2-art-title": {
+      "x": 0,
+      "y": 2460,
+      "text": "文字复制与图片导出，各有自己的工作区。",
+      "kind": "title1",
+      "maxW": 3100,
+      "page": "v2"
+    },
+    "v2-principles": {
+      "x": 4560,
+      "y": 0,
+      "w": 420,
+      "page": "v2",
+      "text": "新版 / 从操作任务开始\n\n1. 首页：移除常驻右侧预览，让每个结果成为可直接复制的大样本；可选 3 个并排比较。\n2. 生成器：同一套交互，保留独立标题、默认输入和样式范围。\n3. 目录：按可复制文字、图形、符号和字符检查分类，搜索 96 个现有条目。\n4. 图形：输入后立即看到画布与导出，设置次之。\n5. 手机：菜单折叠，输入与结果优先。"
+    },
+    "v2-try": {
+      "x": 4560,
+      "y": 650,
+      "w": 420,
+      "page": "v2",
+      "text": "建议体验\n\n打开 01，点 Play。输入一段文字，切换分类并点击样本。复制受限时，页面下方会给出手动复制框。\n勾选 2–3 个 Compare，在结果后并排查看。\n清空输入、输入无结果的搜索词，查看恢复入口。\n从 Explore tools 搜索 cursive 或 neon，可进入画布内对应页面。其他目录项明确跳转线上工具。\n图形页修改标题、颜色、比例，Prepare PNG 后保存本地生成的图片。"
+    },
+    "v2-limits": {
+      "x": 2460,
+      "y": 2760,
+      "w": 420,
+      "page": "v2",
+      "text": "原型边界\n\n新版是独立设计概念，不改动线上导航或路由。旧入口仍存在于完整目录。\n文字原型提供 10 个代表样式；字母和数字映射来自当前实现。其余字符保留，不代表完整生产转换逻辑。\n图形原型使用系统 Arial 和简化的霓虹绘制；实际 PNG 来自当前预览画布，不是线上生产渲染器。\n比较功能是待评审的新交互，不是已上线功能。AI Font、登录、支付及其他生成器保留线上入口，不在本轮重设计范围。\n画布结构检查不等于浏览器交互或视觉验证。"
     }
   },
   "designSystems": []
