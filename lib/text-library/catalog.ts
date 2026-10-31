@@ -119,7 +119,7 @@ export const libraryPages: LibraryPageDefinition[] = [
   },
   {
     id: 'invisible-character', path: '/invisible-character', title: 'Invisible Character Copy and Paste', icon: '␣',
-    description: 'Copy a chosen invisible or blank character, repeat it up to 100 times and inspect pasted text for supported blank characters. See exact Unicode code points.',
+    description: 'Use this invisible text generator to copy a chosen blank character, repeat it up to 100 times and inspect pasted text. See exact Unicode code points.',
     intro: 'Choose the exact character you need, copy it, and paste into the checker to see what arrived. A blank-looking character is not necessarily a space.',
     sections: [
       { title: 'Blank text and zero-width text', text: 'A normal space and a no-break space occupy width. A zero-width space (U+200B) normally does not, and can provide a line-break opportunity. Braille Pattern Blank (U+2800) looks empty in many fonts but is a Braille character, not a whitespace character.' },

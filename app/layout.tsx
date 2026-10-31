@@ -26,8 +26,8 @@
  const geistSans = { variable: '--font-geist-sans' };
  const geistMono = { variable: '--font-geist-mono' };
  const adsenseClientId = 'ca-pub-4183802444188513';
- const homeMetaTitle = 'Free Font Generator – Copy & Paste Stylish Text';
- const homeMetaDescription = 'Create stylish copy-and-paste text and custom font art for social media, games, usernames, and more with free browser-based generators.';
+ const homeMetaTitle = 'Free Font Generator – Fancy Text & Online Font Changer';
+ const homeMetaDescription = 'Generate fancy text and change letter styles online. Copy and paste Unicode fonts for bios, names and messages, or explore separate text artwork tools.';
  const adEligiblePaths = [
    '/',
    '/visual-art',

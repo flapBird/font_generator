@@ -5,10 +5,19 @@ import { toolCategories, type ToolCategoryId } from './tool-navigation';
 export type ToolDirectoryEntry = { title: string; href: string; description: string; output: string; searchText: string };
 export type ToolDirectoryGroup = { id: ToolCategoryId; title: string; href: string; description: string; entries: ToolDirectoryEntry[] };
 
+// Search synonyms reuse canonical tools rather than creating duplicate landing pages.
+const keywordAliases: Record<string, string> = {
+  'cursive-font-generator': 'cursive text generator',
+  'keyboard-font-generator': 'font keyboard online copy paste',
+  'small-caps-generator': 'small caps text generator',
+  'instagram-font-generator': 'instagram bio font generator',
+  'name-font-generator': 'nickname font generator',
+  'preppy-font-generator': 'preppy fonts copy and paste',
+};
 const fontEntries = (visual: boolean): ToolDirectoryEntry[] => (visual ? getVisualArtGenerators() : getFontStyleGenerators()).map((tool) => ({
   title: tool.title, href: tool.canonicalPath, description: tool.intent.primary,
   output: visual ? tool.intent.expectedOutputs.includes('text') ? 'Text & artwork' : 'Images & artwork' : 'Copyable text',
-  searchText: `${tool.title} ${tool.slug} ${tool.tags.join(' ')} ${tool.intent.primary} ${tool.intent.secondary.join(' ')}`.toLowerCase(),
+  searchText: `${tool.title} ${tool.slug} ${keywordAliases[tool.slug] ?? ''} ${tool.tags.join(' ')} ${tool.intent.primary} ${tool.intent.secondary.join(' ')}`.toLowerCase(),
 }));
 const libraryEntries = (ids: string[]): ToolDirectoryEntry[] => libraryPages.filter((page) => ids.includes(page.id)).map((page) => ({
   title: page.title, href: page.path, description: page.description,

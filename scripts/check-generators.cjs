@@ -128,15 +128,15 @@ assert.deepEqual(generatorRegistry.find((entry) => entry.slug === 'handwriting-f
 console.log('Expansion regressions passed: underline, fullwidth punctuation/spacing, small caps, double-struck exceptions/digits, protected social entities, weighted X lengths, pet frames, links and sitemap dates.');
 
 const { hiddenNavigationSlugs, isVisibleInGeneratorNavigation, focusedTextSlugs } = require('../lib/generator-navigation.ts');
-assert.equal(hiddenNavigationSlugs.length, 33);
-assert.equal(new Set(hiddenNavigationSlugs).size, 33);
+assert.equal(hiddenNavigationSlugs.length, 35);
+assert.equal(new Set(hiddenNavigationSlugs).size, 35);
 for (const slug of hiddenNavigationSlugs) {
   assert.ok(knownSlugs.has(slug), `Hidden navigation entry is still a real page: ${slug}`);
   assert.equal(isVisibleInGeneratorNavigation(`/${slug}`), false);
 }
 for (const page of allPages.filter((page) => !hiddenNavigationSlugs.includes(page.slug))) assert.equal(isVisibleInGeneratorNavigation(`/${page.slug}`), true, `${page.slug} retains its navigation entry`);
 for (const slug of ['small-text-generator', 'cursive-font-generator', 'impact-font-generator']) assert.equal(focusedTextSlugs.has(slug), false, `${slug} retains its existing workspace`);
-console.log('Navigation regressions passed: 23 previous and 10 discovery additions hidden, all older entries preserved, old workspace opt-in unchanged.');
+console.log('Navigation regressions passed: 23 previous and 12 discovery additions hidden, all older entries preserved, old workspace opt-in unchanged.');
 
 const { discoverySlugs, discoveryTextSlugs, discoveryArtSlugs } = require('../lib/discovery-catalog.ts');
 const { discoveryTextResults, squareText, messageResults, frameDiscoveryText, styleDiscoveryText } = require('../lib/discovery-text.ts');
@@ -182,7 +182,7 @@ for (const id of Object.keys(discoveryFonts)) {
   assert.ok(fs.statSync(`public/fonts/discovery/${id}/latin.woff2`).size > 1000);
   assert.ok(fs.readFileSync(`public/fonts/discovery/${id}/LICENSE.txt`, 'utf8').length > 500);
 }
-console.log('Discovery regressions passed: ten routes, square alphabets, protected references, platform-specific delimiters, empty/oversized input, grapheme preservation and twelve licensed artwork presets.');
+console.log('Discovery regressions passed: twelve routes, square alphabets, protected references, platform-specific delimiters, empty/oversized input, grapheme preservation and twelve licensed artwork presets.');
 
 // Baseline captured before the October expansion. Changes to older transforms,
 // preset lists, defaults, output declarations or homepage priorities must be deliberate.

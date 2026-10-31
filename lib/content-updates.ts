@@ -1,8 +1,9 @@
 import { discoverySlugs } from './discovery-catalog';
 
 const updateGroups = {
+  '2026-11-01': ['/', '/tools', '/styles', '/cute-font-generator', '/calligraphy-font-generator', '/cursive-font-generator', '/preppy-font-generator', '/heart-font-generator', '/invisible-character'],
   '2026-10-30': [
-    '/tools', '/unicode-tools', '/invisible-character',
+    '/unicode-tools',
     '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',
     '/symbols', '/symbols/heart-symbols', '/symbols/star-symbols', '/symbols/arrow-symbols',
     '/kaomoji', '/emoji-combos',
@@ -22,10 +23,9 @@ const updateGroups = {
     '/glitch-font-generator',
     '/gaming-font-generator',
     '/guides/reddit-fancy-text-guide',
-    ...discoverySlugs.map((slug) => `/${slug}`),
-    '/styles',
+    ...discoverySlugs.filter((slug) => !['cute-font-generator', 'calligraphy-font-generator'].includes(slug)).map((slug) => `/${slug}`),
     '/halloween-font-generator',
-    '/k-pop-font-generator', '/wingdings-font-generator', '/preppy-font-generator',
+    '/k-pop-font-generator', '/wingdings-font-generator',
     '/emoji-font-generator',
     '/adopt-me-font-generator',
   ],
@@ -33,7 +33,6 @@ const updateGroups = {
     '/korean-font-generator',
     '/chinese-font-generator', '/graffiti-font-generator',
     '/arabic-font-generator',
-    '/',
     '/bold-text-generator',
     '/strikethrough-text-generator',
     '/underline-text-generator',
@@ -49,7 +48,6 @@ const updateGroups = {
   '2026-10-26': [
     '/fandom',
     '/small-text-generator',
-    '/cursive-font-generator',
     '/serif-font-generator',
     '/linkedin-font-generator',
     '/minecraft-font-generator',
@@ -89,7 +87,6 @@ const updateGroups = {
     '/christmas-font-generator',
     '/cursive-tattoo-font-generator',
     '/glitter-font-generator',
-    '/heart-font-generator',
     '/big-font-generator',
     '/ransom-note-font-generator',
     '/san-francisco-font-generator',

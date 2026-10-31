@@ -13,7 +13,7 @@ test('all tools directory is indexable and exposes every canonical tool link in 
   expect(llms).toContain('Search loads a lightweight public catalog only on focus');
   const catalog = await request.get('/tool-search.json');
   expect(catalog.headers()['x-robots-tag']).toBe('noindex');
-  expect(await catalog.json()).toHaveLength(96);
+  expect(await catalog.json()).toHaveLength(98);
 });
 
 test('directory searches, filters, recovers from no results and opens existing tools on phone and desktop', async ({ page }) => {

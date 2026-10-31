@@ -14,6 +14,8 @@ import TextToolInput from './TextToolInput';
 import TextOutputCard from './TextOutputCard';
 
 const notes: Record<string, string> = {
+  'cute-font-generator': 'Compare soft script, rounded letters and small caps. Add hearts, bows or sparkles around each non-empty line. These are copyable characters, not colored fonts or stickers. Detected links and references keep their spelling.',
+  'calligraphy-font-generator': 'Compare light script, bold script and angular blackletter. Optional flourishes frame each non-empty line. Unicode letters do not connect like a real calligraphy typeface; use Handwriting or Signature for rendered artwork.',
   'old-english-font-generator': 'These copyable blackletter characters style Latin letters, not the Old English language. Numbers and unsupported scripts remain unchanged. Real typefaces and font files are separate products.',
   'whatsapp-font-generator': 'Fancy text is Unicode for supported display fields. Message formatting uses WhatsApp delimiters and only belongs in messages. Existing delimiter conflicts are shown without deleting your input. Preview formatting is illustrative; check the final message in WhatsApp.',
   'square-text-generator': 'Square alphabets use uppercase Latin letters. Digits, punctuation, other scripts and existing emoji stay unchanged. Filled squares may appear as colored emoji depending on the device.',
@@ -45,7 +47,7 @@ export default function DiscoveryTextTool({ slug, pageTitle, config, navigationI
   // Explicit classes stay discoverable by Tailwind without changing global scans.
   const previewClasses: Record<string, string> = { bold: 'font-bold', italic: 'italic', strike: 'line-through', code: 'font-mono', monospace: 'font-mono' };
   const preview = { ...selected, category: 'classic' as const, ...(mode === 'format' ? { formattedText: { text: selected.previewText ?? '', className: previewClasses[selected.id] ?? '' } } : {}) };
-  const frames: DiscoveryFrame[] = slug === 'sad-font-generator' ? ['none', 'broken', 'rain', 'rose'] : slug === 'old-english-font-generator' ? ['none', 'royal', 'brackets'] : [];
+  const frames: DiscoveryFrame[] = slug === 'sad-font-generator' ? ['none', 'broken', 'rain', 'rose'] : slug === 'old-english-font-generator' ? ['none', 'royal', 'brackets'] : slug === 'cute-font-generator' ? ['none', 'hearts', 'bows', 'sparkles'] : slug === 'calligraphy-font-generator' ? ['none', 'flourish', 'brackets'] : [];
 
   return <TextToolLayout id="generator" label={`${pageTitle} workspace`} workspace={{ pageTitle, config, navigationItems, preview, mobileDirectoryAfterResults: true, outputLabel: mode === 'format' ? 'Formatting source' : 'Copyable text' }} controls={<>
     <TextToolInput id="generator-input" text={text} onChange={setText} limit={1000} />

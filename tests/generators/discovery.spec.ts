@@ -28,7 +28,7 @@ test('discovery routes expose canonical metadata, truthful outputs, directories 
   await expect(page.getByRole('link', { name: 'Try the Reddit Font Generator' })).toBeVisible();
 });
 
-test('seven text workspaces copy by keyboard, isolate input and retain existing navigation on desktop and mobile', async ({ page, context }) => {
+test('discovery text workspaces copy by keyboard, isolate input and retain existing navigation on desktop and mobile', async ({ page, context }) => {
   test.setTimeout(120000);
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   const errors: string[] = []; page.on('pageerror', (error) => errors.push(`${page.url()}: ${error.stack ?? error.message}`));
@@ -181,4 +181,34 @@ test('failed fonts block export and retry succeeds; older routes do not request 
     await expect(page.locator('h1')).toHaveCount(1);
   }
   expect(fonts).toEqual([]);
+});
+
+test('cute and calligraphy frames preserve lines, originals and input; content is server rendered', async ({ page, request }) => {
+  for (const [slug, decoration, frame] of [
+    ['cute-font-generator', 'Bows', '୨୧'],
+    ['calligraphy-font-generator', 'Flourish', '❦'],
+  ]) {
+    const html = await (await request.get(`/${slug}`)).text();
+    expect(html).toContain('What is the');
+    expect(html).toContain('How to use this generator');
+    expect(html).toContain(slug === 'cute-font-generator' ? 'Can I make pink' : 'Does this make connected');
+    await page.goto(`/${slug}`);
+    const input = 'Hello\n\n中文 👨‍👩‍👧‍👦 @artist https://example.com';
+    await page.locator('#generator-input').fill(input);
+    await page.getByRole('button', { name: new RegExp(decoration) }).click();
+    await expect(page.locator('#generator-input')).toHaveValue(input);
+    const output = page.getByRole('button', { name: /^Copy / }).first().locator('[aria-label$=" output"]');
+    await expect(output).toContainText(frame);
+    expect(await output.textContent()).toContain('\n\n');
+    expect(await output.textContent()).toContain('中文 👨‍👩‍👧‍👦 @artist https://example.com');
+    await expect(page.getByLabel('Original text output', { exact: true })).toHaveText(input);
+    for (const width of [320, 390, 1440]) {
+      await page.setViewportSize({ width, height: 950 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await page.locator('#generator').screenshot({ path: `/tmp/${slug}-${width}.png` });
+    }
+  }
+  await page.goto('/tools');
+  await page.getByRole('searchbox', { name: 'Search all tools', exact: true }).fill('cursive text generator');
+  await expect(page.locator('main a[href="/cursive-font-generator"]').first()).toBeVisible();
 });

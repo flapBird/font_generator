@@ -7,6 +7,7 @@ export const DISCOVERY_TEXT_LIMIT = 1000;
 export const discoveryFrames = {
   none: ['None', '', ''], royal: ['Royal', '♔ ', ' ♔'], brackets: ['Brackets', '「', '」'],
   broken: ['Broken heart', '💔 ', ' 💔'], rain: ['Rain', '☂ ', ' ☂'], rose: ['Wilted rose', '🥀 ', ' 🥀'],
+  hearts: ['Hearts', '♡ ', ' ♡'], bows: ['Bows', '୨୧ ', ' ୨୧'], flourish: ['Flourish', '❦ ', ' ❦'],
   stars: ['Stars', '✦ ', ' ✦'], sparkles: ['Sparkles', '✧ ', ' ✧'],
 } as const;
 export type DiscoveryFrame = keyof typeof discoveryFrames;
