@@ -17,19 +17,21 @@ const linkClass = 'inline-flex min-h-9 items-center text-sm leading-6 text-muted
 export default function Footer() {
   return <footer className="border-t border-border bg-muted/50">
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
-      <div className="grid grid-cols-2 gap-10 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)] md:gap-12">
-        <div className="col-span-2 max-w-sm md:col-span-1">
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:gap-12">
+        <div className="max-w-sm">
           <Link href="/" className="gradient-text text-2xl font-bold">Font Generators</Link>
           <p className="mt-4 text-sm leading-7 text-muted-foreground">Font styles, text artwork, symbols and practical Unicode tools in one place.</p>
         </div>
-        <nav aria-label="Font and text tools">
-          <h3 className="mb-3 font-semibold text-foreground">Explore tools</h3>
-          <ul>{toolLinks.map((item) => <li key={item.href}><Link href={item.href} className={linkClass}>{item.title}</Link></li>)}</ul>
-        </nav>
-        <nav aria-label="Site information">
-          <h3 className="mb-3 font-semibold text-foreground">About &amp; Help</h3>
-          <ul>{siteLinks.map((item) => <li key={item.href}><Link href={item.href} className={linkClass}>{item.label}</Link></li>)}</ul>
-        </nav>
+        <div className="ml-auto grid w-full max-w-[26rem] grid-cols-2 gap-8 sm:gap-12 md:w-[26rem]">
+          <nav aria-label="Font and text tools">
+            <h3 className="mb-3 font-semibold text-foreground">Explore tools</h3>
+            <ul>{toolLinks.map((item) => <li key={item.href}><Link href={item.href} className={linkClass}>{item.title}</Link></li>)}</ul>
+          </nav>
+          <nav aria-label="Site information">
+            <h3 className="mb-3 font-semibold text-foreground">About &amp; Help</h3>
+            <ul>{siteLinks.map((item) => <li key={item.href}><Link href={item.href} className={linkClass}>{item.label}</Link></li>)}</ul>
+          </nav>
+        </div>
       </div>
       <div className="mt-8 flex flex-col-reverse justify-between gap-4 border-t border-border pt-5 sm:flex-row sm:items-center">
         <p className="text-xs leading-6 text-muted-foreground">&copy; {new Date().getFullYear()} font-generators.org. All rights reserved.</p>
