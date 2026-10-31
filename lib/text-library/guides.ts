@@ -1,7 +1,8 @@
 import type { LibraryId } from './catalog';
+import { unicodeGuides } from './unicode-guides';
 
 export type SymbolCollectionId = 'symbols' | 'hearts' | 'stars' | 'arrows' | 'kaomoji' | 'emoji-combos';
-type CollectionGuide = {
+export type CollectionGuide = {
   heading: string; paragraphs: string[]; howToHeading: string;
   steps: { title: string; text: string }[];
   faq: { question: string; answer: string }[];
@@ -132,5 +133,5 @@ export const collectionGuides: Record<SymbolCollectionId, CollectionGuide> = {
 };
 
 export function getCollectionGuide(id: LibraryId): CollectionGuide | undefined {
-  return Object.hasOwn(collectionGuides, id) ? collectionGuides[id as SymbolCollectionId] : undefined;
+  return Object.hasOwn(collectionGuides, id) ? collectionGuides[id as SymbolCollectionId] : unicodeGuides[id];
 }

@@ -55,7 +55,8 @@ test('Unicode workspaces have their own navigation, keep inputs separate and fit
       await page.setViewportSize({ width, height: 900 });
       await page.goto(path);
       const navigation = page.getByRole('navigation', { name: 'Unicode tool navigation', exact: true });
-      await expect(navigation.locator('a[aria-current="page"]')).toHaveAttribute('href', path);
+      if (width < 640) await navigation.locator('summary').click();
+      await expect(navigation.locator('a[aria-current="page"]:visible')).toHaveAttribute('href', path);
       await expect(navigation.getByRole('link')).toHaveCount(5);
       await expect(page.getByRole('navigation', { name: 'Current generator', exact: true })).toHaveCount(0);
       await expect(page.getByPlaceholder('Search generators...')).toHaveCount(0);
@@ -64,7 +65,7 @@ test('Unicode workspaces have their own navigation, keep inputs separate and fit
       await page.locator('#unicode-utility-input').fill('Only this page');
       const next = paths[(paths.indexOf(path) + 1) % paths.length];
       await page.evaluate(() => { (window as unknown as Record<string, unknown>).unicodeNavigationMarker = true; });
-      await navigation.locator(`a[href="${next}"]`).click();
+      await navigation.locator(`a[href="${next}"]:visible`).click();
       await expect(page.locator('#unicode-utility-input')).not.toHaveValue('Only this page');
       expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).unicodeNavigationMarker)).toBe(true);
       await page.getByRole('button', { name: 'Clear input', exact: true }).click();

@@ -51,9 +51,9 @@ test('original navigation entries, order, search and collection-link placement a
       }
     }
     await page.goto('/styles');
-    for (const slug of newSlugs.filter((slug) => slug !== 'handwriting-font-generator')) await expect(page.locator(`a[href="/${slug}"]`).first()).toBeVisible();
+    for (const slug of newSlugs.filter((slug) => slug !== 'handwriting-font-generator')) await expect(page.getByRole('main').locator(`a[href="/${slug}"]`).first()).toBeVisible();
     await page.goto('/visual-art');
-    await expect(page.locator('a[href="/handwriting-font-generator"]').first()).toBeVisible();
+    await expect(page.getByRole('main').locator('a[href="/handwriting-font-generator"]').first()).toBeVisible();
   }
 });
 
