@@ -231,7 +231,6 @@ test('mobile and desktop layouts stay within viewport and directory links remain
   }
   await page.setViewportSize({ width: 390, height: 900 });
   await page.getByRole('button', { name: 'Open menu', exact: true }).click();
-  await page.locator('#mobile-navigation').getByRole('button', { name: 'Tools', exact: true }).click();
   await page.locator('#mobile-tool-links').getByRole('link', { name: 'Symbols & Emoji', exact: true }).click();
   await expect(page).toHaveURL(/\/symbols$/);
   await expect(page.getByRole('button', { name: 'Open menu', exact: true })).toBeVisible();

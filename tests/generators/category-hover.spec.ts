@@ -8,7 +8,7 @@ test('centered categories open on mouse hover and retain the earlier ten/seven s
   for (const width of [1024, 1440]) {
     await page.setViewportSize({ width, height: 900 }); await page.goto('/styles');
     const categories = page.locator('[data-category-menu]:visible');
-    if (width === 1440) {
+    if (width >= 1024) {
       const first = await categories.first().boundingBox(); const last = await categories.last().boundingBox();
       expect(Math.abs((first!.x + last!.x + last!.width) / 2 - width / 2)).toBeLessThan(2);
     }
@@ -40,7 +40,6 @@ test('phone long categories remain click-operated and scroll to their final shor
   await page.getByRole('button', { name: 'Open menu', exact: true }).click();
   const mobile = page.locator('#mobile-navigation');
   await expect.poll(() => mobile.evaluate((element) => element.style.height)).toBe('auto');
-  await mobile.getByRole('button', { name: 'Tools', exact: true }).click();
   const trigger = mobile.getByRole('button', { name: 'Show Font Styles tools', exact: true });
   await trigger.hover(); await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   await trigger.click();

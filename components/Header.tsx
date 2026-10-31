@@ -17,53 +17,36 @@ const primaryLinks = [
 ];
 const linkClass = 'flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500';
 
-function Chevron({ open }: { open: boolean }) {
-  return <svg aria-hidden="true" className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 16 16"><path d="M4 6.5L8 10.5L12 6.5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" /></svg>;
-}
-
 export default function Header() {
   const pathname = usePathname();
   const [categoryOpen, setCategoryOpen] = useState<ToolCategoryId | null>(null);
-  const [desktopOpen, setDesktopOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
-  const toolsRef = useRef<HTMLDivElement>(null);
-  const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  function clearTimer() { if (openTimer.current) { clearTimeout(openTimer.current); openTimer.current = null; } }
-  function closeAll() { setCategoryOpen(null); clearTimer(); setDesktopOpen(false); setMobileOpen(false); setMobileToolsOpen(false); }
-  function closeDesktop() { clearTimer(); setDesktopOpen(false); }
-  function openDesktop(delayed = false) {
-    setCategoryOpen(null); clearTimer();
-    if (delayed) openTimer.current = setTimeout(() => setDesktopOpen(true), 180);
-    else setDesktopOpen(true);
-  }
+  function closeAll() { setCategoryOpen(null); setMobileOpen(false); }
   useEffect(() => {
     function outside(event: PointerEvent) {
       if (!(event.target instanceof Element) || !event.target.closest('[data-category-menu]')) setCategoryOpen(null);
-      if (!toolsRef.current?.contains(event.target as Node)) { if (openTimer.current) clearTimeout(openTimer.current); setDesktopOpen(false); }
-      if (!headerRef.current?.contains(event.target as Node)) { setMobileOpen(false); setMobileToolsOpen(false); }
+      if (!headerRef.current?.contains(event.target as Node)) { setMobileOpen(false); }
     }
     document.addEventListener('pointerdown', outside);
-    return () => { document.removeEventListener('pointerdown', outside); if (openTimer.current) clearTimeout(openTimer.current); };
+    return () => document.removeEventListener('pointerdown', outside);
   }, []);
 
   return <header ref={headerRef} className="relative z-50 h-12"
     onKeyDown={(event) => {
-      if (event.key !== 'Escape' || (!desktopOpen && !mobileOpen)) return;
+      if (event.key !== 'Escape' || !mobileOpen) return;
       event.preventDefault();
-      if (mobileOpen) { closeAll(); document.getElementById('mobile-menu-trigger')?.focus(); }
-      else { closeDesktop(); document.getElementById('tools-menu-trigger')?.focus(); }
+      closeAll(); document.getElementById('mobile-menu-trigger')?.focus();
     }}>
     <nav aria-label="Primary navigation">
       <div className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 sm:gap-5 sm:px-6 lg:px-8">
-          <Link href="/" onClick={closeAll} className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"><span className="brand-gradient-text whitespace-nowrap text-base font-bold tracking-[-0.04em] sm:text-2xl">Font Generators</span></Link>
-          <div className="hidden w-full max-w-md lg:block"><SiteSearch key={pathname} id="site-search-desktop" onOpen={closeAll} /></div>
-          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 sm:gap-5 sm:px-6 lg:grid lg:grid-cols-[1fr_minmax(0,30rem)_1fr] lg:px-8 xl:grid-cols-[1fr_minmax(0,32rem)_1fr]">
+          <Link href="/" onClick={closeAll} className="shrink-0 justify-self-start rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"><span className="brand-gradient-text whitespace-nowrap text-base font-bold tracking-[-0.04em] sm:text-2xl">Font Generators</span></Link>
+          <div className="hidden w-full min-w-0 lg:block"><SiteSearch key={pathname} id="site-search-desktop" onOpen={closeAll} /></div>
+          <div className="ml-auto flex shrink-0 items-center justify-self-end gap-1.5 sm:gap-3">
             <ThemeToggle />
             <AccountMenu />
-            <button id="mobile-menu-trigger" type="button" aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-controls="mobile-navigation" aria-expanded={mobileOpen} onClick={() => { setMobileOpen(!mobileOpen); setMobileToolsOpen(false); setCategoryOpen(null); }} className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 lg:hidden">
+            <button id="mobile-menu-trigger" type="button" aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-controls="mobile-navigation" aria-expanded={mobileOpen} onClick={() => { setMobileOpen(!mobileOpen); setCategoryOpen(null); }} className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 lg:hidden">
               <svg aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">{mobileOpen ? <path strokeLinecap="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}</svg>
             </button>
           </div>
@@ -72,27 +55,9 @@ export default function Header() {
       <div className="absolute inset-x-0 top-16 border-b border-border bg-white dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
           <div className="py-2 lg:hidden" inert={mobileOpen}><SiteSearch key={pathname} id="site-search-mobile" onOpen={closeAll} /></div>
-          <div className="hidden h-12 items-center gap-2 lg:flex xl:grid xl:grid-cols-[1fr_auto_1fr]">
-            <div ref={toolsRef} className="relative flex h-full items-center justify-self-start"
-              onMouseEnter={() => openDesktop(true)} onMouseLeave={() => { if (!toolsRef.current?.contains(document.activeElement)) closeDesktop(); }}
-              onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeDesktop(); }}>
-              <button id="tools-menu-trigger" type="button" aria-expanded={desktopOpen} aria-controls="desktop-tool-links" className={linkClass}
-                onClick={() => { clearTimer(); setCategoryOpen(null); setDesktopOpen(!desktopOpen); }}
-                onKeyDown={(event) => { if (event.key === 'ArrowDown') { event.preventDefault(); openDesktop(); requestAnimationFrame(() => document.querySelector<HTMLAnchorElement>('#desktop-tool-links a')?.focus()); } }}>
-                Tools<Chevron open={desktopOpen} />
-              </button>
-              <div className="pointer-events-none absolute left-0 top-full w-[min(38rem,calc(100vw-3rem))]">
-                <div className={`t-dropdown ${desktopOpen ? 'is-open' : ''}`} data-origin="top-left">
-                  <nav id="desktop-tool-links" aria-label="Tool categories" aria-hidden={!desktopOpen} inert={!desktopOpen} className="overflow-hidden rounded-2xl border border-border bg-background shadow-[0_20px_60px_-16px_rgba(15,23,42,0.3)]">
-                    <div className="grid grid-cols-2 gap-1 p-3">{featuredToolCategories.map((category) => <Link key={category.id} href={category.href} onClick={closeAll} onFocus={() => openDesktop()} className="rounded-xl p-4 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500">
-                      <span className="block text-sm font-semibold text-foreground">{category.title}</span><span className="mt-2 block text-xs leading-5 text-muted-foreground">{category.description}</span>
-                    </Link>)}</div>
-                    <Link href="/tools" onClick={closeAll} className="flex min-h-12 items-center justify-between border-t border-border bg-muted px-6 text-sm font-semibold text-violet-700 dark:text-violet-300 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-violet-500">Browse all tools<span aria-hidden="true">→</span></Link>
-                  </nav>
-                </div>
-              </div>
-            </div>
-            <div className="flex min-w-0 items-center gap-1 xl:gap-3">{featuredToolCategories.map((category) => <CategoryMenu key={category.id} category={category} activePath={pathname} open={categoryOpen === category.id} onOpen={() => { closeDesktop(); setCategoryOpen(category.id); }} onToggle={() => { closeDesktop(); setCategoryOpen(categoryOpen === category.id ? null : category.id); }} onClose={() => setCategoryOpen((value) => value === category.id ? null : value)} onNavigate={closeAll} />)}</div>
+          <div className="hidden h-12 items-center gap-2 lg:grid lg:grid-cols-[1fr_auto_1fr]">
+            <div aria-hidden="true" className="hidden lg:block" />
+            <div className="flex min-w-0 items-center gap-1 xl:gap-3">{featuredToolCategories.map((category) => <CategoryMenu key={category.id} category={category} activePath={pathname} open={categoryOpen === category.id} onOpen={() => { setCategoryOpen(category.id); }} onToggle={() => { setCategoryOpen(categoryOpen === category.id ? null : category.id); }} onClose={() => setCategoryOpen((value) => value === category.id ? null : value)} onNavigate={closeAll} />)}</div>
             <div className="ml-auto flex items-center justify-self-end xl:ml-0">
             {primaryLinks.map((item) => <Link key={item.href} href={item.href} className={linkClass} onClick={closeAll}>{item.label}</Link>)}
             </div>
@@ -101,9 +66,7 @@ export default function Header() {
       </div>
       <AnimatePresence>{mobileOpen && <motion.div id="mobile-navigation" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="fixed inset-x-0 top-16 z-50 overflow-hidden border-b border-border bg-background px-3 shadow-lg lg:hidden">
         <div className="max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-y-contain py-3">
-          <button type="button" aria-expanded={mobileToolsOpen} aria-controls="mobile-tool-links" onClick={() => { setMobileToolsOpen(!mobileToolsOpen); setCategoryOpen(null); }} className="flex min-h-12 w-full items-center justify-between rounded-xl px-4 text-left font-medium hover:bg-muted">Tools<Chevron open={mobileToolsOpen} /></button>
-          <nav id="mobile-tool-links" aria-label="Mobile tool categories" hidden={!mobileToolsOpen} className="mx-2 mb-2 rounded-xl border border-border bg-muted p-2">
-            <Link href="/tools" onClick={closeAll} className="flex min-h-11 items-center justify-between rounded-lg px-3 text-sm font-semibold text-violet-700 dark:text-violet-300">Browse all tools<span aria-hidden="true">→</span></Link>
+          <nav id="mobile-tool-links" aria-label="Mobile tool categories" className="mb-2 space-y-1 border-b border-border pb-3">
             {featuredToolCategories.map((category) => <CategoryMenu key={category.id} category={category} mobile activePath={pathname} open={categoryOpen === category.id} onToggle={() => setCategoryOpen(categoryOpen === category.id ? null : category.id)} onClose={() => setCategoryOpen((value) => value === category.id ? null : value)} onNavigate={closeAll} />)}
           </nav>
           {primaryLinks.map((item) => <Link key={item.href} href={item.href} onClick={closeAll} className="flex min-h-12 items-center rounded-xl px-4 font-medium text-foreground hover:bg-muted">{item.label}</Link>)}

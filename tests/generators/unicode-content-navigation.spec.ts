@@ -52,7 +52,6 @@ test('phone category accordions and local tool switcher fit and navigate without
     await page.setViewportSize({ width, height: 844 }); await page.goto('/unicode-tools');
     await page.getByRole('button', { name: 'Open menu', exact: true }).click();
     const mobile = page.locator('#mobile-navigation');
-    await mobile.getByRole('button', { name: 'Tools', exact: true }).click();
     await mobile.getByRole('button', { name: 'Show Unicode Tools tools', exact: true }).click();
     const panel = page.locator('#mobile-unicode-tools-shortcuts');
     await expect(panel.getByRole('link')).toHaveCount(5);

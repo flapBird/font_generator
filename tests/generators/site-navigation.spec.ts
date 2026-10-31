@@ -19,28 +19,24 @@ test('footer has a bounded directory list and keeps help and policies separate',
   }
 });
 
-test('one Tools menu keeps categories peer-level on phone, tablet and desktop', async ({ page }) => {
+test('direct categories replace the Tools menu on phone, tablet and desktop', async ({ page }) => {
   for (const width of [320, 390, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 1000 }); await page.goto('/symbols');
-    await expect(page.getByRole('navigation', { name: 'Symbol collections', exact: true }).locator('a[href="/unicode-tools"]')).toHaveCount(0);
     const main = page.getByRole('navigation', { name: 'Primary navigation', exact: true });
-    let menu;
-    if (width >= 1024) {
-      const brand = await main.getByRole('link', { name: 'Font Generators', exact: true }).boundingBox();
-      const trigger = main.getByRole('button', { name: 'Tools', exact: true });
-      const bounds = await trigger.boundingBox(); expect(brand!.y + brand!.height).toBeLessThan(bounds!.y);
-      await trigger.click(); menu = page.getByRole('navigation', { name: 'Tool categories', exact: true });
-      const box = await menu.boundingBox(); expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x + box!.width).toBeLessThanOrEqual(width);
-      if (width === 1440) await page.screenshot({ path: '/tmp/tools-menu-1440.png', animations: 'disabled' });
-    } else {
+    await expect(main.getByRole('button', { name: 'Tools', exact: true })).toHaveCount(0);
+    await expect(page.locator('#desktop-tool-links')).toHaveCount(0);
+    let menu = main;
+    if (width < 1024) {
       await main.getByRole('button', { name: 'Open menu', exact: true }).click();
       const mobile = page.locator('#mobile-navigation'); await expect.poll(() => mobile.evaluate((element) => element.style.height)).toBe('auto');
-      await mobile.getByRole('button', { name: 'Tools', exact: true }).click(); menu = page.getByRole('navigation', { name: 'Mobile tool categories', exact: true });
-      if (width === 390) await page.screenshot({ path: '/tmp/tools-menu-390.png', animations: 'disabled' });
+      menu = page.getByRole('navigation', { name: 'Mobile tool categories', exact: true });
+      await expect(menu.getByRole('link')).toHaveCount(4);
+    } else {
+      const box = await page.locator('#site-search-desktop').boundingBox();
+      expect(Math.abs(box!.x + box!.width / 2 - width / 2)).toBeLessThan(2);
     }
-    await expect(menu.getByRole('link')).toHaveCount(5);
-    for (const category of featuredToolCategories) await expect(menu.getByRole('link', { name: category.title, exact: width < 1024 })).toHaveAttribute('href', category.href);
-    await menu.getByRole('link', { name: 'Unicode Tools', exact: width < 1024 }).click(); await expect(page).toHaveURL(/\/unicode-tools$/);
+    for (const category of featuredToolCategories) await expect(menu.getByRole('link', { name: category.title, exact: true })).toHaveAttribute('href', category.href);
+    await menu.getByRole('link', { name: 'Unicode Tools', exact: true }).click(); await expect(page).toHaveURL(/\/unicode-tools$/);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });
