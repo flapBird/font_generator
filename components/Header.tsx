@@ -69,11 +69,11 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <div className="absolute inset-x-0 top-16 border-b border-border bg-background">
+      <div className="absolute inset-x-0 top-16 border-b border-border bg-white dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
           <div className="py-2 lg:hidden" inert={mobileOpen}><SiteSearch key={pathname} id="site-search-mobile" onOpen={closeAll} /></div>
-          <div className="hidden h-12 items-center gap-1 lg:flex">
-            <div ref={toolsRef} className="relative flex h-full items-center"
+          <div className="hidden h-12 items-center gap-2 lg:flex xl:grid xl:grid-cols-[1fr_auto_1fr]">
+            <div ref={toolsRef} className="relative flex h-full items-center justify-self-start"
               onMouseEnter={() => openDesktop(true)} onMouseLeave={() => { if (!toolsRef.current?.contains(document.activeElement)) closeDesktop(); }}
               onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeDesktop(); }}>
               <button id="tools-menu-trigger" type="button" aria-expanded={desktopOpen} aria-controls="desktop-tool-links" className={linkClass}
@@ -92,8 +92,8 @@ export default function Header() {
                 </div>
               </div>
             </div>
-            <div className="flex min-w-0 items-center gap-1 border-l border-border pl-2">{featuredToolCategories.map((category) => <CategoryMenu key={category.id} category={category} activePath={pathname} open={categoryOpen === category.id} onToggle={() => { closeDesktop(); setCategoryOpen(categoryOpen === category.id ? null : category.id); }} onClose={() => setCategoryOpen((value) => value === category.id ? null : value)} onNavigate={closeAll} />)}</div>
-            <div className="ml-auto flex items-center">
+            <div className="flex min-w-0 items-center gap-1 xl:gap-3">{featuredToolCategories.map((category) => <CategoryMenu key={category.id} category={category} activePath={pathname} open={categoryOpen === category.id} onOpen={() => { closeDesktop(); setCategoryOpen(category.id); }} onToggle={() => { closeDesktop(); setCategoryOpen(categoryOpen === category.id ? null : category.id); }} onClose={() => setCategoryOpen((value) => value === category.id ? null : value)} onNavigate={closeAll} />)}</div>
+            <div className="ml-auto flex items-center justify-self-end xl:ml-0">
             {primaryLinks.map((item) => <Link key={item.href} href={item.href} className={linkClass} onClick={closeAll}>{item.label}</Link>)}
             </div>
           </div>

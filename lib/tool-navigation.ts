@@ -12,18 +12,27 @@ const featuredCategoryIds: readonly ToolCategoryId[] = ['font-styles', 'visual-a
 export const featuredToolCategories = toolCategories.filter((category) => featuredCategoryIds.includes(category.id));
 
 // Curated shortcuts only; full lists stay in each category directory.
-export const categoryShortcuts: Record<ToolCategoryId, readonly { href: string; label: string }[]> = {
+export const categoryShortcuts: Record<ToolCategoryId, readonly { href: string; label: string; sample?: string }[]> = {
   'font-styles': [
-    { href: '/small-text-generator', label: 'Small text' },
-    { href: '/cursive-font-generator', label: 'Cursive' },
-    { href: '/bold-text-generator', label: 'Bold text' },
-    { href: '/bubble-font-generator', label: 'Bubble' },
+    { href: '/small-text-generator', label: 'Small text', sample: 'ᴬᵃ' },
+    { href: '/weird-text-generator', label: 'Weird text', sample: 'ค' },
+    { href: '/upside-down-text-generator', label: 'Upside down', sample: 'ɐ' },
+    { href: '/italics-font-generator', label: 'Italics', sample: '𝒜' },
+    { href: '/serif-font-generator', label: 'Serif', sample: '𝐀' },
+    { href: '/comic-font-generator', label: 'Comic', sample: 'Aa' },
+    { href: '/retro-font-generator', label: 'Retro', sample: '▤' },
+    { href: '/y2k-font-generator', label: 'Y2K', sample: '✧' },
+    { href: '/western-font-generator', label: 'Western', sample: '★' },
+    { href: '/horror-font-generator', label: 'Horror', sample: 'Ⱥ' },
   ],
   'visual-art': [
-    { href: '/3d-font-generator', label: '3D text' },
-    { href: '/fire-font-generator', label: 'Fire text' },
-    { href: '/minecraft-font-generator', label: 'Minecraft' },
-    { href: '/signature-generator', label: 'Signature generator' },
+    { href: '/brat-text-generator', label: 'Brat text', sample: 'brat' },
+    { href: '/fire-font-generator', label: 'Fire text', sample: '♨' },
+    { href: '/glitter-font-generator', label: 'Glitter', sample: '✦' },
+    { href: '/big-font-generator', label: 'ASCII art', sample: '#_' },
+    { href: '/ransom-note-font-generator', label: 'Ransom note', sample: 'aB' },
+    { href: '/times-new-roman-font-generator', label: 'Times New Roman', sample: 'T' },
+    { href: '/impact-font-generator', label: 'Impact', sample: 'A' },
   ],
   symbols: [
     { href: '/symbols/heart-symbols', label: 'Heart symbols' },
