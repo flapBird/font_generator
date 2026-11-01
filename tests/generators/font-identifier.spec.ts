@@ -11,6 +11,7 @@ test('paste, accessible cropping and explicit font preview handle failures and s
     const transfer = new DataTransfer(); transfer.items.add(new File([blob], 'paste.png', { type: 'image/png' }));
     element.dispatchEvent(new ClipboardEvent('paste', { bubbles: true, clipboardData: transfer }));
   });
+  await page.getByText('Adjust crop coordinates', { exact: true }).click();
   await expect(page.getByLabel('Crop width')).toHaveValue('400');
   const box = (await page.locator('canvas').boundingBox())!;
   await page.mouse.move(box.x + box.width * .1, box.y + box.height * .1);
@@ -29,11 +30,13 @@ test('paste, accessible cropping and explicit font preview handle failures and s
   await expect(page.getByTestId('font-match-preview')).toHaveCount(0);
   await page.unroute('https://fonts.googleapis.com/**');
   const urls: string[] = [];
-  await page.route('https://fonts.googleapis.com/**', route => { urls.push(route.request().url()); return route.fulfill({ contentType: 'text/css', body: '@font-face { font-family: "Oswald"; font-style: normal; font-weight: 400; src: url("http://localhost:3212/fonts/discovery/oswald/latin.woff2") format("woff2"); }' }); });
+  await page.route('https://fonts.googleapis.com/**', route => { urls.push(route.request().url()); return route.fulfill({ contentType: 'text/css', body: `@font-face { font-family: "Oswald"; font-style: normal; font-weight: 400; src: url("${new URL('/fonts/discovery/oswald/latin.woff2', page.url()).href}") format("woff2"); }` }); });
   await page.getByLabel('Text to compare').fill('Private comparison 123');
   await page.getByRole('button', { name: 'Preview Oswald' }).click();
   await expect(page.getByTestId('font-match-preview')).toHaveText('Private comparison 123');
   expect(urls.every(url => !url.includes('text=') && !url.includes('Private'))).toBe(true);
+  await page.getByRole('button', { name: 'Adjust crop', exact: true }).click();
+  await page.getByText('Adjust crop coordinates', { exact: true }).click();
   await page.getByLabel('Crop x', { exact: true }).fill('5');
   await expect(page.getByTestId('font-match-preview')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Preview Oswald' })).toHaveCount(0);
@@ -65,7 +68,9 @@ test('local identifier matches real font crops without uploading and supports ca
       const start = Date.now();
       await page.getByRole('button', { name: 'Identify font locally', exact: true }).click();
       await expect(page.getByRole('status').first()).toContainText('Closest Google Fonts', { timeout: 65000 });
-      const names = await page.locator('ol strong').allTextContents();
+      const showAll = page.getByRole('button', { name: /Show all \d+ candidates/ });
+      if (await showAll.count()) await showAll.click();
+      const names = await page.getByRole('complementary', { name: 'Font candidates' }).locator('ol strong').allTextContents();
       cases.push({ family, degraded, rank: names.indexOf(family) + 1, elapsedMs: Date.now() - start, candidates: names });
       expect(names).toContain(family);
     }
@@ -83,7 +88,8 @@ test('local identifier matches real font crops without uploading and supports ca
     await page.screenshot({ path: `/tmp/font-identifier-${width}.png`, fullPage: true });
   }
   await page.getByRole('button', { name: 'Clear image', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Identify font locally', exact: true })).toBeDisabled();
+  await expect(page.getByRole('heading', { name: 'Find the font in your image.' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Identify font locally', exact: true })).toHaveCount(0);
   network.length = 0;
   for (const path of ['/', '/small-text-generator', '/cute-font-generator']) await page.goto(path);
   expect(network).toEqual([]);
@@ -108,4 +114,104 @@ test('identifier handles blank and invalid images, model failures, and directory
   await page.getByRole('searchbox', { name: 'Search all tools' }).fill('font detector');
   await expect(page.locator('main a[href="/font-identifier"]')).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Show Font Tools tools' })).toHaveCount(0);
+});
+
+test('sample flow reveals all real results, loads fonts on request, and keeps comparison usable on phones', async ({ page, request }) => {
+  const matches = ['Oswald', 'Caveat', 'Bebas Neue', 'Anton', 'Roboto', 'EB Garamond', 'Luckiest Guy', 'Poppins', 'Montserrat', 'Berkshire Swash']
+    .map(family => ({ family, styleName: 'Regular', weight: 400, style: 'normal' }));
+  await page.route('**/font-identifier-worker.js', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: 'self.onmessage = () => self.postMessage({ type: "results", matches: ' + JSON.stringify(matches) + ' });',
+  }));
+  const fontRequests: string[] = [];
+  await page.route('https://fonts.googleapis.com/**', route => {
+    const url = route.request().url(); fontRequests.push(url);
+    const family = new URL(url).searchParams.get('family')!.split(':')[0];
+    const slug = ({ Oswald: 'oswald', Caveat: 'caveat', 'Bebas Neue': 'bebas-neue' } as Record<string, string>)[family];
+    return route.fulfill({ contentType: 'text/css', body: '@font-face { font-family: "' + family + '"; font-style: normal; font-weight: 400; src: url("' + new URL('/fonts/discovery/' + slug + '/latin.woff2', page.url()).href + '") format("woff2"); }' });
+  });
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/font-identifier');
+  await page.screenshot({ path: '/tmp/font-identifier-design-upload-desktop.png', fullPage: true });
+  expect(fontRequests).toEqual([]);
+  await page.getByRole('button', { name: /Identify this sample/ }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Choose one clear line.');
+  await expect(page.locator('canvas')).toHaveJSProperty('width', 1100);
+  await page.screenshot({ path: '/tmp/font-identifier-design-crop-desktop.png', fullPage: true });
+  await page.getByRole('button', { name: 'Identify font locally', exact: true }).click();
+  const candidates = page.getByRole('complementary', { name: 'Font candidates' });
+  await expect(candidates.locator('ol li')).toHaveCount(3);
+  expect(fontRequests).toEqual([]);
+  await expect(page.getByTestId('font-match-preview')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Load candidate previews', exact: true }).click();
+  await expect(page.getByTestId('font-match-preview')).toHaveText('A little more human.');
+  await expect(candidates.getByText('Aa', { exact: true })).toHaveCount(3);
+  expect(fontRequests).toHaveLength(3);
+  await page.getByLabel('Text to compare').fill('Private 字体 👋 123');
+  await page.getByLabel('Size', { exact: true }).focus();
+  await page.keyboard.press('End');
+  await page.getByRole('button', { name: 'Preview Caveat Regular', exact: true }).click();
+  await expect(page.getByTestId('font-match-preview')).toHaveText('Private 字体 👋 123');
+  await expect(page.getByTestId('font-match-preview')).toHaveCSS('font-size', '76px');
+  await expect(page.getByTestId('font-match-preview')).toHaveCSS('font-family', /Caveat/);
+  await expect(page.getByRole('link', { name: 'Open Caveat', exact: false })).toHaveAttribute('href', 'https://fonts.google.com/specimen/Caveat');
+  expect(fontRequests).toHaveLength(3);
+  expect(fontRequests.every(url => !url.includes('text=') && !url.includes('Private'))).toBe(true);
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 950 });
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const image = (await page.getByLabel('Your selected image', { exact: true }).boundingBox())!;
+    const preview = (await page.getByTestId('font-match-preview').boundingBox())!;
+    expect(preview.y - image.y - image.height).toBeLessThan(130);
+    await page.screenshot({ path: '/tmp/font-identifier-design-results-' + width + '.png', fullPage: true });
+  }
+  await page.getByRole('button', { name: 'Preview Oswald Regular', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('font-match-preview')).toHaveCSS('font-family', /Oswald/);
+  await page.getByRole('button', { name: 'Show all 10 candidates' }).click();
+  await expect(candidates.locator('ol li')).toHaveCount(10);
+  expect(fontRequests).toHaveLength(3);
+  await page.getByRole('button', { name: 'Adjust crop', exact: true }).click();
+  await expect(candidates).toHaveCount(0);
+  await expect(page.getByTestId('font-match-preview')).toHaveCount(0);
+  await page.getByText('Adjust crop coordinates', { exact: true }).click();
+  await page.getByLabel('Crop width').fill('800');
+  await page.getByRole('button', { name: 'Clear image', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Find the font in your image.');
+  await page.screenshot({ path: '/tmp/font-identifier-design-upload-mobile.png', fullPage: true });
+  await page.evaluate(() => document.documentElement.classList.add('dark'));
+  await page.screenshot({ path: '/tmp/font-identifier-design-upload-dark.png', fullPage: true });
+  const llms = await (await request.get('/llms.txt')).text();
+  expect(llms).toContain('initially showing three');
+  expect(llms).toContain('only after user action');
+  expect(errors).toEqual([]);
+});
+
+test('matching status, cancellation, timeout and retry preserve the crop', async ({ page }) => {
+  await page.route('**/font-identifier-worker.js', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: 'self.onmessage = () => self.postMessage({ type: "status", message: "Comparing letter shapes on your device…" });',
+  }));
+  await page.goto('/font-identifier');
+  await page.getByRole('button', { name: /Identify this sample/ }).click();
+  await page.getByRole('button', { name: 'Identify font locally', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Looking for similar fonts…' })).toBeVisible();
+  await page.screenshot({ path: '/tmp/font-identifier-design-loading-desktop.png', fullPage: true });
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Choose one clear line.');
+  await expect(page.locator('canvas')).toHaveJSProperty('width', 1100);
+  await page.clock.install();
+  await page.getByRole('button', { name: 'Identify font locally', exact: true }).click();
+  await page.clock.fastForward(60001);
+  await expect(page.getByRole('region', { name: 'Font identifier workspace' }).getByRole('alert')).toContainText('Matching took too long');
+  await page.screenshot({ path: '/tmp/font-identifier-design-error-desktop.png', fullPage: true });
+  await page.getByRole('button', { name: 'Adjust selection', exact: true }).click();
+  await expect(page.locator('canvas')).toHaveJSProperty('width', 1100);
+  await page.getByRole('button', { name: 'Identify font locally', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await page.clock.fastForward(60001);
+  await expect(page.getByRole('region', { name: 'Font identifier workspace' }).getByRole('alert')).toHaveCount(0);
 });
