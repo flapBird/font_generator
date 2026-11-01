@@ -6,7 +6,7 @@
 
 1. Cute / Calligraphy：新增 `/cute-font-generator`、`/calligraphy-font-generator`。复用统一文本工作区，输入限 1,000 UTF-16 单位；按行可选装饰，保留原文、已检测链接与引用。各有 What / How to / FAQ、canonical、目录、相关链接和 sitemap。无图片或字体文件输出。
 2. 现有高量级入口：首页补充 Fancy Text / Online Font Changer 的真实用途；Invisible Character 描述补充 Invisible Text Generator；完整目录搜索支持 Cursive Text、Font Keyboard、Instagram Bio 等别名。Cursive、Kaomoji、Old English、Keyboard 的现有 URL 和工作区不变。原本已有准确专题内容的页面不重复堆关键词。
-3. 字体识别：完成下述资料与接入条件评估；尚未通过真实样本效果/成本验证，未实现公开识别页，不将其列为已上线。
+3. 字体识别：后续用户选择浏览器本地方案，已实现实验性首版；见 [本地字体识别](font-identifier-local.md)。以下第三方 API 评估保留为备选，不是当前实现。
 4. 1K–10K 留候选池；100–1K 不新增，已有 Neon 等不删除；截图没有搜索量的词不自动排期。
 
 ## 分类及兼容范围

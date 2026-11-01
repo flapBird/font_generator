@@ -57,3 +57,6 @@ next-env.d.ts
 # Local design canvas preview server state
 /designs/font-workspace-exploration/.artifact-server.json
 /designs/font-workspace-exploration/.artifact-server.log
+
+# Generated from pinned gpu-font package; no third-party catalogs.
+/public/font-identifier-engine/

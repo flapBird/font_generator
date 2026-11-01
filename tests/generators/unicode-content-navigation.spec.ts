@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures';
 import { unicodeGuides } from '../../lib/text-library/unicode-guides';
-import { categoryShortcuts, toolCategories } from '../../lib/tool-navigation';
+import { categoryShortcuts, featuredToolCategories } from '../../lib/tool-navigation';
 
 test('all five Unicode pages render distinct What, How to and matching FAQ content in initial HTML', async ({ request, page }) => {
   for (const [id, guide] of Object.entries(unicodeGuides)) {
@@ -25,7 +25,7 @@ test('desktop category shortcuts support keyboard, single expansion, outside dis
   for (const width of [1024, 1440]) {
     await page.setViewportSize({ width, height: 900 }); await page.goto('/unicode-tools');
     const nav = page.getByRole('navigation', { name: 'Primary navigation', exact: true });
-    for (const category of toolCategories) {
+    for (const category of featuredToolCategories) {
       const trigger = nav.getByRole('button', { name: `Show ${category.title} tools`, exact: true });
       await trigger.focus(); await trigger.press('ArrowDown');
       const panel = page.locator(`#desktop-${category.id}-shortcuts`);

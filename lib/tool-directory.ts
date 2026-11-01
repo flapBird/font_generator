@@ -25,6 +25,7 @@ const libraryEntries = (ids: string[]): ToolDirectoryEntry[] => libraryPages.fil
   searchText: `${page.title} ${page.path} ${page.description}`.toLowerCase(),
 }));
 const entriesByCategory: Record<ToolCategoryId, ToolDirectoryEntry[]> = {
+  'font-tools': [{ title: 'Font Identifier', href: '/font-identifier', description: 'Find close Google Fonts matches from an image locally in your browser.', output: 'Font candidates', searchText: 'font identifier font finder font detector image screenshot local google fonts' }],
   'font-styles': fontEntries(false),
   'visual-art': [...fontEntries(true), ...libraryEntries(['signature-generator'])],
   symbols: libraryEntries(['symbols', 'hearts', 'stars', 'arrows', 'kaomoji', 'emoji-combos']),

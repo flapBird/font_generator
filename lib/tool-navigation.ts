@@ -3,6 +3,7 @@ export const toolCategories = [
   { id: 'visual-art', title: 'Visual & Art', href: '/visual-art', sample: 'Art', description: 'Text artwork, image exports and signature images.' },
   { id: 'symbols', title: 'Symbols & Emoji', href: '/symbols', sample: '✦', description: 'Symbols, kaomoji and ready-to-copy emoji combinations.' },
   { id: 'unicode-tools', title: 'Unicode Tools', href: '/unicode-tools', sample: 'U+', description: 'Inspect characters, clean text and copy blank characters.' },
+  { id: 'font-tools', title: 'Font Tools', href: '/font-tools', sample: 'Ag', description: 'Identify existing typefaces from images.' },
 ] as const;
 export type ToolCategoryId = typeof toolCategories[number]['id'];
 
@@ -13,6 +14,7 @@ export const featuredToolCategories = toolCategories.filter((category) => featur
 
 // Curated shortcuts only; full lists stay in each category directory.
 export const categoryShortcuts: Record<ToolCategoryId, readonly { href: string; label: string; sample?: string }[]> = {
+  'font-tools': [{ href: '/font-identifier', label: 'Font Identifier' }],
   'font-styles': [
     { href: '/small-text-generator', label: 'Small text', sample: 'ᴬᵃ' },
     { href: '/weird-text-generator', label: 'Weird text', sample: 'ค' },

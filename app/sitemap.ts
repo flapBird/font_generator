@@ -7,6 +7,7 @@
    const baseUrl = 'https://font-generators.org';
    
    const staticPages = [
+     ...['/font-tools', '/font-identifier'].map(path => ({ path, url: `${baseUrl}${path}`, changeFrequency: 'monthly' as const, priority: 0.7 })),
      { path: '/', url: baseUrl, changeFrequency: 'weekly' as const, priority: 1 },
      { path: '/tools', url: `${baseUrl}/tools`, changeFrequency: 'weekly' as const, priority: 0.8 },
      { path: '/about', url: `${baseUrl}/about`, changeFrequency: 'monthly' as const, priority: 0.5 },

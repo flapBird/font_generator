@@ -1,7 +1,7 @@
 import { discoverySlugs } from './discovery-catalog';
 
 const updateGroups = {
-  '2026-11-01': ['/', '/tools', '/styles', '/cute-font-generator', '/calligraphy-font-generator', '/cursive-font-generator', '/preppy-font-generator', '/heart-font-generator', '/invisible-character'],
+  '2026-11-01': ['/font-tools', '/font-identifier', '/', '/tools', '/styles', '/cute-font-generator', '/calligraphy-font-generator', '/cursive-font-generator', '/preppy-font-generator', '/heart-font-generator', '/invisible-character'],
   '2026-10-30': [
     '/unicode-tools',
     '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',

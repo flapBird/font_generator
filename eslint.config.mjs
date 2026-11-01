@@ -9,6 +9,7 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    "public/font-identifier-engine/**", // Generated, unmodified upstream engine assets.
     "out/**",
     "build/**",
     "next-env.d.ts",

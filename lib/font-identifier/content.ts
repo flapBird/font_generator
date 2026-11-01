@@ -1,0 +1,8 @@
+export const identifierDescription = 'Find close Google Fonts matches from an image in your browser. Crop text, identify locally and compare font candidates without uploading your image.';
+export const identifierFaq = [
+  { q: 'Does my image leave my device?', a: 'No. Image decoding, cropping and font matching run in your browser. The model and Google Fonts catalog are downloaded from this site only when you identify a crop. Optional font previews download fonts from Google Fonts; the image and comparison text are not sent with that request.' },
+  { q: 'Can this identify any commercial font?', a: 'No. This first version searches the bundled Google Fonts catalog. An absent font, custom logo or hand-drawn lettering may return a similar candidate. The list is a visual comparison aid, not confirmation of an exact match.' },
+  { q: 'What images can I use?', a: 'Choose PNG, JPEG or WebP up to 10 MB and 20 megapixels. Images are resized to at most 1,600 pixels on the longest edge. Crop one clear line with a single font; tiny, blurred or heavily distorted text is harder to match. SVG, GIF and PDF are not supported.' },
+  { q: 'Why is matching slow or unavailable?', a: 'The model loads on your first attempt. The engine uses WebGPU when available and falls back to CPU processing. Device speed varies. You can cancel at any time; a 60-second timeout allows you to retry with a smaller crop.' },
+  { q: 'Is this free, and can I download the detected font?', a: 'Local matching is free and needs no account or paid API. Use Font source to inspect the candidate on Google Fonts and check its license. This tool does not create a font file or grant a new license.' },
+];
