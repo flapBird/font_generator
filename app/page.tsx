@@ -70,6 +70,16 @@ export default function HomePage() {
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8 dark:text-slate-300">
               Use the fancy text generator as an online font changer: type your words, compare styles, and copy and paste into bios, names and messages. Explore separate artwork tools for image downloads.
             </p>
+            <Link
+              href="/font-identifier"
+              className="mx-auto mt-5 flex min-h-11 w-fit max-w-full items-center gap-3 rounded-2xl border border-violet-200 bg-white px-4 py-2.5 text-left text-sm text-violet-800 transition-colors hover:border-violet-400 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-4 dark:border-violet-800 dark:bg-slate-900 dark:text-violet-200 dark:hover:bg-violet-950"
+            >
+              <span>
+                <strong className="font-semibold">Font Identifier</strong>
+                <span className="block text-xs sm:ml-2 sm:inline sm:text-sm">Find a font from an image</span>
+              </span>
+              <span aria-hidden="true">→</span>
+            </Link>
           </div>
 
           <GeneratorTool
