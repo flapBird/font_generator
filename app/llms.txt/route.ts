@@ -109,7 +109,7 @@ const body = [
   '',
   '## Main navigation',
   '',
-  `- [Homepage](${SITE_URL}/): Use the fancy text generator and online font changer, or browse generator categories. Copyable styles do not change system fonts.`,
+  `- [Homepage](${SITE_URL}/): Use the fancy text generator and online font changer, or browse generator categories. A Font Identifier recommendation card below the text workspace links directly to local image-to-font matching. Copyable styles do not change system fonts.`,
   `- [Text Style Generators](${SITE_URL}/styles): Browse copy-and-paste text tools, including Bold, Strikethrough, Discord, and Zalgo generators.`,
   `- [Visual & Art Generators](${SITE_URL}/visual-art): Browse ASCII, font-preview, meme, and visual artwork tools.`,
   `- [Fandom Font Generators](${SITE_URL}/fandom): Browse unofficial game, film, television, and pop-culture-inspired generators.`,
