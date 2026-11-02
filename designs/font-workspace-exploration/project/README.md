@@ -1,8 +1,20 @@
 # Font Generators — design and interaction exploration
 
+## Revision 4: results-first homepage
+
+The canvas now opens on “04 · 首页 · 结果优先”. Three artboards show one design direction: HomeFocus (desktop), HomeFocusPhone (mobile) and HomeFocusDirectory (mobile with the complete generator directory expanded). All previous design pages remain available; Font Identifier has its own page and [prototype notes](FontIdentifier-README.md).
+
+The compact introduction leads directly to a light input panel and a two-column specimen list. Desktop keeps all 33 existing text and 18 artwork generator links in their observed order. Mobile puts input, style filters and results first, with the full directory behind Generators. The five current header categories include Font Tools; it opens the existing canvas directory screen. No standalone Font Identifier card is added to the homepage.
+
+The preview is an optional inline comparison panel with a size control. Copy attempts use the browser clipboard and expose selectable manual-copy text when access is denied. Category filters, style search, empty-input and no-results recovery, incremental results, generator search, tool search and theme switching are implemented in the prototype. Each artboard owns its own state. Account, pricing and most tool links open the public site.
+
+Unlike Revision 2's representative maps, this prototype includes all 59 current conversion functions as a frozen bundled snapshot from lib/generator.ts. It initially displays eight results; Show more exposes the remainder. HomeFocus-engine.mjs is the reproducible bundle entry and includes static navigation metadata captured on 2026-11-02: 51 visible generator links and 99 public tool entries. The minified 47,200-byte bundle was uploaded as asset c29d2f91ed449f5866317e15c0e53712. Rebuild with esbuild using format=iife and global-name=HomeFocusEngine, upload the result, and update the script URLs if the snapshot changes.
+
+Validation: the Claude Design structure checker reports zero problems. It does not render screens or execute the scripts; browser visual and interaction verification has not been performed. These files propose a homepage layout only. Application components, styles, navigation, conversion functions, URLs and SEO were not modified. The public llms.txt source was reviewed and needs no changes for this private design artifact.
+
 ## Revision 2: task-oriented workspaces
 
-The canvas opens in the new specimen-wall prototype. The page named “02 · 新版交互与主要页面” contains six connected artboards; the earlier static concepts remain on “01 · 上轮静态方案”. Production pages are untouched.
+The page named “02 · 新版交互与主要页面” contains six connected artboards; the earlier static concepts remain on “01 · 上轮静态方案”. Production pages are untouched by these prototype files.
 
 - Wall: a full-width input and two-column specimen wall with category filtering, style search, real clipboard attempts, manual-copy recovery, empty states and comparison of up to three styles.
 - TextDetail: a cursive-focused workspace with its own default input and four representative styles, reusing Wall through a Design Component import.
