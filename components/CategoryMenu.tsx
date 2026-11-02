@@ -17,7 +17,7 @@ export default function CategoryMenu({ category, mobile = false, open, activePat
   function navigate() { clearHover(); onNavigate(); }
   const id = `${mobile ? 'mobile' : 'desktop'}-${category.id}-shortcuts`;
   const active = activePath === category.href || activePath.startsWith(category.href + '/') || categoryShortcuts[category.id].some((item) => item.href === activePath);
-  const viewAll = <Link href={category.href} onClick={navigate} className={`flex items-center justify-between rounded-md font-medium text-violet-700 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:text-violet-300 dark:hover:bg-violet-500/10 ${mobile ? 'min-h-11 px-3 text-sm' : 'min-h-9 px-2.5 text-xs'}`}>View all {category.title.toLowerCase()}<span aria-hidden="true">→</span></Link>;
+  const viewAll = <Link href={category.href} onClick={navigate} className={`flex items-center justify-center gap-2 rounded-md font-medium text-violet-700 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:text-violet-300 dark:hover:bg-violet-500/10 ${mobile ? 'min-h-11 px-3 text-sm' : 'min-h-10 px-2.5 text-[13px]'}`}>View all {category.title.toLowerCase()}<span aria-hidden="true">→</span></Link>;
   return <div data-category-menu className={mobile ? 'w-full' : 'relative shrink-0'}
     onPointerEnter={(event) => {
       if (mobile || event.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -33,7 +33,7 @@ export default function CategoryMenu({ category, mobile = false, open, activePat
       if (event.key === 'Escape' && open) { event.preventDefault(); event.stopPropagation(); clearHover(); onClose(); trigger.current?.focus(); }
     }}>
     <div className={`flex items-center rounded-xl transition-colors ${active || open ? 'bg-violet-50 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300' : 'text-slate-600 hover:bg-muted/60 hover:text-foreground dark:text-slate-300'}`}>
-      <Link href={category.href} onClick={navigate} aria-current={activePath === category.href ? 'page' : undefined} className={`flex min-h-11 items-center rounded-xl text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${mobile ? 'flex-1 px-3' : 'pl-3 pr-1 text-xs xl:text-sm'}`}>{category.title}</Link>
+      <Link href={category.href} onClick={navigate} aria-current={activePath === category.href ? 'page' : undefined} className={`flex min-h-11 items-center rounded-xl text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${mobile ? 'flex-1 px-3' : 'pl-3 pr-1 text-xs xl:text-[15px]'}`}>{category.title}</Link>
       <button ref={trigger} type="button" aria-label={`Show ${category.title} tools`} aria-expanded={open} aria-controls={id} onClick={() => { clearHover(); onToggle(); }} onKeyDown={(event) => {
         if (event.key === 'ArrowDown') { event.preventDefault(); clearHover(); if (!open) onToggle(); requestAnimationFrame(() => panel.current?.querySelector('a')?.focus()); }
       }} className={`flex min-h-11 shrink-0 items-center justify-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${mobile ? 'w-11' : 'w-7 xl:w-8'}`}>
@@ -43,10 +43,10 @@ export default function CategoryMenu({ category, mobile = false, open, activePat
     <div ref={panel} id={id} hidden={!open} className={mobile ? 'mb-2 ml-3 border-l border-border pl-2' : 'absolute left-1/2 top-full z-50 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 pt-2'}>
       <div className={mobile ? '' : 'max-h-[calc(100dvh-9rem)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 dark:border-slate-700 dark:bg-slate-950'}>
         {!mobile && <div className="border-b border-border/70 px-4 py-2.5">
-          <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">{category.title}</p>
+          <p className="text-center text-sm font-semibold text-slate-700 dark:text-slate-200">{category.title}</p>
         </div>}
         {mobile && viewAll}
-        <div className={mobile ? '' : 'p-1.5'}>{categoryShortcuts[category.id].map((item) => <Link key={item.href} href={item.href} onClick={navigate} aria-current={activePath === item.href ? 'page' : undefined} className={`group flex items-center text-foreground transition-colors hover:bg-violet-50 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 aria-[current=page]:bg-muted dark:hover:bg-violet-500/10 dark:hover:text-violet-300 ${mobile ? 'min-h-11 gap-3 rounded-xl px-3 py-2 text-sm' : 'min-h-9 gap-2 rounded-md px-2.5 py-1.5 text-[13px]'}`}>
+        <div className={mobile ? '' : 'p-1.5'}>{categoryShortcuts[category.id].map((item) => <Link key={item.href} href={item.href} onClick={navigate} aria-current={activePath === item.href ? 'page' : undefined} className={`group flex items-center text-foreground transition-colors hover:bg-violet-50 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 aria-[current=page]:bg-muted dark:hover:bg-violet-500/10 dark:hover:text-violet-300 ${mobile ? 'min-h-11 gap-3 rounded-xl px-3 py-2 text-sm' : 'min-h-10 gap-2 rounded-lg px-2.5 py-2 text-sm'}`}>
           {!mobile && <span aria-hidden="true" className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-slate-50 font-serif text-xs text-slate-500 group-hover:bg-white group-hover:text-violet-700 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-violet-500/10 dark:group-hover:text-violet-300">{item.sample ?? (category.id === 'symbols' ? '✧' : 'U+')}</span>}
           <span className="flex-1">{item.label}</span><span aria-hidden="true" className="text-violet-500 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">↗</span>
         </Link>)}</div>
