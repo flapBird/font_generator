@@ -15,7 +15,7 @@ const primaryLinks = [
   { href: '/guides', label: 'Guides' },
   { href: '/pricing', label: 'Pricing' },
 ];
-const linkClass = 'flex min-h-11 items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 xl:px-3';
+const linkClass = 'flex min-h-11 items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:text-slate-300 xl:px-3';
 
 export default function Header() {
   const pathname = usePathname();
