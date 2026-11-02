@@ -68,7 +68,7 @@ export default function HomePage() {
               Free Font Generator
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8 dark:text-slate-300">
-              Use the fancy text generator as an online font changer: type your words, compare styles, and copy and paste into bios, names and messages. Explore separate artwork tools for image downloads.
+              Create stylish copy-and-paste text and custom font art for social media, games, usernames, and more.
             </p>
           </div>
 
