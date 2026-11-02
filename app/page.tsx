@@ -1,5 +1,5 @@
 import Link from '@/components/IntentLink';
-import HomeGenerator from '@/components/HomeGenerator';
+import GeneratorTool from '@/components/GeneratorTool';
 import { generatorStyles, getGeneratorPageConfig } from '@/lib/generator';
 import { generatorRegistry, isFontStyleGenerator } from '@/lib/generator-registry';
 
@@ -56,21 +56,32 @@ export default function HomePage() {
 
       <div
         id="top"
-        className="min-h-screen scroll-mt-20 bg-background pb-16 pt-24"
+        className="min-h-screen scroll-mt-20 bg-gradient-to-b from-white/90 via-slate-50/45 to-transparent pb-16 pt-16 dark:bg-none"
       >
-        <div className="mx-auto max-w-[1328px] px-5 sm:px-6">
-          <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
-            <div><h1 className="text-[29px] font-semibold leading-[1.15] tracking-[-0.04em] text-slate-950 sm:text-4xl dark:text-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative mx-auto mb-9 max-w-4xl pb-1 pt-9 text-center sm:mb-10 sm:pt-12 lg:pt-14">
+            <div
+              aria-hidden="true"
+              className="absolute left-1/2 top-5 -z-10 h-40 w-[min(38rem,92vw)] -translate-x-1/2 rounded-full bg-violet-300/20 blur-3xl dark:bg-violet-600/10"
+            />
+            <h1 className="gradient-text text-4xl font-medium leading-[1.02] tracking-[-0.045em] sm:text-6xl lg:text-[4rem]">
               Free Font Generator
             </h1>
-            <p className="mt-2.5 text-[13px] leading-6 text-slate-600 sm:text-[15px] dark:text-slate-300">
-              Type your text. Find your style. Copy it anywhere.
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8 dark:text-slate-300">
+              Use the fancy text generator as an online font changer: type your words, compare styles, and copy and paste into bios, names and messages. Explore separate artwork tools for image downloads.
             </p>
-            </div><p className="hidden text-xs text-slate-600 sm:block dark:text-slate-300">Free to use · No account needed</p>
-          </header>
+          </div>
 
-          <HomeGenerator
+          <GeneratorTool
             config={homeConfig}
+            pageTitle="Free Font Generator"
+            enableStyleSearch
+            initialResultLimit={80}
+            mobileInitialResultLimit={18}
+            recommendedLabel="All font styles"
+            compactResults
+            enablePopularFilters
+            workspaceMode
             generatorSearchItems={homepageGeneratorSearchItems}
           />
 
@@ -83,8 +94,8 @@ export default function HomePage() {
                 </p>
                 <ol className="grid gap-4 pl-0 sm:grid-cols-3 [&>li]:m-0 [&>li]:list-none [&>li]:rounded-2xl [&>li]:border [&>li]:border-slate-200 [&>li]:bg-white [&>li]:p-5 dark:[&>li]:border-slate-800 dark:[&>li]:bg-slate-950">
                   <li><strong>1. Enter your text.</strong><br />Type a name, bio, caption, message, or short phrase in the input box.</li>
-                  <li><strong>2. Explore the styles.</strong><br />Choose a category, search for a specific style, or open the generator directory.</li>
-                  <li><strong>3. Preview and copy.</strong><br />Tap a sample to copy it, or select Preview to inspect the style and adjust its size.</li>
+                  <li><strong>2. Explore the styles.</strong><br />Use popular tags or the broader categories. Open search only when you need a specific look.</li>
+                  <li><strong>3. Preview and copy.</strong><br />Tap a style card to preview it and copy the result instantly.</li>
                 </ol>
               </section>
 

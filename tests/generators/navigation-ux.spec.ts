@@ -15,7 +15,6 @@ test('original navigation entries, order, search and collection-link placement a
     await page.setViewportSize({ width, height: 900 });
     for (const path of ['/', '/bubble-font-generator']) {
       await page.goto(path);
-      if (path === '/' && width < 1024) await page.getByRole('button', { name: /^Generators/ }).click();
       const rail = page.getByRole('complementary', { name: 'Generator directory' });
       const hiddenSlugs: string[] = [...newSlugs, ...octoberSlugs, ...discoverySlugs];
       const baseline = generatorRegistry.filter((item) => item.kind !== 'directory' && (path !== '/' || item.homepage.enabled) && !hiddenSlugs.includes(item.slug));
@@ -38,16 +37,10 @@ test('original navigation entries, order, search and collection-link placement a
         const artCollection = rail.getByRole('link', { name: /Browse art collection/ });
         expect(await artCollection.evaluate((link) => link.previousElementSibling?.tagName)).toBe('UL');
       } else {
-        if (path === '/') {
-          await expect(rail.locator('a[href="/styles"]')).toBeVisible();
-          await rail.getByRole('button', { name: 'Back to results' }).click();
-          await expect(rail).toBeHidden();
-        } else {
-          // Existing generator pages retain their original mobile rail.
-          await expect(rail.locator('a[href="/styles"]')).not.toBeVisible();
-          const firstResult = page.getByRole('button', { name: /^Preview and copy / }).first();
-          expect((await rail.boundingBox())!.y).toBeLessThan((await firstResult.boundingBox())!.y);
-        }
+        // The original mobile rail has no injected directory-link block above its chips.
+        await expect(rail.locator('a[href="/styles"]')).not.toBeVisible();
+        const firstResult = page.getByRole('button', { name: /^Preview and copy / }).first();
+        expect((await rail.boundingBox())!.y).toBeLessThan((await firstResult.boundingBox())!.y);
       }
       if (path === '/bubble-font-generator') {
         await page.screenshot({ path: `/tmp/restored-navigation-${width}.png`, animations: 'disabled' });
@@ -117,16 +110,12 @@ test('new text tools share the workspace with a temporary current item; handwrit
 test('existing homepage, small text and cursive output and clearing behavior remain intact', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   for (const [path, name, expected] of [
-    ['/', 'Copy Bold Sans Font result', '𝗔𝗯 𝟭𝟮'],
+    ['/', 'Preview and copy Bold Sans Font result', '𝗔𝗯 𝟭𝟮'],
     ['/small-text-generator', 'Preview and copy Superscript Font result', 'ᴬᵇ ¹²'],
     ['/cursive-font-generator', 'Preview and copy Elegant Script Font result', '𝒜𝒷 12'],
   ]) {
     await page.goto(path);
     await page.locator('#generator-input').fill('Ab 12');
-    if (path === '/') {
-      await page.getByRole('button', { name: 'Find a style', exact: true }).click();
-      await page.getByRole('searchbox', { name: 'Search styles' }).fill('bold sans');
-    }
     await page.getByRole('button', { name, exact: true }).click();
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
     await page.getByRole('button', { name: 'Clear input', exact: true }).click();
