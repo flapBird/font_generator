@@ -12,7 +12,7 @@ test('centered categories open on mouse hover and retain the earlier ten/seven s
       const first = await categories.first().boundingBox(); const last = await categories.last().boundingBox();
       expect(Math.abs((first!.x + last!.x + last!.width) / 2 - width / 2)).toBeLessThan(2);
     }
-    for (const [id, label] of [['font-styles', 'Font Styles'], ['visual-art', 'Visual & Art'], ['symbols', 'Symbols & Emoji'], ['unicode-tools', 'Unicode Tools']]) {
+    for (const [id, label] of [['font-styles', 'Font Styles'], ['visual-art', 'Visual & Art'], ['symbols', 'Symbols & Emoji'], ['unicode-tools', 'Unicode Tools'], ['font-tools', 'Font Tools']]) {
       const group = categories.filter({ has: page.getByRole('link', { name: label, exact: true }) });
       const panel = page.locator(`#desktop-${id}-shortcuts`);
       await group.getByRole('link', { name: label, exact: true }).hover();

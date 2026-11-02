@@ -5,7 +5,7 @@
 ## 已实现边界
 
 - `/font-identifier`：PNG/JPEG/WebP 文件或工作区粘贴截图，最多 10 MB / 20 MP；浏览器缩放到最长边 1600px。指针拖动或数字坐标裁切，独立 Worker 识别，取消及 60 秒超时，最多十个字体候选。
-- `/font-tools`：有 What / How to / FAQ 的独立分类目录。只增量加入 `/tools`，不增加顶栏/页脚精选分类，不改变旧生成器常驻导航或转换逻辑。
+- `/font-tools`：有 What / How to / FAQ 的独立分类目录。按用户确认加入桌面顶部分类导航和手机分类菜单，并保留 `/tools` 入口；分类子菜单提供 Font Identifier。首页正文不再单独放分类卡片或识别工具直达入口。页脚、搜索分类建议及旧生成器常驻导航保持各自既有列表。
 - 固定 `gpu-font@0.4.2`，仅打包 Google Fonts 索引。网页缓存曾显示 0.4.3，但实际 npm 尚无该版本，因此以实际安装包为准。保留 MIT LICENSE，未复制其它来源目录、未分发字体文件。
 - `scripts/prepare-font-identifier.mjs` 从锁定依赖生成忽略跟踪的静态资产；`prebuild` 和 `predev` 自动执行。保持源目录关系，模型与索引的哈希由上游引擎校验。没有额外服务端识别接口、API Key 或按次费用。
 - Worker 只在用户点击 Identify 时启动；支持 WebGPU / CPU 回退，终止 Worker 可取消 CPU 运算；更换图片或裁切会取消旧请求并清除过期候选。旧页面不加载识别代码或模型。

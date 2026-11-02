@@ -11,6 +11,9 @@ export type ToolCategoryId = typeof toolCategories[number]['id'];
 // Future categories belong in /tools first; adding one must not grow the header/footer.
 const featuredCategoryIds: readonly ToolCategoryId[] = ['font-styles', 'visual-art', 'symbols', 'unicode-tools'];
 export const featuredToolCategories = toolCategories.filter((category) => featuredCategoryIds.includes(category.id));
+// Font Tools is explicitly included in the header; footer and search suggestions keep their curated lists.
+const headerCategoryIds: readonly ToolCategoryId[] = [...featuredCategoryIds, 'font-tools'];
+export const headerToolCategories = toolCategories.filter((category) => headerCategoryIds.includes(category.id));
 
 // Curated shortcuts only; full lists stay in each category directory.
 export const categoryShortcuts: Record<ToolCategoryId, readonly { href: string; label: string; sample?: string }[]> = {

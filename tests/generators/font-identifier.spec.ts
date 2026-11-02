@@ -113,7 +113,7 @@ test('identifier handles blank and invalid images, model failures, and directory
   await page.goto('/tools');
   await page.getByRole('searchbox', { name: 'Search all tools' }).fill('font detector');
   await expect(page.locator('main a[href="/font-identifier"]')).toBeVisible();
-  await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Show Font Tools tools' })).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'Primary navigation' }).getByRole('button', { name: 'Show Font Tools tools' })).toBeVisible();
 });
 
 test('sample flow reveals all real results, loads fonts on request, and keeps comparison usable on phones', async ({ page, request }) => {

@@ -70,16 +70,6 @@ export default function HomePage() {
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8 dark:text-slate-300">
               Use the fancy text generator as an online font changer: type your words, compare styles, and copy and paste into bios, names and messages. Explore separate artwork tools for image downloads.
             </p>
-            <Link
-              href="/font-tools"
-              className="mx-auto mt-5 flex min-h-11 w-fit max-w-full items-center gap-3 rounded-2xl border border-violet-200 bg-white px-4 py-2.5 text-left text-sm text-violet-800 transition-colors hover:border-violet-400 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-4 dark:border-violet-800 dark:bg-slate-900 dark:text-violet-200 dark:hover:bg-violet-950"
-            >
-              <span>
-                <strong className="font-semibold">Font Tools</strong>
-                <span className="block text-xs sm:ml-2 sm:inline sm:text-sm">Identify and compare typefaces</span>
-              </span>
-              <span aria-hidden="true">→</span>
-            </Link>
           </div>
 
           <GeneratorTool
@@ -94,16 +84,6 @@ export default function HomePage() {
             workspaceMode
             generatorSearchItems={homepageGeneratorSearchItems}
           />
-
-          <section aria-label="More font tools" className="mx-auto mt-8 max-w-6xl">
-            <Link href="/font-tools" className="group flex flex-col gap-4 rounded-2xl border border-violet-200 bg-white p-5 transition-colors hover:border-violet-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 dark:border-violet-900 dark:bg-slate-900">
-              <div className="max-w-2xl">
-                <h2 className="text-xl font-semibold text-slate-950 dark:text-white">Font Tools</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Explore tools for working with real typefaces, starting with free, local font identification from images.</p>
-              </div>
-              <span className="inline-flex min-h-11 shrink-0 items-center text-sm font-semibold text-violet-700 group-hover:underline dark:text-violet-300">Browse Font Tools →</span>
-            </Link>
-          </section>
 
           <div className="mx-auto mt-16 max-w-6xl">
             <div className="prose prose-neutral max-w-none dark:prose-invert">
