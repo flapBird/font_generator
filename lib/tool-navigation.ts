@@ -17,7 +17,7 @@ export const headerToolCategories = toolCategories.filter((category) => headerCa
 
 // Curated shortcuts only; full lists stay in each category directory.
 export const categoryShortcuts: Record<ToolCategoryId, readonly { href: string; label: string; sample?: string }[]> = {
-  'font-tools': [{ href: '/font-identifier', label: 'Font Identifier' }],
+  'font-tools': [{ href: '/font-identifier', label: 'Font Identifier', sample: 'Ag' }],
   'font-styles': [
     { href: '/small-text-generator', label: 'Small text', sample: 'ᴬᵃ' },
     { href: '/weird-text-generator', label: 'Weird text', sample: 'ค' },
@@ -40,16 +40,16 @@ export const categoryShortcuts: Record<ToolCategoryId, readonly { href: string; 
     { href: '/impact-font-generator', label: 'Impact', sample: 'A' },
   ],
   symbols: [
-    { href: '/symbols/heart-symbols', label: 'Heart symbols' },
-    { href: '/symbols/star-symbols', label: 'Star symbols' },
-    { href: '/symbols/arrow-symbols', label: 'Arrow symbols' },
-    { href: '/kaomoji', label: 'Kaomoji' },
-    { href: '/emoji-combos', label: 'Emoji combos' },
+    { href: '/symbols/heart-symbols', label: 'Heart symbols', sample: '♡' },
+    { href: '/symbols/star-symbols', label: 'Star symbols', sample: '★' },
+    { href: '/symbols/arrow-symbols', label: 'Arrow symbols', sample: '→' },
+    { href: '/kaomoji', label: 'Kaomoji', sample: 'ツ' },
+    { href: '/emoji-combos', label: 'Emoji combos', sample: '☺' },
   ],
   'unicode-tools': [
-    { href: '/unicode-character-inspector', label: 'Character inspector' },
-    { href: '/invisible-character-remover', label: 'Invisible character remover' },
-    { href: '/fancy-text-to-normal-text', label: 'Fancy text to normal' },
-    { href: '/invisible-character', label: 'Invisible character' },
+    { href: '/unicode-character-inspector', label: 'Character inspector', sample: '⌕' },
+    { href: '/invisible-character-remover', label: 'Invisible character remover', sample: '⌫' },
+    { href: '/fancy-text-to-normal-text', label: 'Fancy text to normal', sample: 'Aa' },
+    { href: '/invisible-character', label: 'Invisible character', sample: '␣' },
   ],
 };

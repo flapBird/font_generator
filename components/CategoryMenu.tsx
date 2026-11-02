@@ -40,15 +40,15 @@ export default function CategoryMenu({ category, mobile = false, open, activePat
         <svg aria-hidden="true" className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 16 16"><path d="M4 6.5L8 10.5L12 6.5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" /></svg>
       </button>
     </div>
-    <div ref={panel} id={id} hidden={!open} className={mobile ? 'mb-2 ml-3 border-l border-border pl-2' : 'absolute left-1/2 top-full z-50 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 pt-2'}>
+    <div ref={panel} id={id} hidden={!open} className={mobile ? 'mb-2 ml-3 border-l border-border pl-2' : 'absolute left-1/2 top-full z-50 w-[232px] max-w-[calc(100vw-2rem)] -translate-x-1/2 pt-2'}>
       <div className={mobile ? '' : 'max-h-[calc(100dvh-9rem)] overflow-y-auto overscroll-contain rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 dark:border-slate-700 dark:bg-slate-950'}>
         {!mobile && <div className="border-b border-border/70 px-4 py-2.5">
           <p className="text-center text-sm font-semibold text-slate-700 dark:text-slate-200">{category.title}</p>
         </div>}
         {mobile && viewAll}
-        <div className={mobile ? '' : 'p-1.5'}>{categoryShortcuts[category.id].map((item) => <Link key={item.href} href={item.href} onClick={navigate} aria-current={activePath === item.href ? 'page' : undefined} className={`group flex items-center text-foreground transition-colors hover:bg-violet-50 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 aria-[current=page]:bg-muted dark:hover:bg-violet-500/10 dark:hover:text-violet-300 ${mobile ? 'min-h-11 gap-3 rounded-xl px-3 py-2 text-sm' : 'min-h-10 gap-2 rounded-lg px-2.5 py-2 text-sm'}`}>
+        <div className={mobile ? '' : 'mx-auto w-fit max-w-full p-1.5'}>{categoryShortcuts[category.id].map((item) => <Link key={item.href} href={item.href} onClick={navigate} aria-current={activePath === item.href ? 'page' : undefined} className={`group flex items-center text-foreground transition-colors hover:bg-violet-50 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 aria-[current=page]:bg-muted dark:hover:bg-violet-500/10 dark:hover:text-violet-300 ${mobile ? 'min-h-11 gap-3 rounded-xl px-3 py-2 text-sm' : 'min-h-10 justify-start gap-2 rounded-lg px-2 py-2 text-left text-sm'}`}>
           {!mobile && <span aria-hidden="true" className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-slate-50 font-serif text-xs text-slate-500 group-hover:bg-white group-hover:text-violet-700 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-violet-500/10 dark:group-hover:text-violet-300">{item.sample ?? (category.id === 'symbols' ? '✧' : 'U+')}</span>}
-          <span className="flex-1">{item.label}</span><span aria-hidden="true" className="text-violet-500 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">↗</span>
+          <span className={mobile ? 'flex-1' : 'min-w-0'}>{item.label}</span>
         </Link>)}</div>
         {!mobile && <div className="border-t border-border/70 px-1.5 py-1">{viewAll}</div>}
       </div>
