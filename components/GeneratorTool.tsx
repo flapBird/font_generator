@@ -169,7 +169,7 @@ interface GeneratorDirectoryContentProps {
   temporaryCurrentItem?: GeneratorSearchItem;
 }
 
-function GeneratorDirectoryContent({
+export function GeneratorDirectoryContent({
   searchId,
   query,
   onQueryChange,
