@@ -7,6 +7,10 @@ import { useGeneratorText } from '@/lib/use-generator-text';
 import TextToolInput from './TextToolInput';
 
 const initialPreset = sonicPresets[0];
+const checkerboard = {
+  backgroundImage: 'conic-gradient(var(--checker-tile) 25%, var(--checker-base) 0 50%, var(--checker-tile) 0 75%, var(--checker-base) 0)',
+  backgroundSize: '20px 20px',
+};
 
 export default function SonicArtworkTool() {
   const [text, setText] = useGeneratorText(SONIC_SAMPLE);
@@ -56,8 +60,8 @@ export default function SonicArtworkTool() {
   }
 
   return (
-    <section id="generator" aria-label="Sonic title artwork studio" className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]">
-      <div className="contents lg:col-start-1 lg:row-start-1 lg:block lg:min-w-0 lg:space-y-4">
+    <section id="generator" aria-label="Sonic title artwork studio" className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]">
+      <div role="group" aria-label="Artwork controls" className="contents lg:col-start-1 lg:row-start-1 lg:block lg:min-w-0 lg:space-y-4">
         <div className="order-1 min-w-0 space-y-3">
           <TextToolInput id="sonic-input" text={text} onChange={setText} limit={SONIC_INPUT_LIMIT} label="Your title" />
           <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-3 sm:p-4 dark:border-slate-800">
@@ -97,23 +101,33 @@ export default function SonicArtworkTool() {
         </div>
       </div>
 
-      <div className="order-2 min-w-0 space-y-3 lg:col-start-2 lg:row-start-1">
-        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 p-2 dark:border-slate-700 dark:bg-slate-800" style={{ backgroundImage: settings.transparent ? 'conic-gradient(#dbe3ef 25%, #f8fafc 0 50%, #dbe3ef 0 75%, #f8fafc 0)' : undefined, backgroundSize: '24px 24px' }}>
-          <canvas ref={canvasRef} aria-label="Sonic title preview" width={2000} height={1000} className={`block w-full rounded-2xl ${ready ? '' : 'invisible'}`} style={{ aspectRatio: `${width} / ${height}` }} />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold">{preset.name}</p>
-            <p role="status" className="text-sm text-slate-600 dark:text-slate-400">{previewError ? 'The font or preview could not load.' : !hasText ? 'Enter a title to preview.' : ready ? `${width} × ${height} PNG ready` : 'Loading the preview…'}</p>
+      <section aria-label="Preview and download" className="order-2 flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 lg:col-start-2 lg:row-start-1">
+        <div className={`relative min-h-0 max-h-[30rem] flex-1 bg-slate-100 dark:bg-slate-900 lg:aspect-auto lg:max-h-none ${settings.format === 'square' ? 'aspect-square' : 'aspect-[1.8]'}`}>
+          <div className="absolute inset-3 flex items-center justify-center sm:inset-5">
+            <canvas
+              ref={canvasRef}
+              aria-label="Sonic title preview"
+              width={2000}
+              height={1000}
+              className={`block h-auto max-h-full w-auto max-w-full flex-none rounded-lg shadow-sm ring-1 ring-slate-900/10 [--checker-base:#f8fafc] [--checker-tile:#dbe3ef] dark:ring-white/10 dark:[--checker-base:#283345] dark:[--checker-tile:#37445a] ${ready ? '' : 'invisible'}`}
+              style={settings.transparent ? checkerboard : undefined}
+            />
           </div>
-          <div className="flex flex-wrap gap-2">
-            {previewError && <button type="button" onClick={() => setAttempt((value) => value + 1)} className="min-h-11 rounded-xl border px-4 text-sm font-semibold">Retry preview</button>}
-            <button type="button" disabled={!ready} onClick={download} className="min-h-12 rounded-xl bg-violet-600 px-5 text-sm font-semibold text-white hover:bg-violet-700 focus-visible:outline-violet-600 disabled:opacity-50">Download PNG</button>
-          </div>
         </div>
-        {downloadError && <p role="alert" className="text-sm text-red-700 dark:text-red-300">Download failed. Try again.</p>}
-        <p className="text-sm text-slate-600 dark:text-slate-400">Unofficial fan lettering using <a href="/fonts/discovery/luckiest-guy/LICENSE.txt" className="font-medium text-violet-700 underline dark:text-violet-300">Luckiest Guy under the Apache 2.0 license</a>.</p>
-      </div>
+        <div className="border-t border-slate-200 p-3 sm:px-5 sm:py-4 dark:border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">{preset.name}</p>
+              <p role="status" className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">{previewError ? 'The font or preview could not load.' : !hasText ? 'Enter a title to preview.' : ready ? `${width} × ${height} PNG ready` : 'Loading the preview…'}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {previewError && <button type="button" onClick={() => setAttempt((value) => value + 1)} className="min-h-11 rounded-xl border px-4 text-sm font-semibold">Retry preview</button>}
+              <button type="button" disabled={!ready} onClick={download} className="min-h-12 rounded-xl bg-violet-600 px-5 text-sm font-semibold text-white hover:bg-violet-700 focus-visible:outline-violet-600 disabled:opacity-50">Download PNG</button>
+            </div>
+          </div>
+          {downloadError && <p role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">Download failed. Try again.</p>}
+        </div>
+      </section>
     </section>
   );
 }

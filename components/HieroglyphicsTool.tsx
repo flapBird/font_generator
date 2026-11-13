@@ -7,18 +7,33 @@ import TextOutputCard from './TextOutputCard';
 import TextToolInput from './TextToolInput';
 import styles from './HieroglyphicsTool.module.css';
 
+const nameExamples = hieroglyphSamples.map((name) => ({ name, glyphs: spellInHieroglyphs(name).text }));
+
 export default function HieroglyphicsTool() {
   const [text, setText] = useGeneratorText(hieroglyphSamples[0]);
   const result = useMemo(() => spellInHieroglyphs(text), [text]);
 
   return (
     <section id="generator" aria-label="Hieroglyphics translator workspace" className="grid items-start gap-4 rounded-3xl border border-slate-200 bg-white p-3 sm:p-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] dark:border-slate-800 dark:bg-slate-950">
-      <div className="min-w-0 space-y-2">
+      <div className="min-w-0 space-y-4">
         <TextToolInput id="hieroglyph-input" label="Name or short word" text={text} onChange={setText} limit={HIEROGLYPH_INPUT_LIMIT} />
-        <div className="flex flex-wrap items-center gap-x-2 text-sm text-slate-600 dark:text-slate-400">
-          <span>Try a name</span>
-          {hieroglyphSamples.map((name) => <button key={name} type="button" onClick={() => setText(name)} className="min-h-11 rounded-lg px-2 font-semibold text-violet-700 underline focus-visible:outline-violet-600 dark:text-violet-300">{name}</button>)}
-        </div>
+        <fieldset className="min-w-0">
+          <legend className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">Try a name</legend>
+          <div className="grid grid-cols-3 gap-2">
+            {nameExamples.map(({ name, glyphs }) => (
+              <button
+                key={name}
+                type="button"
+                aria-pressed={text === name}
+                onClick={() => setText(name)}
+                className={`${styles.sample} flex min-w-0 flex-col items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-1 py-2 text-sm font-semibold text-slate-800 transition-colors hover:border-violet-300 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 aria-pressed:border-violet-400 aria-pressed:bg-violet-50 aria-pressed:text-violet-800 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-violet-700 dark:hover:bg-violet-950/60 dark:focus-visible:ring-offset-slate-950 dark:aria-pressed:border-violet-500 dark:aria-pressed:bg-violet-950/60 dark:aria-pressed:text-violet-200`}
+              >
+                <span aria-hidden="true" className={`${styles.glyphs} ${styles.sampleGlyphs} grid h-8 w-full place-items-center whitespace-nowrap text-violet-700 dark:text-violet-300`}>{glyphs}</span>
+                {name}
+              </button>
+            ))}
+          </div>
+        </fieldset>
         <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">Sound out unfamiliar names and try typing their pronunciation if the first spelling looks wrong.</p>
       </div>
       <div className="min-w-0 space-y-4">

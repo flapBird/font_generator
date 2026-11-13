@@ -4,12 +4,9 @@ export const HIEROGLYPH_INPUT_LIMIT = 120;
 export const hieroglyphSamples = ['Sam', 'Sharon', 'Alex'];
 
 // English sound approximations follow the Royal Ontario Museum activity.
+// https://www.rom.on.ca/learn/resources/activity-write-your-name-egyptian-hieroglyphs
 // The Unicode chart identifies the Gardiner signs and code points.
-export const hieroglyphSources = {
-  museum: 'https://www.rom.on.ca/learn/resources/activity-write-your-name-egyptian-hieroglyphs',
-  unicode: 'https://www.unicode.org/charts/PDF/U13000.pdf',
-};
-
+// https://www.unicode.org/charts/PDF/U13000.pdf
 const signs = {
   vulture: ['G1', 0x1313f, 'Vulture'], foot: ['D58', 0x130c0, 'Foot'], basket: ['V31', 0x133a1, 'Basket'],
   hand: ['D46', 0x130a7, 'Hand'], reed: ['M17', 0x131cb, 'Reed leaf'], viper: ['I9', 0x13191, 'Horned viper'],

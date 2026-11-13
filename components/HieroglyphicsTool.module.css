@@ -12,3 +12,12 @@
   line-height: 1.8;
   font-synthesis: none;
 }
+
+.sample {
+  container-type: inline-size;
+}
+
+.sampleGlyphs {
+  font-size: 0.75rem;
+  font-size: min(1.125rem, 16cqi);
+}

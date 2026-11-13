@@ -114,7 +114,15 @@ test('hieroglyphs show sign codes, load a page-local font and copy exact text', 
     return faces.some((face) => face.status === 'loaded');
   })).toBe(true);
   expect(fontRequests.some((url) => url.endsWith('/egyptian.woff2'))).toBe(true);
+  const samples = page.getByRole('group', { name: 'Try a name', exact: true });
+  await expect(samples.getByRole('button', { name: 'Sam', pressed: true })).toBeVisible();
+  const sharon = samples.getByRole('button', { name: 'Sharon' });
+  await sharon.press('Space');
+  await expect(sharon).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByLabel('Name or short word')).toHaveValue('Sharon');
+  await expect(page.getByLabel('Hieroglyphs output')).toHaveText('𓈙𓄿𓂋𓍯𓈖');
   await page.getByLabel('Name or short word').fill('Sh x 12! 中文');
+  await expect(samples.getByRole('button', { pressed: true })).toHaveCount(0);
   await expect(page.getByText('N37 · U+13219')).toBeVisible();
   await expect(page.getByText('Letters outside the supported Latin mapping are shown as entered.')).toBeVisible();
   await page.getByRole('button', { name: 'Copy Hieroglyphs', exact: true }).click();
@@ -159,6 +167,19 @@ test('Sonic exports the current preview and allows retry when its font fails', a
   expect(download.suggestedFilename()).toBe('sonic-sunset-sprint.png');
   expect((await readFile((await download.path())!)).toString('base64')).toBe(pixels.png);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.setViewportSize({ width: 1440, height: 950 });
+  const controls = page.getByRole('group', { name: 'Artwork controls' });
+  const previewPanel = page.getByRole('region', { name: 'Preview and download' });
+  for (const [format, ratio] of [['square', 1], ['banner', 2]] as const) {
+    await page.getByLabel('Canvas format').selectOption(format);
+    await expect(downloadButton).toBeEnabled();
+    const controlBox = (await controls.boundingBox())!;
+    const previewBox = (await previewPanel.boundingBox())!;
+    const canvasBox = (await canvas.boundingBox())!;
+    expect(previewBox.y).toBeCloseTo(controlBox.y, 0);
+    expect(previewBox.height).toBeCloseTo(controlBox.height, 0);
+    expect(canvasBox.width / canvasBox.height).toBeCloseTo(ratio, 2);
+  }
   await page.getByRole('button', { name: 'Clear text', exact: true }).click();
   await expect(downloadButton).toBeDisabled();
 });
