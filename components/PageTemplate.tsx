@@ -1,5 +1,6 @@
 import FocusedTextGeneratorTool from './FocusedTextGeneratorTool';
 import DiscoveryToolBoundary from './DiscoveryToolBoundary';
+import LetterToolBoundary from './LetterToolBoundary';
 import { isDiscoveryArt, isDiscoveryText, discoveryStyleIds, discoverySamples, discoveryRelatedLinks } from '@/lib/discovery-catalog';
 import OctoberToolBoundary from './OctoberToolBoundary';
 import { isOctoberArt, isOctoberText } from '@/lib/october-catalog';
@@ -127,6 +128,9 @@ export default function PageTemplate({
   const visualConfig = baseVisualConfig;
   const isPlatform = Boolean(platformTextConfigs[page.slug]);
   const isZalgo = page.slug === 'zalgo-text-generator';
+  const slug = page.slug;
+  const isSonic = slug === 'sonic-font-generator';
+  const isKeywordTool = slug === 'cursed-text-generator' || slug === 'letters-in-different-fonts' || slug === 'sonic-font-generator';
   const isDiscord = page.slug === 'discord-font-generator';
   const isAsciiGenerator = definition?.kind === 'ascii';
   const isThreeDGenerator = page.slug === '3d-font-generator';
@@ -134,7 +138,7 @@ export default function PageTemplate({
   const isHybridGenerator = definition?.kind === 'hybrid';
   const isMinecraftGenerator = visualConfig?.engine === 'minecraft-renderer';
   const requiresVisualConfig = definition
-    ? !isThreeDGenerator && !octoberArt && !discoveryArt && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
+    ? !isThreeDGenerator && !octoberArt && !discoveryArt && !isSonic && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
     : false;
   if (requiresVisualConfig && !visualConfig) {
     throw new Error(`Generator ${page.slug} is registered as ${definition?.kind} but has no visual configuration.`);
@@ -142,12 +146,12 @@ export default function PageTemplate({
   if (visualConfig && definition?.kind === 'unicode') {
     throw new Error(`Generator ${page.slug} has a visual configuration but is still registered as Unicode-only.`);
   }
-  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator || octoberArt || discoveryArt;
+  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator || octoberArt || discoveryArt || isSonic;
   const usesFontWorkspace = !isSpecializedGenerator;
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
   const specializedHowTo = getSpecializedHowTo(page.slug);
-  const workflowSteps = discoveryArt
+  const workflowSteps = page.workflowSteps ? page.workflowSteps.map(({ title, text }, index) => [String(index + 1), title, text]) : discoveryArt
     ? [['1', 'Enter your title', 'Use up to 120 characters for artwork, including manual line breaks.'], ['2', 'Choose your look', 'Pick a preset and adjust its colors, effects and layout.'], ['3', 'Download PNG', 'Wait for the preview to be ready, then save the banner or square artwork.']]
     : discoveryText
     ? [['1', 'Enter your text', 'Use the page example or enter your own short phrase.'], ['2', 'Choose the output', 'Compare styles and any page-specific decoration or formatting controls.'], ['3', 'Copy and check', 'Tap a result card and test it in the destination field.']]
@@ -192,7 +196,7 @@ export default function PageTemplate({
   const relatedLinks = getRelatedLinks(page.relatedSlugs).slice(0, 4);
   const additionalLinks = getRelatedLinks(discoveryRelatedLinks[page.slug] ?? []);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
-    if (isZalgo || isDiscord || isPlatform || octoberArt || octoberText || discoveryArt || discoveryText) return example;
+    if (isZalgo || isDiscord || isPlatform || octoberArt || octoberText || discoveryArt || discoveryText || isKeywordTool) return example;
     const styleId = config.styleIds[index % config.styleIds.length];
     const style = getStyleDefinition(styleId);
     return {
@@ -234,7 +238,9 @@ export default function PageTemplate({
           )}
         </header>
 
-        {discoveryArt || discoveryText ? (
+        {isKeywordTool ? (
+          <LetterToolBoundary key={slug} slug={slug} pageTitle={page.title} config={config} navigationItems={generatorNavigationItems} />
+        ) : discoveryArt || discoveryText ? (
           <DiscoveryToolBoundary key={page.slug} artwork={discoveryArt} slug={page.slug} pageTitle={page.title} config={config} navigationItems={generatorNavigationItems} />
         ) : octoberArt || octoberText ? (
           <OctoberToolBoundary key={page.slug} artwork={octoberArt} slug={page.slug} pageTitle={page.title} config={config} navigationItems={generatorNavigationItems} />
@@ -486,6 +492,8 @@ export default function PageTemplate({
                   ? 'PNG and faithful SVG both preserve the exact rendered canvas. Copy formatting-code text separately when the destination supports Minecraft § or & codes.'
                   : page.slug === 'halloween-font-generator'
                   ? 'PNG preserves the lettering and scene. Choose Transparent in Customize to export only the lettering effects, or use the Copyable text tab for bios and messages.'
+                  : isSonic
+                  ? 'PNG preserves the current preview. With Transparent background enabled, you can place the lettering over your own image.'
                   : isSpecializedGenerator
                     ? 'PNG preserves the current rendered appearance. SVG keeps editable text, so its font can change when opened on a device without the same typeface.'
                   : 'Fancy text changes characters, not the installed font. That is why the result can be copied into many apps, but rendering may vary by device.'}

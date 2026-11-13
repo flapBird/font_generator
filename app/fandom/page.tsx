@@ -4,13 +4,14 @@
  import { generateStyleVariants, getGeneratorPageConfig } from '@/lib/generator';
  import { getSpecializedDescription, getVisualGeneratorConfig } from '@/lib/visual-generator';
  import { getGeneratorDefinition } from '@/lib/generator-registry';
+ import { sonicPresets } from '@/lib/sonic-artwork';
  
  export const metadata: Metadata = {
    title: 'Fandom Font Generators',
    alternates: {
      canonical: 'https://font-generators.org/fandom',
    },
-   description: 'Unicode text styles inspired by pop culture franchises. Create Disney, Mario, Stranger Things, and other fandom-inspired text for fan content.',
+   description: 'Explore unofficial fandom typography tools for Disney, Mario, Sonic, Stranger Things and other themes. Preview title artwork and check each tool’s download or copy options.',
  };
  
  export default function FandomIndexPage() {
@@ -22,7 +23,7 @@
              <span className="gradient-text">Fandom Font Generators</span>
            </h1>
            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-             Unicode text styles inspired by your favorite franchises. Unofficial fan tools for creative expression.
+             Explore unofficial title artwork and copyable text inspired by games, film and television.
            </p>
          </div>
  
@@ -31,6 +32,7 @@
              const config = getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds);
              const visualConfig = getVisualGeneratorConfig(page.slug);
              const definition = getGeneratorDefinition(page.slug);
+             const isSonic = page.slug === 'sonic-font-generator';
              const preview = generateStyleVariants(page.title.replace(' Font Generator', ''), config.styleIds.slice(0, 1))[0];
              return (
                <Link
@@ -41,7 +43,7 @@
                  <div className="flex items-start justify-between gap-3">
                    <span className="text-2xl" aria-hidden="true">{page.icon}</span>
                    <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-violet-700 dark:bg-violet-950/50 dark:text-violet-300">
-                     {visualConfig ? `${visualConfig.presets.length} presets` : definition?.kind === 'directory' ? 'Generator directory' : `${config.styleIds.length} styles`}
+                     {isSonic ? `${sonicPresets.length} presets` : visualConfig ? `${visualConfig.presets.length} presets` : definition?.kind === 'directory' ? 'Generator directory' : `${config.styleIds.length} styles`}
                    </span>
                  </div>
                  <h2 className="mt-4 text-lg font-black text-slate-950 transition group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">
@@ -49,8 +51,8 @@
                  </h2>
                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{getSpecializedDescription(page.slug) ?? page.description}</p>
                  <div className="mt-auto pt-5">
-                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{visualConfig ? 'Rendered artwork + downloads' : preview?.name}</p>
-                   <p className="mt-1 break-words text-lg text-slate-900 dark:text-slate-100">{visualConfig?.presets[0]?.name ?? preview?.text}</p>
+                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{isSonic ? 'Transparent PNG' : visualConfig ? 'Rendered artwork + downloads' : preview?.name}</p>
+                   <p className="mt-1 break-words text-lg text-slate-900 dark:text-slate-100">{isSonic ? sonicPresets[0].name : visualConfig?.presets[0]?.name ?? preview?.text}</p>
                  </div>
                </Link>
              );

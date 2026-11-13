@@ -1,6 +1,6 @@
 // This catalog is separate from the font-style registry: old directories stay unchanged.
 export type UnicodeUtilityId = 'unicode-character-inspector' | 'invisible-character-remover' | 'fancy-text-to-normal-text';
-export type LibraryId = 'symbols' | 'hearts' | 'stars' | 'arrows' | 'kaomoji' | 'emoji-combos' | 'unicode-tools' | 'invisible-character' | 'signature-generator' | UnicodeUtilityId;
+export type LibraryId = 'symbols' | 'hearts' | 'stars' | 'arrows' | 'kaomoji' | 'emoji-combos' | 'unicode-tools' | 'invisible-character' | 'signature-generator' | 'hieroglyphics-translator' | UnicodeUtilityId;
 export type LibraryPageDefinition = {
   id: LibraryId; path: string; title: string; description: string; intro: string; icon: string;
   sections: { title: string; text: string }[];
@@ -110,12 +110,22 @@ export const libraryPages: LibraryPageDefinition[] = [
   },
   {
     id: 'unicode-tools', path: '/unicode-tools', title: 'Unicode Text Tools', icon: 'U+',
-    description: 'Inspect Unicode characters, selectively remove invisible text, restore supported fancy letters, or copy exact blank characters with free browser-based tools.',
-    intro: 'Understand the characters behind the text. Inspect code points, choose what to clean, restore supported letter styles or copy an exact blank character.',
+    description: 'Inspect Unicode characters, clean invisible text, restore supported fancy letters, copy blank characters or spell a name in Egyptian hieroglyphs.',
+    intro: 'Understand the characters behind the text. Inspect code points, clean text, restore fancy letters, copy a blank character or try your name in hieroglyphs.',
     sections: [
-      { title: 'Choose a tool by the result you need', text: 'Inspect characters and their encoding, select invisible character types to remove, restore supported fancy letters, or copy a specific blank character. Symbols lets you browse visible characters. Font Styles changes supported letters into copyable Unicode alternatives.' },
+      { title: 'Choose a tool by the result you need', text: 'Inspect characters and their encoding, select invisible character types to remove, restore supported fancy letters, or copy a specific blank character. Use the Hieroglyphics Translator to make a copyable approximation of a name, or browse the Symbols library for visible characters.' },
       { title: 'Characters are not font files', text: 'Unicode identifies characters; a font supplies their shapes. Copying text does not install a typeface. If you need a PNG image or an installable font, use the separate artwork or AI font tools and review their output descriptions.' },
     ], related: ['invisible-character', 'unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text', 'symbols'],
+  },
+  {
+    id: 'hieroglyphics-translator', path: '/hieroglyphics-translator', title: 'Hieroglyphics Translator', icon: 'Aa',
+    description: 'Write an English name in copyable Egyptian hieroglyphs using an approximate spelling. See each sign with its Gardiner number and Unicode code point.',
+    intro: 'Write your name in Egyptian hieroglyphs. Enter an English name or short word to see an approximate spelling you can copy.',
+    sections: [
+      { title: 'How English sounds are matched', text: 'The tool tries supported letter pairs such as sh and ph first, then individual letters. A letter can produce two signs, as x does for k and s. Accented Latin letters with an A–Z base use that base. Try an alternative spelling for silent letters or names with an unusual pronunciation.' },
+      { title: 'Read the sign breakdown', text: 'The rows show the part of the name that was matched, the sign it produced, a short description and two references. The Gardiner number identifies the sign in Egyptology. The Unicode code point identifies the character you can copy.' },
+      { title: 'Keep a copyable result', text: 'Spaces, numbers, punctuation and unsupported characters pass through. Preview uses a locally hosted Noto font for the mapped signs. A different app may show boxes if its fonts lack those characters.' },
+    ], related: ['unicode-tools', 'unicode-character-inspector', 'symbols'],
   },
   {
     id: 'invisible-character', path: '/invisible-character', title: 'Invisible Character Copy and Paste', icon: '␣',

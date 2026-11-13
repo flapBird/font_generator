@@ -17,7 +17,11 @@ export const discoveryRelatedLinks: Record<string, string[]> = {
   'discord-font-generator': ['whatsapp-font-generator', 'reddit-font-generator'],
   'fire-font-generator': ['neon-font-generator'],
   'y2k-font-generator': ['neon-font-generator', 'cyberpunk-font-generator'],
-  'glitch-font-generator': ['cyberpunk-font-generator'],
+  'glitch-font-generator': ['cyberpunk-font-generator', 'cursed-text-generator'],
+  'zalgo-text-generator': ['cursed-text-generator'],
+  'horror-font-generator': ['cursed-text-generator'],
+  'mario-font-generator': ['sonic-font-generator'],
+  'name-font-generator': ['letters-in-different-fonts'],
   'gaming-font-generator': ['anime-font-generator', 'cyberpunk-font-generator', 'square-text-generator'],
 };
 

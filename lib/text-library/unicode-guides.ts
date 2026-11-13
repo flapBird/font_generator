@@ -7,11 +7,11 @@ export const unicodeGuides: Partial<Record<LibraryId, CollectionGuide>> = {
     heading: 'What are Unicode text tools?',
     paragraphs: [
       'Unicode text tools help you examine or change the characters inside a string. Text that looks identical can contain different code points: é can be a single character or an e followed by a combining accent. Spaces and formatting characters can also affect text without leaving a visible mark.',
-      'This directory offers four tasks: inspect characters, selectively remove invisible characters, restore supported fancy letters to ordinary text, and copy a chosen blank character. These tools work with text, not font files or pictures. Choose a tool for the change you actually need; inspecting text never changes it.',
+      'This directory offers tools to inspect characters, selectively remove invisible characters, restore supported fancy letters to ordinary text, copy a chosen blank character and approximate an English name in Egyptian hieroglyphs. Choose a tool by the result you want to copy.',
     ],
     howToHeading: 'How to choose and use a Unicode tool',
     steps: [
-      { title: 'Choose your task', text: 'Use Character Inspector to understand a string, Invisible Character Remover to make selected changes, Fancy Text to Normal Text to restore supported letter styles, or Invisible Character to copy blank text.' },
+      { title: 'Choose your task', text: 'Use Character Inspector to examine a string, one of the cleanup tools to change it, or Invisible Character to copy blank text. Open Hieroglyphics Translator for an approximate spelling of a name.' },
       { title: 'Paste or select your text', text: 'Paste into the chosen tool. For blank text, select a character type and a repeat count instead. Read the available options before changing joiners, spaces or letter styles.' },
       { title: 'Review, then copy', text: 'Check the report or compare the original and result. Use the matching Copy button and paste into your destination. Test the pasted text there because apps can handle characters differently.' },
     ],
@@ -21,6 +21,26 @@ export const unicodeGuides: Partial<Record<LibraryId, CollectionGuide>> = {
       { question: 'Will cleaning text keep all emoji and languages intact?', answer: 'The remover starts with every change disabled. Turning on joiner, direction-control or variation-selector removal can change emoji or writing systems. Review the result; blanket removal is not suitable for every string.' },
       { question: 'Do I need an account or an upload?', answer: 'No account is required for these free tools. Their processing runs in your browser, and tool input stays in page memory. Switching to another tool opens its own example rather than carrying your input across.' },
       { question: 'Can I use the tools on a phone?', answer: 'Yes. Open a tool, paste from your keyboard or long-press Paste, adjust its controls and tap Copy. If the browser blocks automatic clipboard access, use the selectable manual-copy text provided by the copy control.' },
+    ],
+  },
+  'hieroglyphics-translator': {
+    heading: 'What is the Hieroglyphics Translator?',
+    paragraphs: [
+      'This tool uses a small set of Egyptian signs to approximate the sounds of English names and short words. It follows the approach used in museum name-writing activities. For example, M uses the owl sign. The copied result consists of Unicode characters you can paste into a document, note or message.',
+      'Ancient Egyptian used signs for sounds, words and categories of meaning. Reading an inscription requires vocabulary, grammar and context. This tool uses spelling rules and assumes common pronunciations for the patterns it recognizes.',
+    ],
+    howToHeading: 'How to write a name in Egyptian hieroglyphs',
+    steps: [
+      { title: 'Type a name or short word', text: 'Replace the example or pick one of the sample names. The input accepts up to 120 UTF-16 units.' },
+      { title: 'Review the signs', text: 'Open How this name was spelled to see which letters or pairs produced each sign. Try spelling the name by sound if a silent letter or unusual pronunciation changes the result.' },
+      { title: 'Copy the hieroglyphs', text: 'Tap the Hieroglyphs card, then paste it into your document or message. Check that the destination renders the signs.' },
+    ],
+    faq: [
+      { question: 'Does the tool translate English sentences into Ancient Egyptian?', answer: 'It provides a pronunciation-based approximation for English names and short words. Translating meaning into Ancient Egyptian requires its vocabulary and grammar.' },
+      { question: 'Why do SH and M produce a different number of signs than X?', answer: 'SH is handled as one spelling unit and M uses one sign. X is treated as a k plus s sound by default and produces two signs. Try a phonetic spelling for exceptions such as an initial X pronounced like Z.' },
+      { question: 'Can I paste hieroglyphs from an inscription to translate them?', answer: 'The tool spells Latin input using selected signs. Existing hieroglyphs are passed through. Use the Unicode Character Inspector to identify their code points.' },
+      { question: 'Why do I see boxes after pasting?', answer: 'The receiving app needs a font with Egyptian hieroglyphs. Try a document editor with Noto Sans Egyptian Hieroglyphs and select it for the pasted text.' },
+      { question: 'Is my text uploaded?', answer: 'The spelling and preview run in your browser. The tool uses a locally hosted font and keeps the input in page memory.' },
     ],
   },
   'unicode-character-inspector': {

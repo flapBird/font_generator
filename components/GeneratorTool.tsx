@@ -51,6 +51,7 @@ interface GeneratorToolProps {
     footer?: ReactNode;
     preview: { id: string; name: string; text: string; category: GeneratorStyleCategory; formattedText?: { text: string; className: string } };
     outputLabel?: string;
+    previewTextClassName?: string;
     // Explicit opt-in: keep the existing mobile order for all other tools.
     mobileDirectoryAfterResults?: boolean;
   };
@@ -788,7 +789,7 @@ export default function GeneratorTool({
                       <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-100">
                         {formattedPreview ? 'Message preview' : `${previewVariant ? categoryLabels[previewVariant.category] : 'Preview'} collection`}
                       </p>
-                      <p aria-label={formattedPreview ? 'Formatted message preview' : undefined} className={`mt-3 break-words text-3xl leading-[1.25] ${formattedPreview ? `whitespace-pre-wrap ${formattedPreview.className}` : ''} ${inputText && previewVariant?.text ? '' : 'text-white/65'}`}>
+                      <p aria-label={formattedPreview ? 'Formatted message preview' : undefined} className={`mt-3 break-words text-3xl leading-[1.25] ${customWorkspace?.previewTextClassName ?? ''} ${formattedPreview ? `whitespace-pre-wrap ${formattedPreview.className}` : ''} ${inputText && previewVariant?.text ? '' : 'text-white/65'}`}>
                         {inputText && previewVariant?.text ? (formattedPreview?.text ?? previewVariant.text) : 'Your text, your style.'}
                       </p>
                     </div>

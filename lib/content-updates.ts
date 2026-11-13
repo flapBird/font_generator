@@ -1,16 +1,16 @@
 import { discoverySlugs } from './discovery-catalog';
 
 const updateGroups = {
-  '2026-11-01': ['/font-tools', '/font-identifier', '/', '/tools', '/styles', '/cute-font-generator', '/calligraphy-font-generator', '/cursive-font-generator', '/preppy-font-generator', '/heart-font-generator', '/invisible-character'],
+  '2026-11-13': ['/', '/tools', '/styles', '/unicode-tools', '/fandom', '/visual-art', '/cursed-text-generator', '/letters-in-different-fonts', '/hieroglyphics-translator', '/sonic-font-generator'],
+  '2026-11-01': ['/font-tools', '/font-identifier', '/cute-font-generator', '/calligraphy-font-generator', '/cursive-font-generator', '/preppy-font-generator', '/heart-font-generator', '/invisible-character'],
   '2026-10-30': [
-    '/unicode-tools',
     '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',
     '/symbols', '/symbols/heart-symbols', '/symbols/star-symbols', '/symbols/arrow-symbols',
     '/kaomoji', '/emoji-combos',
   ],
   '2026-10-29': [
     '/privacy',
-    '/signature-generator', '/visual-art',
+    '/signature-generator',
   ],
   '2026-10-28': [
     '/fraktur-font-generator',
@@ -46,7 +46,6 @@ const updateGroups = {
     '/zalgo-text-generator',
   ],
   '2026-10-26': [
-    '/fandom',
     '/small-text-generator',
     '/serif-font-generator',
     '/linkedin-font-generator',

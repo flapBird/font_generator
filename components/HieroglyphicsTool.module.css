@@ -1,0 +1,14 @@
+@font-face {
+  font-family: 'Noto Sans Egyptian Hieroglyphs';
+  src: url('/fonts/hieroglyphics/egyptian.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+1308B, U+130A7, U+130C0, U+130ED, U+1313F, U+13153, U+13171, U+13191, U+13193, U+131CB-131CC, U+1320E, U+13216, U+13219, U+13254, U+13283, U+132AA, U+132F4, U+1336F, U+1337F, U+133A1, U+133BC, U+133CF, U+1340D;
+}
+
+.glyphs {
+  font-family: 'Noto Sans Egyptian Hieroglyphs', system-ui, sans-serif;
+  line-height: 1.8;
+  font-synthesis: none;
+}

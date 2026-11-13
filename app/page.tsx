@@ -127,6 +127,7 @@ export default function HomePage() {
                     </article>
                   ))}
                 </div>
+                <p><Link href="/letters-in-different-fonts">Browse letters A–Z</Link> to compare one letter across styles or copy a full alphabet.</p>
               </section>
 
               <section className="mt-14">

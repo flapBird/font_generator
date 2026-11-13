@@ -128,15 +128,50 @@ assert.deepEqual(generatorRegistry.find((entry) => entry.slug === 'handwriting-f
 console.log('Expansion regressions passed: underline, fullwidth punctuation/spacing, small caps, double-struck exceptions/digits, protected social entities, weighted X lengths, pet frames, links and sitemap dates.');
 
 const { hiddenNavigationSlugs, isVisibleInGeneratorNavigation, focusedTextSlugs } = require('../lib/generator-navigation.ts');
-assert.equal(hiddenNavigationSlugs.length, 35);
-assert.equal(new Set(hiddenNavigationSlugs).size, 35);
+assert.equal(hiddenNavigationSlugs.length, 38);
+assert.equal(new Set(hiddenNavigationSlugs).size, hiddenNavigationSlugs.length);
 for (const slug of hiddenNavigationSlugs) {
   assert.ok(knownSlugs.has(slug), `Hidden navigation entry is still a real page: ${slug}`);
   assert.equal(isVisibleInGeneratorNavigation(`/${slug}`), false);
 }
 for (const page of allPages.filter((page) => !hiddenNavigationSlugs.includes(page.slug))) assert.equal(isVisibleInGeneratorNavigation(`/${page.slug}`), true, `${page.slug} retains its navigation entry`);
 for (const slug of ['small-text-generator', 'cursive-font-generator', 'impact-font-generator']) assert.equal(focusedTextSlugs.has(slug), false, `${slug} retains its existing workspace`);
-console.log('Navigation regressions passed: 23 previous and 12 discovery additions hidden, all older entries preserved, old workspace opt-in unchanged.');
+console.log('Navigation regressions passed: 38 additions hidden, all older entries preserved, old workspace opt-in unchanged.');
+
+const { cursedTextResults, cleanCursedText, CURSED_CLEAN_LIMIT, CURSED_INPUT_LIMIT } = require('../lib/cursed-text.ts');
+const cursedInput = 'Café cafe\u0301 ñ\n中文 👨‍👩‍👧‍👦 1️⃣';
+const cursedResults = cursedTextResults(cursedInput, 2, 42);
+assert.equal(new Set(cursedResults.map(({ text }) => text)).size, 6);
+assert.deepEqual(cursedTextResults(cursedInput, 2, 42), cursedResults);
+assert.notEqual(cursedTextResults(cursedInput, 2, 43)[0].text, cursedResults[0].text);
+for (const result of cursedResults.filter(({ id }) => id !== 'blackletter')) {
+  assert.deepEqual(cleanCursedText(result.text).text, cursedInput);
+  assert.ok(cleanCursedText(result.text).removed > 0);
+}
+assert.deepEqual(cleanCursedText('é e\u0301 ñ ❤️'), { text: 'é e\u0301 ñ ❤️', removed: 0 });
+const denseResult = cursedTextResults('A'.repeat(CURSED_INPUT_LIMIT), 7).find(({ id }) => id === 'heavy').text;
+assert.equal(denseResult.length, CURSED_CLEAN_LIMIT);
+assert.equal(cleanCursedText(denseResult).text, 'A'.repeat(CURSED_INPUT_LIMIT));
+assert.ok(cursedTextResults('x'.repeat(CURSED_INPUT_LIMIT + 1)).every(({ text }) => text === ''));
+
+const { latinAlphabet, getLetterStyles } = require('../lib/letter-styles.ts');
+for (const letter of latinAlphabet + latinAlphabet.toLowerCase()) {
+  const results = getLetterStyles(letter);
+  assert.equal(new Set(results.map(({ text }) => text)).size, results.length);
+  assert.ok(results.every(({ text }) => text !== letter && text.isWellFormed()));
+}
+assert.equal(getLetterStyles('Z').find(({ id }) => id === 'squared').text, '🅉');
+assert.ok(getLetterStyles('z').every(({ id }) => id !== 'squared'));
+assert.deepEqual(getLetterStyles('é'), []);
+
+const { spellInHieroglyphs, HIEROGLYPH_INPUT_LIMIT } = require('../lib/hieroglyphics.ts');
+assert.equal(spellInHieroglyphs('Sam').text, '𓋴𓄿𓅓');
+const spelled = spellInHieroglyphs('Sh X 12,\né 中文 👨‍👩‍👧‍👦');
+assert.equal(spelled.text, '𓈙 𓎡𓋴 12,\n𓇋 中文 👨‍👩‍👧‍👦');
+assert.deepEqual(spelled.matches.map(({ input, signs }) => [input, signs.map(([gardiner]) => gardiner)]), [['Sh', ['N37']], ['X', ['V31', 'S29']], ['é', ['M17']]]);
+assert.equal(spelled.unmatchedLetters, 2);
+assert.equal(spellInHieroglyphs('A'.repeat(HIEROGLYPH_INPUT_LIMIT + 1)).text, '');
+console.log('Keyword tool regressions passed: cursed mark round-trip and limits, A–Z case coverage and Egyptian sign mapping.');
 
 const { discoverySlugs, discoveryTextSlugs, discoveryArtSlugs } = require('../lib/discovery-catalog.ts');
 const { discoveryTextResults, squareText, messageResults, frameDiscoveryText, styleDiscoveryText } = require('../lib/discovery-text.ts');

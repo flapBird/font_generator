@@ -1,0 +1,115 @@
+import type { PageDefinition } from './data';
+import { cursedTextResults } from './cursed-text';
+import { getLetterStyles } from './letter-styles';
+
+export const focusedLetterPages: PageDefinition[] = [
+  {
+    slug: 'cursed-text-generator',
+    title: 'Cursed Text Generator',
+    metaTitle: 'Cursed Text Generator — Creepy Text to Copy and Paste',
+    metaDescription: 'Make cursed text with six creepy Unicode styles. Compare stacked marks, slashes and blackletter, adjust the intensity, or clean supported marks from pasted text.',
+    category: 'styles',
+    description: 'Compare six cursed text styles, adjust stacked marks, then copy your result. Clean text removes supported marks from pasted Latin text.',
+    content: [
+      'Cursed text gives a short phrase the look of a broken signal, a scratched-out note or a line from a horror game. Enter a phrase once and compare six results using your own wording. The output is Unicode text you can copy into a chat, caption, bio or story. The app you paste into supplies the font and draws the marks.',
+      '**Choose the kind of distortion**',
+      'Haunted adds marks on both sides of the line. Overhead Static puts the marks above the letters, and Falling puts them below. Heavy Stack adds a denser mix with strokes through the middle. Adjust Stack intensity to change these four results together, or use Shuffle marks to try a new arrangement at the same intensity. Scratched adds a single diagonal stroke, while Blackletter uses angular characters without extra marks. Both keep a fixed style as you adjust the slider.',
+      '**Keep the part you want people to read**',
+      'Use a short phrase such as “Do not open” in a game-night message or “The signal is lost” in a horror caption. A low stack is easier to read beside ordinary words. Overhead Static can clip in a field with little room above the baseline, and Falling can overlap the next line. Try Scratched or a shorter phrase when a chat or bio cuts off a dense result. Keep names people need to search for, links and instructions in ordinary text.',
+      '**Clean pasted text and review the change**',
+      'Open Clean text and paste a result to see which supported marks can be removed. The input stays available above the preview. The cleaner targets this tool’s mark palette on Latin text and can also remove matching marks used intentionally. Common spelling accents such as an acute accent or tilde stay intact. Other tools can use different marks, and a substituted letterform such as Blackletter requires a different conversion.',
+      '**Cursed text and Zalgo**',
+      'Zalgo is the stacked-mark technique behind many cursed text effects. This page is for comparing several looks side by side, including Scratched and Blackletter. Use the separate Zalgo Text Generator when you want to turn each mark direction on or off and compare its five strengths.',
+    ].join('\n\n'),
+    howToUse: 'Creation accepts up to 1,000 UTF-16 units. The cleaner accepts up to 23,000, enough for a full-size Heavy Stack result from this page.',
+    workflowSteps: [
+      { title: 'Enter a phrase', text: 'Type a name, a short line of dialogue or a caption. You can also load one of the example phrases.' },
+      { title: 'Compare the effects', text: 'Change Stack intensity for the four stacked styles, or use Shuffle marks to get a different arrangement.' },
+      { title: 'Copy and test', text: 'Tap a result or focus it and press Enter. Paste it into the exact field where you intend to use it and check for clipping.' },
+    ],
+    examples: [
+      { before: 'Lost signal', after: cursedTextResults('Lost signal', 1).find((result) => result.id === 'haunted')!.text, note: 'Haunted · Low stack' },
+      { before: 'Do not open', after: cursedTextResults('Do not open').find((result) => result.id === 'scratched')!.text, note: 'Scratched' },
+      { before: 'After dark', after: cursedTextResults('After dark').find((result) => result.id === 'blackletter')!.text, note: 'Blackletter' },
+    ],
+    faq: [
+      { q: 'How do I make cursed text easier to read?', a: 'Set Stack intensity near 1 or choose Scratched. Keep the effect to a few words, especially in a compact bio or a multiline chat.' },
+      { q: 'Can I paste cursed text into Discord, Instagram or a game?', a: 'Try the exact message or profile field. An app can render combining marks differently, strip them, reject them or count them toward a length limit. A message and a username can have different rules.' },
+      { q: 'Why does a short phrase become long after copying?', a: 'Each mark is another Unicode character attached to a letter. Several marks can look like one tall letter on screen while using several positions in a field that counts code points or UTF-16 units.' },
+      { q: 'Can Clean text recover every original letter?', a: 'Clean text removes the supported combining marks from Latin text. It preserves common spelling accents and leaves other scripts and emoji intact. Arbitrary lookalikes, Blackletter and marks outside the supported palette can remain.' },
+      { q: 'What happens to accented words and emoji?', a: 'The stacked and scratched styles keep the accents on supported Latin characters. Emoji, spaces, line breaks and unsupported scripts pass through. Blackletter styles supported Latin letters and retains their accents.' },
+      { q: 'Do I need an account or a font download?', a: 'The tool is free and runs in your browser. It keeps the creation and cleanup inputs in page memory while you switch modes. The result you copy is Unicode text.' },
+    ],
+    relatedSlugs: ['zalgo-text-generator', 'glitch-font-generator', 'creepy-scary-font-generator', 'discord-font-generator'],
+    icon: '👻',
+    defaultStyleIds: ['boldFraktur', 'slash'],
+  },
+  {
+    slug: 'letters-in-different-fonts',
+    title: 'Letters in Different Fonts',
+    metaTitle: 'Letters in Different Fonts A–Z — Copy and Paste',
+    metaDescription: 'Pick any letter from A to Z and compare bold, cursive, gothic, circled and other copyable Unicode styles. Copy one letter or a full alphabet.',
+    category: 'styles',
+    description: 'Pick an A–Z letter, compare uppercase or lowercase Unicode styles, and copy one character or a full alphabet.',
+    content: [
+      'Letters in Different Fonts lets you compare a single Latin letter across several Unicode alphabets. Use it to pick an initial, compare the shape of a letter, or find a matching character for a short label. For example, the letter A can appear as 𝐀 in bold, 𝒜 in script, 𝔄 in blackletter, or Ⓐ inside a circle.',
+      '**Compare uppercase and lowercase**',
+      'Some styles provide separate shapes for both cases. Others cover only one case. Squared capitals are available in Uppercase, while the parenthesized set here covers lowercase. A case that returns the original character or repeats an existing result is omitted from the comparison.',
+      '**Use a whole alphabet when you need matching letters**',
+      'The Alphabet style menu below the comparison shows all 26 letters in the current case. Tap Full alphabet to copy the row with spaces. The homepage generator styles an entire name or phrase at once.',
+    ].join('\n\n'),
+    howToUse: 'The clipboard receives Unicode characters. Check the destination app to see how it renders the letter or alphabet you copied.',
+    workflowSteps: [
+      { title: 'Pick a letter', text: 'Choose A through Z and select Uppercase or Lowercase.' },
+      { title: 'Compare the shapes', text: 'Read across the style cards. Focus a card to preview its letter, or select a style from the Alphabet style menu.' },
+      { title: 'Copy a letter or row', text: 'Tap a letter card to copy that character. Tap Full alphabet to copy all 26 letters in the selected style.' },
+    ],
+    examples: [
+      { before: 'A', after: getLetterStyles('A').find((style) => style.id === 'doubleStruck')!.text, note: 'Double Struck' },
+      { before: 'm', after: getLetterStyles('m').find((style) => style.id === 'script')!.text, note: 'Elegant Script' },
+      { before: 'Z', after: getLetterStyles('Z').find((style) => style.id === 'circled')!.text, note: 'Circled Letters' },
+    ],
+    faq: [
+      { q: 'Why do the uppercase and lowercase lists differ?', a: 'Unicode coverage depends on the alphabet. The tool only offers the styles that produce a distinct result for the current letter and case.' },
+      { q: 'Can I use these letters in a username?', a: 'Check the exact field. Some sites allow a styled display name but restrict account handles to a smaller character set.' },
+      { q: 'Why does a letter appear as a box after pasting?', a: 'The destination may lack a font that can draw that character. Try a widely supported style such as Bold Serif or Fullwidth, and verify it in the intended app.' },
+      { q: 'Does copying a letter install a font?', a: 'Copy places the chosen Unicode character on your clipboard. Font installation is a separate task that requires a typeface file.' },
+    ],
+    relatedSlugs: ['cursive-font-generator', 'bubble-font-generator', 'old-english-font-generator', 'name-font-generator'],
+    icon: 'Aa',
+    defaultStyleIds: ['doubleStruck', 'script', 'circled'],
+  },
+];
+
+export const sonicPage: PageDefinition = {
+  slug: 'sonic-font-generator',
+  title: 'Sonic Font Generator',
+  metaTitle: 'Sonic Font Generator — Arcade Title PNG Maker',
+  metaDescription: 'Make unofficial Sonic-inspired title artwork. Choose an arcade preset, adjust slant and colors, and download a transparent PNG in banner or square format.',
+  category: 'fandom',
+  description: 'Make unofficial Sonic-inspired arcade titles with forward slant, layered outlines and 3D depth. Download transparent PNG artwork.',
+  content: [
+    'The Sonic Font Generator turns a short title into arcade lettering for a thumbnail, speedrun overlay, fan-event graphic or banner. The bundled Luckiest Guy typeface supplies the chunky letter shapes. The renderer adds a forward slant, layered outlines and an offset extrusion in the live preview.',
+    '**Pick a preset and fit it to your layout**',
+    'Arcade Gold pairs a warm face with a blue outline. Blue Boost uses a cool face, more forward slant and a deeper extrusion. Sunset Sprint softens the slant and uses orange and violet. A banner fits a wide thumbnail or overlay. A square is a better starting point for a centered post. Add a line break to separate a short title and a subtitle.',
+    '**Download your title as artwork**',
+    'PNG captures the canvas, including the slant, outlines and depth. Transparent background leaves only the lettering so you can place it over another image. Turn transparency off to include a colored background and speed lines. This independent fan tool uses original effects and the Apache 2.0-licensed Luckiest Guy typeface.',
+  ].join('\n\n'),
+  howToUse: 'The canvas fits the title automatically. The preview and export are rendered in your browser using a locally hosted font.',
+  workflowSteps: [
+    { title: 'Enter your title', text: 'Type up to 120 UTF-16 units. Short titles leave more room for the outline and depth.' },
+    { title: 'Choose a look', text: 'Pick a preset, adjust the fill, outline and slant, then choose Banner or Square. Toggle Transparent background for the layer you need.' },
+    { title: 'Download PNG', text: 'Wait for the preview to show PNG ready and select Download PNG.' },
+  ],
+  examples: [],
+  faq: [
+    { q: 'What file does the Sonic Font Generator create?', a: 'It creates PNG artwork at 2000 × 1000 pixels in Banner or 1600 × 1600 pixels in Square. It uses Luckiest Guy for the letter shapes and draws the effect in your browser.' },
+    { q: 'Will the checkerboard appear in my PNG?', a: 'The checkerboard marks transparent pixels in the preview. With Transparent background enabled, those pixels stay transparent in the export.' },
+    { q: 'Can I use the output as editable text?', a: 'PNG is a finished image. Keep your original title separately if you want to edit the wording in another app.' },
+    { q: 'Why is the download button disabled?', a: 'Enter a title and wait for the font and preview to finish loading. If loading fails, use Retry preview.' },
+    { q: 'Does the tool cover every alphabet?', a: 'The bundled face is a Latin subset. The browser may use a device font for other characters. Check the preview before exporting.' },
+    { q: 'Is this an official Sonic font?', a: 'This is an independent fan-lettering tool. The preset uses Luckiest Guy and original effects. Official logos, character art and proprietary font files are not included.' },
+  ],
+  relatedSlugs: ['mario-font-generator', 'minecraft-font-generator', 'pop-culture-font-generators', '3d-font-generator'],
+  icon: '⚡',
+};

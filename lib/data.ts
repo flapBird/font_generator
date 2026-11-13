@@ -4,6 +4,7 @@
  import { priorityKeywordPages } from './priority-keyword-pages';
  import { additionalGuidePages } from './additional-guides';
  import { newKeywordFandomPages, newKeywordStylePages } from './new-keyword-pages';
+ import { focusedLetterPages, sonicPage } from './letter-tool-pages';
 
  export interface PageDefinition {
    slug: string;
@@ -14,6 +15,7 @@
    description: string;
    content: string;
    howToUse?: string;
+   workflowSteps?: { title: string; text: string }[];
    examples: { before: string; after: string; note?: string }[];
    faq: { q: string; a: string }[];
    relatedSlugs: string[];
@@ -853,6 +855,7 @@
    ...expansionStylePages,
    ...octoberKeywordPages,
    ...discoveryKeywordPages,
+   ...focusedLetterPages,
  ];
  
  export const fandomPages: PageDefinition[] = [
@@ -957,6 +960,7 @@
    },
    ...newKeywordFandomPages,
    ...expansionFandomPages,
+   sonicPage,
  ];
  
  export const guidePages: PageDefinition[] = [

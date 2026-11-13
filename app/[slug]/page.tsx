@@ -50,6 +50,9 @@ export default async function GeneratorPage({ params }: { params: Promise<{ slug
 
   const config = getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds);
   const textFeatures: Record<string, string[]> = {
+    'cursed-text-generator': ['Six copyable cursed styles', 'Adjustable stacked marks', 'Shuffle marks', 'Supported combining mark cleanup'],
+    'letters-in-different-fonts': ['A–Z letter picker', 'Uppercase and lowercase comparisons', 'Copy a letter or full alphabet'],
+    'sonic-font-generator': ['Three arcade title presets', 'Adjustable slant and colors', 'Transparent PNG in banner or square format'],
     'zalgo-text-generator': ['Adjustable intensity', 'Above, through, and below mark controls', 'Randomize marks', 'Copy Unicode text'],
     'discord-font-generator': ['Unicode display-name styles', 'Native Discord Markdown', 'Message formatting preview', 'Copy text'],
     'twitter-font-generator': ['Unicode text styles', 'Detected links and mentions preserved', 'Weighted standard-post length estimate', 'Original text fallback'],
@@ -63,8 +66,9 @@ export default async function GeneratorPage({ params }: { params: Promise<{ slug
     .map((styleId) => getStyleDefinition(styleId)?.name)
     .filter((name): name is string => Boolean(name));
   const isFontStyle = isFontStyleGenerator(definition);
-  const categoryPath = isFontStyle ? '/styles' : '/visual-art';
-  const categoryName = isFontStyle ? 'Font Styles' : 'Visual & Art';
+  const isSonic = page.slug === 'sonic-font-generator';
+  const categoryPath = isFontStyle ? '/styles' : isSonic ? '/fandom' : '/visual-art';
+  const categoryName = isFontStyle ? 'Font Styles' : isSonic ? 'Fandom' : 'Visual & Art';
   const canonicalUrl = `https://font-generators.org/${page.slug}`;
 
   return (

@@ -1,4 +1,5 @@
 import { fandomPages, stylePages, type PageDefinition } from './data';
+import { focusedLetterPages } from './letter-tool-pages';
 import { generatorStyles } from './generator';
 import { octoberArtSlugs, octoberTextSlugs } from './october-catalog';
 import { discoverySlugs, discoveryArtSlugs, discoveryTextSlugs } from './discovery-catalog';
@@ -172,6 +173,37 @@ const overrides: Record<string, GeneratorOverride> = {
     },
     capabilities: ['copy', 'grapheme-safe', 'mark-directions', 'intensity-control'],
     acceptanceCriteria: ['Make intensity and mark directions independently adjustable.', 'Keep output stable until input, settings, or randomization changes.', 'Keep unsupported graphemes and line breaks intact.', 'Reject oversized drafts visibly without silently truncating text.'],
+  },
+  'cursed-text-generator': {
+    tags: ['cursed fonts', 'corrupted text', 'creepy letters', 'uncurse text', 'remove cursed marks'],
+    intent: {
+      primary: 'Compare six cursed Unicode styles, adjust or shuffle stacked marks, and clean supported marks from pasted Latin text.',
+      secondary: ['Creation accepts 1,000 UTF-16 units and cleanup accepts 23,000. Both run locally with separate drafts.'],
+      expectedOutputs: ['text'],
+    },
+    capabilities: ['copy', 'grapheme-safe', 'intensity-control', 'preset-gallery'],
+    homepage: { enabled: false, featured: false, priority: 1000 },
+  },
+  'letters-in-different-fonts': {
+    tags: ['fancy letters', 'alphabet', 'A–Z', 'a to z', 'fancy initials', 'letter styles'],
+    intent: {
+      primary: 'Compare a single A–Z letter in uppercase or lowercase across distinct Unicode styles. Copy one letter or the complete styled alphabet.',
+      secondary: ['Style options follow the actual coverage of the selected letter and case.'],
+      expectedOutputs: ['text'],
+    },
+    capabilities: ['copy', 'grapheme-safe', 'preset-gallery'],
+    homepage: { enabled: false, featured: false, priority: 1000 },
+  },
+  'sonic-font-generator': {
+    kind: 'theme-logo',
+    tags: ['sonic the hedgehog', 'arcade title', 'speedrun', 'fan lettering', 'transparent png'],
+    intent: {
+      primary: 'Render unofficial Sonic-inspired arcade titles with forward slant, layered outlines and 3D depth. Download banner or square PNG artwork with optional transparency.',
+      secondary: ['Uses the locally hosted Luckiest Guy Latin face and original canvas effects. Accepts up to 120 UTF-16 units.'],
+      expectedOutputs: ['png'],
+    },
+    capabilities: ['preset-gallery', 'font-availability', 'extrusion-depth', 'png-export'],
+    homepage: { enabled: false, featured: false, priority: 1000 },
   },
   '3d-font-generator': {
     kind: 'theme-logo',
@@ -357,7 +389,7 @@ const buildDefinition = (page: PageDefinition, priority: number): GeneratorDefin
 
 export const generatorRegistry: GeneratorDefinition[] = [
   ...stylePages.map((page, index) => buildDefinition(page, index)),
-  ...fandomPages.map((page, index) => buildDefinition(page, stylePages.length - octoberArtSlugs.length - octoberTextSlugs.length - discoverySlugs.length + index)),
+  ...fandomPages.map((page, index) => buildDefinition(page, stylePages.length - octoberArtSlugs.length - octoberTextSlugs.length - discoverySlugs.length - focusedLetterPages.length + index)),
 ];
 
 export const validateGeneratorRegistry = (definitions: GeneratorDefinition[] = generatorRegistry) => {

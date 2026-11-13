@@ -13,7 +13,8 @@ test('all tools directory is indexable and exposes every canonical tool link in 
   expect(llms).toContain('Search loads a lightweight public catalog only on focus');
   const catalog = await request.get('/tool-search.json');
   expect(catalog.headers()['x-robots-tag']).toBe('noindex');
-  expect(await catalog.json()).toHaveLength(99);
+  const indexedTools: { href: string }[] = await catalog.json();
+  expect(indexedTools.map(({ href }) => href)).toEqual(toolDirectoryGroups.flatMap(({ entries }) => entries.map(({ href }) => href)));
 });
 
 test('directory searches, filters, recovers from no results and opens existing tools on phone and desktop', async ({ page }) => {
@@ -30,7 +31,7 @@ test('directory searches, filters, recovers from no results and opens existing t
     await directory.getByRole('button', { name: 'Show all tools', exact: true }).click();
     await expect(search).toHaveValue('');
     await directory.getByRole('button', { name: 'Unicode Tools', exact: true }).click();
-    await expect(directory.locator('[data-directory-tool]')).toHaveCount(5);
+    await expect(directory.locator('[data-directory-tool]')).toHaveCount(6);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     if (width === 390 || width === 1440) await page.screenshot({ path: `/tmp/tool-directory-${width}.png`, animations: 'disabled' });
     await directory.getByRole('link', { name: 'Unicode Character Inspector', exact: true }).click();

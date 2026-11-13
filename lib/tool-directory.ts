@@ -29,7 +29,7 @@ const entriesByCategory: Record<ToolCategoryId, ToolDirectoryEntry[]> = {
   'font-styles': fontEntries(false),
   'visual-art': [...fontEntries(true), ...libraryEntries(['signature-generator'])],
   symbols: libraryEntries(['symbols', 'hearts', 'stars', 'arrows', 'kaomoji', 'emoji-combos']),
-  'unicode-tools': libraryEntries(['unicode-tools', 'unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text', 'invisible-character']),
+  'unicode-tools': libraryEntries(['unicode-tools', 'unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text', 'invisible-character', 'hieroglyphics-translator']),
 };
 // Server-side catalog only. Never import this module at runtime from the shared header.
 export const toolDirectoryGroups: ToolDirectoryGroup[] = toolCategories.map((category) => ({

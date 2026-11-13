@@ -1,0 +1,119 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { loadDiscoveryFont } from '@/lib/discovery-renderer';
+import { SONIC_INPUT_LIMIT, SONIC_SAMPLE, drawSonicArtwork, sonicFormats, sonicPresets, type SonicArtworkSettings, type SonicFormat } from '@/lib/sonic-artwork';
+import { useGeneratorText } from '@/lib/use-generator-text';
+import TextToolInput from './TextToolInput';
+
+const initialPreset = sonicPresets[0];
+
+export default function SonicArtworkTool() {
+  const [text, setText] = useGeneratorText(SONIC_SAMPLE);
+  const [presetIndex, setPresetIndex] = useState(0);
+  const [settings, setSettings] = useState<SonicArtworkSettings>({
+    fill: initialPreset.fill, outline: initialPreset.outline, scene: initialPreset.scene, slant: initialPreset.slant,
+    transparent: true, format: 'banner',
+  });
+  const [attempt, setAttempt] = useState(0);
+  const [preview, setPreview] = useState({ key: '', error: false });
+  const [downloadError, setDownloadError] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [width, height] = sonicFormats[settings.format];
+  const preset = sonicPresets[presetIndex];
+  const renderKey = JSON.stringify([text, presetIndex, settings, attempt]);
+  const hasText = text.trim().length > 0 && text.length <= SONIC_INPUT_LIMIT;
+  const ready = hasText && preview.key === renderKey && !preview.error;
+  const previewError = preview.key === renderKey && preview.error;
+
+  useEffect(() => {
+    if (!hasText) return;
+    let cancelled = false;
+    loadDiscoveryFont('luckiest-guy').then(() => {
+      if (cancelled || !canvasRef.current) return;
+      drawSonicArtwork(canvasRef.current, text, preset, settings);
+      setPreview({ key: renderKey, error: false });
+    }).catch(() => {
+      if (!cancelled) setPreview({ key: renderKey, error: true });
+    });
+    return () => { cancelled = true; };
+  }, [hasText, preset, renderKey, settings, text]);
+
+  function download() {
+    if (!ready || !canvasRef.current) return;
+    setDownloadError(false);
+    canvasRef.current.toBlob((blob) => {
+      if (!blob) { setDownloadError(true); return; }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sonic-${preset.name.toLowerCase().replace(' ', '-')}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, 'image/png');
+  }
+
+  return (
+    <section id="generator" aria-label="Sonic title artwork studio" className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]">
+      <div className="contents lg:col-start-1 lg:row-start-1 lg:block lg:min-w-0 lg:space-y-4">
+        <div className="order-1 min-w-0 space-y-3">
+          <TextToolInput id="sonic-input" text={text} onChange={setText} limit={SONIC_INPUT_LIMIT} label="Your title" />
+          <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-3 sm:p-4 dark:border-slate-800">
+            <legend className="px-1 text-sm font-semibold">Preset</legend>
+            <div className="grid grid-cols-3 gap-2">
+              {sonicPresets.map((item, index) => (
+                <button key={item.name} type="button" aria-pressed={index === presetIndex} onClick={() => {
+                  setPresetIndex(index);
+                  setSettings((current) => ({ ...current, fill: item.fill, outline: item.outline, scene: item.scene, slant: item.slant }));
+                }} className={`min-h-14 rounded-lg border p-2 text-xs font-semibold focus-visible:outline-violet-600 ${index === presetIndex ? 'border-violet-600 bg-violet-50 text-violet-800 dark:bg-violet-950 dark:text-violet-200' : 'border-slate-200 dark:border-slate-700'}`}>
+                  <span aria-hidden="true" className="mx-auto mb-1 block h-2 w-7 rounded-full" style={{ background: `linear-gradient(90deg, ${item.fill} 50%, ${item.outline} 50%)` }} />
+                  {item.name}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+        <div className="order-3 min-w-0 space-y-3 rounded-2xl border border-slate-200 p-3 sm:p-4 dark:border-slate-800">
+          <div className="grid grid-cols-3 gap-2">
+            {(['fill', 'outline', 'scene'] as const).map((color) => <label key={color} className="block text-sm capitalize">
+              {color}
+              <input type="color" value={settings[color]} disabled={color === 'scene' && settings.transparent}
+                onChange={(event) => setSettings({ ...settings, [color]: event.target.value })} className="mt-1 h-11 w-full cursor-pointer rounded-lg disabled:opacity-40" />
+            </label>)}
+          </div>
+          <label className="block text-sm">Slant <span className="float-right text-slate-500 dark:text-slate-400">{settings.slant}°</span>
+            <input type="range" min={0} max={26} value={settings.slant} onChange={(event) => setSettings({ ...settings, slant: Number(event.target.value) })} className="mt-1 h-7 w-full accent-violet-600" />
+          </label>
+          <label className="block text-sm">Canvas format
+            <select value={settings.format} onChange={(event) => setSettings({ ...settings, format: event.target.value as SonicFormat })} className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 dark:border-slate-700 dark:bg-slate-950">
+              <option value="banner">Banner</option><option value="square">Square</option>
+            </select>
+          </label>
+          <label className="flex min-h-11 items-center gap-2 text-sm">
+            <input type="checkbox" checked={settings.transparent} onChange={(event) => setSettings({ ...settings, transparent: event.target.checked })} className="h-4 w-4 accent-violet-600" />Transparent background
+          </label>
+        </div>
+      </div>
+
+      <div className="order-2 min-w-0 space-y-3 lg:col-start-2 lg:row-start-1">
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 p-2 dark:border-slate-700 dark:bg-slate-800" style={{ backgroundImage: settings.transparent ? 'conic-gradient(#dbe3ef 25%, #f8fafc 0 50%, #dbe3ef 0 75%, #f8fafc 0)' : undefined, backgroundSize: '24px 24px' }}>
+          <canvas ref={canvasRef} aria-label="Sonic title preview" width={2000} height={1000} className={`block w-full rounded-2xl ${ready ? '' : 'invisible'}`} style={{ aspectRatio: `${width} / ${height}` }} />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold">{preset.name}</p>
+            <p role="status" className="text-sm text-slate-600 dark:text-slate-400">{previewError ? 'The font or preview could not load.' : !hasText ? 'Enter a title to preview.' : ready ? `${width} × ${height} PNG ready` : 'Loading the preview…'}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {previewError && <button type="button" onClick={() => setAttempt((value) => value + 1)} className="min-h-11 rounded-xl border px-4 text-sm font-semibold">Retry preview</button>}
+            <button type="button" disabled={!ready} onClick={download} className="min-h-12 rounded-xl bg-violet-600 px-5 text-sm font-semibold text-white hover:bg-violet-700 focus-visible:outline-violet-600 disabled:opacity-50">Download PNG</button>
+          </div>
+        </div>
+        {downloadError && <p role="alert" className="text-sm text-red-700 dark:text-red-300">Download failed. Try again.</p>}
+        <p className="text-sm text-slate-600 dark:text-slate-400">Unofficial fan lettering using <a href="/fonts/discovery/luckiest-guy/LICENSE.txt" className="font-medium text-violet-700 underline dark:text-violet-300">Luckiest Guy under the Apache 2.0 license</a>.</p>
+      </div>
+    </section>
+  );
+}

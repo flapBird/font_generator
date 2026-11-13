@@ -26,6 +26,11 @@
      const isAscii = page.slug === 'big-font-generator';
      const kind: StyleDirectoryKind = isAscii ? 'ascii' : definition?.kind === 'unicode' ? 'unicode' : visualConfig ? 'artwork' : 'unicode';
      const description = getSpecializedDescription(page.slug) ?? page.description;
+     const focusedPreview = page.slug === 'cursed-text-generator'
+       ? { badge: '6 cursed styles', metaLabel: 'Stack · Scratch · Clean', previewText: page.examples[0].after }
+       : page.slug === 'letters-in-different-fonts'
+       ? { badge: 'A–Z', metaLabel: 'Copy a letter or an alphabet', previewText: '𝐀  𝒜  𝔄  Ⓐ' }
+       : undefined;
 
      return {
        slug: page.slug,
@@ -45,6 +50,7 @@
          config.styleIds.join(' '),
          visualConfig?.presets.flatMap((preset) => [preset.name, preset.description]).join(' '),
        ].filter(Boolean).join(' '),
+       ...focusedPreview,
      };
    });
 

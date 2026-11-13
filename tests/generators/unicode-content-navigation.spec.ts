@@ -2,7 +2,7 @@ import { test, expect } from './fixtures';
 import { unicodeGuides } from '../../lib/text-library/unicode-guides';
 import { categoryShortcuts, featuredToolCategories } from '../../lib/tool-navigation';
 
-test('all five Unicode pages render distinct What, How to and matching FAQ content in initial HTML', async ({ request, page }) => {
+test('Unicode pages render distinct What, How to and matching FAQ content in initial HTML', async ({ request, page }) => {
   for (const [id, guide] of Object.entries(unicodeGuides)) {
     const html = await (await request.get(`/${id}`)).text();
     expect(html).toContain(guide.heading);

@@ -22,7 +22,7 @@ export function libraryMetadata(id: LibraryId): Metadata {
 
 export function LibraryPageShell({ id, children }: { id: LibraryId; children: React.ReactNode }) {
   const page = getLibraryPage(id);
-  const isUnicode = ['unicode-tools', 'invisible-character', 'unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text'].includes(id);
+  const isUnicode = ['unicode-tools', 'invisible-character', 'unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text', 'hieroglyphics-translator'].includes(id);
   const parent = id === 'signature-generator' ? { id: 'visual-art', title: 'Visual & Art', path: '/visual-art' } : getLibraryPage(isUnicode ? 'unicode-tools' : 'symbols');
   const crumbs = [
     { '@type': 'ListItem', position: 1, name: 'Font Generators', item: 'https://font-generators.org/' },
@@ -48,7 +48,7 @@ export function LibraryPageShell({ id, children }: { id: LibraryId; children: Re
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{page.title}</h1>
         <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">{page.intro}</p>
       </header>
-      {isUnicode && <UnicodeToolNavigation current={id} />}
+      {isUnicode && id !== 'hieroglyphics-translator' && <UnicodeToolNavigation current={id} />}
       {children}
       <CollectionContent page={page} />
       <section aria-labelledby="library-related-heading" className="mt-10 border-t border-slate-200 pt-8">

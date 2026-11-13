@@ -12,6 +12,7 @@ export const hiddenNavigationSlugs = [
   'chinese-font-generator', 'wingdings-font-generator', 'graffiti-font-generator',
   'arabic-font-generator', 'preppy-font-generator', 'emoji-font-generator', 'gaming-font-generator',
   ...discoverySlugs,
+  'cursed-text-generator', 'letters-in-different-fonts', 'sonic-font-generator',
 ] as const;
 
 // Utility pages have their own catalog; do not register them as font styles or artwork.
@@ -19,7 +20,7 @@ export const hiddenUtilityNavigationPaths = [
   '/symbols', '/symbols/heart-symbols', '/symbols/star-symbols', '/symbols/arrow-symbols',
   '/kaomoji', '/emoji-combos', '/unicode-tools', '/invisible-character',
   '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',
-  '/signature-generator',
+  '/signature-generator', '/hieroglyphics-translator',
 ] as const;
 
 const hiddenPaths = new Set<string>([

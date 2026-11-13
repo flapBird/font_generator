@@ -38,10 +38,12 @@ export interface ZalgoOptions {
   middle: boolean;
   below: boolean;
   seed: number;
+  marks?: Record<keyof typeof zalgoMarks, readonly string[]>;
 }
 
 export function generateZalgo(text: string, options: ZalgoOptions) {
   if (text.length > ZALGO_INPUT_LIMIT) return '';
+  const marks = options.marks ?? zalgoMarks;
   const intensity = Number.isFinite(options.intensity) ? Math.max(0, Math.min(10, Math.round(options.intensity))) : 0;
   let state = options.seed >>> 0;
   const random = () => {
@@ -56,7 +58,7 @@ export function generateZalgo(text: string, options: ZalgoOptions) {
     for (const zone of ['above', 'middle', 'below'] as const) {
       if (!options[zone]) continue;
       const count = zone === 'middle' ? Math.min(intensity, 2) : intensity;
-      for (let i = 0; i < count; i++) result += zalgoMarks[zone][Math.floor(random() * zalgoMarks[zone].length)];
+      for (let i = 0; i < count; i++) result += marks[zone][Math.floor(random() * marks[zone].length)];
     }
     return result;
   }).join('');
