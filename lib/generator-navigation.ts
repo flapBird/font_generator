@@ -13,6 +13,7 @@ export const hiddenNavigationSlugs = [
   'arabic-font-generator', 'preppy-font-generator', 'emoji-font-generator', 'gaming-font-generator',
   ...discoverySlugs,
   'cursed-text-generator', 'letters-in-different-fonts', 'sonic-font-generator',
+  'spiderman-font-generator',
 ] as const;
 
 // Utility pages have their own catalog; do not register them as font styles or artwork.

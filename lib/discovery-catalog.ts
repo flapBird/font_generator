@@ -21,6 +21,9 @@ export const discoveryRelatedLinks: Record<string, string[]> = {
   'zalgo-text-generator': ['cursed-text-generator'],
   'horror-font-generator': ['cursed-text-generator'],
   'mario-font-generator': ['sonic-font-generator'],
+  'sonic-font-generator': ['spiderman-font-generator'],
+  'comic-font-generator': ['spiderman-font-generator'],
+  'pop-culture-font-generators': ['spiderman-font-generator'],
   'name-font-generator': ['letters-in-different-fonts'],
   'gaming-font-generator': ['anime-font-generator', 'cyberpunk-font-generator', 'square-text-generator'],
 };

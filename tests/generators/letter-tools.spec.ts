@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { test, expect } from './fixtures';
 
-const paths = ['/cursed-text-generator', '/letters-in-different-fonts', '/hieroglyphics-translator', '/sonic-font-generator'];
+const paths = ['/cursed-text-generator', '/letters-in-different-fonts', '/hieroglyphics-translator', '/sonic-font-generator', '/spiderman-font-generator'];
 
 test('keyword tools have canonical pages, server-rendered help and public discovery', async ({ request }) => {
   const [sitemap, llms, search] = await Promise.all([
@@ -25,19 +25,24 @@ test('keyword tools have canonical pages, server-rendered help and public discov
   expect(llms).toMatch(/cursed-text-generator\).*Outputs: copyable text\./);
   expect(llms).toMatch(/letters-in-different-fonts\).*Outputs: copyable text\./);
   expect(llms).toMatch(/sonic-font-generator\).*Outputs: PNG\./);
+  expect(llms).toMatch(/spiderman-font-generator\).*Outputs: PNG\./);
+  expect(llms).toContain('Web texture on letters works with either background mode.');
   expect(llms).toContain('The sign breakdown shows each matched spelling unit, Gardiner number and code point.');
 
   const directoryLinks = {
     '/': [paths[1]], '/tools': paths, '/styles': paths.slice(0, 2), '/unicode-tools': [paths[2]],
-    '/fandom': [paths[3]], '/visual-art': [paths[3]], '/zalgo-text-generator': [paths[0]],
+    '/fandom': paths.slice(3), '/visual-art': paths.slice(3), '/zalgo-text-generator': [paths[0]],
+    '/sonic-font-generator': [paths[4]],
   };
   for (const [directory, links] of Object.entries(directoryLinks)) {
     const html = await (await request.get(directory)).text();
     for (const path of links) expect(html).toContain(`href="${path}"`);
   }
-  const redirect = await request.get('/fandom/sonic-font-generator', { maxRedirects: 0 });
-  expect(redirect.status()).toBe(301);
-  expect(redirect.headers().location).toBe('/sonic-font-generator');
+  for (const path of paths.slice(3)) {
+    const redirect = await request.get('/fandom' + path, { maxRedirects: 0 });
+    expect(redirect.status()).toBe(301);
+    expect(redirect.headers().location).toBe(path);
+  }
 });
 
 test('Cursed creates distinct styles and cleans pasted output while keeping the creation draft', async ({ page, context }) => {
@@ -182,4 +187,105 @@ test('Sonic exports the current preview and allows retry when its font fails', a
   }
   await page.getByRole('button', { name: 'Clear text', exact: true }).click();
   await expect(downloadButton).toBeDisabled();
+});
+
+test('Spider-Man masks optional webs to the lettering and exports the current PNG', async ({ page, request }) => {
+  const fontPath = '/fonts/spiderman/bangers-latin.woff2';
+  const requestedFonts: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname === fontPath) requestedFonts.push(request.url());
+  });
+  await page.setViewportSize({ width: 1440, height: 950 });
+  await page.goto('/');
+  const search = page.locator('#site-search-desktop');
+  for (const query of ['Spider-Man', 'spider man', 'spiderman font generator']) {
+    await search.fill(query);
+    await expect(page.locator('#site-search-desktop-results a[href="/spiderman-font-generator"]')).toBeVisible();
+  }
+  await page.goto('/sonic-font-generator');
+  await expect(page.getByRole('button', { name: 'Download PNG', exact: true })).toBeEnabled();
+  expect(requestedFonts).toEqual([]);
+
+  await page.route('**' + fontPath, (route) => route.abort());
+  await page.goto('/spiderman-font-generator');
+  const download = page.getByRole('button', { name: 'Download PNG', exact: true });
+  const retry = page.getByRole('button', { name: 'Retry preview' });
+  await expect(retry).toBeVisible();
+  await expect(download).toBeDisabled();
+  await page.unroute('**' + fontPath);
+  await retry.click();
+  await expect(download).toBeEnabled();
+  expect(requestedFonts.length).toBeGreaterThan(0);
+  const license = await request.get('/fonts/spiderman/OFL.txt');
+  expect(license.ok()).toBe(true);
+  expect(await license.text()).toContain('SIL OPEN FONT LICENSE Version 1.1');
+
+  const input = page.getByLabel('Your title', { exact: true });
+  const canvas = page.getByLabel('Spider-Man title preview', { exact: true });
+  const web = page.getByLabel('Web texture on letters', { exact: true });
+  const transparent = page.getByLabel('Transparent background', { exact: true });
+  await expect(input).toHaveValue('WEB SLINGER');
+  await expect(web).toBeChecked();
+  await expect(transparent).toBeChecked();
+  await input.fill('WEB SLINGER\nCafé 12 👩🏽‍🚀');
+  const artwork = () => canvas.evaluate((node: HTMLCanvasElement) => {
+    const pixels = node.getContext('2d')!.getImageData(0, 0, node.width, node.height).data;
+    let ink = 0, borderInk = 0;
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (!pixels[i]) continue;
+      ink++;
+      const point = (i - 3) / 4;
+      const x = point % node.width, y = Math.floor(point / node.width);
+      if (x < 4 || y < 4 || x >= node.width - 4 || y >= node.height - 4) borderInk++;
+    }
+    return { png: node.toDataURL().split(',')[1], ink, borderInk, corner: pixels[3], width: node.width, height: node.height };
+  });
+  await expect(download).toBeEnabled();
+  const withWeb = await artwork();
+  await web.uncheck();
+  await expect(download).toBeEnabled();
+  const withoutWeb = await artwork();
+  expect(withWeb.png).not.toBe(withoutWeb.png);
+  expect(withWeb.ink).toBe(withoutWeb.ink);
+  expect(withWeb.ink).toBeGreaterThan(1000);
+  expect(withWeb.borderInk).toBe(0);
+  expect(withWeb.corner).toBe(0);
+  expect([withWeb.width, withWeb.height]).toEqual([2000, 1000]);
+
+  const presets = new Set<string>();
+  for (const name of ['Classic Cover', 'Midnight Web', 'Retro Issue']) {
+    await page.getByRole('button', { name, exact: true }).click();
+    await expect(download).toBeEnabled();
+    presets.add((await artwork()).png);
+  }
+  expect(presets.size).toBe(3);
+  await expect(input).toHaveValue('WEB SLINGER\nCafé 12 👩🏽‍🚀');
+  await expect(web).not.toBeChecked();
+  await transparent.uncheck();
+  await expect(download).toBeEnabled();
+  expect((await artwork()).corner).toBe(255);
+  await transparent.check();
+  await web.check();
+  await page.getByLabel('Canvas format').selectOption('square');
+  await expect(page.getByText('1600 × 1600 PNG ready', { exact: true })).toBeVisible();
+  const expected = await artwork();
+  expect(expected.corner).toBe(0);
+  expect([expected.width, expected.height]).toEqual([1600, 1600]);
+  const event = page.waitForEvent('download');
+  await download.click();
+  const file = await event;
+  expect(file.suggestedFilename()).toBe('spiderman-retro-issue.png');
+  expect((await readFile((await file.path())!)).toString('base64')).toBe(expected.png);
+
+  const controls = page.getByRole('group', { name: 'Artwork controls' });
+  const panel = page.getByRole('region', { name: 'Preview and download' });
+  expect((await panel.boundingBox())!.height).toBeCloseTo((await controls.boundingBox())!.height, 0);
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    expect((await panel.boundingBox())!.y).toBeLessThan((await web.boundingBox())!.y);
+  }
+  await page.getByRole('button', { name: 'Clear text', exact: true }).click();
+  await expect(download).toBeDisabled();
+  await expect(canvas).toBeHidden();
 });

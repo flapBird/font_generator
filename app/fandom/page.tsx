@@ -5,6 +5,10 @@
  import { getSpecializedDescription, getVisualGeneratorConfig } from '@/lib/visual-generator';
  import { getGeneratorDefinition } from '@/lib/generator-registry';
  import { sonicPresets } from '@/lib/sonic-artwork';
+ import { spidermanPresets } from '@/lib/spiderman-artwork';
+ import { isTitleArtworkSlug, type TitleArtworkSlug } from '@/lib/title-artwork';
+
+ const titlePresets = { 'sonic-font-generator': sonicPresets, 'spiderman-font-generator': spidermanPresets } satisfies Record<TitleArtworkSlug, readonly { name: string }[]>;
  
  export const metadata: Metadata = {
    title: 'Fandom Font Generators',
@@ -32,7 +36,7 @@
              const config = getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds);
              const visualConfig = getVisualGeneratorConfig(page.slug);
              const definition = getGeneratorDefinition(page.slug);
-             const isSonic = page.slug === 'sonic-font-generator';
+             const artworkPresets = isTitleArtworkSlug(page.slug) ? titlePresets[page.slug] : undefined;
              const preview = generateStyleVariants(page.title.replace(' Font Generator', ''), config.styleIds.slice(0, 1))[0];
              return (
                <Link
@@ -43,7 +47,7 @@
                  <div className="flex items-start justify-between gap-3">
                    <span className="text-2xl" aria-hidden="true">{page.icon}</span>
                    <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-violet-700 dark:bg-violet-950/50 dark:text-violet-300">
-                     {isSonic ? `${sonicPresets.length} presets` : visualConfig ? `${visualConfig.presets.length} presets` : definition?.kind === 'directory' ? 'Generator directory' : `${config.styleIds.length} styles`}
+                     {artworkPresets ? `${artworkPresets.length} presets` : visualConfig ? `${visualConfig.presets.length} presets` : definition?.kind === 'directory' ? 'Generator directory' : `${config.styleIds.length} styles`}
                    </span>
                  </div>
                  <h2 className="mt-4 text-lg font-black text-slate-950 transition group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">
@@ -51,8 +55,8 @@
                  </h2>
                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{getSpecializedDescription(page.slug) ?? page.description}</p>
                  <div className="mt-auto pt-5">
-                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{isSonic ? 'Transparent PNG' : visualConfig ? 'Rendered artwork + downloads' : preview?.name}</p>
-                   <p className="mt-1 break-words text-lg text-slate-900 dark:text-slate-100">{isSonic ? sonicPresets[0].name : visualConfig?.presets[0]?.name ?? preview?.text}</p>
+                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{artworkPresets ? 'Transparent PNG' : visualConfig ? 'Rendered artwork + downloads' : preview?.name}</p>
+                   <p className="mt-1 break-words text-lg text-slate-900 dark:text-slate-100">{artworkPresets?.[0].name ?? visualConfig?.presets[0]?.name ?? preview?.text}</p>
                  </div>
                </Link>
              );

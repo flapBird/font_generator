@@ -1,7 +1,6 @@
 import { discoveryFonts } from './discovery-art';
-import { segmentGraphemes } from './unicode';
+import { titleArtworkFormats, wrapArtworkLines, type TitleArtworkSettings } from './title-artwork';
 
-export const SONIC_INPUT_LIMIT = 120;
 export const SONIC_SAMPLE = 'SPEED RUN';
 export const sonicPresets = [
   { name: 'Arcade Gold', fill: '#ffd54b', outline: '#254ba9', depth: '#13275f', scene: '#e9f4ff', slant: 14, layers: 22 },
@@ -9,19 +8,8 @@ export const sonicPresets = [
   { name: 'Sunset Sprint', fill: '#ff9f39', outline: '#56318f', depth: '#301751', scene: '#ffe8dc', slant: 8, layers: 14 },
 ] as const;
 
-export const sonicFormats = { banner: [2000, 1000], square: [1600, 1600] } as const;
-export type SonicFormat = keyof typeof sonicFormats;
-export type SonicArtworkSettings = {
-  fill: string;
-  outline: string;
-  scene: string;
-  slant: number;
-  transparent: boolean;
-  format: SonicFormat;
-};
-
-export function drawSonicArtwork(canvas: HTMLCanvasElement, text: string, preset: typeof sonicPresets[number], settings: SonicArtworkSettings) {
-  const [width, height] = sonicFormats[settings.format];
+export function drawSonicArtwork(canvas: HTMLCanvasElement, text: string, preset: typeof sonicPresets[number], settings: TitleArtworkSettings) {
+  const [width, height] = titleArtworkFormats[settings.format];
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
@@ -42,18 +30,7 @@ export function drawSonicArtwork(canvas: HTMLCanvasElement, text: string, preset
     ctx.restore();
   }
 
-  // Wrap words before fitting. Manual line breaks (including blank rows) stay intact.
-  const lines = text.replace(/\r\n?/g, '\n').split('\n').flatMap((line) => {
-    const parts = segmentGraphemes(line);
-    const wrapped: string[] = [];
-    while (parts.length > 24) {
-      const space = parts.slice(0, 25).lastIndexOf(' ');
-      const split = space > 0 ? space : 24;
-      wrapped.push(parts.splice(0, split).join(''));
-      if (parts[0] === ' ') parts.shift();
-    }
-    return [...wrapped, parts.join('')];
-  });
+  const lines = wrapArtworkLines(text);
 
   const slant = Math.tan(settings.slant * Math.PI / 180);
   const font = (size: number) => `400 ${size}px "${discoveryFonts['luckiest-guy'].family}", sans-serif`;

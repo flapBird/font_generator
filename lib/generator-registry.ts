@@ -205,6 +205,17 @@ const overrides: Record<string, GeneratorOverride> = {
     capabilities: ['preset-gallery', 'font-availability', 'extrusion-depth', 'png-export'],
     homepage: { enabled: false, featured: false, priority: 1000 },
   },
+  'spiderman-font-generator': {
+    kind: 'theme-logo',
+    tags: ['spiderman', 'spider-man', 'spider man', 'spidey', 'comic cover', 'web texture', 'transparent png'],
+    intent: {
+      primary: 'Make unofficial Spider-Man-inspired comic titles with layered outlines and optional web texture. Download banner or square PNG artwork with optional transparency.',
+      secondary: ['Three presets use the locally hosted Bangers Latin font. Adjust fill, outline, slant and background. Accepts up to 120 UTF-16 units.'],
+      expectedOutputs: ['png'],
+    },
+    capabilities: ['preset-gallery', 'font-availability', 'extrusion-depth', 'png-export'],
+    homepage: { enabled: false, featured: false, priority: 1000 },
+  },
   '3d-font-generator': {
     kind: 'theme-logo',
     tags: ['3d text', '3d letters', '3d lettering', '3d font maker', 'transparent png'],

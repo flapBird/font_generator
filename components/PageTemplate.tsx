@@ -21,6 +21,7 @@ import { fandomPages, guidePages, stylePages, type PageDefinition } from '@/lib/
 import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
 import { generatorRegistry, getGeneratorDefinition, isFontStyleGenerator } from '@/lib/generator-registry';
 import { getPageSupplement } from '@/lib/page-supplements';
+import { isTitleArtworkSlug } from '@/lib/title-artwork';
 import { getSpecializedAbout, getSpecializedFaq, getSpecializedHowTo, getVisualGeneratorConfig } from '@/lib/visual-generator';
 
 interface PageTemplateProps {
@@ -129,8 +130,8 @@ export default function PageTemplate({
   const isPlatform = Boolean(platformTextConfigs[page.slug]);
   const isZalgo = page.slug === 'zalgo-text-generator';
   const slug = page.slug;
-  const isSonic = slug === 'sonic-font-generator';
-  const isKeywordTool = slug === 'cursed-text-generator' || slug === 'letters-in-different-fonts' || slug === 'sonic-font-generator';
+  const isTitleArtwork = isTitleArtworkSlug(slug);
+  const isKeywordTool = slug === 'cursed-text-generator' || slug === 'letters-in-different-fonts' || isTitleArtwork;
   const isDiscord = page.slug === 'discord-font-generator';
   const isAsciiGenerator = definition?.kind === 'ascii';
   const isThreeDGenerator = page.slug === '3d-font-generator';
@@ -138,7 +139,7 @@ export default function PageTemplate({
   const isHybridGenerator = definition?.kind === 'hybrid';
   const isMinecraftGenerator = visualConfig?.engine === 'minecraft-renderer';
   const requiresVisualConfig = definition
-    ? !isThreeDGenerator && !octoberArt && !discoveryArt && !isSonic && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
+    ? !isThreeDGenerator && !octoberArt && !discoveryArt && !isTitleArtwork && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
     : false;
   if (requiresVisualConfig && !visualConfig) {
     throw new Error(`Generator ${page.slug} is registered as ${definition?.kind} but has no visual configuration.`);
@@ -146,7 +147,7 @@ export default function PageTemplate({
   if (visualConfig && definition?.kind === 'unicode') {
     throw new Error(`Generator ${page.slug} has a visual configuration but is still registered as Unicode-only.`);
   }
-  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator || octoberArt || discoveryArt || isSonic;
+  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator || octoberArt || discoveryArt || isTitleArtwork;
   const usesFontWorkspace = !isSpecializedGenerator;
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
@@ -492,7 +493,7 @@ export default function PageTemplate({
                   ? 'PNG and faithful SVG both preserve the exact rendered canvas. Copy formatting-code text separately when the destination supports Minecraft § or & codes.'
                   : page.slug === 'halloween-font-generator'
                   ? 'PNG preserves the lettering and scene. Choose Transparent in Customize to export only the lettering effects, or use the Copyable text tab for bios and messages.'
-                  : isSonic
+                  : isTitleArtwork
                   ? 'PNG preserves the current preview. With Transparent background enabled, you can place the lettering over your own image.'
                   : isSpecializedGenerator
                     ? 'PNG preserves the current rendered appearance. SVG keeps editable text, so its font can change when opened on a device without the same typeface.'

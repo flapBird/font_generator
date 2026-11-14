@@ -5,6 +5,7 @@
  import { additionalGuidePages } from './additional-guides';
  import { newKeywordFandomPages, newKeywordStylePages } from './new-keyword-pages';
  import { focusedLetterPages, sonicPage } from './letter-tool-pages';
+ import { spidermanPage } from './spiderman-page';
 
  export interface PageDefinition {
    slug: string;
@@ -961,6 +962,7 @@
    ...newKeywordFandomPages,
    ...expansionFandomPages,
    sonicPage,
+   spidermanPage,
  ];
  
  export const guidePages: PageDefinition[] = [
