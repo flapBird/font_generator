@@ -1,8 +1,9 @@
+import { unicodeTools } from './unicode-tool-catalog';
 export const toolCategories = [
   { id: 'font-styles', title: 'Font Styles', href: '/styles', sample: 'Aa', description: 'Copyable letter styles for bios, names and messages.' },
   { id: 'visual-art', title: 'Visual & Art', href: '/visual-art', sample: 'Art', description: 'Text artwork, image exports and signature images.' },
   { id: 'symbols', title: 'Symbols & Emoji', href: '/symbols', sample: '✦', description: 'Symbols, kaomoji and ready-to-copy emoji combinations.' },
-  { id: 'unicode-tools', title: 'Unicode Tools', href: '/unicode-tools', sample: 'U+', description: 'Inspect characters, clean text and copy blank characters.' },
+  { id: 'unicode-tools', title: 'Unicode Tools', href: '/unicode-tools', sample: 'U+', description: 'Inspect and clean text, copy blanks and explore script alphabets.' },
   { id: 'font-tools', title: 'Font Tools', href: '/font-tools', sample: 'Ag', description: 'Identify existing typefaces from images.' },
 ] as const;
 export type ToolCategoryId = typeof toolCategories[number]['id'];
@@ -46,10 +47,5 @@ export const categoryShortcuts: Record<ToolCategoryId, readonly { href: string; 
     { href: '/kaomoji', label: 'Kaomoji', sample: 'ツ' },
     { href: '/emoji-combos', label: 'Emoji combos', sample: '☺' },
   ],
-  'unicode-tools': [
-    { href: '/unicode-character-inspector', label: 'Character inspector', sample: '⌕' },
-    { href: '/invisible-character-remover', label: 'Invisible character remover', sample: '⌫' },
-    { href: '/fancy-text-to-normal-text', label: 'Fancy text to normal', sample: 'Aa' },
-    { href: '/invisible-character', label: 'Invisible character', sample: '␣' },
-  ],
+  'unicode-tools': unicodeTools.filter((tool) => ['unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text', 'invisible-character', 'cuneiform-translator', 'enchanting-table-translator', 'enderman-translator'].includes(tool.id)).map((tool) => ({ href: `/${tool.id}`, label: tool.label })),
 };

@@ -3,17 +3,17 @@
 import { useMemo, useState } from 'react';
 import { CUNEIFORM_INPUT_LIMIT, cuneiformExamples, cuneiformFontSample, cuneiformSignChart, spellInCuneiform } from '@/lib/cuneiform';
 import { useGeneratorText } from '@/lib/use-generator-text';
-import { segmentGraphemes } from '@/lib/unicode';
 import TextOutputCard from './TextOutputCard';
 import TextToolInput from './TextToolInput';
-import TextToolLayout, { type TextWorkspace } from './TextToolLayout';
+import UnicodeToolWorkspace from './text-library/UnicodeToolWorkspace';
 import CopyButton from './text-library/CopyButton';
-import ScriptPngButton from './ScriptPngButton';
+import { ScriptImageOutput, ScriptOutputPicker, type ScriptOutputMode } from './ScriptOutput';
 import fonts from './ScriptFonts.module.css';
 
-export default function CuneiformTranslator(workspace: Pick<TextWorkspace, 'config' | 'navigationItems' | 'pageTitle'>) {
+export default function CuneiformTranslator() {
   const [text, setText] = useGeneratorText(cuneiformExamples[0]);
   const [query, setQuery] = useState('');
+  const [outputMode, setOutputMode] = useState<ScriptOutputMode>('text');
   const result = useMemo(() => spellInCuneiform(text), [text]);
   const search = query.trim().toLowerCase();
   const signs = cuneiformSignChart.filter(({ reading, glyph, code }) =>
@@ -21,14 +21,7 @@ export default function CuneiformTranslator(workspace: Pick<TextWorkspace, 'conf
 
   return (
     <div data-clarity-mask="true">
-      <TextToolLayout label="Cuneiform Translator" workspace={{
-        ...workspace,
-        preview: { id: 'cuneiform', name: 'Cuneiform signs', text: result.text.trim() ? result.text : '', category: 'symbols', characterCount: segmentGraphemes(result.text).length },
-        previewTextClassName: `whitespace-pre-wrap [overflow-wrap:anywhere] ${fonts.cuneiform}`,
-        outputLabel: 'Text and PNG',
-        mobileDirectoryAfterResults: true,
-        compactWorkspace: true,
-      }} controls={<>
+      <UnicodeToolWorkspace id="generator" label="Cuneiform Translator" controls={<div className="space-y-4">
         <TextToolInput id="cuneiform-input" label="Name or short word" text={text} onChange={setText} limit={CUNEIFORM_INPUT_LIMIT} />
         <div className="flex flex-wrap items-center gap-x-3 text-sm">
           <span className="text-slate-600 dark:text-slate-400">Try a name</span>
@@ -39,10 +32,13 @@ export default function CuneiformTranslator(workspace: Pick<TextWorkspace, 'conf
             </button>
           ))}
         </div>
-      </>}>
-        <TextOutputCard title="Cuneiform signs" text={result.text} textClassName={fonts.cuneiform}
-          description="Approximate spelling with syllable signs. Try typing the name as it sounds." selected />
-        <ScriptPngButton text={result.text} family="Site Cuneiform" fontSample={cuneiformFontSample} filename="cuneiform.png" />
+      </div>}>
+        <ScriptOutputPicker value={outputMode} onChange={setOutputMode} />
+        {outputMode === 'text' ? <TextOutputCard title="Cuneiform signs" text={result.text} textClassName={fonts.cuneiform}
+          description="Copy these Unicode signs into a message or document. Try typing the name as it sounds." selected />
+          : <ScriptImageOutput title="Cuneiform signs" text={result.text} textClassName={fonts.cuneiform}
+            description="Keep the sign shapes when sharing an image. PNG contains rendered lettering, not editable text."
+            family="Site Cuneiform" fontSample={cuneiformFontSample} filename="cuneiform.png" />}
         {result.unmatchedLetters > 0 && (
           <p role="status" className="text-sm text-amber-800 dark:text-amber-300">The result keeps letters outside the supported spellings as entered.</p>
         )}
@@ -86,7 +82,7 @@ export default function CuneiformTranslator(workspace: Pick<TextWorkspace, 'conf
             </ul>
           ) : <p role="status" className="pb-4 text-sm text-slate-600 dark:text-slate-400">No signs match this search.</p>}
         </details>
-      </TextToolLayout>
+      </UnicodeToolWorkspace>
     </div>
   );
 }

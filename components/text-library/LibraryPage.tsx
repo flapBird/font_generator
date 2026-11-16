@@ -1,3 +1,4 @@
+import { isUnicodeTool } from '@/lib/unicode-tool-catalog';
 import surface from '@/components/ToolSurface.module.css';
 import type { Metadata } from 'next';
 import Link from '@/components/IntentLink';
@@ -21,15 +22,16 @@ export function libraryMetadata(id: LibraryId): Metadata {
   };
 }
 
-export function LibraryPageShell({ id, children, workspace = false, category, resources }: {
+export function LibraryPageShell({ id, children, workspace = false, centeredHeading = false, category, resources }: {
   id: LibraryId;
   children: React.ReactNode;
   workspace?: boolean;
+  centeredHeading?: boolean;
   category?: { title: string; path: string };
   resources?: readonly { href: string; title: string }[];
 }) {
   const page = getLibraryPage(id);
-  const isUnicode = ['unicode-tools', 'invisible-character', 'unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text', 'hieroglyphics-translator'].includes(id);
+  const isUnicode = isUnicodeTool(id);
   const parent = id === 'signature-generator' ? { id: 'visual-art', title: 'Visual & Art', path: '/visual-art' } : getLibraryPage(isUnicode ? 'unicode-tools' : 'symbols');
   const parentPath = category?.path ?? parent.path;
   const parentTitle = category?.title ?? (id === 'signature-generator' ? 'Visual & Art' : isUnicode ? 'Unicode Tools' : 'Symbols & Emoji');
@@ -54,11 +56,11 @@ export function LibraryPageShell({ id, children, workspace = false, category, re
         {parent.id !== id && <><Link href={parentPath} className="py-2 hover:text-violet-700">{parentTitle}</Link><span aria-hidden="true">/</span></>}
         <span aria-current="page">{page.title}</span>
       </nav>
-      <header className="mb-6 max-w-3xl">
+      <header className={`mb-6 max-w-3xl ${centeredHeading ? 'mx-auto text-center' : ''}`}>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{page.title}</h1>
         <p className={`mt-3 text-sm leading-6 text-slate-500 sm:text-base ${workspace ? 'dark:text-slate-400' : ''}`}>{page.intro}</p>
       </header>
-      {isUnicode && id !== 'hieroglyphics-translator' && <UnicodeToolNavigation current={id} />}
+      {isUnicode && id !== 'unicode-tools' && <UnicodeToolNavigation current={id} />}
       {children}
       <CollectionContent page={page} workspace={workspace} />
       {resources && resources.length > 0 && <section aria-labelledby="script-resources" className="mt-10 border-t border-slate-200 pt-8 dark:border-slate-800">

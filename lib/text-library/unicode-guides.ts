@@ -13,7 +13,7 @@ export const unicodeGuides: Partial<Record<LibraryId, CollectionGuide>> = {
     ],
     howToHeading: 'How to choose and use a Unicode tool',
     steps: [
-      { title: 'Choose your task', text: 'Use Character Inspector to examine a string, a cleanup tool to change it or Invisible Character to copy blank text. Choose a script tool to spell a name or convert a game-inspired message.' },
+      { title: 'Choose your task', text: 'Search by tool name or task, then filter Inspect & clean, Blank characters, Ancient scripts or Game alphabets. Open a card to use the tool; Clear filters restores the full directory.' },
       { title: 'Paste or select your text', text: 'Paste into the chosen tool. For blank text, select a character type and a repeat count instead. Read the available options before changing joiners, spaces or letter styles.' },
       { title: 'Review, then copy', text: 'Check the report or compare the original and result. Use the matching Copy button and paste into your destination. Test the pasted text there because apps can handle characters differently.' },
     ],

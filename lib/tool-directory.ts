@@ -1,3 +1,4 @@
+import { unicodeTools } from './unicode-tool-catalog';
 import { getFontStyleGenerators, getVisualArtGenerators } from './generator-registry';
 import { libraryPages } from './text-library/catalog';
 import { toolCategories, type ToolCategoryId } from './tool-navigation';
@@ -28,15 +29,15 @@ const libraryDetails: Partial<Record<string, { output: string; keywords?: string
 };
 const libraryEntries = (ids: string[]): ToolDirectoryEntry[] => libraryPages.filter((page) => ids.includes(page.id)).map((page) => ({
   title: page.title, href: page.path, description: page.description,
-  output: libraryDetails[page.id]?.output ?? 'Text & characters',
-  searchText: [page.title, page.path, page.description, libraryDetails[page.id]?.keywords].filter(Boolean).join(' ').toLowerCase(),
+  output: unicodeTools.find((tool) => tool.id === page.id)?.output ?? libraryDetails[page.id]?.output ?? 'Text & characters',
+  searchText: [page.title, page.path, page.description, unicodeTools.find((tool) => tool.id === page.id)?.keywords, libraryDetails[page.id]?.keywords].filter(Boolean).join(' ').toLowerCase(),
 }));
 const entriesByCategory: Record<ToolCategoryId, ToolDirectoryEntry[]> = {
   'font-tools': [{ title: 'Font Identifier', href: '/font-identifier', description: 'Find close Google Fonts matches from an image locally in your browser.', output: 'Font candidates', searchText: 'font identifier font finder font detector image screenshot local google fonts' }],
   'font-styles': fontEntries(false),
   'visual-art': [...fontEntries(true), ...libraryEntries(['signature-generator'])],
   symbols: libraryEntries(['symbols', 'hearts', 'stars', 'arrows', 'kaomoji', 'emoji-combos']),
-  'unicode-tools': libraryEntries(['unicode-tools', 'unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text', 'invisible-character', 'hieroglyphics-translator', 'cuneiform-translator', 'enchanting-table-translator', 'enderman-translator', 'standard-galactic-alphabet']),
+  'unicode-tools': libraryEntries(['unicode-tools', ...unicodeTools.map((tool) => tool.id)]),
 };
 // Server-side catalog only. Never import this module at runtime from the shared header.
 export const toolDirectoryGroups: ToolDirectoryGroup[] = toolCategories.map((category) => ({

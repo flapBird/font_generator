@@ -78,14 +78,14 @@ export default function VisualArtDirectory({ items }: { items: VisualArtDirector
       {visibleItems.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {visibleItems.map((item) => (
-            <Link key={item.id} href={item.href} className="group flex min-h-64 flex-col rounded-3xl border border-slate-200 bg-white p-5 transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_24px_60px_-42px_rgba(109,40,217,0.55)] dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700">
+            <Link key={item.id} href={item.href} className="group flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_24px_60px_-42px_rgba(109,40,217,0.55)] dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700">
               <span className="flex items-start justify-between gap-3">
                 <span className="text-3xl" aria-hidden="true">{item.icon}</span>
                 <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:bg-violet-950/50 dark:text-violet-300">{groupLabels[item.group]}</span>
               </span>
-              <h2 className="mt-5 text-lg font-black text-slate-950 transition group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">{item.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{item.description}</p>
-              <div className="mt-auto flex items-end justify-between gap-3 pt-5">
+              <h2 className="mt-3 text-base font-black text-slate-950 transition group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">{item.title}</h2>
+              <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{item.description}</p>
+              <div className="mt-auto flex items-end justify-between gap-3 pt-3">
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{item.outputs.join(' · ')}</span>
                 <span className="text-sm font-bold text-violet-700 dark:text-violet-300">Open →</span>
               </div>

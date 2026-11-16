@@ -2,27 +2,26 @@
 
 import { useRef, useState } from 'react';
 import Link from './IntentLink';
-import TextToolLayout, { type TextWorkspace } from './TextToolLayout';
+import UnicodeToolWorkspace from './text-library/UnicodeToolWorkspace';
 import TextToolInput from './TextToolInput';
 import TextOutputCard from './TextOutputCard';
 import ScriptAlphabetChart from './ScriptAlphabetChart';
-import ScriptPngButton from './ScriptPngButton';
+import { ScriptImageOutput, ScriptOutputPicker, type ScriptOutputMode } from './ScriptOutput';
 import fonts from './ScriptFonts.module.css';
 import { ALPHABET_DECODE_LIMIT, ALPHABET_INPUT_LIMIT, convertScriptText, galacticSpecimen, type ScriptAlphabet, type ScriptDirection } from '@/lib/script-alphabets';
 import { useGeneratorText } from '@/lib/use-generator-text';
-import { segmentGraphemes } from '@/lib/unicode';
 
 const language = {
   galactic: { title: 'Galactic', sample: 'Minecraft', decodeSample: 'Hello', symbolLabel: 'Galactic Unicode lookalikes' },
   ender: { title: 'Ender', sample: 'See you in the End', decodeSample: 'Hello human', symbolLabel: 'Ender symbols' },
 };
-const previewClass = 'whitespace-pre-wrap [overflow-wrap:anywhere]';
 
-export default function ScriptAlphabetTranslator({ alphabet, ...workspace }: Pick<TextWorkspace, 'config' | 'navigationItems' | 'pageTitle'> & {
+export default function ScriptAlphabetTranslator({ alphabet }: {
   alphabet: ScriptAlphabet;
 }) {
   const options = language[alphabet];
   const [direction, setDirection] = useState<ScriptDirection>('encode');
+  const [outputMode, setOutputMode] = useState<ScriptOutputMode>('text');
   const [plain, setPlain] = useGeneratorText(options.sample);
   const [encoded, setEncoded] = useGeneratorText(convertScriptText(options.decodeSample, alphabet, 'encode'));
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -32,9 +31,9 @@ export default function ScriptAlphabetTranslator({ alphabet, ...workspace }: Pic
   const input = decoding ? encoded : plain;
   const setInput = decoding ? setEncoded : setPlain;
   const converted = convertScriptText(input, alphabet, direction);
-  const preview = galactic && !decoding ? galacticSpecimen(plain) : converted;
+  const imageOutput = galactic && !decoding && outputMode === 'image';
+  const preview = imageOutput ? galacticSpecimen(plain) : converted;
   const outputTitle = decoding ? 'English text' : options.symbolLabel;
-  const previewTitle = galactic && !decoding ? 'Galactic lettering' : outputTitle;
   const limit = decoding ? ALPHABET_DECODE_LIMIT : ALPHABET_INPUT_LIMIT;
   const canDecodeResult = !decoding && Boolean(converted.trim()) && converted.length <= ALPHABET_DECODE_LIMIT;
 
@@ -64,17 +63,7 @@ export default function ScriptAlphabetTranslator({ alphabet, ...workspace }: Pic
 
   return (
     <div data-clarity-mask="true">
-      <TextToolLayout
-        label={workspace.pageTitle}
-        workspace={{
-          ...workspace,
-          preview: { id: direction, name: previewTitle, text: preview.trim() ? preview : '', category: 'symbols', characterCount: segmentGraphemes(preview).length },
-          previewTextClassName: `${previewClass} ${decoding ? '' : fonts.galactic}`,
-          outputLabel: galactic && !decoding ? 'Text and PNG' : 'Copyable text',
-          mobileDirectoryAfterResults: true,
-          compactWorkspace: true,
-        }}
-        controls={<>
+      <UnicodeToolWorkspace id="generator" label={`${options.title} translator`} controls={<div className="space-y-4">
           <div role="group" aria-label="Conversion direction" className="flex flex-wrap gap-2">
             {(['encode', 'decode'] as const).map((value) => (
               <button key={value} type="button" aria-pressed={direction === value} onClick={() => { setDirection(value); setAtLimit(false); }}
@@ -86,31 +75,28 @@ export default function ScriptAlphabetTranslator({ alphabet, ...workspace }: Pic
           <TextToolInput id="script-input" inputRef={inputRef} label={decoding ? `${options.title} symbols` : 'English text'}
             text={input} onChange={(value) => { setInput(value); setAtLimit(false); }} limit={limit}
             textClassName={decoding ? fonts.galactic : undefined} />
-        </>}
+        </div>}
       >
-        <TextOutputCard key={direction} title={outputTitle} text={converted}
+        {galactic && !decoding && <ScriptOutputPicker value={outputMode} onChange={setOutputMode} />}
+        {!imageOutput && <TextOutputCard key={`output-${direction}`} title={outputTitle} text={converted}
           textClassName={decoding ? '' : fonts.galactic}
           description={decoding ? 'Recognized symbols become lowercase letters.' : galactic ? 'Use these Unicode lookalikes when you need to paste the result as text.' : 'Fan alphabet for in-character messages and puzzles.'}
-          selected />
-        {galactic && !decoding && (
-          <section aria-label="Galactic lettering preview" className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="text-sm font-semibold">Galactic lettering</h3>
-            <p className={`max-h-56 overflow-y-auto text-3xl leading-relaxed text-violet-800 dark:text-violet-200 ${previewClass} ${fonts.galactic}`}
-              aria-label={plain.trim() ? `Galactic preview of ${plain}` : undefined}>
-              {plain.trim() ? <span aria-hidden="true">{preview}</span> : <span className="text-sm text-slate-500">Enter text for the image preview.</span>}
-            </p>
-            <ScriptPngButton text={preview} family="Site Galactic" fontSample={galacticSpecimen('A')} filename="enchanting-table.png" />
-          </section>
+          selected />}
+        {imageOutput && (
+          <ScriptImageOutput title="Galactic lettering" text={preview} textClassName={fonts.galactic}
+            accessibleText={plain.trim() ? `Galactic preview of ${plain}` : undefined}
+            description="Render the message with Galactic letter shapes. PNG contains an image, while Copyable text uses Unicode lookalikes."
+            family="Site Galactic" fontSample={galacticSpecimen('A')} filename="enchanting-table.png" />
         )}
         {(!decoding || galactic) && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-          {!decoding && <button type="button" onClick={decodeResult} disabled={!canDecodeResult}
+          {!decoding && !imageOutput && <button type="button" onClick={decodeResult} disabled={!canDecodeResult}
             className="min-h-11 font-semibold text-violet-700 focus-visible:outline-violet-600 disabled:opacity-50 dark:text-violet-300">
             Decode this result
           </button>}
           {galactic && <Link href="/standard-galactic-alphabet" className="inline-flex min-h-11 items-center font-semibold text-violet-700 hover:underline dark:text-violet-300">A–Z alphabet chart →</Link>}
         </div>}
         {(decoding || !galactic) && (
-          <details key={direction} className="rounded-2xl border border-slate-200 bg-white px-4 dark:border-slate-800 dark:bg-slate-950">
+          <details key={`keyboard-${direction}`} className="rounded-2xl border border-slate-200 bg-white px-4 dark:border-slate-800 dark:bg-slate-950">
             <summary className="min-h-11 cursor-pointer py-3 text-sm font-semibold focus-visible:outline-violet-600">
               {decoding ? `${options.title} symbol keyboard` : 'Ender alphabet chart'}
             </summary>
@@ -121,7 +107,7 @@ export default function ScriptAlphabetTranslator({ alphabet, ...workspace }: Pic
             {decoding && atLimit && <p role="status" className="pb-3 text-sm text-amber-800 dark:text-amber-300">Input is full. Remove text to insert another symbol.</p>}
           </details>
         )}
-      </TextToolLayout>
+      </UnicodeToolWorkspace>
     </div>
   );
 }

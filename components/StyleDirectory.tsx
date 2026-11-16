@@ -141,7 +141,7 @@ export default function StyleDirectory({ cards }: StyleDirectoryProps) {
             <Link
               key={card.slug}
               href={`/${card.slug}`}
-              className="group flex min-h-56 flex-col rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_-42px_rgba(15,23,42,0.5)] transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_24px_60px_-40px_rgba(109,40,217,0.45)] dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700"
+              className="group flex min-w-0 flex-col rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_18px_50px_-42px_rgba(15,23,42,0.5)] transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-[0_24px_60px_-40px_rgba(109,40,217,0.45)] dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700"
             >
               <div className="flex items-start justify-between gap-3">
                 <span className="text-2xl" aria-hidden="true">{card.icon}</span>
@@ -149,11 +149,11 @@ export default function StyleDirectory({ cards }: StyleDirectoryProps) {
                   {card.badge}
                 </span>
               </div>
-              <h2 className="mt-4 text-lg font-black text-slate-950 transition group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">
+              <h2 className="mt-3 text-base font-black text-slate-950 transition group-hover:text-violet-700 dark:text-white dark:group-hover:text-violet-300">
                 {card.title}
               </h2>
               <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{card.description}</p>
-              <div className="mt-auto pt-5">
+              <div className="mt-auto pt-3">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{card.metaLabel}</p>
                 <p className="mt-1 break-words text-lg text-slate-900 dark:text-slate-100">{card.previewText}</p>
               </div>

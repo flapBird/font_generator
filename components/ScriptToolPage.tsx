@@ -1,8 +1,5 @@
 import { LibraryPageShell } from './text-library/LibraryPage';
-import { getLibraryPage, type ScriptToolId } from '@/lib/text-library/catalog';
-import { generatorWorkspaceItems } from '@/lib/generator-workspace-navigation';
-import type { GeneratorSearchItem } from './GeneratorTool';
-import type { GeneratorPageConfig } from '@/lib/generator';
+import { type ScriptToolId } from '@/lib/text-library/catalog';
 import type { ReactNode } from 'react';
 
 const resources = {
@@ -28,16 +25,7 @@ const resources = {
   ],
 };
 
-export function scriptWorkspace(id: Exclude<ScriptToolId, 'standard-galactic-alphabet'>) {
-  const { path, title, description, icon } = getLibraryPage(id);
-  const current: GeneratorSearchItem = { id, title, href: path, icon, kind: 'unicode', collection: 'font-style', description, searchText: title };
-  const config: GeneratorPageConfig = {
-    styleIds: [], initialText: '', intentLabel: title, resultIntro: description, bestFor: [], compatibilityNote: '',
-  };
-  return { pageTitle: title, config, navigationItems: [...generatorWorkspaceItems, current] };
-}
-
 export default function ScriptToolPage({ id, children }: { id: ScriptToolId; children: ReactNode }) {
-  const category = id === 'cuneiform-translator' ? { title: 'Unicode Tools', path: '/unicode-tools' } : { title: 'Fandom', path: '/fandom' };
-  return <LibraryPageShell id={id} workspace resources={resources[id]} category={category}>{children}</LibraryPageShell>;
+  const category = { title: 'Unicode Tools', path: '/unicode-tools' };
+  return <LibraryPageShell id={id} workspace centeredHeading resources={resources[id]} category={category}>{children}</LibraryPageShell>;
 }

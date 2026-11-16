@@ -9,7 +9,7 @@ export const scriptToolContent = {
     steps: [
       { title: 'Type a name', text: 'Replace the example with up to 120 UTF-16 units. Try spelling the name the way you say it when the usual spelling has silent letters or unusual sounds.' },
       { title: 'Check the syllable signs', text: 'Open Spelling breakdown to see the matched parts, readings and Unicode code points. Use the sign chart to look up or copy an individual sign.' },
-      { title: 'Copy or download', text: 'Tap the Cuneiform signs card to copy the text. Choose Download PNG for a transparent image that keeps the sign shapes across devices.' },
+      { title: 'Copy or download', text: 'Keep Copyable text selected and tap the Cuneiform signs card to copy. Switch Output format to PNG image, check the preview, then choose Download PNG. Switching formats keeps your input.' },
     ],
     faq: [
       { question: 'Does the tool translate English into Sumerian or Akkadian?', answer: 'The result approximates the spelling of a modern name or word. Translating a sentence into an ancient language requires its vocabulary and grammar.' },
@@ -23,13 +23,13 @@ export const scriptToolContent = {
     heading: 'What is the Enchanting Table Translator?',
     paragraphs: [
       'Minecraft’s enchanting table displays lettering based on the Standard Galactic Alphabet, the 26-letter script Tom Hall created for Commander Keen. Each glyph stands for a Latin letter. Reading the glyphs reveals the flavor words in the menu. The game’s plain-text enchantment clue is what tells you which effect to expect.',
-      'Type a short message for a Minecraft puzzle or fan post, or paste symbols that use this page’s mapping. The copy card uses Unicode lookalikes. The lettering preview and PNG use a locally hosted fan typeface with the Galactic shapes.',
+      'Type a short message for a Minecraft puzzle or fan post, or paste symbols that use this page’s mapping. Copyable text uses Unicode lookalikes for pasting. Switch Output format to PNG image to preview and download lettering drawn with a locally hosted fan typeface.',
     ],
     howToHeading: 'How to translate Minecraft enchanting table text',
     steps: [
       { title: 'Choose a direction', text: 'Select English to Galactic to write a message, or Galactic to English to read supported symbols. Type up to 1,000 UTF-16 units for encoding or 2,000 for decoding.' },
-      { title: 'Check the result', text: 'Compare the copyable symbols with the Galactic lettering preview. If you only have a screenshot, open the symbol keyboard in Galactic to English and choose the matching shapes by hand.' },
-      { title: 'Copy or download', text: 'Tap the result card for copyable text. In English to Galactic, choose Download PNG for a transparent image of the lettering. Use Decode this result to check a message you just made.' },
+      { title: 'Check the result', text: 'In English to Galactic, choose Copyable text for symbols to paste or PNG image for Galactic letter shapes. Switching formats keeps your message. For a screenshot, open the symbol keyboard in Galactic to English and enter the matching shapes by hand.' },
+      { title: 'Copy or download', text: 'In Copyable text, tap the result card to copy or use Decode this result to check your message. In PNG image, check the lettering and choose Download PNG for a transparent image.' },
     ],
     faq: [
       { question: 'What language is on the Minecraft enchanting table?', answer: 'The menu uses Standard Galactic Alphabet lettering. Each glyph represents a Latin letter, so converting the glyphs recovers words written with those letters.' },
