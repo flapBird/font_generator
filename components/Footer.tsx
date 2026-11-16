@@ -4,6 +4,8 @@ import { featuredToolCategories } from '@/lib/tool-navigation';
 const toolLinks = [{ href: '/tools', title: 'All tools' }, ...featuredToolCategories];
 const siteLinks = [
   { href: '/#top', label: 'Home' },
+  { href: '/ai-font-generator', label: 'AI Font' },
+  { href: '/pricing', label: 'Pricing' },
   { href: '/guides', label: 'Guides' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },

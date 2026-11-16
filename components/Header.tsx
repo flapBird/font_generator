@@ -10,13 +10,6 @@ import { usePathname } from 'next/navigation';
 import CategoryMenu from './CategoryMenu';
 import { headerToolCategories, type ToolCategoryId } from '@/lib/tool-navigation';
 
-const primaryLinks = [
-  { href: '/ai-font-generator', label: 'AI Font' },
-  { href: '/guides', label: 'Guides' },
-  { href: '/pricing', label: 'Pricing' },
-];
-const linkClass = 'flex min-h-11 items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:text-slate-300 xl:px-3';
-
 export default function Header() {
   const pathname = usePathname();
   const [categoryOpen, setCategoryOpen] = useState<ToolCategoryId | null>(null);
@@ -55,21 +48,16 @@ export default function Header() {
       <div className="absolute inset-x-0 top-16 border-b border-border bg-white dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
           <div className="py-2 lg:hidden" inert={mobileOpen}><SiteSearch key={pathname} id="site-search-mobile" onOpen={closeAll} /></div>
-          <div className="hidden h-12 items-center gap-2 lg:grid lg:grid-cols-[1fr_auto_1fr]">
-            <div aria-hidden="true" className="hidden lg:block" />
+          <div className="hidden h-12 items-center justify-center lg:flex">
             <div className="flex min-w-0 items-center gap-1 xl:gap-3">{headerToolCategories.map((category) => <CategoryMenu key={category.id} category={category} activePath={pathname} open={categoryOpen === category.id} onOpen={() => { setCategoryOpen(category.id); }} onToggle={() => { setCategoryOpen(categoryOpen === category.id ? null : category.id); }} onClose={() => setCategoryOpen((value) => value === category.id ? null : value)} onNavigate={closeAll} />)}</div>
-            <div className="ml-auto flex items-center justify-self-end xl:ml-0">
-            {primaryLinks.map((item) => <Link key={item.href} href={item.href} className={linkClass} onClick={closeAll}>{item.label}</Link>)}
-            </div>
           </div>
         </div>
       </div>
       <AnimatePresence>{mobileOpen && <motion.div id="mobile-navigation" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="fixed inset-x-0 top-16 z-50 overflow-hidden border-b border-border bg-background px-3 shadow-lg lg:hidden">
         <div className="max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-y-contain py-3">
-          <nav id="mobile-tool-links" aria-label="Mobile tool categories" className="mb-2 space-y-1 border-b border-border pb-3">
+          <nav id="mobile-tool-links" aria-label="Mobile tool categories" className="space-y-1">
             {headerToolCategories.map((category) => <CategoryMenu key={category.id} category={category} mobile activePath={pathname} open={categoryOpen === category.id} onToggle={() => setCategoryOpen(categoryOpen === category.id ? null : category.id)} onClose={() => setCategoryOpen((value) => value === category.id ? null : value)} onNavigate={closeAll} />)}
           </nav>
-          {primaryLinks.map((item) => <Link key={item.href} href={item.href} onClick={closeAll} className="flex min-h-12 items-center rounded-xl px-4 font-medium text-foreground hover:bg-muted">{item.label}</Link>)}
         </div>
       </motion.div>}</AnimatePresence>
     </nav>

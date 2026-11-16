@@ -10,7 +10,7 @@ test('footer has a bounded directory list and keeps help and policies separate',
     for (const href of ['/tools', '/styles', '/visual-art', '/symbols', '/unicode-tools']) await expect(tools.locator(`a[href="${href}"]`)).toHaveCount(1);
     await expect(tools.locator('a[href$="-generator"]')).toHaveCount(0);
     const site = footer.getByRole('navigation', { name: 'Site information', exact: true });
-    expect(await site.locator('a').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(['/#top', '/guides', '/about', '/contact']);
+    expect(await site.locator('a').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(['/#top', '/ai-font-generator', '/pricing', '/guides', '/about', '/contact']);
     const policies = footer.getByRole('navigation', { name: 'Site policies', exact: true });
     expect(await policies.locator('a').evaluateAll((links) => links.map((link) => link.getAttribute('href')))).toEqual(['/terms', '/privacy']);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -35,6 +35,7 @@ test('direct categories replace the Tools menu on phone, tablet and desktop', as
       const box = await page.locator('#site-search-desktop').boundingBox();
       expect(Math.abs(box!.x + box!.width / 2 - width / 2)).toBeLessThan(2);
     }
+    for (const href of ['/ai-font-generator', '/pricing', '/guides']) await expect(main.locator(`a[href="${href}"]`)).toHaveCount(0);
     for (const category of headerToolCategories) await expect(menu.getByRole('link', { name: category.title, exact: true })).toHaveAttribute('href', category.href);
     await menu.getByRole('link', { name: 'Unicode Tools', exact: true }).click(); await expect(page).toHaveURL(/\/unicode-tools$/);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
