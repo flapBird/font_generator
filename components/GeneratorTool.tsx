@@ -211,8 +211,8 @@ function GeneratorDirectoryContent({
         aria-current={isCurrentGenerator(item.title) ? 'page' : undefined}
         className={`flex min-h-10 items-center gap-2 rounded-lg border-l-2 px-2.5 py-2 text-xs font-medium transition ${
           isCurrentGenerator(item.title)
-            ? 'border-violet-600 bg-violet-50 text-violet-700 shadow-sm dark:bg-violet-950/40 dark:text-violet-200'
-            : 'border-transparent text-slate-600 hover:bg-white hover:text-violet-700 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-violet-300'
+            ? 'border-violet-600 bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-200'
+            : 'border-transparent text-slate-600 hover:bg-slate-50 hover:text-violet-700 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-violet-300'
         }`}
       >
         <span aria-hidden="true" className="w-4 shrink-0 text-center">{item.icon}</span>
@@ -490,8 +490,6 @@ export default function GeneratorTool({
 
   const previewVariant = customWorkspace?.preview ?? defaultPreviewVariant;
   const compactWorkspace = customWorkspace?.compactWorkspace;
-  const visiblePreview = (compactWorkspace || Boolean(inputText)) && Boolean(previewVariant?.text);
-  const formattedPreview = customWorkspace?.preview.formattedText;
 
   const visualGeneratorItems = useMemo(
     () => generatorSearchItems.filter((item) => item.collection === 'visual-art' && item.kind !== 'directory'),
@@ -611,22 +609,18 @@ export default function GeneratorTool({
       <section
         id={sectionId}
         aria-labelledby={headingId}
-        className="relative rounded-[2rem] border border-slate-200/80 bg-white/95 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.38)] dark:border-slate-800 dark:bg-slate-950"
+        className="text-workspace relative rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
       >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-10 top-[-1px] h-px bg-gradient-to-r from-transparent via-violet-500/70 to-transparent"
-        />
         <h2 id={headingId} className="sr-only">
           Generate {pageTitle.replace(/\s+Generator$/i, '')}
         </h2>
 
         <div className="p-3 sm:p-5 lg:p-6">
-          <div className={`grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[220px_minmax(0,1fr)_300px] ${compactWorkspace ? 'xl:grid-rows-[auto_1fr]' : ''}`}>
+          <div className={`grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-6 xl:grid-cols-[220px_minmax(0,1fr)] xl:gap-x-8 ${compactWorkspace ? 'xl:grid-rows-[auto_1fr]' : ''}`}>
               {customWorkspace ? (
                 <div className="order-1 min-w-0 space-y-4 xl:col-start-2 xl:row-start-1">{customWorkspace.controls}</div>
               ) : (
-              <div className="order-1 min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.5)] sm:p-5 xl:col-start-2 xl:row-start-1 dark:border-slate-800 dark:bg-slate-900">
+              <div className="order-1 min-w-0 xl:col-start-2 xl:row-start-1">
                 <label htmlFor={inputId} className="block text-sm font-medium text-slate-900 dark:text-white">
                   Enter your text
                 </label>
@@ -642,7 +636,7 @@ export default function GeneratorTool({
                     rows={3}
                     maxLength={240}
                     placeholder={pageTitle.replace(/ copyable text$/, ' Generator')}
-                    className="h-28 min-h-28 w-full resize-y rounded-2xl border border-slate-300 bg-white px-4 py-4 pr-16 text-lg leading-7 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-violet-400"
+                    className="block h-28 min-h-28 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-4 pr-16 text-lg leading-7 text-slate-950 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-violet-400"
                     autoComplete="off"
                   />
                   {inputText && (
@@ -651,7 +645,7 @@ export default function GeneratorTool({
                       onClick={clearInput}
                       aria-label="Clear input"
                       title="Clear input"
-                      className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-2xl leading-none text-slate-400 shadow-sm transition hover:border-violet-300 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 sm:h-10 sm:w-10 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400"
+                      className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-2xl leading-none text-slate-400 shadow-sm transition hover:border-violet-300 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400"
                     >
                       ×
                     </button>
@@ -676,7 +670,7 @@ export default function GeneratorTool({
 
                 <div id="generated-results" className="mt-4 grid gap-3 scroll-mt-24">
                   {variants.map((variant, index) => {
-                    const isSelected = previewVariant?.id === variant.id;
+                    const isSelected = previewStyleId === variant.id;
                     const isCopied = copiedId === variant.id;
 
                     return (
@@ -685,54 +679,36 @@ export default function GeneratorTool({
                         role="button"
                         tabIndex={0}
                         aria-label={inputText
-                          ? `Preview and copy ${getFontDisplayName(variant.name)} result`
+                          ? `Copy ${getFontDisplayName(variant.name)} result`
                           : `Enter text for ${getFontDisplayName(variant.name)}`}
                         onFocus={() => setPreviewStyleId(variant.id)}
                         onClick={(event) => copyVariantFromCard(event, variant)}
                         onKeyDown={(event) => copyVariantFromCard(event, variant)}
-                        className={`group cursor-pointer rounded-2xl border bg-white p-4 outline-none transition dark:bg-slate-950 ${index >= visibleMobileLimit ? 'hidden sm:block' : ''} ${
-                          isSelected
-                            ? 'border-violet-400 shadow-[0_16px_40px_-32px_rgba(109,40,217,0.9)] ring-2 ring-violet-500/10 dark:border-violet-600'
-                            : 'border-slate-200 hover:border-violet-300 hover:shadow-[0_16px_40px_-32px_rgba(109,40,217,0.8)] focus-visible:border-violet-400 focus-visible:ring-2 focus-visible:ring-violet-500/20 dark:border-slate-800 dark:hover:border-violet-700'
+                        className={`group cursor-pointer rounded-xl border bg-white p-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 sm:p-5 dark:bg-slate-950 ${index >= visibleMobileLimit ? 'hidden sm:block' : ''} ${
+                          isCopied
+                            ? 'border-emerald-500 bg-emerald-50/30 dark:border-emerald-500'
+                            : isSelected ? 'border-violet-400 dark:border-violet-500'
+                            : 'border-slate-200 hover:border-violet-300 hover:bg-slate-50/60 focus-visible:border-violet-400 focus-visible:ring-2 focus-visible:ring-violet-500/20 dark:border-slate-800 dark:hover:border-violet-700'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex min-w-0 flex-wrap items-center gap-2">
-                            <h4 className="font-medium text-slate-900 dark:text-white">{getFontDisplayName(variant.name)}</h4>
+                            <h4 className="text-sm font-medium text-slate-600 dark:text-slate-300">{getFontDisplayName(variant.name)}</h4>
                             <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-400">
                               {categoryLabels[variant.category]}
                             </span>
                           </div>
-                          <span className={`text-xs font-bold transition ${isCopied ? 'text-emerald-600' : 'text-slate-400 opacity-0 group-hover:opacity-100 group-focus:opacity-100'}`}>
+                          <span className={`min-w-20 shrink-0 text-right text-xs font-medium ${isCopied ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}`}>
                             {isCopied ? 'Copied' : inputText ? 'Click to copy' : 'Enter text'}
                           </span>
                         </div>
-                        <p className={`mt-4 min-h-8 select-text whitespace-pre-wrap break-words text-xl leading-8 sm:text-2xl ${
+                        <p className={`mt-4 min-h-8 select-text whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-xl leading-8 sm:text-2xl ${
                           inputText
                             ? 'text-slate-950 dark:text-white'
                             : 'italic text-slate-400 dark:text-slate-500'
                         }`}>
                           {inputText ? variant.text : 'Type above to see this style'}
                         </p>
-                        <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
-                          <span className={isCopied ? 'font-semibold text-emerald-600' : 'text-slate-400'}>
-                            {isCopied
-                              ? 'Copied to clipboard'
-                              : inputText
-                                ? 'Tap anywhere to copy'
-                                : 'Tap to enter text'}
-                          </span>
-                          <span aria-hidden="true" className={`relative block h-5 w-5 ${isCopied ? 'text-emerald-600' : 'text-slate-400'}`}>
-                            {isCopied ? (
-                              <span className="absolute inset-0 flex items-center justify-center text-base font-bold">✓</span>
-                            ) : (
-                              <>
-                                <span className="absolute left-0.5 top-1.5 h-3 w-3 rounded-[3px] border-2 border-current" />
-                                <span className="absolute left-1.5 top-0.5 h-3 w-3 rounded-[3px] border-2 border-current bg-white dark:bg-slate-950" />
-                              </>
-                            )}
-                          </span>
-                        </div>
                       </article>
                     );
                   })}
@@ -766,56 +742,7 @@ export default function GeneratorTool({
 
               {customWorkspace?.mobileDirectoryAfterResults && directory}
 
-              <aside className="hidden xl:sticky xl:top-24 xl:col-start-3 xl:row-start-1 xl:row-span-2 xl:block xl:self-start" aria-label="Selected font preview">
-                <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_24px_70px_-46px_rgba(91,33,182,0.65)] dark:border-slate-800 dark:bg-slate-950">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">Font Studio</p>
-                      <p className="mt-1 max-w-48 truncate text-sm font-bold text-slate-950 dark:text-white">
-                        {previewVariant ? (customWorkspace ? previewVariant.name : getFontDisplayName(previewVariant.name)) : 'Select a font'}
-                      </p>
-                    </div>
-                    <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Live
-                    </span>
-                  </div>
 
-                  <div className="relative mt-4 min-h-80 overflow-hidden rounded-[2rem] bg-gradient-to-br from-violet-700 via-purple-600 to-fuchsia-500 p-5 text-white shadow-[0_24px_50px_-28px_rgba(109,40,217,0.95)]">
-                    <span aria-hidden="true" className="absolute -right-12 -top-14 h-40 w-40 rounded-full border-[24px] border-white/10" />
-                    <span aria-hidden="true" className="absolute -bottom-20 -left-14 h-48 w-48 rounded-full bg-white/10 blur-sm" />
-                    <div className="relative flex items-center justify-between">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-sm font-black italic ring-1 ring-white/25">Fg</span>
-                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/70">Live type specimen</span>
-                    </div>
-
-                    <div className="relative flex min-h-48 flex-col justify-center py-6">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-100">
-                        {formattedPreview ? 'Message preview' : `${previewVariant ? categoryLabels[previewVariant.category] : 'Preview'} collection`}
-                      </p>
-                      <p aria-label={formattedPreview ? 'Formatted message preview' : undefined} className={`mt-3 break-words text-3xl leading-[1.25] ${customWorkspace?.previewTextClassName ?? ''} ${formattedPreview ? `whitespace-pre-wrap ${formattedPreview.className}` : ''} ${visiblePreview ? '' : 'text-white/65'}`}>
-                        {visiblePreview ? (formattedPreview?.text ?? previewVariant?.text) : compactWorkspace ? 'Enter text to preview.' : 'Your text, your style.'}
-                      </p>
-                    </div>
-
-                    <div className="relative flex items-end justify-between gap-3 border-t border-white/20 pt-4 text-[9px] uppercase tracking-[0.14em] text-white/70">
-                      <span>font-generators.org</span>
-                      <span>{formattedPreview ? 'Markdown' : 'Unicode'} / 2026</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-900">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{formattedPreview ? 'Source characters' : 'Characters'}</p>
-                      <p className="mt-1 text-lg font-black text-slate-950 dark:text-white">{customWorkspace?.preview.characterCount ?? previewVariant?.text?.length ?? 0}</p>
-                    </div>
-                    <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-900">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Output</p>
-                      <p className="mt-1 text-sm font-bold text-emerald-600">{customWorkspace?.outputLabel ?? 'Copyable text'}</p>
-                    </div>
-                  </div>
-                  {!compactWorkspace && <p className="mt-3 text-center text-[11px] text-slate-500 dark:text-slate-400">Select any card to update the specimen.</p>}
-                </div>
-              </aside>
             </div>
 
           {customWorkspace?.footer}
@@ -916,7 +843,7 @@ export default function GeneratorTool({
               rows={3}
               maxLength={240}
               placeholder={pageTitle.replace(/ copyable text$/, ' Generator')}
-              className="mt-2 h-28 min-h-28 w-full resize-y rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-lg leading-7 text-slate-950 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-violet-400"
+              className="mt-2 block h-28 min-h-28 w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-4 py-4 text-lg leading-7 text-slate-950 outline-none transition focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:focus:border-violet-400"
               autoComplete="off"
             />
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
@@ -1082,7 +1009,7 @@ export default function GeneratorTool({
           {variants.map((variant) => (
             <div key={variant.id} className="grid gap-3">
               <article
-                className={`group rounded-2xl border border-slate-200 bg-white transition hover:border-violet-300 hover:shadow-[0_16px_40px_-32px_rgba(109,40,217,0.8)] dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700 ${compactResults ? 'p-4' : 'p-4 sm:p-5'}`}
+                className={`group rounded-2xl border border-slate-200 bg-white transition hover:border-violet-300 hover:bg-slate-50/60 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-700 ${compactResults ? 'p-4' : 'p-4 sm:p-5'}`}
               >
                 <div className={compactResults ? 'grid gap-3 sm:grid-cols-[250px_minmax(0,1fr)_auto] sm:items-center' : 'flex flex-col gap-4 sm:flex-row sm:items-center'}>
                   <div className={compactResults ? 'min-w-0' : 'min-w-0 flex-1'}>

@@ -39,7 +39,7 @@ test('original navigation entries, order, search and collection-link placement a
       } else {
         // The original mobile rail has no injected directory-link block above its chips.
         await expect(rail.locator('a[href="/styles"]')).not.toBeVisible();
-        const firstResult = page.getByRole('button', { name: /^Preview and copy / }).first();
+        const firstResult = page.getByRole('button', { name: /^Copy / }).first();
         expect((await rail.boundingBox())!.y).toBeLessThan((await firstResult.boundingBox())!.y);
       }
       if (path === '/bubble-font-generator') {
@@ -86,14 +86,12 @@ test('new text tools share the workspace with a temporary current item; handwrit
       await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
       await expect(copy).toContainText('Copied!');
       if (width === 1440 && slug !== 'handwriting-font-generator') {
-        const preview = page.getByRole('complementary', { name: 'Selected font preview' });
-        await expect(preview).toContainText(expected!);
+        await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toHaveCount(0);
         const cards = page.getByRole('button', { name: /^Copy / });
         if (await cards.count() > 1) {
           const another = cards.nth(1);
           const anotherOutput = await another.locator('[aria-label$=" output"]').textContent();
           await another.focus();
-          await expect(preview).toContainText(anotherOutput!);
           await page.keyboard.press('Enter');
           await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(anotherOutput);
           await copy.click();
@@ -110,9 +108,9 @@ test('new text tools share the workspace with a temporary current item; handwrit
 test('existing homepage, small text and cursive output and clearing behavior remain intact', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   for (const [path, name, expected] of [
-    ['/', 'Preview and copy Bold Sans Font result', '𝗔𝗯 𝟭𝟮'],
-    ['/small-text-generator', 'Preview and copy Superscript Font result', 'ᴬᵇ ¹²'],
-    ['/cursive-font-generator', 'Preview and copy Elegant Script Font result', '𝒜𝒷 12'],
+    ['/', 'Copy Bold Sans Font result', '𝗔𝗯 𝟭𝟮'],
+    ['/small-text-generator', 'Copy Superscript Font result', 'ᴬᵇ ¹²'],
+    ['/cursive-font-generator', 'Copy Elegant Script Font result', '𝒜𝒷 12'],
   ]) {
     await page.goto(path);
     await page.locator('#generator-input').fill('Ab 12');
@@ -169,4 +167,30 @@ test('client-side switching resets input and keeps old HERE behavior and indepen
     await page.getByRole('button', { name: 'Clear text', exact: true }).click();
     await expect(page.locator('#generator-input')).toHaveValue('');
   }
+});
+
+test('text workspace stays readable without a preview column at narrow and wide sizes', async ({ page, context, request }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  for (const width of [320, 390, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+    await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toHaveCount(0);
+    const input = page.getByLabel('Enter your text', { exact: true });
+    await input.fill('Ab 👩‍💻 e\u0301\n' + 'x'.repeat(180));
+    const card = page.getByRole('button', { name: 'Copy Bold Serif Font result', exact: true });
+    const output = await card.locator('p').textContent();
+    await card.focus();
+    await page.keyboard.press('Enter');
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(output);
+    await expect(card).toContainText('Copied');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    if (width === 1440) expect((await input.boundingBox())!.width).toBeGreaterThan(650);
+    await page.getByRole('button', { name: 'Clear input', exact: true }).click();
+    await expect(input).toBeFocused();
+    await expect(page.getByRole('button', { name: 'Enter text for Bold Serif Font' })).toBeVisible();
+  }
+  const llms = await (await request.get('/llms.txt')).text();
+  expect(llms).toContain('without a decorative preview sidebar');
+  expect(llms).toContain('expandable Message preview');
+  expect(llms).not.toContain('desktop Font Studio card');
 });

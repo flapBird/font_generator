@@ -66,7 +66,7 @@ test('Cursed creates distinct styles and cleans pasted output while keeping the 
     await copy.focus();
     await page.keyboard.press('Enter');
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(effect);
-    if (width === 1440) await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toContainText(effect!);
+    await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Clean text', exact: true }).click();
     await page.getByLabel('Text to clean', { exact: true }).fill(effect!);

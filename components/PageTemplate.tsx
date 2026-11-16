@@ -196,9 +196,9 @@ export default function PageTemplate({
   });
 
   return (
-    <div className="min-h-screen pb-20 pt-20">
+    <div className={`min-h-screen pb-20 pt-20 ${usesFontWorkspace ? 'text-workspace-page' : ''}`}>
       <ResetPageScroll routeKey={page.slug} />
-      <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${usesFontWorkspace ? 'max-w-7xl' : 'max-w-6xl'}`}>
+      <div className={`mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl`}>
         <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400 sm:mb-5">
           <Link href="/" className="font-medium hover:text-violet-700 dark:hover:text-violet-300">
             Font Generators
@@ -212,7 +212,7 @@ export default function PageTemplate({
         </nav>
 
         <header className={`text-center ${usesFontWorkspace ? 'mb-6 sm:mb-8' : ''}`}>
-          <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-white">
+          <h1 className={usesFontWorkspace ? "text-[30px] font-semibold leading-tight tracking-tight text-slate-950 sm:text-[44px] dark:text-white" : "text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-white"}>
             {page.title}
           </h1>
           {isThreeDGenerator && (

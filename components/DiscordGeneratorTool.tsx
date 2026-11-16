@@ -36,6 +36,11 @@ export default function DiscordGeneratorTool({ config, navigationItems }: { conf
     <div className="mt-3 flex flex-wrap gap-4 text-violet-700 dark:text-violet-300"><a href="https://support.discord.com/hc/en-us/articles/210298617" target="_blank" rel="noreferrer">Discord formatting reference ↗</a><a href="https://support.discord.com/hc/en-us/articles/12620128861463" target="_blank" rel="noreferrer">Discord name rules ↗</a></div>
   </details>}>
     <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">{mode === 'unicode' ? `${config.styleIds.length} styles · Tap a result to copy` : '6 message formats · Tap a result to copy'}</h3>
+    {mode === 'message' && <details className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+      <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium">Message preview</summary>
+      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{selectedFormat.name} · Illustrative formatting; check the final message in Discord.</p>
+      <p aria-label="Formatted message preview" className={`mt-3 whitespace-pre-wrap break-words text-xl [overflow-wrap:anywhere] ${previewClassName}`}>{text || 'Enter text to preview.'}</p>
+    </details>}
     {mode === 'unicode' ? results.map((style) => <TextOutputCard key={style.id} title={style.name} text={style.text} selected={preview.id === style.id} onPreview={() => setSelectedId(style.id)} />) : messageResults.map((item) => (
       <TextOutputCard key={item.id} title={item.title} text={item.text}
         selected={format === item.id} onPreview={() => setFormat(item.id)} />

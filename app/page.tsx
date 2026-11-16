@@ -56,19 +56,15 @@ export default function HomePage() {
 
       <div
         id="top"
-        className="min-h-screen scroll-mt-20 bg-gradient-to-b from-white/90 via-slate-50/45 to-transparent pb-16 pt-16 dark:bg-none"
+        className="text-workspace-page min-h-screen scroll-mt-20 pb-16 pt-16"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative mx-auto mb-9 max-w-4xl pb-1 pt-6 text-center sm:mb-10">
-            <div
-              aria-hidden="true"
-              className="absolute left-1/2 top-5 -z-10 h-40 w-[min(38rem,92vw)] -translate-x-1/2 rounded-full bg-violet-300/20 blur-3xl dark:bg-violet-600/10"
-            />
-            <h1 className="gradient-text text-4xl font-medium leading-[1.02] tracking-[-0.045em] sm:text-6xl lg:text-[4rem]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-7 max-w-3xl pt-6 text-center">
+            <h1 className="text-[30px] font-semibold leading-tight tracking-tight text-slate-950 sm:text-[44px] dark:text-white">
               Free Font Generator
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8 dark:text-slate-300">
-              Create stylish copy-and-paste text and custom font art for social media, games, usernames, and more.
+            <p className="mx-auto mt-3 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">
+              Type your text, explore font styles, and click a result to copy.
             </p>
           </div>
 
@@ -95,7 +91,7 @@ export default function HomePage() {
                 <ol className="grid gap-4 pl-0 sm:grid-cols-3 [&>li]:m-0 [&>li]:list-none [&>li]:rounded-2xl [&>li]:border [&>li]:border-slate-200 [&>li]:bg-white [&>li]:p-5 dark:[&>li]:border-slate-800 dark:[&>li]:bg-slate-950">
                   <li><strong>1. Enter your text.</strong><br />Type a name, bio, caption, message, or short phrase in the input box.</li>
                   <li><strong>2. Explore the styles.</strong><br />Use popular tags or the broader categories. Open search only when you need a specific look.</li>
-                  <li><strong>3. Preview and copy.</strong><br />Tap a style card to preview it and copy the result instantly.</li>
+                  <li><strong>3. Preview and copy.</strong><br />Compare the results, then tap a style card to copy it instantly.</li>
                 </ol>
               </section>
 

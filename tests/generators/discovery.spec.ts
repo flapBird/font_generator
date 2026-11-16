@@ -47,7 +47,7 @@ test('discovery text workspaces copy by keyboard, isolate input and retain exist
       const output = await card.locator('[aria-label$=" output"]').textContent();
       await card.focus(); await page.keyboard.press('Enter');
       await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(output);
-      if (width === 1440) await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toContainText(output!);
+      await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toHaveCount(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       await page.getByRole('button', { name: 'Clear text', exact: true }).click();
       await expect(card).toBeDisabled();
@@ -112,7 +112,7 @@ test('artwork presets render distinct images and export the exact transparent ba
     for (const format of ['banner', 'square']) {
       await page.getByLabel('Canvas', { exact: true }).selectOption(format);
       await expect(page.getByTestId('discovery-status')).toContainText('Ready');
-      const pixelInfo = await page.getByTestId('discovery-canvas').evaluate((element) => {
+      const pixelInfo = await page.getByTestId('discovery-canvas').evaluate(async (element) => {
         const c = element as HTMLCanvasElement, ctx = c.getContext('2d')!;
         const pixels = ctx.getImageData(0, 0, c.width, c.height).data;
         let ink = 0, edgeInk = 0;
@@ -120,7 +120,16 @@ test('artwork presets render distinct images and export the exact transparent ba
           ink++;
           if (x < 4 || y < 4 || x >= c.width - 4 || y >= c.height - 4) edgeInk++;
         }
-        return { corner: pixels[3], ink, edgeInk, url: c.toDataURL(), width: c.width, height: c.height };
+        // Compare the same PNG encoder: Chrome can round RGB differently in
+        // synchronous toDataURL versus asynchronous toBlob (alpha is unchanged).
+        const blob = await new Promise<Blob>((resolve, reject) => c.toBlob((value) => value ? resolve(value) : reject(new Error('Preview encoding failed')), 'image/png'));
+        const url = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(blob);
+        });
+        return { corner: pixels[3], ink, edgeInk, url, width: c.width, height: c.height };
       });
       expect(pixelInfo.corner).toBe(0); expect(pixelInfo.ink).toBeGreaterThan(1000);
       expect(pixelInfo.edgeInk).toBe(0);

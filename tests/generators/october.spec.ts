@@ -44,7 +44,7 @@ test('all five text workspaces isolate inputs and preserve temporary HERE, clipb
       const output = await card.locator('[aria-label$=" output"]').textContent();
       await card.focus(); await page.keyboard.press('Enter');
       await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(output);
-      if (width === 1440) await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toContainText(output!);
+      await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toHaveCount(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       // Client-side link and Back reset input while preserving client navigation.
       await page.evaluate(() => { (window as Window & { navigationSentinel?: number }).navigationSentinel = 42; });
@@ -101,7 +101,7 @@ test('page-specific controls preserve language, empty lines, emoji clusters and 
   await expect(page.getByLabel('Symbols → Letters output', { exact: true })).toHaveText('Hello');
   await decoded.focus(); await page.keyboard.press('Enter');
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('Hello');
-  await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toContainText('Hello');
+  await expect(page.getByRole('complementary', { name: 'Selected font preview' })).toHaveCount(0);
   await page.getByText('Wingdings character chart · 62 characters', { exact: true }).click();
   await page.getByLabel('Find a letter or symbol').fill('A');
   await page.getByRole('button', { name: 'Copy Letter A', exact: true }).click();

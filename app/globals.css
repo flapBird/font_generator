@@ -272,3 +272,30 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* Text workspaces keep their visual treatment separate from artwork editors. */
+.text-workspace-page {
+  background: #f6f7f9;
+}
+.dark .text-workspace-page {
+  background: #090b12;
+}
+.text-workspace .text-output-card {
+  border-radius: 0.75rem;
+}
+.text-workspace .text-output-card:not(:focus-visible) {
+  box-shadow: none;
+}
+.text-workspace .text-output-title {
+  font-size: 0.875rem;
+}
+
+.text-workspace .text-tool-input {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+}
+.text-workspace .text-output-hint {
+  display: none;
+}

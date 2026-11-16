@@ -48,6 +48,7 @@ test('Discord retains input across modes and copies escaped multiline Markdown',
   await expect(page.getByLabel('Underline bold (Markdown) output')).toHaveText(expected);
   await page.getByRole('button', { name: 'Copy Underline bold (Markdown)', exact: true }).click();
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
+  await page.getByText('Message preview', { exact: true }).click();
   expect(await page.getByLabel('Formatted message preview', { exact: true }).textContent()).toBe(' A*b \n\nNext');
   await expect(page.getByLabel('Formatted message preview', { exact: true })).toHaveCSS('white-space', 'pre-wrap');
   await page.getByLabel('Your text', { exact: true }).fill('Hello');

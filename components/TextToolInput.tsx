@@ -9,7 +9,7 @@ export default function TextToolInput({ id, text, onChange, limit, label = 'Your
 }) {
   const localInput = useRef<HTMLTextAreaElement>(null);
   const input = inputRef ?? localInput;
-  return <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+  return <div className="text-tool-input rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
     <div className="flex items-center justify-between gap-2">
       <label htmlFor={id} className="text-sm font-medium text-slate-950 dark:text-white">{label}</label>
       <button type="button" onClick={() => { onChange(''); input.current?.focus(); }} className="min-h-11 rounded-lg px-2 text-sm font-medium text-violet-700 hover:bg-violet-100 focus-visible:outline-violet-500 dark:text-violet-300 dark:hover:bg-violet-950">Clear text</button>

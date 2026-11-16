@@ -32,9 +32,9 @@ export default function Header() {
       closeAll(); document.getElementById('mobile-menu-trigger')?.focus();
     }}>
     <nav aria-label="Primary navigation">
-      <div className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background">
+      <div className="fixed inset-x-0 top-0 z-50 border-b border-border bg-white dark:bg-slate-950">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 sm:gap-5 sm:px-6 lg:grid lg:grid-cols-[1fr_minmax(0,30rem)_1fr] lg:px-8 xl:grid-cols-[1fr_minmax(0,32rem)_1fr]">
-          <Link href="/" onClick={closeAll} className="shrink-0 justify-self-start rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"><span className="brand-gradient-text whitespace-nowrap text-base font-bold tracking-[-0.04em] sm:text-2xl">Font Generators</span></Link>
+          <Link href="/" onClick={closeAll} className="shrink-0 justify-self-start rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"><span className="text-violet-700 dark:text-violet-300 whitespace-nowrap text-base font-bold tracking-[-0.04em] sm:text-2xl">Font Generators</span></Link>
           <div className="hidden w-full min-w-0 lg:block"><SiteSearch key={pathname} id="site-search-desktop" onOpen={closeAll} /></div>
           <div className="ml-auto flex shrink-0 items-center justify-self-end gap-1.5 sm:gap-3">
             <ThemeToggle />
@@ -53,7 +53,7 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <AnimatePresence>{mobileOpen && <motion.div id="mobile-navigation" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="fixed inset-x-0 top-16 z-50 overflow-hidden border-b border-border bg-background px-3 shadow-lg lg:hidden">
+      <AnimatePresence>{mobileOpen && <motion.div id="mobile-navigation" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="fixed inset-x-0 top-16 z-50 overflow-hidden border-b border-border bg-white dark:bg-slate-950 px-3 shadow-lg lg:hidden">
         <div className="max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-y-contain py-3">
           <nav id="mobile-tool-links" aria-label="Mobile tool categories" className="space-y-1">
             {headerToolCategories.map((category) => <CategoryMenu key={category.id} category={category} mobile activePath={pathname} open={categoryOpen === category.id} onToggle={() => setCategoryOpen(categoryOpen === category.id ? null : category.id)} onClose={() => setCategoryOpen((value) => value === category.id ? null : value)} onNavigate={closeAll} />)}

@@ -21,7 +21,7 @@ export default function Footer() {
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
       <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:gap-12">
         <div className="max-w-sm">
-          <Link href="/" className="gradient-text text-2xl font-bold">Font Generators</Link>
+          <Link href="/" className="text-violet-700 dark:text-violet-300 text-2xl font-bold">Font Generators</Link>
           <p className="mt-4 text-sm leading-7 text-muted-foreground">Font styles, text artwork, symbols and practical Unicode tools in one place.</p>
         </div>
         <div className="ml-auto grid w-full max-w-[26rem] grid-cols-2 gap-8 sm:gap-12 md:w-[26rem]">
