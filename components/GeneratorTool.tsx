@@ -42,6 +42,7 @@ interface GeneratorToolProps {
   enablePopularFilters?: boolean;
   showSocialPreview?: boolean;
   workspaceMode?: boolean;
+  enableResultLayout?: boolean;
   generatorSearchItems?: GeneratorSearchItem[];
   sectionId?: string;
   // New text tools supply their specialized controls/results without changing older workspaces.
@@ -405,6 +406,7 @@ export default function GeneratorTool({
   enablePopularFilters = false,
   showSocialPreview = false,
   workspaceMode = false,
+  enableResultLayout = false,
   generatorSearchItems = [],
   sectionId = 'generator',
   customWorkspace,
@@ -421,6 +423,7 @@ export default function GeneratorTool({
   const [visibleGeneratorLimit, setVisibleGeneratorLimit] = useState(4);
   const [popularFilterId, setPopularFilterId] = useState('all');
   const [previewStyleId, setPreviewStyleId] = useState<string | null>(null);
+  const [resultLayout, setResultLayout] = useState<'grid' | 'list'>('grid');
   const headingId = `${sectionId}-heading`;
   const inputId = `${sectionId}-input`;
 
@@ -666,9 +669,19 @@ export default function GeneratorTool({
                   <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
                     {searchedStyleIds.length} {inputText ? 'generated' : 'available'} styles
                   </h3>
+                  {enableResultLayout && <div role="group" aria-label="Results layout" className="hidden shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 md:flex dark:border-slate-700 dark:bg-slate-900">
+                    {(['grid', 'list'] as const).map((layout) => <button
+                      key={layout}
+                      type="button"
+                      aria-pressed={resultLayout === layout}
+                      aria-controls="generated-results"
+                      onClick={() => setResultLayout(layout)}
+                      className={`min-h-11 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${resultLayout === layout ? 'bg-white text-violet-700 shadow-sm dark:bg-slate-800 dark:text-violet-300' : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'}`}
+                    >{layout === 'grid' ? 'Grid' : 'List'}</button>)}
+                  </div>}
                 </div>
 
-                <div id="generated-results" className="mt-4 grid gap-3 scroll-mt-24">
+                <div id="generated-results" className={`mt-4 grid grid-cols-1 gap-3 scroll-mt-24 ${enableResultLayout && resultLayout === 'grid' ? 'md:grid-cols-2' : ''}`}>
                   {variants.map((variant, index) => {
                     const isSelected = previewStyleId === variant.id;
                     const isCopied = copiedId === variant.id;
@@ -684,7 +697,7 @@ export default function GeneratorTool({
                         onFocus={() => setPreviewStyleId(variant.id)}
                         onClick={(event) => copyVariantFromCard(event, variant)}
                         onKeyDown={(event) => copyVariantFromCard(event, variant)}
-                        className={`group cursor-pointer rounded-xl border bg-white p-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 sm:p-5 dark:bg-slate-950 ${index >= visibleMobileLimit ? 'hidden sm:block' : ''} ${
+                        className={`group min-w-0 cursor-pointer rounded-xl border bg-white p-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 sm:p-5 dark:bg-slate-950 ${index >= visibleMobileLimit ? 'hidden sm:block' : ''} ${
                           isCopied
                             ? 'border-emerald-500 bg-emerald-50/30 dark:border-emerald-500'
                             : isSelected ? 'border-violet-400 dark:border-violet-500'
@@ -698,8 +711,8 @@ export default function GeneratorTool({
                               {categoryLabels[variant.category]}
                             </span>
                           </div>
-                          <span className={`min-w-20 shrink-0 text-right text-xs font-medium ${isCopied ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}`}>
-                            {isCopied ? 'Copied' : inputText ? 'Click to copy' : 'Enter text'}
+                          <span className={`${enableResultLayout ? 'min-w-11' : 'min-w-20'} shrink-0 text-right text-xs font-medium ${isCopied ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}`}>
+                            {isCopied ? 'Copied' : inputText ? (enableResultLayout ? 'Copy' : 'Click to copy') : 'Enter text'}
                           </span>
                         </div>
                         <p className={`mt-4 min-h-8 select-text whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-xl leading-8 sm:text-2xl ${

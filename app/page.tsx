@@ -78,6 +78,7 @@ export default function HomePage() {
             compactResults
             enablePopularFilters
             workspaceMode
+            enableResultLayout
             generatorSearchItems={homepageGeneratorSearchItems}
           />
 
@@ -90,7 +91,7 @@ export default function HomePage() {
                 </p>
                 <ol className="grid gap-4 pl-0 sm:grid-cols-3 [&>li]:m-0 [&>li]:list-none [&>li]:rounded-2xl [&>li]:border [&>li]:border-slate-200 [&>li]:bg-white [&>li]:p-5 dark:[&>li]:border-slate-800 dark:[&>li]:bg-slate-950">
                   <li><strong>1. Enter your text.</strong><br />Type a name, bio, caption, message, or short phrase in the input box.</li>
-                  <li><strong>2. Explore the styles.</strong><br />Use popular tags or the broader categories. Open search only when you need a specific look.</li>
+                  <li><strong>2. Explore the styles.</strong><br />Browse the results or search for a generator. On wider screens, switch between Grid and List to compare short samples or longer text.</li>
                   <li><strong>3. Preview and copy.</strong><br />Compare the results, then tap a style card to copy it instantly.</li>
                 </ol>
               </section>
