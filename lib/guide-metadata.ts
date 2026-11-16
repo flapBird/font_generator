@@ -7,6 +7,7 @@ export interface GuideMetadata {
   updatedAt: string;
   updatedLabel: string;
   sources: GuideSource[];
+  figure?: { src: string; width: number; height: number; alt: string; caption: string; source: GuideSource };
   toolLink: {
     href: string;
     label: string;
@@ -28,7 +29,41 @@ const unicodeNormalization: GuideSource = {
   url: 'https://www.unicode.org/reports/tr15/',
 };
 
+const metCuneiformTablet = {
+  title: 'The Metropolitan Museum of Art, object 1988.433.3',
+  url: 'https://www.metmuseum.org/art/collection/search/327385',
+};
+
 const metadataBySlug: Record<string, GuideMetadata> = {
+  'what-is-cuneiform': {
+    updatedAt: '2026-11-16',
+    updatedLabel: 'November 16, 2026',
+    sources: [
+      { title: 'The Met · The Origins of Writing', url: 'https://www.metmuseum.org/essays/the-origins-of-writing' },
+      metCuneiformTablet,
+      { title: 'Oracc · Introduction to Cuneiform Sign Lists', url: 'https://oracc.museum.upenn.edu/dcclt/signlists/signlists/index.html' },
+      { title: 'Oracc · The AN sign and its readings', url: 'https://oracc.museum.upenn.edu/osl/signlist/l0065/o0000099/index.html' },
+      { title: 'Unicode · Cuneiform character chart', url: 'https://www.unicode.org/charts/PDF/U12000.pdf' },
+    ],
+    figure: {
+      src: '/guides/cuneiform-tablet.webp', width: 768, height: 1024,
+      alt: 'Small clay tablet from Mesopotamia with incised signs and divided rows of early writing',
+      caption: 'Administrative account of malt and barley groats, ca. 3100–2900 BCE. Public domain.',
+      source: metCuneiformTablet,
+    },
+    toolLink: { href: '/cuneiform-translator', label: 'Try the Cuneiform Translator' },
+  },
+  'minecraft-enchanting-table': {
+    updatedAt: '2026-11-16',
+    updatedLabel: 'November 16, 2026',
+    sources: [
+      { title: 'Mojang · Bedrock enchanting table recipe', url: 'https://github.com/Mojang/bedrock-samples/blob/main/behavior_pack/recipes/enchanting_table.json' },
+      { title: 'Mojang · In-game enchanting instructions', url: 'https://github.com/Mojang/bedrock-samples/blob/main/resource_pack/texts/en_US.lang#L3992-L4004' },
+      { title: 'Minecraft · Chiseled Bookshelf', url: 'https://www.minecraft.net/en-us/article/chiseled-bookshelf' },
+      { title: 'Tom Hall on creating the Standard Galactic Alphabet', url: 'https://cc314.shikadi.net/oldcc314/sga.htm' },
+    ],
+    toolLink: { href: '/enchanting-table-translator', label: 'Try the Enchanting Table Translator' },
+  },
   'reddit-fancy-text-guide': {
     updatedAt: '2026-10-28',
     updatedLabel: 'October 28, 2026',

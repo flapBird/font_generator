@@ -7,15 +7,18 @@
  import { sonicPresets } from '@/lib/sonic-artwork';
  import { spidermanPresets } from '@/lib/spiderman-artwork';
  import { isTitleArtworkSlug, type TitleArtworkSlug } from '@/lib/title-artwork';
+ import { getLibraryPage } from '@/lib/text-library/catalog';
+ import IntentLink from '@/components/IntentLink';
 
  const titlePresets = { 'sonic-font-generator': sonicPresets, 'spiderman-font-generator': spidermanPresets } satisfies Record<TitleArtworkSlug, readonly { name: string }[]>;
+ const minecraftScriptTools = ['enchanting-table-translator', 'enderman-translator', 'standard-galactic-alphabet'] as const;
  
  export const metadata: Metadata = {
    title: 'Fandom Font Generators',
    alternates: {
      canonical: 'https://font-generators.org/fandom',
    },
-   description: 'Explore unofficial fandom typography tools for Disney, Mario, Sonic, Stranger Things and other themes. Preview title artwork and check each tool’s download or copy options.',
+   description: 'Explore unofficial fandom typography, from Disney and Sonic title artwork to Minecraft enchanting symbols, Enderman text and an A–Z Galactic alphabet chart.',
  };
  
  export default function FandomIndexPage() {
@@ -62,6 +65,19 @@
              );
            })}
          </div>
+
+         <section aria-labelledby="minecraft-script-tools" className="mt-10">
+           <h2 id="minecraft-script-tools" className="text-2xl font-bold">Minecraft alphabets and translators</h2>
+           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+             {minecraftScriptTools.map((id) => {
+               const tool = getLibraryPage(id);
+               return <IntentLink key={id} href={tool.path} className="rounded-2xl border border-slate-200 bg-white p-5 hover:border-violet-400 focus-visible:outline-violet-600 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-violet-500">
+                 <h3 className="font-semibold">{tool.title}</h3>
+                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{tool.intro}</p>
+               </IntentLink>;
+             })}
+           </div>
+         </section>
  
          <div className="mt-12 text-center">
            <Link

@@ -5,6 +5,8 @@ import { getLibraryPage, type UnicodeUtilityId } from '@/lib/text-library/catalo
 
 export const metadata = libraryMetadata('unicode-tools');
 
+const scriptTools = ['cuneiform-translator', 'enchanting-table-translator', 'enderman-translator', 'standard-galactic-alphabet'] as const;
+
 export default function UnicodeToolsPage() {
   return <LibraryPageShell id="unicode-tools">
     <section aria-labelledby="available-unicode-tools" className="grid gap-4 sm:grid-cols-2">
@@ -30,6 +32,15 @@ export default function UnicodeToolsPage() {
         <p className="mt-3 text-sm leading-7 text-slate-600">Spell an English name with Egyptian signs, see how each part was matched and copy the result.</p>
         <span className="mt-4 inline-block text-sm font-semibold">Open tool →</span>
       </LibraryLink>
+      {scriptTools.map((id) => {
+        const tool = getLibraryPage(id);
+        return <LibraryLink key={id} href={tool.path} tool="unicode-tools" targetId={id} className="rounded-2xl border border-slate-200 bg-white p-6 transition hover:border-violet-500 focus-visible:outline-violet-600">
+          <span aria-hidden="true" className="text-3xl text-violet-700">{tool.icon}</span>
+          <h3 className="mt-3 text-xl font-semibold">{tool.title}</h3>
+          <p className="mt-3 text-sm leading-7 text-slate-600">{tool.intro}</p>
+          <span className="mt-4 inline-block text-sm font-semibold text-violet-700">Open tool →</span>
+        </LibraryLink>;
+      })}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:col-span-2"><h3 className="font-semibold">Looking for letter styles?</h3><p className="mt-2 text-sm leading-7 text-slate-600">The existing font tools convert supported letters into copyable Unicode styles, with separate controls for each generator.</p>
         <div className="mt-3 flex flex-wrap gap-4 text-sm text-violet-700"><Link href="/styles" className="py-2">All font styles →</Link><Link href="/small-text-generator" className="py-2">Small text →</Link><Link href="/cursive-font-generator" className="py-2">Cursive text →</Link></div>
       </div>

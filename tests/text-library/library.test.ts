@@ -65,7 +65,7 @@ test('local saved data is bounded and malformed records never break rendering', 
 });
 
 test('utility catalog stays separate from all old generators and hidden from permanent navigation', () => {
-  assert.equal(libraryPages.length, 13);
+  assert.equal(libraryPages.length, 17);
   assert.equal(new Set(libraryPages.map((page) => page.path)).size, libraryPages.length);
   assert.equal(generatorRegistry.length, 91);
   for (const page of libraryPages) {

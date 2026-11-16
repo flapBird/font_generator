@@ -7,7 +7,7 @@
    alternates: {
      canonical: 'https://font-generators.org/guides',
    },
-   description: 'Practical guides to Unicode text, compatibility, accessibility, Instagram bios, Discord, character coverage, and troubleshooting.',
+   description: 'Read practical guides to Unicode text, cuneiform writing, Minecraft enchanting, social text, compatibility and accessibility.',
  };
  
  export default function GuidesIndexPage() {
@@ -19,7 +19,7 @@
              <span className="gradient-text">Guides</span>
            </h1>
            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-             Learn how Unicode text works, where it is compatible, and how to use decorative styles responsibly.
+             Explore Unicode and decorative text, the history of cuneiform writing, and the letters on Minecraft’s enchanting table.
            </p>
          </div>
  

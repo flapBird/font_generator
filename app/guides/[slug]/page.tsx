@@ -12,6 +12,8 @@
    const { slug } = await params;
    const page = getPageBySlug(slug, guidePages);
    if (!page) return {};
+   const figure = getGuideMetadata(slug).figure;
+   const image = figure?.src ?? '/og-font-generators.png';
    return {
      title: buildMetaTitle(page),
      description: buildMetaDescription(page),
@@ -23,13 +25,13 @@
        description: buildMetaDescription(page),
        url: `https://font-generators.org/guides/${page.slug}`,
        type: 'article',
-       images: ['/og-font-generators.png'],
+       images: [image],
      },
      twitter: {
        card: 'summary_large_image',
        title: buildMetaTitle(page),
        description: buildMetaDescription(page),
-       images: ['/og-font-generators.png'],
+       images: [image],
      },
    };
  }
@@ -62,7 +64,7 @@
                "name": "Font Generators",
                "url": "https://font-generators.org"
              },
-             "image": "https://font-generators.org/og-font-generators.png",
+             "image": `https://font-generators.org${guideMetadata.figure?.src ?? '/og-font-generators.png'}`,
              "mainEntityOfPage": `https://font-generators.org/guides/${page.slug}`
            })
          }}

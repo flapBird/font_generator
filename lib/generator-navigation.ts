@@ -22,6 +22,7 @@ export const hiddenUtilityNavigationPaths = [
   '/kaomoji', '/emoji-combos', '/unicode-tools', '/invisible-character',
   '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',
   '/signature-generator', '/hieroglyphics-translator',
+  '/cuneiform-translator', '/enchanting-table-translator', '/enderman-translator', '/standard-galactic-alphabet',
 ] as const;
 
 const hiddenPaths = new Set<string>([

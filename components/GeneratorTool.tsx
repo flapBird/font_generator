@@ -49,11 +49,12 @@ interface GeneratorToolProps {
     controls: ReactNode;
     results: ReactNode;
     footer?: ReactNode;
-    preview: { id: string; name: string; text: string; category: GeneratorStyleCategory; formattedText?: { text: string; className: string } };
+    preview: { id: string; name: string; text: string; category: GeneratorStyleCategory; formattedText?: { text: string; className: string }; characterCount?: number };
     outputLabel?: string;
     previewTextClassName?: string;
     // Explicit opt-in: keep the existing mobile order for all other tools.
     mobileDirectoryAfterResults?: boolean;
+    compactWorkspace?: boolean;
   };
 }
 
@@ -488,6 +489,8 @@ export default function GeneratorTool({
   );
 
   const previewVariant = customWorkspace?.preview ?? defaultPreviewVariant;
+  const compactWorkspace = customWorkspace?.compactWorkspace;
+  const visiblePreview = (compactWorkspace || Boolean(inputText)) && Boolean(previewVariant?.text);
   const formattedPreview = customWorkspace?.preview.formattedText;
 
   const visualGeneratorItems = useMemo(
@@ -619,7 +622,7 @@ export default function GeneratorTool({
         </h2>
 
         <div className="p-3 sm:p-5 lg:p-6">
-          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[220px_minmax(0,1fr)_300px]">
+          <div className={`grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-5 xl:grid-cols-[220px_minmax(0,1fr)_300px] ${compactWorkspace ? 'xl:grid-rows-[auto_1fr]' : ''}`}>
               {customWorkspace ? (
                 <div className="order-1 min-w-0 space-y-4 xl:col-start-2 xl:row-start-1">{customWorkspace.controls}</div>
               ) : (
@@ -789,8 +792,8 @@ export default function GeneratorTool({
                       <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-100">
                         {formattedPreview ? 'Message preview' : `${previewVariant ? categoryLabels[previewVariant.category] : 'Preview'} collection`}
                       </p>
-                      <p aria-label={formattedPreview ? 'Formatted message preview' : undefined} className={`mt-3 break-words text-3xl leading-[1.25] ${customWorkspace?.previewTextClassName ?? ''} ${formattedPreview ? `whitespace-pre-wrap ${formattedPreview.className}` : ''} ${inputText && previewVariant?.text ? '' : 'text-white/65'}`}>
-                        {inputText && previewVariant?.text ? (formattedPreview?.text ?? previewVariant.text) : 'Your text, your style.'}
+                      <p aria-label={formattedPreview ? 'Formatted message preview' : undefined} className={`mt-3 break-words text-3xl leading-[1.25] ${customWorkspace?.previewTextClassName ?? ''} ${formattedPreview ? `whitespace-pre-wrap ${formattedPreview.className}` : ''} ${visiblePreview ? '' : 'text-white/65'}`}>
+                        {visiblePreview ? (formattedPreview?.text ?? previewVariant?.text) : compactWorkspace ? 'Enter text to preview.' : 'Your text, your style.'}
                       </p>
                     </div>
 
@@ -803,32 +806,32 @@ export default function GeneratorTool({
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-900">
                       <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">{formattedPreview ? 'Source characters' : 'Characters'}</p>
-                      <p className="mt-1 text-lg font-black text-slate-950 dark:text-white">{previewVariant?.text?.length ?? 0}</p>
+                      <p className="mt-1 text-lg font-black text-slate-950 dark:text-white">{customWorkspace?.preview.characterCount ?? previewVariant?.text?.length ?? 0}</p>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-3 dark:bg-slate-900">
                       <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Output</p>
                       <p className="mt-1 text-sm font-bold text-emerald-600">{customWorkspace?.outputLabel ?? 'Copyable text'}</p>
                     </div>
                   </div>
-                  <p className="mt-3 text-center text-[11px] text-slate-500 dark:text-slate-400">Select any card to update the specimen.</p>
+                  {!compactWorkspace && <p className="mt-3 text-center text-[11px] text-slate-500 dark:text-slate-400">Select any card to update the specimen.</p>}
                 </div>
               </aside>
             </div>
 
           {customWorkspace?.footer}
-          <div className="mt-7 grid gap-3 border-t border-slate-200 pt-6 sm:grid-cols-3 dark:border-slate-800">
+          {(!compactWorkspace || config.bestFor.length > 0) && <div className="mt-7 grid gap-3 border-t border-slate-200 pt-6 sm:grid-cols-3 dark:border-slate-800">
             {config.bestFor.map((item) => (
               <div key={item} className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-900">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Works well for</p>
                 <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{item}</p>
               </div>
             ))}
-          </div>
-          <p className="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
+          </div>}
+          {(!compactWorkspace || config.compatibilityNote) && <p className="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
             {config.compatibilityNote}
-          </p>
+          </p>}
 
-          {visualGeneratorItems.length ? (
+          {!compactWorkspace && visualGeneratorItems.length > 0 ? (
             <nav aria-labelledby="visual-generators-heading" className="mt-7 rounded-3xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-900">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                 <div>

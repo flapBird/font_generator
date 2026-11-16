@@ -1,8 +1,13 @@
 import { discoverySlugs } from './discovery-catalog';
 
 const updateGroups = {
-  '2026-11-14': ['/tools', '/fandom', '/visual-art', '/spiderman-font-generator'],
-  '2026-11-13': ['/', '/styles', '/unicode-tools', '/cursed-text-generator', '/letters-in-different-fonts', '/hieroglyphics-translator', '/sonic-font-generator'],
+  '2026-11-16': [
+    '/tools', '/fandom', '/unicode-tools', '/guides',
+    '/cuneiform-translator', '/enchanting-table-translator', '/enderman-translator', '/standard-galactic-alphabet',
+    '/guides/what-is-cuneiform', '/guides/minecraft-enchanting-table',
+  ],
+  '2026-11-14': ['/visual-art', '/spiderman-font-generator'],
+  '2026-11-13': ['/', '/styles', '/cursed-text-generator', '/letters-in-different-fonts', '/hieroglyphics-translator', '/sonic-font-generator'],
   '2026-11-01': ['/font-tools', '/font-identifier', '/cute-font-generator', '/calligraphy-font-generator', '/cursive-font-generator', '/preppy-font-generator', '/heart-font-generator', '/invisible-character'],
   '2026-10-30': [
     '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',
@@ -108,7 +113,6 @@ const updateGroups = {
   ],
   '2026-08-13': ['/about'],
   '2026-08-01': ['/contact', '/terms'],
-  '2026-07-28': ['/guides'],
 } as const;
 
 const entries = Object.entries(updateGroups).flatMap(([updatedAt, paths]) =>

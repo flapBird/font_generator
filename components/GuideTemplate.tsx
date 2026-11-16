@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Fragment, type ReactNode } from 'react';
 import {
   getRelatedPages,
@@ -107,6 +108,16 @@ export default function GuideTemplate({
 
         <article className="prose prose-slate mt-10 max-w-none dark:prose-invert">
           {paragraphs.map((paragraph, index) => {
+            if (index === 0 && guideMetadata.figure) {
+              const { src, width, height, alt, caption, source } = guideMetadata.figure;
+              return <Fragment key={index}>
+                <p>{renderInlineFormatting(paragraph)}</p>
+                <figure className="max-w-sm">
+                  <Image src={src} alt={alt} width={width} height={height} unoptimized className="rounded-2xl" />
+                  <figcaption>{caption} <a href={source.url}>{source.title}</a></figcaption>
+                </figure>
+              </Fragment>;
+            }
             const sectionLead = paragraph.match(sectionLeadPattern);
             if (sectionLead) {
               return (

@@ -19,7 +19,8 @@ import ThreeDFontGeneratorTool from './ThreeDFontGeneratorTool';
 import ResetPageScroll from './ResetPageScroll';
 import { fandomPages, guidePages, stylePages, type PageDefinition } from '@/lib/data';
 import { getGeneratorPageConfig, getStyleDefinition } from '@/lib/generator';
-import { generatorRegistry, getGeneratorDefinition, isFontStyleGenerator } from '@/lib/generator-registry';
+import { getGeneratorDefinition } from '@/lib/generator-registry';
+import { generatorWorkspaceItems as generatorNavigationItems } from '@/lib/generator-workspace-navigation';
 import { getPageSupplement } from '@/lib/page-supplements';
 import { isTitleArtworkSlug } from '@/lib/title-artwork';
 import { getSpecializedAbout, getSpecializedFaq, getSpecializedHowTo, getVisualGeneratorConfig } from '@/lib/visual-generator';
@@ -51,19 +52,6 @@ const getRelatedLinks = (slugs: string[]) =>
 
 const cleanFaqQuestion = (question: string) =>
   question.replace(/\s+a:\s+.*$/i, '').trim();
-
-const generatorNavigationItems = generatorRegistry
-  .filter((generator) => generator.kind !== 'directory')
-  .map((generator) => ({
-    id: generator.id,
-    title: generator.title,
-    href: generator.canonicalPath,
-    icon: generator.icon,
-    kind: generator.kind,
-    description: generator.intent.primary,
-    collection: isFontStyleGenerator(generator) ? 'font-style' as const : 'visual-art' as const,
-    searchText: `${generator.slug} ${generator.tags.join(' ')} ${generator.intent.primary} ${generator.intent.secondary.join(' ')}`,
-  }));
 
 function SanFranciscoContent() {
   return (

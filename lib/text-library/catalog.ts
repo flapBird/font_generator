@@ -1,6 +1,7 @@
 // This catalog is separate from the font-style registry: old directories stay unchanged.
 export type UnicodeUtilityId = 'unicode-character-inspector' | 'invisible-character-remover' | 'fancy-text-to-normal-text';
-export type LibraryId = 'symbols' | 'hearts' | 'stars' | 'arrows' | 'kaomoji' | 'emoji-combos' | 'unicode-tools' | 'invisible-character' | 'signature-generator' | 'hieroglyphics-translator' | UnicodeUtilityId;
+export type ScriptToolId = 'cuneiform-translator' | 'enchanting-table-translator' | 'enderman-translator' | 'standard-galactic-alphabet';
+export type LibraryId = 'symbols' | 'hearts' | 'stars' | 'arrows' | 'kaomoji' | 'emoji-combos' | 'unicode-tools' | 'invisible-character' | 'signature-generator' | 'hieroglyphics-translator' | UnicodeUtilityId | ScriptToolId;
 export type LibraryPageDefinition = {
   id: LibraryId; path: string; title: string; description: string; intro: string; icon: string;
   sections: { title: string; text: string }[];
@@ -110,11 +111,11 @@ export const libraryPages: LibraryPageDefinition[] = [
   },
   {
     id: 'unicode-tools', path: '/unicode-tools', title: 'Unicode Text Tools', icon: 'U+',
-    description: 'Inspect Unicode characters, clean invisible text, restore supported fancy letters, copy blank characters or spell a name in Egyptian hieroglyphs.',
-    intro: 'Understand the characters behind the text. Inspect code points, clean text, restore fancy letters, copy a blank character or try your name in hieroglyphs.',
+    description: 'Inspect Unicode characters, clean invisible text, restore fancy letters and browse converters for ancient scripts and Minecraft alphabets.',
+    intro: 'Inspect characters, clean pasted text or explore symbols from ancient scripts and Minecraft.',
     sections: [
-      { title: 'Choose a tool by the result you need', text: 'Inspect characters and their encoding, select invisible character types to remove, restore supported fancy letters, or copy a specific blank character. Use the Hieroglyphics Translator to make a copyable approximation of a name, or browse the Symbols library for visible characters.' },
-      { title: 'Characters are not font files', text: 'Unicode identifies characters; a font supplies their shapes. Copying text does not install a typeface. If you need a PNG image or an installable font, use the separate artwork or AI font tools and review their output descriptions.' },
+      { title: 'Choose a tool by the result you need', text: 'Inspect characters and their encoding, select invisible character types to remove, restore supported fancy letters, or copy a specific blank character. Use a script converter to spell a name or write a game-inspired message.' },
+      { title: 'Copy text or save an image', text: 'Unicode identifies characters, and a font supplies their shapes. Copyable text uses the receiving app’s fonts. Cuneiform and Enchanting Table also offer PNG downloads that hold the rendered glyph shapes.' },
     ], related: ['invisible-character', 'unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text', 'symbols'],
   },
   {
@@ -136,6 +137,30 @@ export const libraryPages: LibraryPageDefinition[] = [
       { title: 'Check before using a blank nickname', text: 'Games and social apps can reject, trim or replace these characters. A successful copy here does not verify acceptance in a username, bio or message. Paste into the checker to inspect the exact sequence; an empty field and a field containing a blank character are different.' },
       { title: 'Inspect without silently changing text', text: 'The checker counts code points, UTF-16 units and grapheme clusters, and lists the supported blank and formatting characters it finds. It does not remove anything. Joiners and variation selectors can be important for emoji and other scripts, so they are reported separately and preserved.' },
     ], related: ['unicode-tools', 'symbols', 'kaomoji'],
+  },
+  {
+    id: 'cuneiform-translator', path: '/cuneiform-translator', title: 'Cuneiform Translator', icon: '◩',
+    description: 'Spell an English name in cuneiform with real Unicode signs, a syllable breakdown, a searchable sign chart and transparent PNG download.',
+    intro: 'Write a name with cuneiform syllable signs. Check the spelling approximation, copy the signs or save a PNG.',
+    sections: [], related: ['hieroglyphics-translator', 'unicode-character-inspector'],
+  },
+  {
+    id: 'enchanting-table-translator', path: '/enchanting-table-translator', title: 'Enchanting Table Translator', icon: '✧',
+    description: 'Convert English to Minecraft enchanting table symbols and back. Copy Unicode lookalikes, type with an A–Z symbol keyboard or download a Galactic lettering PNG.',
+    intro: 'Convert English and Standard Galactic Alphabet symbols both ways. Copy the Unicode text or download Galactic lettering as a PNG.',
+    sections: [], related: ['standard-galactic-alphabet', 'enderman-translator'],
+  },
+  {
+    id: 'enderman-translator', path: '/enderman-translator', title: 'Enderman Translator', icon: '⟟',
+    description: 'Write and decode Enderman-style messages with a fan-made A–Z alphabet. Copy Unicode symbols or use the symbol keyboard to read a note.',
+    intro: 'Write or decode Enderman-style messages with a fan alphabet for Minecraft roleplay, chat and puzzles.',
+    sections: [], related: ['enchanting-table-translator', 'standard-galactic-alphabet'],
+  },
+  {
+    id: 'standard-galactic-alphabet', path: '/standard-galactic-alphabet', title: 'Standard Galactic Alphabet', icon: '⋮',
+    description: 'Compare all 26 Standard Galactic Alphabet glyphs from A to Z, copy their Unicode lookalikes and read how the script appears in Minecraft.',
+    intro: 'Compare the 26 Galactic letter shapes used on Minecraft’s enchanting table. Tap any letter to copy its Unicode lookalike.',
+    sections: [], related: ['enchanting-table-translator', 'enderman-translator'],
   },
 ];
 

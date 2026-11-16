@@ -6,6 +6,7 @@
  import { newKeywordFandomPages, newKeywordStylePages } from './new-keyword-pages';
  import { focusedLetterPages, sonicPage } from './letter-tool-pages';
  import { spidermanPage } from './spiderman-page';
+ import { scriptGuides } from './script-guides';
 
  export interface PageDefinition {
    slug: string;
@@ -1010,6 +1011,7 @@
      icon: '📖',
    },
    ...additionalGuidePages,
+   ...scriptGuides,
  ];
  
  // Helper functions

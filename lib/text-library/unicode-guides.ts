@@ -1,23 +1,25 @@
 import type { LibraryId } from './catalog';
 import type { CollectionGuide } from './guides';
+import { scriptToolContent } from '../script-tool-content';
 
 // Explanations follow the actual local tools; they are not loaded by the header.
 export const unicodeGuides: Partial<Record<LibraryId, CollectionGuide>> = {
+  ...scriptToolContent,
   'unicode-tools': {
     heading: 'What are Unicode text tools?',
     paragraphs: [
       'Unicode text tools help you examine or change the characters inside a string. Text that looks identical can contain different code points: é can be a single character or an e followed by a combining accent. Spaces and formatting characters can also affect text without leaving a visible mark.',
-      'This directory offers tools to inspect characters, selectively remove invisible characters, restore supported fancy letters to ordinary text, copy a chosen blank character and approximate an English name in Egyptian hieroglyphs. Choose a tool by the result you want to copy.',
+      'This directory offers tools to inspect characters, selectively remove invisible characters, restore supported fancy letters, copy a blank character and explore Egyptian, cuneiform and Minecraft-inspired writing. Choose a tool by the result you want to copy.',
     ],
     howToHeading: 'How to choose and use a Unicode tool',
     steps: [
-      { title: 'Choose your task', text: 'Use Character Inspector to examine a string, one of the cleanup tools to change it, or Invisible Character to copy blank text. Open Hieroglyphics Translator for an approximate spelling of a name.' },
+      { title: 'Choose your task', text: 'Use Character Inspector to examine a string, a cleanup tool to change it or Invisible Character to copy blank text. Choose a script tool to spell a name or convert a game-inspired message.' },
       { title: 'Paste or select your text', text: 'Paste into the chosen tool. For blank text, select a character type and a repeat count instead. Read the available options before changing joiners, spaces or letter styles.' },
       { title: 'Review, then copy', text: 'Check the report or compare the original and result. Use the matching Copy button and paste into your destination. Test the pasted text there because apps can handle characters differently.' },
     ],
     faq: [
       { question: 'Which tool should I start with if text looks wrong?', answer: 'Start with Unicode Character Inspector when you do not know what is in the string. It shows code points and encoding information without changing the input. Choose a separate cleanup tool only after identifying what needs to change.' },
-      { question: 'Do these tools create or convert font files?', answer: 'No. They inspect, copy or change Unicode text. They do not create TTF, OTF or WOFF files, identify fonts from pictures or change the font installed in another app.' },
+      { question: 'What can I download from these tools?', answer: 'Most utilities offer copyable text or character reports. Cuneiform Translator and Enchanting Table Translator also export transparent PNG images.' },
       { question: 'Will cleaning text keep all emoji and languages intact?', answer: 'The remover starts with every change disabled. Turning on joiner, direction-control or variation-selector removal can change emoji or writing systems. Review the result; blanket removal is not suitable for every string.' },
       { question: 'Do I need an account or an upload?', answer: 'No account is required for these free tools. Their processing runs in your browser, and tool input stays in page memory. Switching to another tool opens its own example rather than carrying your input across.' },
       { question: 'Can I use the tools on a phone?', answer: 'Yes. Open a tool, paste from your keyboard or long-press Paste, adjust its controls and tap Copy. If the browser blocks automatic clipboard access, use the selectable manual-copy text provided by the copy control.' },

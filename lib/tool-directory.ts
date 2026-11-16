@@ -19,17 +19,24 @@ const fontEntries = (visual: boolean): ToolDirectoryEntry[] => (visual ? getVisu
   output: visual ? tool.intent.expectedOutputs.includes('text') ? 'Text & artwork' : 'Images & artwork' : 'Copyable text',
   searchText: `${tool.title} ${tool.slug} ${keywordAliases[tool.slug] ?? ''} ${tool.tags.join(' ')} ${tool.intent.primary} ${tool.intent.secondary.join(' ')}`.toLowerCase(),
 }));
+const libraryDetails: Partial<Record<string, { output: string; keywords?: string }>> = {
+  'signature-generator': { output: 'Transparent PNG' },
+  'cuneiform-translator': { output: 'Text & PNG', keywords: 'cuneiform generator alphabet symbols sumerian akkadian write my name in cuneiform' },
+  'enchanting-table-translator': { output: 'Text & PNG', keywords: 'minecraft enchantment table language runes font translator standard galactic alphabet sga decoder' },
+  'enderman-translator': { output: 'Copyable text', keywords: 'minecraft enderman language ender enderspeak skrittish alien alphabet fan cipher' },
+  'standard-galactic-alphabet': { output: 'Copyable symbols', keywords: 'minecraft sga enchanting table chart alphabet letters font' },
+};
 const libraryEntries = (ids: string[]): ToolDirectoryEntry[] => libraryPages.filter((page) => ids.includes(page.id)).map((page) => ({
   title: page.title, href: page.path, description: page.description,
-  output: page.id === 'signature-generator' ? 'Transparent PNG' : 'Text & characters',
-  searchText: `${page.title} ${page.path} ${page.description}`.toLowerCase(),
+  output: libraryDetails[page.id]?.output ?? 'Text & characters',
+  searchText: [page.title, page.path, page.description, libraryDetails[page.id]?.keywords].filter(Boolean).join(' ').toLowerCase(),
 }));
 const entriesByCategory: Record<ToolCategoryId, ToolDirectoryEntry[]> = {
   'font-tools': [{ title: 'Font Identifier', href: '/font-identifier', description: 'Find close Google Fonts matches from an image locally in your browser.', output: 'Font candidates', searchText: 'font identifier font finder font detector image screenshot local google fonts' }],
   'font-styles': fontEntries(false),
   'visual-art': [...fontEntries(true), ...libraryEntries(['signature-generator'])],
   symbols: libraryEntries(['symbols', 'hearts', 'stars', 'arrows', 'kaomoji', 'emoji-combos']),
-  'unicode-tools': libraryEntries(['unicode-tools', 'unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text', 'invisible-character', 'hieroglyphics-translator']),
+  'unicode-tools': libraryEntries(['unicode-tools', 'unicode-character-inspector', 'invisible-character-remover', 'fancy-text-to-normal-text', 'invisible-character', 'hieroglyphics-translator', 'cuneiform-translator', 'enchanting-table-translator', 'enderman-translator', 'standard-galactic-alphabet']),
 };
 // Server-side catalog only. Never import this module at runtime from the shared header.
 export const toolDirectoryGroups: ToolDirectoryGroup[] = toolCategories.map((category) => ({

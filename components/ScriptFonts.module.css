@@ -1,0 +1,33 @@
+@font-face {
+  font-family: "Site Cuneiform";
+  src: url("/fonts/cuneiform/cuneiform.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+12000-123FF;
+}
+
+@font-face {
+  font-family: "Site Galactic";
+  src: url("/fonts/galactic/sga.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+00A1, U+0296, U+0307, U+0323, U+1451, U+14B2, U+14B7, U+14ED, U+14F5, U+1511, U+2138, U+21B8, U+2234, U+2237, U+2291, U+22A3, U+22AC, U+22C9, U+22CF, U+22D4, U+22EE, U+2307, U+2316, U+2330, U+233F, U+2340, U+234A, U+2351, U+2359, U+235C, U+237E, U+2385, U+238D, U+238E, U+2390, U+2393, U+23C1, U+23C3, U+23DA, U+254E, U+260A, U+260C, U+260D, U+268D, U+27CA, U+27D2, U+27DF, U+2A05, U+30EA, U+1D679, U+EB40-EB59;
+}
+
+@font-face {
+  font-family: "Site Galactic";
+  src: url("/fonts/galactic/vai.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+A58C, U+A58E;
+}
+
+.cuneiform {
+  font-family: "Site Cuneiform", system-ui, sans-serif;
+  font-weight: 400;
+}
+
+.galactic {
+  font-family: "Site Galactic", system-ui, sans-serif;
+  font-weight: 400;
+}
