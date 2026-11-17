@@ -22,7 +22,7 @@ const fontEntries = (visual: boolean): ToolDirectoryEntry[] => (visual ? getVisu
   searchText: `${tool.title} ${tool.slug} ${keywordAliases[tool.slug] ?? ''} ${tool.tags.join(' ')} ${tool.intent.primary} ${tool.intent.secondary.join(' ')}`.toLowerCase(),
 }));
 const libraryDetails: Partial<Record<string, { output: string; keywords?: string }>> = {
-  'name-tracing-worksheet': { output: 'Printable SVG worksheet' },
+  'name-tracing-worksheet': { output: 'PDF & SVG worksheet' },
   'cross-stitch-font-generator': { output: 'SVG stitch chart' },
   'font-pairing': { output: 'Font previews & CSS' },
   'signature-generator': { output: 'Transparent PNG' },

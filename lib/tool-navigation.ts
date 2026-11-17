@@ -4,7 +4,7 @@ export const toolCategories = [
   { id: 'visual-art', title: 'Visual & Art', href: '/visual-art', sample: 'Art', description: 'Text artwork, image exports and signature images.' },
   { id: 'symbols', title: 'Symbols & Emoji', href: '/symbols', sample: '✦', description: 'Symbols, kaomoji and ready-to-copy emoji combinations.' },
   { id: 'unicode-tools', title: 'Unicode Tools', href: '/unicode-tools', sample: 'U+', description: 'Inspect and clean text, copy blanks and explore script alphabets.' },
-  { id: 'font-tools', title: 'Font Tools', href: '/font-tools', sample: 'Ag', description: 'Identify existing typefaces from images.' },
+  { id: 'font-tools', title: 'Font Tools', href: '/font-tools', sample: 'Ag', description: 'Typeface identification, worksheets, converters, accents and font pairings.' },
 ] as const;
 export type ToolCategoryId = typeof toolCategories[number]['id'];
 

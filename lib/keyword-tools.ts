@@ -2,7 +2,7 @@ export const keywordTools = [
   {
     "id": "name-tracing-worksheet",
     "title": "Name Tracing Worksheet",
-    "description": "Create a printable SVG name worksheet with light tracing letters, practice lines and blank rows. Standard print letters, not a stroke-order curriculum.",
+    "description": "Create an A4 PDF or SVG name worksheet with 3–10 rows: a model, light tracing letters and a blank practice row. Standard print letters, not a stroke-order curriculum.",
     "sample": "Emma"
   },
   {
