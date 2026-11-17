@@ -14,6 +14,7 @@ export type TextWorkspace = {
   previewTextClassName?: string;
   mobileDirectoryAfterResults?: boolean;
   compactWorkspace?: boolean;
+  enableResultLayout?: boolean;
 };
 
 /** Layout for the new text tools only; older generator workspaces opt in separately. */
@@ -22,7 +23,7 @@ export default function TextToolLayout({ label, controls, children, footer, id, 
 }) {
   if (workspace) return <GeneratorTool
     config={workspace.config} pageTitle={workspace.pageTitle} generatorSearchItems={workspace.navigationItems}
-    workspaceMode sectionId={id}
+    workspaceMode sectionId={id} enableResultLayout={workspace.enableResultLayout}
     customWorkspace={{ controls, results: children, footer, preview: workspace.preview, outputLabel: workspace.outputLabel, previewTextClassName: workspace.previewTextClassName, mobileDirectoryAfterResults: workspace.mobileDirectoryAfterResults, compactWorkspace: workspace.compactWorkspace }}
   />;
   return <section id={id} aria-label={label} className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-3 sm:p-5 dark:border-slate-800 dark:bg-slate-950">

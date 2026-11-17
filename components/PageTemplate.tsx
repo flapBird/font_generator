@@ -198,7 +198,7 @@ export default function PageTemplate({
   return (
     <div className={`min-h-screen pb-20 pt-20 ${usesFontWorkspace ? 'text-workspace-page' : ''}`}>
       <ResetPageScroll routeKey={page.slug} />
-      <div className={`mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl`}>
+      <div className={`mx-auto px-4 sm:px-6 ${usesFontWorkspace ? "max-w-[1536px] lg:px-16" : "max-w-6xl lg:px-8"}`}>
         <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400 sm:mb-5">
           <Link href="/" className="font-medium hover:text-violet-700 dark:hover:text-violet-300">
             Font Generators
@@ -278,6 +278,7 @@ export default function PageTemplate({
             pageTitle={page.title}
             compactResults
             workspaceMode
+            enableResultLayout
             enableStyleSearch
             enablePopularFilters
             initialResultLimit={18}

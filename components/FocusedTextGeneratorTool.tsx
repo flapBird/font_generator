@@ -15,7 +15,7 @@ export default function FocusedTextGeneratorTool({ config, pageTitle, handwritin
   const [selectedId, setSelectedId] = useState(config.styleIds[0]);
   const results = generateStyleVariants(text, config.styleIds);
   const preview = results.find((style) => style.id === selectedId) ?? results[0];
-  return <TextToolLayout workspace={navigationItems && preview ? { pageTitle, config, navigationItems, preview } : undefined} id={handwriting ? 'copyable-styles' : 'generator'} label={`${pageTitle} workspace`} controls={<>
+  return <TextToolLayout workspace={navigationItems && preview ? { pageTitle, config, navigationItems, enableResultLayout: true, preview } : undefined} id={handwriting ? 'copyable-styles' : 'generator'} label={`${pageTitle} workspace`} controls={<>
     {handwriting && <div><h2 className="font-medium text-slate-950 dark:text-white">Copyable script alternatives</h2><p className="mt-2 text-sm leading-6 text-slate-500">Unicode text for bios and messages. These characters do not reproduce the handwriting artwork above.</p></div>}
     <TextToolInput id="generator-input" text={text} onChange={setText} limit={240} />
     <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">{handwriting ? 'Tap a script result to copy it.' : 'Compare the styles, then tap any result to copy.'}</p>

@@ -49,7 +49,7 @@ export default function DiscoveryTextTool({ slug, pageTitle, config, navigationI
   const preview = { ...selected, category: 'classic' as const, ...(mode === 'format' ? { formattedText: { text: selected.previewText ?? '', className: previewClasses[selected.id] ?? '' } } : {}) };
   const frames: DiscoveryFrame[] = slug === 'sad-font-generator' ? ['none', 'broken', 'rain', 'rose'] : slug === 'old-english-font-generator' ? ['none', 'royal', 'brackets'] : slug === 'cute-font-generator' ? ['none', 'hearts', 'bows', 'sparkles'] : slug === 'calligraphy-font-generator' ? ['none', 'flourish', 'brackets'] : [];
 
-  return <TextToolLayout id="generator" label={`${pageTitle} workspace`} workspace={{ pageTitle, config, navigationItems, preview, mobileDirectoryAfterResults: true, outputLabel: mode === 'format' ? 'Formatting source' : 'Copyable text' }} controls={<>
+  return <TextToolLayout id="generator" label={`${pageTitle} workspace`} workspace={{ pageTitle, config, navigationItems, enableResultLayout: true, preview, mobileDirectoryAfterResults: true, outputLabel: mode === 'format' ? 'Formatting source' : 'Copyable text' }} controls={<>
     <TextToolInput id="generator-input" text={text} onChange={setText} limit={1000} />
     {overLimit && <p role="alert">Shorten your text to 1,000 characters to generate results. Your input has not been truncated.</p>}
     {platform && <fieldset><legend className="mb-2 text-sm font-semibold">Output type</legend><div className="flex flex-wrap gap-2">

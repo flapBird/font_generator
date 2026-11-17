@@ -21,7 +21,7 @@ export default function DiscordGeneratorTool({ config, navigationItems }: { conf
   const preview = mode === 'message' ? { id: 'markdown', name: `${selectedFormat.name} (Markdown)`, text: formatDiscordMessage(text, format), category: 'classic' as const, formattedText: { text, className: previewClassName } } : (results.find((style) => style.id === selectedId) ?? results[0]);
   const messageResults = discordFormats.map((item) => ({ ...item, title: `${item.name} (Markdown)`, text: formatDiscordMessage(text, item.id) }));
   const optionClass = (active: boolean) => `min-h-11 rounded-xl border px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${active ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:border-violet-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'}`;
-  return <TextToolLayout workspace={{ pageTitle: 'Discord Font Generator', config, navigationItems, preview, outputLabel: mode === 'message' ? 'Markdown source' : 'Copyable text' }} label="Discord text workspace" controls={<>
+  return <TextToolLayout workspace={{ pageTitle: 'Discord Font Generator', config, navigationItems, enableResultLayout: true, preview, outputLabel: mode === 'message' ? 'Markdown source' : 'Copyable text' }} label="Discord text workspace" controls={<>
     <TextToolInput id="discord-input" text={text} onChange={setText} />
     <fieldset><legend className="mb-2 text-sm font-medium text-slate-950 dark:text-white">Use text for</legend>
       <div role="group" aria-label="Text destination" className="grid gap-2 lg:grid-cols-2">

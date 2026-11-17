@@ -580,6 +580,17 @@ export default function GeneratorTool({
     !isVisibleInGeneratorNavigation(item.href) && normalizeSearchText(item.title) === normalizedPageTitle
   ) : undefined;
 
+  const layoutControl = (enableResultLayout && <div role="group" aria-label="Results layout" className="hidden shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 md:flex dark:border-slate-700 dark:bg-slate-900">
+                    {(['grid', 'list'] as const).map((layout) => <button
+                      key={layout}
+                      type="button"
+                      aria-pressed={resultLayout === layout}
+                      aria-controls="generated-results"
+                      onClick={() => setResultLayout(layout)}
+                      className={`min-h-11 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${resultLayout === layout ? 'bg-white text-violet-700 shadow-sm dark:bg-slate-800 dark:text-violet-300' : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'}`}
+                    >{layout === 'grid' ? 'Grid' : 'List'}</button>)}
+                  </div>);
+
   if (workspaceMode) {
     const directory = (
       <aside
@@ -619,7 +630,7 @@ export default function GeneratorTool({
         </h2>
 
         <div className="p-3 sm:p-5 lg:p-6">
-          <div className={`grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-6 xl:grid-cols-[220px_minmax(0,1fr)] xl:gap-x-8 ${compactWorkspace ? 'xl:grid-rows-[auto_1fr]' : ''}`}>
+          <div className={`grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-6 xl:grid-cols-[220px_minmax(0,1fr)] xl:gap-x-8 xl:grid-rows-[auto_1fr]`}>
               {customWorkspace ? (
                 <div className="order-1 min-w-0 space-y-4 xl:col-start-2 xl:row-start-1">{customWorkspace.controls}</div>
               ) : (
@@ -664,21 +675,15 @@ export default function GeneratorTool({
               {!customWorkspace?.mobileDirectoryAfterResults && directory}
 
               <div className="order-3 min-w-0 xl:col-start-2 xl:row-start-2">
-                {customWorkspace ? <div className="space-y-3">{customWorkspace.results}</div> : <>
+                {customWorkspace ? <>
+                  {enableResultLayout && <div className="mb-4 hidden justify-end md:flex">{layoutControl}</div>}
+                  <div id="generated-results" className={enableResultLayout ? `grid min-w-0 grid-cols-1 gap-3 [&>*:not(article)]:col-span-full [&>article>button]:h-full ${resultLayout === 'grid' ? 'md:grid-cols-2' : ''}` : 'space-y-3'}>{customWorkspace.results}</div>
+                </> : <>
                 <div className="flex items-end justify-between gap-4">
                   <h3 className="text-sm font-medium text-slate-700 dark:text-slate-200">
                     {searchedStyleIds.length} {inputText ? 'generated' : 'available'} styles
                   </h3>
-                  {enableResultLayout && <div role="group" aria-label="Results layout" className="hidden shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1 md:flex dark:border-slate-700 dark:bg-slate-900">
-                    {(['grid', 'list'] as const).map((layout) => <button
-                      key={layout}
-                      type="button"
-                      aria-pressed={resultLayout === layout}
-                      aria-controls="generated-results"
-                      onClick={() => setResultLayout(layout)}
-                      className={`min-h-11 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${resultLayout === layout ? 'bg-white text-violet-700 shadow-sm dark:bg-slate-800 dark:text-violet-300' : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'}`}
-                    >{layout === 'grid' ? 'Grid' : 'List'}</button>)}
-                  </div>}
+                  {layoutControl}
                 </div>
 
                 <div id="generated-results" className={`mt-4 grid grid-cols-1 gap-3 scroll-mt-24 ${enableResultLayout && resultLayout === 'grid' ? 'md:grid-cols-2' : ''}`}>

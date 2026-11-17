@@ -37,7 +37,7 @@ export default function PlatformTextGeneratorTool({ slug, config, pageTitle, nav
   const optionClass = (selected: boolean) => `min-h-11 rounded-xl border px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 ${selected ? 'border-violet-600 bg-violet-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:border-violet-400 hover:bg-violet-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-violet-950/40'}`;
 
   return (
-    <TextToolLayout label={`${platform.label} text workspace`} workspace={{ pageTitle, config, navigationItems, preview: { id: preview.id, name: preview.title, text: preview.text, category: 'decorative' } }} controls={<>
+    <TextToolLayout label={`${platform.label} text workspace`} workspace={{ pageTitle, config, navigationItems, enableResultLayout: true, preview: { id: preview.id, name: preview.title, text: preview.text, category: 'decorative' } }} controls={<>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between gap-2">
               <label htmlFor="platform-input" className="text-sm font-medium text-slate-950 dark:text-white">{isPet ? 'Pet name or label' : 'Your text'}</label>
@@ -79,10 +79,10 @@ export default function PlatformTextGeneratorTool({ slug, config, pageTitle, nav
             <h3 className="font-medium text-slate-700 dark:text-slate-200">{results.length} {text.trim() ? 'generated' : 'available'} styles</h3>
             <span className="text-violet-700 dark:text-violet-300">Tap a result to copy</span>
           </div>
-          <div className="grid gap-3">
+          <>
             {results.map((result) => <TextOutputCard key={result.id} title={result.title} text={result.text} selected={preview.id === result.id} onPreview={() => setSelectedId(result.id)} description={isX && destination === 'post' ? `${result.length} / 280 — standard post estimate${result.length > 280 ? ' · Over limit; shorten your text' : ''}` : undefined} />)}
             <TextOutputCard title="Original text" text={text} selected={preview.id === 'original'} onPreview={() => setSelectedId('original')} description="Unchanged input, without styling or frames." />
-          </div>
+          </>
     </TextToolLayout>
   );
 }

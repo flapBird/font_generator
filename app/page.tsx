@@ -58,7 +58,7 @@ export default function HomePage() {
         id="top"
         className="text-workspace-page min-h-screen scroll-mt-20 pb-16 pt-16"
       >
-        <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-16">
           <div className="mx-auto mb-7 max-w-3xl pt-6 text-center">
             <h1 className="text-[30px] font-semibold leading-tight tracking-tight text-slate-950 sm:text-[44px] dark:text-white">
               Free Font Generator
