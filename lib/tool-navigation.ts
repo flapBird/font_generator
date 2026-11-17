@@ -18,7 +18,15 @@ export const headerToolCategories = toolCategories.filter((category) => headerCa
 
 // Curated shortcuts only; full lists stay in each category directory.
 export const categoryShortcuts: Record<ToolCategoryId, readonly { href: string; label: string; sample?: string }[]> = {
-  'font-tools': [{ href: '/font-identifier', label: 'Font Identifier', sample: 'Ag' }],
+  'font-tools': [
+    { href: '/font-identifier', label: 'Font Identifier', sample: 'Ag' },
+    { href: '/name-tracing-worksheet', label: 'Name Tracing Worksheet', sample: 'Aa' },
+    { href: '/roman-numeral-converter', label: 'Roman Numeral Converter', sample: 'IV' },
+    { href: '/emoji-translator', label: 'Emoji Translator', sample: '☺' },
+    { href: '/accents-keyboard', label: 'Accents Keyboard', sample: 'é' },
+    { href: '/cross-stitch-font-generator', label: 'Cross Stitch Font', sample: '×' },
+    { href: '/font-pairing', label: 'Font Pairing', sample: 'Aa' },
+  ],
   'font-styles': [
     { href: '/small-text-generator', label: 'Small text', sample: 'ᴬᵃ' },
     { href: '/weird-text-generator', label: 'Weird text', sample: 'ค' },
