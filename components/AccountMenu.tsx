@@ -10,7 +10,7 @@ const authConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.e
 const control = 'flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 function AccountIcon() {
-  return <svg aria-hidden="true" className="h-9 w-9 text-slate-300 dark:text-slate-400" viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="currentColor" /><circle cx="18" cy="13" r="7" fill="white" /><path d="M5 30a13 13 0 0 1 26 0 18 18 0 0 1-26 0Z" fill="white" /></svg>;
+  return <svg aria-hidden="true" className="h-9 w-9 text-slate-300 dark:text-slate-400" viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="currentColor" /><circle cx="18" cy="13" r="7" fill="white" /><path d="M8 32.97C8 25 12 18 18 18S28 25 28 32.97A18 18 0 0 1 8 32.97Z" fill="white" /></svg>;
 }
 
 export default function AccountMenu() {
