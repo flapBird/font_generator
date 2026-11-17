@@ -7,9 +7,10 @@
   "title": "Font Generators · 首页设计探索",
   "launch": {
     "view": "canvas",
-    "page": "homefocus"
+    "page": "density"
   },
   "pages": [
+    { "id": "density", "name": "05 · 留白、列数与一致性" },
     { "id": "homefocus", "name": "04 · 首页 · 结果优先" },
     { "id": "fonttools", "name": "03 · Font Identifier 识别与比较" },
     {
@@ -22,6 +23,10 @@
     }
   ],
   "boards": {
+    "DensityHome.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 1200, "title": "A · 首页两列 · 建议默认", "page": "density", "expand": "fill" },
+    "DensityThree.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 1200, "title": "B · 同屏三列 · 密度对比", "page": "density", "expand": "fill" },
+    "DensityDetail.dc.html": { "x": 0, "y": 1320, "w": 1440, "h": 1200, "title": "C · Bold 独立页 · 统一两列", "page": "density", "expand": "fill" },
+    "DensityPhone.dc.html": { "x": 1520, "y": 1320, "w": 390, "h": 844, "title": "D · 手机 · 单列", "page": "density" },
     "HomeFocus.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 1540, "title": "01 / 首页 · 输入与结果", "page": "homefocus", "expand": "fill", "is_interactive": true },
     "HomeFocusPhone.dc.html": { "x": 1520, "y": 0, "w": 390, "h": 844, "title": "02 / 手机 · 直接选择样式", "page": "homefocus", "is_interactive": true },
     "HomeFocusDirectory.dc.html": { "x": 1990, "y": 0, "w": 390, "h": 844, "title": "03 / 手机 · 完整生成器目录", "page": "homefocus", "is_interactive": true },
@@ -126,6 +131,10 @@
     }
   },
   "order": [
+    "DensityHome.dc.html",
+    "DensityThree.dc.html",
+    "DensityDetail.dc.html",
+    "DensityPhone.dc.html",
     "HomeFocus.dc.html",
     "HomeFocusPhone.dc.html",
     "HomeFocusDirectory.dc.html",
@@ -148,6 +157,8 @@
     "B-Mobile.dc.html"
   ],
   "notes": {
+    "density-title": { "x": 0, "y": -300, "text": "让字体更突出，让页面切换更一致。", "kind": "title1", "maxW": 2960, "page": "density" },
+    "density-decision": { "x": 3040, "y": 0, "w": 400, "page": "density", "text": "建议方向\n1440px 桌面使用约 64px 侧边距。首页与普通文本页统一两列，手机单列。三列作为大屏、短文本的可选密度，不强加给长句或特殊输出。\n\n两列卡片约 490px，三列约 320px；在相同字号下比较长名称与展开字距样式的换行。输入区通栏，结果区决定列数。\n\n静态可编辑设计稿：输入、复制及布局按钮为外观示意，尚未接入业务交互。本轮不更改站点实现。现有侧栏及全部样式在实现时保留；画板仅展示代表性样本。结构检查不等于浏览器视觉验证。" },
     "homefocus-title": { "x": 0, "y": -300, "text": "先看到文字，再挑一个喜欢的样子。", "kind": "title1", "maxW": 2380, "page": "homefocus" },
     "homefocus-direction": { "x": 2460, "y": 0, "w": 420, "page": "homefocus", "text": "首页 / 结果优先\n\n缩短介绍，让输入与第一组结果同时出现。\n桌面保留原有 33 个文字及 18 个图形生成器入口，按原顺序展示。右侧大预览改为按需展开的轻量比较区。\n手机先输入、筛选、复制；完整目录单独展开，所有旧入口仍可访问。\n顶部保留五个分类，包括 Font Tools；首页正文不单独推 Font Identifier。\n这是一套方案的桌面、手机和手机目录状态。" },
     "homefocus-try": { "x": 2460, "y": 620, "w": 420, "page": "homefocus", "text": "建议在 Play 中体验\n\n输入自己的文字，切换类别，搜索样式；点击大字样本尝试复制。\n复制被浏览器拒绝时会提供手动复制文本，不伪报成功。\nPreview 展开所选字样，可调字号；关闭后继续浏览结果。\n清空输入或搜一个不存在的词，可看恢复入口。\n手机上的 Generators 展开完整目录，顶部 Search tools 搜索当前 99 个工具快照。" },
