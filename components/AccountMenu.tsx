@@ -7,10 +7,10 @@ import { setAnalyticsIdentity, trackLoginResult } from '@/lib/analytics/browser'
 import { authChangedEvent, authReturnPath } from '@/lib/ai-font/auth-navigation';
 
 const authConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
-const control = 'flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full border border-border bg-background px-3 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-5';
+const control = 'flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 function AccountIcon() {
-  return <svg aria-hidden="true" className="h-5 w-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="3.5" /><path strokeLinecap="round" d="M4.5 21v-2a7.5 7.5 0 0 1 15 0v2" /></svg>;
+  return <svg aria-hidden="true" className="h-7 w-7" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="4" /><path d="M4 21v-1a8 8 0 0 1 16 0v1H4Z" /></svg>;
 }
 
 export default function AccountMenu() {
@@ -66,7 +66,7 @@ export default function AccountMenu() {
     finally { setBusy(false); }
   }
 
-  if (!user) return <Link href={`/login?next=${encodeURIComponent(authReturnPath(pathname))}`} className={control} aria-label="Log in" title="Log in"><AccountIcon /><span className="hidden sm:inline">Log in</span></Link>;
+  if (!user) return <Link href={`/login?next=${encodeURIComponent(authReturnPath(pathname))}`} className={control} aria-label="Log in" title="Log in"><AccountIcon /></Link>;
 
   const initial = Array.from(user.displayName?.trim() || user.email?.trim() || 'U')[0].toLocaleUpperCase();
 
