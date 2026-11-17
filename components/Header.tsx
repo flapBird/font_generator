@@ -38,6 +38,7 @@ export default function Header() {
           <div className="hidden w-full min-w-0 lg:block"><SiteSearch key={pathname} id="site-search-desktop" onOpen={closeAll} /></div>
           <div className="ml-auto flex shrink-0 items-center justify-self-end gap-1.5 sm:gap-3">
             <ThemeToggle />
+            <span aria-hidden="true" className="mx-1 h-6 w-px shrink-0 bg-slate-200 sm:mx-2 dark:bg-slate-700" />
             <AccountMenu />
             <button id="mobile-menu-trigger" type="button" aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-controls="mobile-navigation" aria-expanded={mobileOpen} onClick={() => { setMobileOpen(!mobileOpen); setCategoryOpen(null); }} className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 lg:hidden">
               <svg aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">{mobileOpen ? <path strokeLinecap="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}</svg>

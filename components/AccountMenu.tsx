@@ -7,10 +7,10 @@ import { setAnalyticsIdentity, trackLoginResult } from '@/lib/analytics/browser'
 import { authChangedEvent, authReturnPath } from '@/lib/ai-font/auth-navigation';
 
 const authConfigured = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
-const control = 'flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+const control = 'flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 function AccountIcon() {
-  return <svg aria-hidden="true" className="h-7 w-7" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="4" /><path d="M4 21v-1a8 8 0 0 1 16 0v1H4Z" /></svg>;
+  return <svg aria-hidden="true" className="h-9 w-9 text-slate-300 dark:text-slate-400" viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="currentColor" /><circle cx="18" cy="13" r="7" fill="white" /><path d="M5 30a13 13 0 0 1 26 0 18 18 0 0 1-26 0Z" fill="white" /></svg>;
 }
 
 export default function AccountMenu() {
