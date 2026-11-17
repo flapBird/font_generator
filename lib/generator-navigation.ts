@@ -18,6 +18,7 @@ export const hiddenNavigationSlugs = [
 
 // Utility pages have their own catalog; do not register them as font styles or artwork.
 export const hiddenUtilityNavigationPaths = [
+  '/name-tracing-worksheet','/roman-numeral-converter','/emoji-translator','/cross-stitch-font-generator','/accents-keyboard','/font-pairing',
   '/symbols', '/symbols/heart-symbols', '/symbols/star-symbols', '/symbols/arrow-symbols',
   '/kaomoji', '/emoji-combos', '/unicode-tools', '/invisible-character',
   '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',

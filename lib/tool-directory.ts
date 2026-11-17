@@ -1,3 +1,4 @@
+import { keywordTools } from './keyword-tools';
 import { unicodeTools } from './unicode-tool-catalog';
 import { getFontStyleGenerators, getVisualArtGenerators } from './generator-registry';
 import { libraryPages } from './text-library/catalog';
@@ -21,6 +22,9 @@ const fontEntries = (visual: boolean): ToolDirectoryEntry[] => (visual ? getVisu
   searchText: `${tool.title} ${tool.slug} ${keywordAliases[tool.slug] ?? ''} ${tool.tags.join(' ')} ${tool.intent.primary} ${tool.intent.secondary.join(' ')}`.toLowerCase(),
 }));
 const libraryDetails: Partial<Record<string, { output: string; keywords?: string }>> = {
+  'name-tracing-worksheet': { output: 'Printable SVG worksheet' },
+  'cross-stitch-font-generator': { output: 'SVG stitch chart' },
+  'font-pairing': { output: 'Font previews & CSS' },
   'signature-generator': { output: 'Transparent PNG' },
   'cuneiform-translator': { output: 'Text & PNG', keywords: 'cuneiform generator alphabet symbols sumerian akkadian write my name in cuneiform' },
   'enchanting-table-translator': { output: 'Text & PNG', keywords: 'minecraft enchantment table language runes font translator standard galactic alphabet sga decoder' },
@@ -33,7 +37,7 @@ const libraryEntries = (ids: string[]): ToolDirectoryEntry[] => libraryPages.fil
   searchText: [page.title, page.path, page.description, unicodeTools.find((tool) => tool.id === page.id)?.keywords, libraryDetails[page.id]?.keywords].filter(Boolean).join(' ').toLowerCase(),
 }));
 const entriesByCategory: Record<ToolCategoryId, ToolDirectoryEntry[]> = {
-  'font-tools': [{ title: 'Font Identifier', href: '/font-identifier', description: 'Find close Google Fonts matches from an image locally in your browser.', output: 'Font candidates', searchText: 'font identifier font finder font detector image screenshot local google fonts' }],
+  'font-tools': [...libraryEntries(keywordTools.map(tool => tool.id)), { title: 'Font Identifier', href: '/font-identifier', description: 'Find close Google Fonts matches from an image locally in your browser.', output: 'Font candidates', searchText: 'font identifier font finder font detector image screenshot local google fonts' }],
   'font-styles': fontEntries(false),
   'visual-art': [...fontEntries(true), ...libraryEntries(['signature-generator'])],
   symbols: libraryEntries(['symbols', 'hearts', 'stars', 'arrows', 'kaomoji', 'emoji-combos']),

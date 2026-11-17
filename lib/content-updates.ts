@@ -1,6 +1,7 @@
 import { discoverySlugs } from './discovery-catalog';
 
 const updateGroups = {
+  '2026-11-17': ["/name-tracing-worksheet", "/roman-numeral-converter", "/emoji-translator", "/cross-stitch-font-generator", "/accents-keyboard", "/font-pairing"],
   '2026-11-16': [
     '/tools', '/fandom', '/unicode-tools', '/guides',
     '/cuneiform-translator', '/enchanting-table-translator', '/enderman-translator', '/standard-galactic-alphabet',

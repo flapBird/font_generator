@@ -1,7 +1,8 @@
+import { keywordTools, type KeywordToolId } from '../keyword-tools';
 // This catalog is separate from the font-style registry: old directories stay unchanged.
 export type UnicodeUtilityId = 'unicode-character-inspector' | 'invisible-character-remover' | 'fancy-text-to-normal-text';
 export type ScriptToolId = 'cuneiform-translator' | 'enchanting-table-translator' | 'enderman-translator' | 'standard-galactic-alphabet';
-export type LibraryId = 'symbols' | 'hearts' | 'stars' | 'arrows' | 'kaomoji' | 'emoji-combos' | 'unicode-tools' | 'invisible-character' | 'signature-generator' | 'hieroglyphics-translator' | UnicodeUtilityId | ScriptToolId;
+export type LibraryId = KeywordToolId | 'symbols' | 'hearts' | 'stars' | 'arrows' | 'kaomoji' | 'emoji-combos' | 'unicode-tools' | 'invisible-character' | 'signature-generator' | 'hieroglyphics-translator' | UnicodeUtilityId | ScriptToolId;
 export type LibraryPageDefinition = {
   id: LibraryId; path: string; title: string; description: string; intro: string; icon: string;
   sections: { title: string; text: string }[];
@@ -9,6 +10,7 @@ export type LibraryPageDefinition = {
 };
 
 export const libraryPages: LibraryPageDefinition[] = [
+  ...keywordTools.map(tool => ({ ...tool, path: `/${tool.id}`, intro: tool.description, icon: "Aa", sections: [], related: [] })),
   {
     id: 'signature-generator', path: '/signature-generator', title: 'Signature Generator', icon: '✍',
     description: 'Type a signature in six real handwriting fonts or draw with a mouse, pen or finger. Download an automatically cropped transparent PNG, free and without sign-in.',
