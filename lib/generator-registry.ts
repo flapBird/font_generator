@@ -16,7 +16,7 @@ export type GeneratorKind =
   | 'hybrid'
   | 'directory';
 
-export type GeneratorOutput = 'text' | 'png' | 'svg' | 'txt' | 'game-code';
+export type GeneratorOutput = 'text' | 'png' | 'jpg' | 'svg' | 'pdf' | 'txt' | 'game-code';
 
 export type GeneratorCapability =
   | 'copy'
@@ -41,6 +41,8 @@ export type GeneratorCapability =
   | 'extrusion-depth'
   | 'preset-gallery'
   | 'png-export'
+  | 'jpg-export'
+  | 'pdf-export'
   | 'svg-export'
   | 'txt-export';
 
@@ -74,19 +76,25 @@ type GeneratorOverride = Partial<Omit<GeneratorDefinition, 'id' | 'slug' | 'titl
 const overrides: Record<string, GeneratorOverride> = {
   ...Object.fromEntries(novemberArtworkSlugs.map((slug): [string, GeneratorOverride] => {
     const stencil = slug === stencilLetterSlug;
+    const wavy = slug === 'wavy-text-generator';
     const page = [...stylePages, ...fandomPages].find((page) => page.slug === slug)!;
     const secondary = stencil
-      ? ['Classic, Military and Industrial presets. Adjustable bridge width and letter spacing. Fit artwork, A4 landscape and US Letter landscape.']
+      ? ['Classic, Military and Industrial presets. Adjustable bridges and spacing. A4 and US Letter print PDFs can place one character on each page.']
       : isFandomBrushSlug(slug)
-        ? ['Three original brush presets with optional texture or motion, 120 UTF-16 units, banner or square PNG and optional transparency.']
-        : ['Customize the lettering and download a banner or square PNG with optional transparency.'];
+        ? ['Three effects per fan title, up to 120 UTF-16 units, and PNG for banner, square, 16:9 video or 9:16 story.']
+        : wavy
+          ? ['Follow a wave, arc or custom curve, or warp the lettering. Local photo backgrounds, banner/square/story canvases and PNG or JPG export.']
+          : ['Set a single line or combine a team name with a straight jersey number. Download a banner or square PNG.'];
     return [slug, {
       kind: stencil ? 'font-preview' : 'theme-logo',
       tags: stencil ? ['military font', 'bridged stencil', 'printable cutout']
         : slug === 'varsity-font-generator' ? ['jersey lettering', 'college athletics', 'block letters']
         : slug === 'wavy-text-generator' ? ['wavy font', 'sinusoidal', 'curved lettering'] : ['anime brush lettering'],
-      intent: { primary: page.description, secondary, expectedOutputs: stencil ? ['svg', 'png'] : ['png'] },
-      capabilities: ['preset-gallery', 'png-export', ...(stencil ? ['svg-export' as const] : ['font-availability' as const])],
+      intent: { primary: page.description, secondary, expectedOutputs: stencil ? ['svg', 'png', 'pdf'] : wavy ? ['png', 'jpg'] : ['png'] },
+      capabilities: ['preset-gallery', 'png-export', ...(
+        stencil ? ['svg-export', 'pdf-export'] as const
+          : wavy ? ['font-availability', 'image-upload', 'jpg-export'] as const : ['font-availability'] as const
+      )],
       homepage: { enabled: false, featured: false, priority: 1000 },
     }];
   })),

@@ -488,7 +488,9 @@ export default function PageTemplate({
                   : page.slug === 'halloween-font-generator'
                   ? 'PNG preserves the lettering and scene. Choose Transparent in Customize to export only the lettering effects, or use the Copyable text tab for bios and messages.'
                   : slug === stencilLetterSlug
-                  ? 'Download SVG for scalable stencil paths and physical paper sizing. Download PNG when you need a transparent image.'
+                  ? 'Download a print PDF for A4 or US Letter, or save the current sheet as vector SVG or transparent PNG.'
+                  : slug === 'wavy-text-generator'
+                  ? 'PNG preserves transparent backgrounds. JPG uses white behind transparent artwork. The path guide is only shown in the editor.'
                   : isTitleArtwork || isNovemberArtwork
                   ? 'PNG preserves the current preview. With Transparent background enabled, you can place the lettering over your own image.'
                   : isSpecializedGenerator

@@ -3,14 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   getLetteringSettings,
-  letteringConfigurations,
-  letteringFonts,
+  varsityConfiguration,
   letteringSizes,
   letteringTextLimit,
   type LetteringSettings,
-  type LetteringVariant,
 } from '@/lib/lettering-art';
-import { loadLetteringFont, renderLetteringArt } from '@/lib/lettering-art-renderer';
+import { loadLetteringFont, renderVarsityArt } from '@/lib/lettering-art-renderer';
 
 const panel = 'min-w-0 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950 sm:p-5';
 const field = 'min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white';
@@ -18,17 +16,20 @@ const field = 'min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 
 interface PreviewState {
   settings: LetteringSettings;
   text: string;
-  presetIndex: number;
+  number: string;
   attempt: number;
   status: 'ready' | 'error';
 }
 
-export default function LetteringArtworkTool({ variant }: { variant: LetteringVariant }) {
-  const config = letteringConfigurations[variant];
+export default function LetteringArtworkTool() {
+  const config = varsityConfiguration;
   const [text, setText] = useState(config.sample);
   const [presetIndex, setPresetIndex] = useState(0);
-  const preset = config.presets[presetIndex];
-  const [settings, setSettings] = useState(() => getLetteringSettings(preset));
+  const [layout, setLayout] = useState<'single' | 'jersey'>('single');
+  const [jerseyNumber, setJerseyNumber] = useState('24');
+  const number = layout === 'jersey' ? jerseyNumber : '';
+  const hasArtwork = Boolean(text.trim() || number);
+  const [settings, setSettings] = useState(() => getLetteringSettings(config.presets[0]));
   const [preview, setPreview] = useState<PreviewState>();
   const [attempt, setAttempt] = useState(0);
   const [exporting, setExporting] = useState(false);
@@ -37,23 +38,23 @@ export default function LetteringArtworkTool({ variant }: { variant: LetteringVa
   const [width, height] = letteringSizes[settings.format];
 
   const current = preview?.settings === settings && preview.text === text
-    && preview.presetIndex === presetIndex && preview.attempt === attempt;
+    && preview.number === number && preview.attempt === attempt;
   const failed = current && preview.status === 'error';
   const ready = current && preview.status === 'ready';
 
   useEffect(() => {
     let cancelled = false;
     const update = (status: PreviewState['status']) => {
-      if (!cancelled) setPreview({ settings, text, presetIndex, attempt, status });
+      if (!cancelled) setPreview({ settings, text, number, attempt, status });
     };
-    loadLetteringFont(preset.font).then(() => {
+    loadLetteringFont().then(() => {
       const canvas = canvasRef.current;
       if (cancelled || !canvas) return;
-      renderLetteringArt(canvas, text, variant, preset.font, settings);
+      renderVarsityArt(canvas, text, number, settings);
       update('ready');
     }).catch(() => update('error'));
     return () => { cancelled = true; };
-  }, [attempt, preset.font, presetIndex, settings, text, variant]);
+  }, [attempt, number, settings, text]);
 
   function patch<K extends keyof LetteringSettings>(key: K, value: LetteringSettings[K]) {
     setSettings((old) => ({ ...old, [key]: value }));
@@ -71,7 +72,7 @@ export default function LetteringArtworkTool({ variant }: { variant: LetteringVa
   }
 
   function download() {
-    if (!ready || !text.trim() || !canvasRef.current || exporting) return;
+    if (!ready || !hasArtwork || !canvasRef.current || exporting) return;
     setExporting(true);
     setExportError(false);
     canvasRef.current.toBlob((blob) => {
@@ -83,28 +84,39 @@ export default function LetteringArtworkTool({ variant }: { variant: LetteringVa
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${config.fileName}.png`;
+      link.download = 'varsity-lettering.png';
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     }, 'image/png');
   }
 
   return (
-    <section id="generator" aria-label="Artwork editor" data-clarity-mask="true" className="mt-5 grid items-start gap-4 lg:grid-cols-[minmax(18rem,1fr)_minmax(0,1.65fr)] lg:gap-x-6">
+    <section id="generator" aria-label="Varsity lettering editor" data-clarity-mask="true" className="mt-5 grid items-start gap-4 lg:grid-cols-[minmax(18rem,1fr)_minmax(0,1.65fr)] lg:gap-x-6">
       <div className={panel}>
-        <label htmlFor="lettering-art-input" className="block font-semibold text-slate-950 dark:text-white">Your text</label>
-        <p className="mb-3 mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{config.intro}</p>
+        <fieldset className="mb-4 grid grid-cols-2 gap-2">
+          <legend className="mb-2 text-sm font-bold">Lettering layout</legend>
+          {(['single', 'jersey'] as const).map((option) => <button key={option} type="button" aria-pressed={layout === option}
+            onClick={() => setLayout(option)}
+            className="min-h-11 rounded-lg border border-slate-200 px-2 text-xs font-semibold aria-pressed:border-violet-500 aria-pressed:bg-violet-50 dark:border-slate-700 dark:aria-pressed:bg-violet-950">
+            {option === 'single' ? 'Single line' : 'Name + number'}
+          </button>)}
+        </fieldset>
+        <label htmlFor="lettering-art-input" className="mb-1 block text-sm font-semibold text-slate-950 dark:text-white">{layout === 'single' ? 'Team name or number' : 'Team name'}</label>
         <input
           id="lettering-art-input"
           className={field}
           type="text"
           maxLength={letteringTextLimit}
-          placeholder={config.placeholder}
+          placeholder="WESTFIELD"
           value={text}
           onChange={(event) => { setText(event.target.value); setExportError(false); }}
           aria-describedby="lettering-art-count"
         />
         <p id="lettering-art-count" className="mt-1 text-right text-xs tabular-nums text-slate-500">{text.length} / {letteringTextLimit}</p>
+        {layout === 'jersey' && <label className="mt-2 grid gap-1 text-sm font-semibold">Jersey number
+          <input className={field} inputMode="numeric" maxLength={3} value={jerseyNumber}
+            onChange={(event) => setJerseyNumber(event.target.value.replace(/[^0-9]/g, ''))} />
+        </label>}
       </div>
 
       <div className={`${panel} lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-20`}>
@@ -129,7 +141,7 @@ export default function LetteringArtworkTool({ variant }: { variant: LetteringVa
             aria-label="Live lettering artwork"
             className={`block h-full w-full ${ready ? '' : 'invisible'}`}
           />
-          {(!ready || !text.trim()) && (
+          {(!ready || !hasArtwork) && (
             <div role="status" className={`absolute inset-0 grid place-items-center p-4 text-center text-sm ${ready ? 'text-slate-700 [text-shadow:0_0_6px_white]' : 'text-slate-700 dark:text-slate-300'}`}>
               <span className="rounded-md bg-white/90 px-3 py-2 text-slate-700 dark:bg-slate-950/90 dark:text-slate-300">
                 {failed ? 'The artwork could not be rendered.' : ready ? 'Enter text to see your artwork.' : 'Preparing preview…'}
@@ -150,7 +162,7 @@ export default function LetteringArtworkTool({ variant }: { variant: LetteringVa
             <button
               type="button"
               onClick={download}
-              disabled={!ready || !text.trim() || exporting}
+              disabled={!ready || !hasArtwork || exporting}
               className="min-h-11 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {exporting ? 'Preparing PNG…' : 'Download PNG'}
@@ -179,9 +191,9 @@ export default function LetteringArtworkTool({ variant }: { variant: LetteringVa
           </div>
           <a
             className="mt-2 inline-flex min-h-8 items-center text-xs text-slate-600 underline decoration-slate-400 underline-offset-2 dark:text-slate-300"
-            href={preset.font === 'graduate' ? '/fonts/lettering/OFL.txt' : `/fonts/discovery/${preset.font}/LICENSE.txt`}
+            href="/fonts/lettering/OFL.txt"
           >
-            {letteringFonts[preset.font].label} · {letteringFonts[preset.font].license}
+            Graduate · SIL OFL 1.1
           </a>
         </fieldset>
 
@@ -202,7 +214,7 @@ export default function LetteringArtworkTool({ variant }: { variant: LetteringVa
         </fieldset>
 
         <div className="grid gap-2">
-          {([{ key: 'curve', label: config.curveLabel }, { key: 'outlineWidth', label: 'Outline width' }] as const).map(({ key, label }) => (
+          {([{ key: 'curve', label: 'Arch height' }, { key: 'outlineWidth', label: 'Outline width' }] as const).map(({ key, label }) => (
             <label key={key} className="grid gap-0.5 text-sm font-medium text-slate-700 dark:text-slate-200">
               <span className="flex justify-between gap-2"><span>{label}</span><span aria-hidden="true" className="tabular-nums">{settings[key]}%</span></span>
               <input
@@ -217,25 +229,12 @@ export default function LetteringArtworkTool({ variant }: { variant: LetteringVa
           ))}
         </div>
 
-        <div className={`grid gap-3 ${variant === 'wavy' ? 'grid-cols-2' : ''}`}>
-          <div className="grid gap-1 text-sm font-medium text-slate-700 dark:text-slate-200">
-            <label htmlFor="lettering-art-format">Canvas</label>
-            <select id="lettering-art-format" value={settings.format} className={field} onChange={(event) => patch('format', event.target.value === 'square' ? 'square' : 'banner')}>
-              <option value="banner">Banner</option>
-              <option value="square">Square</option>
-            </select>
-          </div>
-          {variant === 'wavy' && (
-            <div className="grid gap-1 text-sm font-medium text-slate-700 dark:text-slate-200">
-              <label htmlFor="lettering-art-waves">Waves</label>
-              <select id="lettering-art-waves" value={settings.waves} className={field} onChange={(event) => patch('waves', Number(event.target.value))}>
-                <option value={1}>One</option>
-                <option value={2}>Two</option>
-                <option value={3}>Three</option>
-              </select>
-            </div>
-          )}
-        </div>
+        <label className="grid gap-1 text-sm font-medium text-slate-700 dark:text-slate-200">Canvas
+          <select aria-label="Canvas" value={settings.format} className={field} onChange={(event) => patch('format', event.target.value === 'square' ? 'square' : 'banner')}>
+            <option value="banner">Banner</option>
+            <option value="square">Square</option>
+          </select>
+        </label>
       </div>
     </section>
   );

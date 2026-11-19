@@ -38,7 +38,7 @@ export const keywordTools = [
   {
     "id": "text-repeater",
     "title": "Text Repeater",
-    "description": "Repeat text, lines, or emoji up to 10,000 times. Choose a separator, preview the result, and copy it or download a TXT file.",
+    "description": "Repeat a block of text or each line up to 10,000 times. Choose a separator, preview the result, and copy it or download TXT.",
     "sample": "Hello!"
   }
 ] as const;

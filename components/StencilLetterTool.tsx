@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import {
-  drawStencilLetters, stencilPaperSizes, stencilPresets, stencilSvg, stencilText,
+  drawStencilLetters, stencilPaperSizes, stencilPresets, stencilSvg, stencilText, stencilTransform,
   STENCIL_INPUT_LIMIT, STENCIL_SAMPLE,
 } from '@/lib/stencil-letter-art';
 
@@ -47,10 +47,16 @@ export default function StencilLetterTool({ pageTitle }: { pageTitle: string }) 
   const [spacing, setSpacing] = useState<number>(initial.spacing);
   const [color, setColor] = useState<string>(initial.color);
   const [paper, setPaper] = useState<keyof typeof stencilPaperSizes>('fitted');
-  const [exportingPng, setExportingPng] = useState(false);
+  const [perSheet, setPerSheet] = useState(false);
+  const [sheet, setSheet] = useState(0);
+  const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState('');
   const { lines, unsupported } = stencilText(text);
-  const drawing = drawStencilLetters(lines, { gap, spacing, width: preset.width, paper });
+  const characters = perSheet && paper !== 'fitted' ? Array.from(lines.join('').replace(/ /g, '')) : [];
+  const currentSheet = Math.min(sheet, Math.max(0, characters.length - 1));
+  const visibleLines = characters.length ? [characters[currentSheet]] : lines;
+  const settings = { gap, spacing, width: preset.width, paper };
+  const drawing = drawStencilLetters(visibleLines, settings);
 
   function choosePreset(nextPreset: (typeof stencilPresets)[number]) {
     setPreset(nextPreset);
@@ -59,18 +65,24 @@ export default function StencilLetterTool({ pageTitle }: { pageTitle: string }) 
     setColor(nextPreset.color);
   }
 
-  async function exportArtwork(format: 'svg' | 'png') {
-    if (!drawing || exportingPng) return;
+  async function exportArtwork(format: 'svg' | 'png' | 'pdf') {
+    if (!drawing || exporting) return;
     setExportError('');
-    setExportingPng(format === 'png');
+    setExporting(true);
     try {
+      if (format === 'pdf' && paper !== 'fitted') {
+        const { stencilPrintPdf } = await import('@/lib/stencil-print-pdf');
+        const pages = characters.length ? characters.flatMap((character) => drawStencilLetters([character], settings) ?? []) : [drawing];
+        downloadStencil(stencilPrintPdf(pages, paper, color), `stencil-letters-${preset.id}.pdf`);
+        return;
+      }
       const svg = new Blob([stencilSvg(drawing, color)], { type: 'image/svg+xml;charset=utf-8' });
       const output = format === 'svg' ? svg : await stencilPng(svg, drawing.width, drawing.height);
       downloadStencil(output, `stencil-letters-${preset.id}.${format}`);
     } catch {
       setExportError(`The ${format.toUpperCase()} download could not be created. Please try again.`);
     } finally {
-      setExportingPng(false);
+      setExporting(false);
     }
   }
 
@@ -82,7 +94,7 @@ export default function StencilLetterTool({ pageTitle }: { pageTitle: string }) 
             <label htmlFor="stencil-input" className="text-sm font-bold text-slate-900 dark:text-slate-100">Your stencil text</label>
             <button type="button" onClick={() => setText('')} disabled={!text} className="min-h-11 px-1 text-sm font-semibold text-violet-700 hover:underline disabled:opacity-50 dark:text-violet-300">Clear text</button>
           </div>
-          <textarea id="stencil-input" rows={3} maxLength={STENCIL_INPUT_LIMIT} value={text} onChange={(event) => setText(event.target.value)}
+          <textarea id="stencil-input" rows={3} maxLength={STENCIL_INPUT_LIMIT} value={text} onChange={(event) => { setText(event.target.value); setSheet(0); }}
             placeholder="Type a short label or sign" aria-describedby="stencil-input-hint"
             className="block w-full resize-y rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-base leading-6 text-slate-950 placeholder:text-slate-500 focus:border-violet-600 focus:outline focus:outline-2 focus:outline-violet-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
           <div className="mt-2 flex items-start justify-between gap-3 text-xs leading-5 text-slate-600 dark:text-slate-400">
@@ -118,18 +130,31 @@ export default function StencilLetterTool({ pageTitle }: { pageTitle: string }) 
           <div className="grid min-h-48 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white p-3 sm:min-h-72 sm:p-4 dark:border-slate-700"
             style={{ backgroundImage: 'conic-gradient(#f1f3f6 25%, #fff 0 50%, #f1f3f6 0 75%, #fff 0)', backgroundSize: '20px 20px' }}>
             {drawing ? (
-              <svg role="img" aria-label={`Stencil made from ${lines.filter(Boolean).join(' ')}`}
+              <svg role="img" aria-label={`Stencil made from ${visibleLines.filter(Boolean).join(' ')}`}
                 viewBox={drawing.viewBox} width={drawing.width} height={drawing.height}
                 className={`h-auto w-full max-w-full ${drawing.physical ? 'bg-white shadow-md' : ''}`}
                 style={{ width: `min(100%, ${24 * drawing.width / drawing.height}rem)` }}>
-                <g fill={color}>{drawing.items.map(({ path, transform }, index) => <path key={index} d={path} transform={transform} />)}</g>
+                <g fill={color}>{drawing.items.map((item, index) => <path key={index} d={item.path} transform={stencilTransform(item)} />)}</g>
               </svg>
             ) : <p className="rounded-md bg-white/90 px-3 py-2 text-sm text-slate-700">Enter stencil text to preview it here.</p>}
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-            <button type="button" className={primaryButton} disabled={!drawing || exportingPng} onClick={() => void exportArtwork('svg')}>Download SVG</button>
-            <button type="button" className={secondaryButton} disabled={!drawing || exportingPng} onClick={() => void exportArtwork('png')}>{exportingPng ? 'Creating PNG…' : 'Download PNG'}</button>
+            <button type="button" className={primaryButton} disabled={!drawing || exporting} onClick={() => void exportArtwork('svg')}>Download SVG</button>
+            <button type="button" className={secondaryButton} disabled={!drawing || exporting} onClick={() => void exportArtwork('png')}>Download PNG</button>
           </div>
+          {paper === 'fitted' && <p className="mt-2 text-xs text-slate-500">Choose A4 or US Letter in Print layout to download a print PDF.</p>}
+          {paper !== 'fitted' && <>
+            {characters.length > 1 && <div className="mt-3 flex items-center gap-3 text-sm">
+              <button type="button" disabled={currentSheet === 0} onClick={() => setSheet(currentSheet - 1)}
+                className={secondaryButton}>Previous</button>
+              <span aria-live="polite">Sheet {currentSheet + 1} / {characters.length}</span>
+              <button type="button" disabled={currentSheet === characters.length - 1} onClick={() => setSheet(currentSheet + 1)}
+                className={secondaryButton}>Next</button>
+            </div>}
+            <button type="button" className={`${primaryButton} mt-3`} disabled={!drawing || exporting}
+              onClick={() => void exportArtwork('pdf')}>Download print PDF</button>
+            {characters.length > 1 && <p className="mt-2 text-xs text-slate-500">PDF includes all sheets. SVG and PNG save the current sheet.</p>}
+          </>}
           {exportError && <p role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">{exportError}</p>}
         </div>
 
@@ -147,7 +172,7 @@ export default function StencilLetterTool({ pageTitle }: { pageTitle: string }) 
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
               <label className="grid gap-1 text-sm text-slate-700 dark:text-slate-300">
                 Print layout
-                <select value={paper} onChange={(event) => setPaper(event.target.value as keyof typeof stencilPaperSizes)}
+                <select aria-label="Print layout" value={paper} onChange={(event) => { setPaper(event.target.value as keyof typeof stencilPaperSizes); setSheet(0); }}
                   className="h-11 w-full rounded-lg border border-slate-300 bg-white px-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
                   {Object.entries(stencilPaperSizes).map(([value, option]) => <option key={value} value={value}>{option.label}</option>)}
                 </select>
@@ -158,6 +183,10 @@ export default function StencilLetterTool({ pageTitle }: { pageTitle: string }) 
                   className="h-11 w-full min-w-12 cursor-pointer rounded-lg border border-slate-300 bg-white p-1 dark:border-slate-700 dark:bg-slate-900" />
               </label>
             </div>
+            {paper !== 'fitted' && <label className="flex min-h-11 items-center gap-2 text-sm">
+              <input type="checkbox" className="accent-violet-600" checked={perSheet}
+                onChange={(event) => { setPerSheet(event.target.checked); setSheet(0); }} />One character per sheet
+            </label>}
           </div>
         </fieldset>
       </div>

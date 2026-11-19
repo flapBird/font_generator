@@ -1,7 +1,7 @@
 import { segmentGraphemes } from './unicode';
 
 export const TITLE_ARTWORK_INPUT_LIMIT = 120;
-export const titleArtworkFormats = { banner: [2000, 1000], square: [1600, 1600] } as const;
+export const titleArtworkFormats = { banner: [2000, 1000], square: [1600, 1600], video: [1920, 1080], story: [1080, 1920] } as const;
 export type TitleArtworkFormat = keyof typeof titleArtworkFormats;
 export type TitleArtworkSlug = 'sonic-font-generator' | 'spiderman-font-generator';
 

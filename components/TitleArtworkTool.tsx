@@ -12,13 +12,14 @@ const checkerboard = {
 
 type DrawArtwork<Preset> = (canvas: HTMLCanvasElement, text: string, preset: Preset, settings: TitleArtworkSettings) => void;
 
-export default function TitleArtworkTool<Preset extends TitleArtworkPreset>({ id, name, sample, presets, loadFont, drawArtwork, children }: {
+export default function TitleArtworkTool<Preset extends TitleArtworkPreset>({ id, name, sample, presets, loadFont, drawArtwork, videoFormats = false, children }: {
   id: string;
   name: string;
   sample: string;
   presets: readonly [Preset, ...Preset[]];
   loadFont: () => Promise<FontFace>;
   drawArtwork: DrawArtwork<Preset>;
+  videoFormats?: boolean;
   children?: ReactNode;
 }) {
   const [text, setText] = useGeneratorText(sample);
@@ -103,6 +104,7 @@ export default function TitleArtworkTool<Preset extends TitleArtworkPreset>({ id
           <label className="block text-sm">Canvas format
             <select value={settings.format} onChange={(event) => setSettings({ ...settings, format: event.target.value as TitleArtworkFormat })} className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 dark:border-slate-700 dark:bg-slate-950">
               <option value="banner">Banner</option><option value="square">Square</option>
+              {videoFormats && <><option value="video">Video · 16:9</option><option value="story">Story · 9:16</option></>}
             </select>
           </label>
           <label className="flex min-h-11 items-center gap-2 text-sm">
@@ -113,7 +115,7 @@ export default function TitleArtworkTool<Preset extends TitleArtworkPreset>({ id
       </div>
 
       <section aria-label="Preview and download" className="order-2 flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 lg:col-start-2 lg:row-start-1">
-        <div className={`relative min-h-0 max-h-[30rem] flex-1 bg-slate-100 dark:bg-slate-900 lg:aspect-auto lg:max-h-none ${settings.format === 'square' ? 'aspect-square' : 'aspect-[1.8]'}`}>
+        <div className={`relative min-h-0 max-h-[30rem] flex-1 bg-slate-100 dark:bg-slate-900 lg:aspect-auto lg:max-h-none ${settings.format === 'story' ? 'aspect-[.78]' : settings.format === 'square' ? 'aspect-square' : 'aspect-[1.8]'}`}>
           <div className="absolute inset-3 flex items-center justify-center sm:inset-5">
             <canvas
               ref={canvasRef}

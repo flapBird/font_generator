@@ -33,17 +33,17 @@ export const keywordToolGuides: Record<KeywordToolId, Guide> = {
  },
  'text-repeater': {
   paragraphs: [
-    'Text Repeater repeats the entire block you enter, including spaces, line breaks, and emoji. Use it to make test data, repeat a short label, or build a list separated by commas or line breaks. You can copy the result or save it as a plain-text file.',
+    'Text Repeater repeats a whole block or each non-empty line separately. It preserves spaces and emoji. In Each line mode, empty lines stay empty and line groups are joined with the original breaks. Use it to make test data, repeat a short label, or build a list separated by commas or line breaks. You can copy the result or save it as a plain-text file.',
     'The repeat count can be a whole number from 1 to 10,000. The source accepts up to 10,000 UTF-16 units, and the complete result, including separators, can use up to 100,000 UTF-16 units. Some emoji use several units.',
   ],
   steps: [
     ['Enter the source text', 'Type or paste the full block you want to repeat. Use Clear text to start from an empty field.'],
-    ['Set copies and a separator', 'Choose how many copies to make. Select No separator, Space, New line, or Custom. Use Custom to enter a separator such as a comma and a space.'],
+    ['Set copies and a separator', 'Choose Whole block or Each line, then set the number of copies. Select No separator, Space, New line, or Custom. Use Custom to enter a separator such as a comma and a space.'],
     ['Review and save', 'Check the repeated text in the live preview. If the result is too long, reduce the number of copies or shorten the source. Choose Copy repeated text or Download TXT.'],
   ],
   faq: [
     ['Is the separator added at the end?', 'The separator goes between copies. For example, three copies of “Hi” with the separator “, ” yield “Hi, Hi, Hi”. Spaces or line breaks you entered in the original text are repeated as part of each copy.'],
-    ['Can I repeat a multiline block or emoji?', 'Yes. Each copy contains the whole block in its original order, including any internal line breaks. Emoji and other Unicode text are copied without a character substitution.'],
+    ['Can I repeat a multiline block or emoji?', 'Yes. Whole block preserves internal line breaks in every copy. Each line repeats the first non-empty line before moving to the next. Both modes preserve your emoji and other Unicode text.'],
     ['Why is the result too long at fewer than 10,000 copies?', 'The result limit counts both your source and the separators. For longer input or separators, fewer copies will fit.'],
     ['What if my browser blocks clipboard access?', 'Select the text in the preview and use your device’s Copy command, or choose Download TXT to save a UTF-8 text file.'],
   ],

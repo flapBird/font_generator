@@ -15,10 +15,15 @@ export const stencilPaperSizes = {
   letter: { label: 'US Letter landscape', physical: ['11in', '8.5in'] },
 } as const;
 
-type StencilPaper = keyof typeof stencilPaperSizes;
+export type StencilPaper = keyof typeof stencilPaperSizes;
 type Glyph = string | ((gap: number) => string);
 type StencilSettings = { gap: number; spacing: number; width: number; paper: StencilPaper };
-type StencilDrawing = { width: number; height: number; viewBox: string; items: { path: string; transform: string }[]; physical: readonly [string, string] | null };
+type StencilGlyph = { path: string; x: number; y: number; scaleX: number; scaleY: number };
+export type StencilDrawing = { width: number; height: number; viewBox: string; items: StencilGlyph[]; physical: readonly [string, string] | null };
+
+export function stencilTransform({ x, y, scaleX, scaleY }: StencilGlyph) {
+  return `translate(${x},${y}) scale(${scaleX},${scaleY})`;
+}
 
 const top = (center: number, gap: number) => center - gap / 2;
 const bottom = (center: number, gap: number) => center + gap / 2;
@@ -137,7 +142,7 @@ export function drawStencilLetters(lines: readonly string[], settings: StencilSe
       const left = x;
       x += ((glyphWidths[character] ?? 100) * glyphScale + spacing) * scale;
       const path = glyphs[character];
-      return path ? [{ path: typeof path === 'function' ? path(gap) : path, transform: `translate(${left},${startY + row * LINE_HEIGHT * scale}) scale(${scale * glyphScale},${scale})` }] : [];
+      return path ? [{ path: typeof path === 'function' ? path(gap) : path, x: left, y: startY + row * LINE_HEIGHT * scale, scaleX: scale * glyphScale, scaleY: scale }] : [];
     });
   });
   return { width: viewWidth, height: viewHeight, items, viewBox: `0 0 ${viewWidth} ${viewHeight}`, physical };
@@ -145,6 +150,6 @@ export function drawStencilLetters(lines: readonly string[], settings: StencilSe
 
 export function stencilSvg(drawing: StencilDrawing, color: string) {
   const [width, height] = drawing.physical ?? [drawing.width, drawing.height];
-  const paths = drawing.items.map(({ path, transform }) => `<path d="${path}" transform="${transform}"/>`).join('');
+  const paths = drawing.items.map((item) => `<path d="${item.path}" transform="${stencilTransform(item)}"/>`).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${drawing.viewBox}"><g fill="${color}">${paths}</g></svg>`;
 }

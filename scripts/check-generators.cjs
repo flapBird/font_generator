@@ -140,7 +140,7 @@ for (const slug of ['small-text-generator', 'cursive-font-generator', 'impact-fo
 for (const slug of novemberArtworkSlugs) {
   const entry = generatorRegistry.find((item) => item.slug === slug);
   assert.ok(entry, `${slug}: registered artwork tool`);
-  assert.deepEqual(entry.intent.expectedOutputs, slug === stencilLetterSlug ? ['svg', 'png'] : ['png']);
+  assert.deepEqual(entry.intent.expectedOutputs, slug === stencilLetterSlug ? ['svg', 'png', 'pdf'] : slug === 'wavy-text-generator' ? ['png', 'jpg'] : ['png']);
   assert.equal(entry.homepage.enabled, false);
   assert.equal(isVisibleInGeneratorNavigation(entry.canonicalPath), false);
 }

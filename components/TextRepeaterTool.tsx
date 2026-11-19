@@ -16,15 +16,20 @@ const panelClass = 'min-w-0 space-y-4 rounded-2xl border border-slate-200 p-5 da
 export default function TextRepeaterTool({ sample }: { sample: string }) {
   const [text, setText] = useGeneratorText(sample);
   const [copiesInput, setCopiesInput] = useState('3');
+  const [scope, setScope] = useState<'block' | 'lines'>('block');
   const [separatorType, setSeparatorType] = useState<Separator>('newline');
   const [customSeparator, setCustomSeparator] = useState('');
 
   const copies = Number(copiesInput);
   const validCopies = /^[0-9]+$/.test(copiesInput) && copies >= 1 && copies <= copiesLimit;
   const separator = separatorType === 'custom' ? customSeparator : separatorOptions[separatorType];
-  const length = validCopies && text.length ? text.length * copies + separator.length * (copies - 1) : 0;
+  const parts = scope === 'lines' ? text.split('\n') : [text];
+  const length = validCopies ? parts.reduce((size, part) =>
+    size + (part ? part.length * copies + separator.length * (copies - 1) : 0), parts.length - 1) : 0;
   const tooLong = length > outputLimit;
-  const result = length > 0 && !tooLong ? text + (separator + text).repeat(copies - 1) : '';
+  const result = length > 0 && !tooLong
+    ? parts.map((part) => part ? part + (separator + part).repeat(copies - 1) : '').join('\n')
+    : '';
 
   function download() {
     const url = URL.createObjectURL(new Blob([result], { type: 'text/plain;charset=utf-8' }));
@@ -41,6 +46,17 @@ export default function TextRepeaterTool({ sample }: { sample: string }) {
       <div className={`${panelClass} bg-white dark:bg-slate-950`}>
         <h2 className="text-lg font-semibold">Set up repetitions</h2>
         <TextToolInput id="repeater-source" text={text} onChange={setText} limit={inputLimit} label="Text to repeat" />
+        <fieldset className="flex flex-wrap gap-x-5 gap-y-1">
+          <legend className="text-sm font-medium">Repeat</legend>
+          <label className="inline-flex min-h-11 items-center gap-2 text-sm">
+            <input type="radio" name="repeater-scope" checked={scope === 'block'} onChange={() => setScope('block')} className="accent-violet-600" />
+            Whole block
+          </label>
+          <label className="inline-flex min-h-11 items-center gap-2 text-sm">
+            <input type="radio" name="repeater-scope" checked={scope === 'lines'} onChange={() => setScope('lines')} className="accent-violet-600" />
+            Each line
+          </label>
+        </fieldset>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label htmlFor="repeater-count" className="text-sm font-medium">Number of copies</label>
@@ -60,6 +76,12 @@ export default function TextRepeaterTool({ sample }: { sample: string }) {
         <p id="repeater-count-hint" className={`text-xs ${validCopies ? 'text-slate-500 dark:text-slate-400' : 'text-rose-700 dark:text-rose-300'}`}>
           Enter a whole number from 1 to {copiesLimit.toLocaleString('en-US')}.
         </p>
+        <div className="flex flex-wrap gap-2" aria-label="Quick copy counts">
+          {[10, 100, 1000].map((count) => <button key={count} type="button" aria-label={`Set ${count} copies`}
+            onClick={() => setCopiesInput(String(count))} className="min-h-11 rounded-lg border border-slate-300 px-3 text-xs font-semibold hover:border-violet-500 dark:border-slate-700">
+            {count.toLocaleString('en-US')}×
+          </button>)}
+        </div>
         {separatorType === 'custom' && (
           <label className="block space-y-2 text-sm font-medium">
             <span>Custom separator</span>

@@ -1,19 +1,12 @@
-import {
-  letteringFonts,
-  letteringSizes,
-  type LetteringFont,
-  type LetteringSettings,
-  type LetteringVariant,
-} from './lettering-art';
-import { loadDiscoveryFont } from './discovery-renderer';
+import { graduateFontFamily, letteringSizes, type LetteringSettings } from './lettering-art';
+import { segmentGraphemes } from './unicode';
 
 let graduateFont: Promise<FontFace> | undefined;
 
-export function loadLetteringFont(font: LetteringFont) {
-  if (font !== 'graduate') return loadDiscoveryFont(font);
+export function loadLetteringFont() {
   if (graduateFont) return graduateFont;
 
-  const face = new FontFace(letteringFonts.graduate.family, 'url(/fonts/lettering/Graduate-Regular.ttf)');
+  const face = new FontFace(graduateFontFamily, 'url(/fonts/lettering/Graduate-Regular.ttf)');
   graduateFont = new Promise<FontFace>((resolve, reject) => {
     const timer = window.setTimeout(() => reject(new Error('Font loading timed out.')), 15_000);
     face.load().then((loaded) => {
@@ -33,17 +26,6 @@ export function loadLetteringFont(font: LetteringFont) {
   return graduateFont;
 }
 
-const englishGraphemes = new Intl.Segmenter('en', { granularity: 'grapheme' });
-
-function makeLayer(width: number, height: number) {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Canvas is unavailable.');
-  return ctx;
-}
-
 function paintLettering(ctx: CanvasRenderingContext2D, text: string, x: number, baseline: number, size: number, settings: LetteringSettings) {
   const stroke = size * settings.outlineWidth / 820;
   ctx.lineJoin = 'round';
@@ -56,12 +38,12 @@ function paintLettering(ctx: CanvasRenderingContext2D, text: string, x: number, 
   ctx.fillText(text, x, baseline);
 }
 
-function paintVarsity(ctx: CanvasRenderingContext2D, text: string, font: string, size: number, settings: LetteringSettings) {
-  const letters = Array.from(englishGraphemes.segment(text), ({ segment }) => segment);
-  const { width, height } = ctx.canvas;
+function paintVarsity(ctx: CanvasRenderingContext2D, text: string, size: number, top: number, height: number, settings: LetteringSettings) {
+  const letters = segmentGraphemes(text);
+  const { width } = ctx.canvas;
 
   function measure(fontSize: number) {
-    ctx.font = font.replace('{size}', String(fontSize));
+    ctx.font = `400 ${fontSize}px "${graduateFontFamily}", serif`;
     const spacing = fontSize * .065;
     const advances = letters.map((letter) => ctx.measureText(letter).width);
     const run = advances.reduce((total, advance) => total + advance, 0) + (letters.length - 1) * spacing;
@@ -73,7 +55,7 @@ function paintVarsity(ctx: CanvasRenderingContext2D, text: string, font: string,
   const { advances, spacing, run } = measure(size);
   const metrics = ctx.measureText(text);
   const arch = letters.length > 1 ? Math.min(run * .17, height * .18) * settings.curve / 100 : 0;
-  const baseline = height / 2 + (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent + arch) / 2;
+  const baseline = top + height / 2 + (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent + arch) / 2;
   let x = (width - run) / 2;
   letters.forEach((letter, index) => {
     const advance = advances[index];
@@ -90,44 +72,7 @@ function paintVarsity(ctx: CanvasRenderingContext2D, text: string, font: string,
   });
 }
 
-function paintWave(ctx: CanvasRenderingContext2D, text: string, font: string, size: number, settings: LetteringSettings) {
-  const { width, height } = ctx.canvas;
-  ctx.font = font.replace('{size}', String(size));
-  const initialMetrics = ctx.measureText(text);
-  const inkWidth = initialMetrics.actualBoundingBoxLeft + initialMetrics.actualBoundingBoxRight;
-  size *= Math.min(1, width * .76 / Math.max(1, inkWidth));
-  ctx.font = font.replace('{size}', String(size));
-  const metrics = ctx.measureText(text);
-  const padding = Math.ceil(size / 8) + 8;
-  const layerWidth = Math.ceil(metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight) + padding * 2;
-  const layerHeight = Math.ceil(metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent) + padding * 2;
-  const ink = makeLayer(layerWidth, layerHeight);
-  ink.font = ctx.font;
-  paintLettering(ink, text, padding + metrics.actualBoundingBoxLeft, padding + metrics.actualBoundingBoxAscent, size, settings);
-
-  const originX = Math.round((width - layerWidth) / 2);
-  const originY = Math.round((height - layerHeight) / 2);
-  const amplitude = Math.min(height * .17, layerWidth * .2) * settings.curve / 100;
-  if (!amplitude) {
-    ctx.drawImage(ink.canvas, originX, originY);
-    return;
-  }
-  // Shift narrow strips of one shaped line so the glyph outlines follow the wave too.
-  const waveWidth = Math.max(1, layerWidth - padding * 2);
-  for (let x = 0; x < layerWidth; x++) {
-    const phase = ((x - padding) / waveWidth - .5) * Math.PI * 2 * settings.waves;
-    const y = originY + amplitude * Math.sin(phase);
-    ctx.drawImage(ink.canvas, x, 0, 1, layerHeight, originX + x, y, 1, layerHeight);
-  }
-}
-
-export function renderLetteringArt(
-  canvas: HTMLCanvasElement,
-  input: string,
-  variant: LetteringVariant,
-  fontId: LetteringFont,
-  settings: LetteringSettings,
-) {
+export function renderVarsityArt(canvas: HTMLCanvasElement, name: string, number: string, settings: LetteringSettings) {
   const [width, height] = letteringSizes[settings.format];
   canvas.width = width;
   canvas.height = height;
@@ -140,14 +85,12 @@ export function renderLetteringArt(
   }
   ctx.textBaseline = 'alphabetic';
   ctx.direction = 'ltr';
-  const inputLine = input.trim();
-  if (!inputLine) return;
-
-  const font = `400 {size}px "${letteringFonts[fontId].family}", ${variant === 'varsity' ? 'serif' : 'sans-serif'}`;
-  const size = height * (settings.format === 'square' ? .35 : .51);
-  if (variant === 'varsity') {
-    paintVarsity(ctx, inputLine.toUpperCase(), font, size, settings);
-  } else {
-    paintWave(ctx, inputLine, font, size, settings);
+  const title = name.trim().toUpperCase();
+  if (number && title) {
+    paintVarsity(ctx, title, height * .32, 0, height * .45, settings);
+    paintVarsity(ctx, number, height * .48, height * .39, height * .61, { ...settings, curve: 0 });
+  } else if (title || number) {
+    paintVarsity(ctx, title || number, height * (settings.format === 'square' ? .35 : .51), 0, height,
+      title ? settings : { ...settings, curve: 0 });
   }
 }

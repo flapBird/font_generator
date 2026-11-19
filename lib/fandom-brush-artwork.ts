@@ -1,4 +1,4 @@
-import { fandomBrushConfigs, type FandomBrushSlug } from './fandom-brush-catalog';
+import { fandomBrushConfigs, type FandomBrushPreset, type FandomBrushSlug } from './fandom-brush-catalog';
 import { titleArtworkFormats, wrapArtworkLines, type TitleArtworkSettings } from './title-artwork';
 
 const fonts = new Map<FandomBrushSlug, Promise<FontFace>>();
@@ -63,7 +63,37 @@ function weatherInk(ctx: CanvasRenderingContext2D, left: number, right: number, 
   ctx.restore();
 }
 
-export function drawFandomBrushArtwork(canvas: HTMLCanvasElement, text: string, slug: FandomBrushSlug, settings: TitleArtworkSettings, decorated: boolean) {
+function inkAccent(ctx: CanvasRenderingContext2D, left: number, right: number, size: number, color: string, wave: boolean) {
+  const span = Math.max(right - left, size);
+  ctx.fillStyle = color;
+  ctx.globalAlpha = .78;
+  ctx.beginPath();
+  ctx.moveTo(left - size * .15, size * .28);
+  if (wave) {
+    ctx.bezierCurveTo(left + span * .3, -size * .14, left + span * .52, size * .48, right + size * .14, size * .09);
+    ctx.bezierCurveTo(left + span * .63, size * .61, left + span * .28, size * .12, left - size * .15, size * .28);
+  } else {
+    ctx.quadraticCurveTo(left + span * .44, size * .29, right + size * .12, size * .02);
+    ctx.quadraticCurveTo(left + span * .66, size * .48, left - size * .15, size * .28);
+  }
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+function embers(ctx: CanvasRenderingContext2D, left: number, right: number, size: number, color: string) {
+  ctx.fillStyle = color;
+  for (let i = 0; i < 20; i++) {
+    const x = left - size * .22 + (right - left + size * .44) * ((i * 17 % 29) / 29);
+    const y = i % 2 === 0 ? -.75 - i % 4 * .08 : .18 + i % 4 * .052;
+    ctx.save();
+    ctx.translate(x, y * size);
+    ctx.rotate(-.55);
+    ctx.fillRect(0, 0, size * (.022 + i % 3 * .014), size * .009);
+    ctx.restore();
+  }
+}
+
+export function drawFandomBrushArtwork(canvas: HTMLCanvasElement, text: string, slug: FandomBrushSlug, preset: FandomBrushPreset, settings: TitleArtworkSettings, decorated: boolean) {
   const { effect, fontName } = fandomBrushConfigs[slug];
   const [width, height] = titleArtworkFormats[settings.format];
   canvas.width = width;
@@ -96,7 +126,18 @@ export function drawFandomBrushArtwork(canvas: HTMLCanvasElement, text: string, 
     ctx.transform(1, 0, shear, 1, 0, 0);
     const left = -metrics.actualBoundingBoxLeft;
     const right = metrics.actualBoundingBoxRight;
-    if (decorated && effect === 'motion') motionTrails(ctx, left, 0, size, settings.fill, settings.outline);
+    if (decorated && preset.detail === 'trails') motionTrails(ctx, left, 0, size, settings.fill, settings.outline);
+    if (decorated && preset.detail === 'echo') {
+      ctx.fillStyle = settings.outline;
+      for (const [distance, opacity] of [[.28, .17], [.15, .31]]) {
+        ctx.globalAlpha = opacity;
+        ctx.fillText(line, -size * distance, size * distance * .19);
+      }
+      ctx.globalAlpha = 1;
+    }
+    if (decorated && (preset.detail === 'water' || preset.detail === 'sweep')) {
+      inkAccent(ctx, left, right, size, settings.outline, preset.detail === 'water');
+    }
     ctx.strokeStyle = settings.outline;
     ctx.lineWidth = Math.max(1, size * (effect === 'motion' ? .11 : .038));
     if (effect === 'motion') {
@@ -107,7 +148,8 @@ export function drawFandomBrushArtwork(canvas: HTMLCanvasElement, text: string, 
     ctx.strokeText(line, 0, 0);
     ctx.fillStyle = settings.fill;
     ctx.fillText(line, 0, 0);
-    if (decorated && effect === 'ink') weatherInk(ctx, left, right, 0, size, settings.outline);
+    if (decorated && preset.detail === 'dry') weatherInk(ctx, left, right, 0, size, settings.outline);
+    if (decorated && preset.detail === 'embers') embers(ctx, left, right, size, settings.fill);
     ctx.restore();
   });
 
