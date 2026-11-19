@@ -1,6 +1,8 @@
 import FocusedTextGeneratorTool from './FocusedTextGeneratorTool';
 import DiscoveryToolBoundary from './DiscoveryToolBoundary';
 import LetterToolBoundary from './LetterToolBoundary';
+import NovemberArtworkBoundary from './NovemberArtworkBoundary';
+import { isNovemberArtworkSlug, novemberArtworkRelatedLinks, stencilLetterSlug } from '@/lib/november-artwork-catalog';
 import { isDiscoveryArt, isDiscoveryText, discoveryStyleIds, discoverySamples, discoveryRelatedLinks } from '@/lib/discovery-catalog';
 import OctoberToolBoundary from './OctoberToolBoundary';
 import { isOctoberArt, isOctoberText } from '@/lib/october-catalog';
@@ -118,6 +120,7 @@ export default function PageTemplate({
   const isPlatform = Boolean(platformTextConfigs[page.slug]);
   const isZalgo = page.slug === 'zalgo-text-generator';
   const slug = page.slug;
+  const isNovemberArtwork = isNovemberArtworkSlug(slug);
   const isTitleArtwork = isTitleArtworkSlug(slug);
   const isKeywordTool = slug === 'cursed-text-generator' || slug === 'letters-in-different-fonts' || isTitleArtwork;
   const isDiscord = page.slug === 'discord-font-generator';
@@ -127,7 +130,7 @@ export default function PageTemplate({
   const isHybridGenerator = definition?.kind === 'hybrid';
   const isMinecraftGenerator = visualConfig?.engine === 'minecraft-renderer';
   const requiresVisualConfig = definition
-    ? !isThreeDGenerator && !octoberArt && !discoveryArt && !isTitleArtwork && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
+    ? !isThreeDGenerator && !octoberArt && !discoveryArt && !isTitleArtwork && !isNovemberArtwork && ['font-preview', 'meme', 'theme-logo', 'game-text', 'hybrid', 'directory'].includes(definition.kind)
     : false;
   if (requiresVisualConfig && !visualConfig) {
     throw new Error(`Generator ${page.slug} is registered as ${definition?.kind} but has no visual configuration.`);
@@ -135,7 +138,7 @@ export default function PageTemplate({
   if (visualConfig && definition?.kind === 'unicode') {
     throw new Error(`Generator ${page.slug} has a visual configuration but is still registered as Unicode-only.`);
   }
-  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator || octoberArt || discoveryArt || isTitleArtwork;
+  const isSpecializedGenerator = Boolean(visualConfig) || isAsciiGenerator || isThreeDGenerator || octoberArt || discoveryArt || isTitleArtwork || isNovemberArtwork;
   const usesFontWorkspace = !isSpecializedGenerator;
   const specializedAbout = getSpecializedAbout(page.slug, page.title);
   const specializedFaq = getSpecializedFaq(page.slug, page.title);
@@ -183,9 +186,9 @@ export default function PageTemplate({
       ];
   const supplement = getPageSupplement(page.slug);
   const relatedLinks = getRelatedLinks(page.relatedSlugs).slice(0, 4);
-  const additionalLinks = getRelatedLinks(discoveryRelatedLinks[page.slug] ?? []);
+  const additionalLinks = getRelatedLinks([...(discoveryRelatedLinks[slug] ?? []), ...(novemberArtworkRelatedLinks[slug] ?? [])]);
   const generatedExamples = page.examples.slice(0, 4).map((example, index) => {
-    if (isZalgo || isDiscord || isPlatform || octoberArt || octoberText || discoveryArt || discoveryText || isKeywordTool) return example;
+    if (isZalgo || isDiscord || isPlatform || octoberArt || octoberText || discoveryArt || discoveryText || isKeywordTool || isNovemberArtwork) return example;
     const styleId = config.styleIds[index % config.styleIds.length];
     const style = getStyleDefinition(styleId);
     return {
@@ -227,7 +230,9 @@ export default function PageTemplate({
           )}
         </header>
 
-        {isKeywordTool ? (
+        {isNovemberArtwork ? (
+          <NovemberArtworkBoundary key={slug} slug={slug} pageTitle={page.title} />
+        ) : isKeywordTool ? (
           <LetterToolBoundary key={slug} slug={slug} pageTitle={page.title} config={config} navigationItems={generatorNavigationItems} />
         ) : discoveryArt || discoveryText ? (
           <DiscoveryToolBoundary key={page.slug} artwork={discoveryArt} slug={page.slug} pageTitle={page.title} config={config} navigationItems={generatorNavigationItems} />
@@ -342,7 +347,7 @@ export default function PageTemplate({
               </section>
             )}
 
-            {page.howToUse && (
+            {(page.howToUse || (isNovemberArtwork && page.workflowSteps)) && (
               <section className="mt-12 rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
                   Simple workflow
@@ -361,7 +366,7 @@ export default function PageTemplate({
                     </li>
                   ))}
                 </ol>
-                <p className="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-400">{specializedHowTo ?? page.howToUse}</p>
+                {(specializedHowTo ?? page.howToUse) && <p className="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-400">{specializedHowTo ?? page.howToUse}</p>}
               </section>
             )}
 
@@ -482,7 +487,9 @@ export default function PageTemplate({
                   ? 'PNG and faithful SVG both preserve the exact rendered canvas. Copy formatting-code text separately when the destination supports Minecraft § or & codes.'
                   : page.slug === 'halloween-font-generator'
                   ? 'PNG preserves the lettering and scene. Choose Transparent in Customize to export only the lettering effects, or use the Copyable text tab for bios and messages.'
-                  : isTitleArtwork
+                  : slug === stencilLetterSlug
+                  ? 'Download SVG for scalable stencil paths and physical paper sizing. Download PNG when you need a transparent image.'
+                  : isTitleArtwork || isNovemberArtwork
                   ? 'PNG preserves the current preview. With Transparent background enabled, you can place the lettering over your own image.'
                   : isSpecializedGenerator
                     ? 'PNG preserves the current rendered appearance. SVG keeps editable text, so its font can change when opened on a device without the same typeface.'

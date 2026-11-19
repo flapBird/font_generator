@@ -6,6 +6,9 @@
  import { newKeywordFandomPages, newKeywordStylePages } from './new-keyword-pages';
  import { focusedLetterPages, sonicPage } from './letter-tool-pages';
  import { spidermanPage } from './spiderman-page';
+ import { fandomBrushPages } from './fandom-brush-pages';
+ import { letteringArtPages } from './lettering-art-pages';
+ import { stencilLetterPage } from './stencil-letter-page';
  import { scriptGuides } from './script-guides';
 
  export interface PageDefinition {
@@ -858,6 +861,8 @@
    ...octoberKeywordPages,
    ...discoveryKeywordPages,
    ...focusedLetterPages,
+   ...letteringArtPages,
+   stencilLetterPage,
  ];
  
  export const fandomPages: PageDefinition[] = [
@@ -964,6 +969,7 @@
    ...expansionFandomPages,
    sonicPage,
    spidermanPage,
+   ...fandomBrushPages,
  ];
  
  export const guidePages: PageDefinition[] = [

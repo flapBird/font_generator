@@ -128,7 +128,8 @@ assert.deepEqual(generatorRegistry.find((entry) => entry.slug === 'handwriting-f
 console.log('Expansion regressions passed: underline, fullwidth punctuation/spacing, small caps, double-struck exceptions/digits, protected social entities, weighted X lengths, pet frames, links and sitemap dates.');
 
 const { hiddenNavigationSlugs, isVisibleInGeneratorNavigation, focusedTextSlugs } = require('../lib/generator-navigation.ts');
-assert.equal(hiddenNavigationSlugs.length, 39);
+const { novemberArtworkSlugs, stencilLetterSlug } = require('../lib/november-artwork-catalog.ts');
+assert.equal(hiddenNavigationSlugs.length, 39 + novemberArtworkSlugs.length);
 assert.equal(new Set(hiddenNavigationSlugs).size, hiddenNavigationSlugs.length);
 for (const slug of hiddenNavigationSlugs) {
   assert.ok(knownSlugs.has(slug), `Hidden navigation entry is still a real page: ${slug}`);
@@ -136,7 +137,15 @@ for (const slug of hiddenNavigationSlugs) {
 }
 for (const page of allPages.filter((page) => !hiddenNavigationSlugs.includes(page.slug))) assert.equal(isVisibleInGeneratorNavigation(`/${page.slug}`), true, `${page.slug} retains its navigation entry`);
 for (const slug of ['small-text-generator', 'cursive-font-generator', 'impact-font-generator']) assert.equal(focusedTextSlugs.has(slug), false, `${slug} retains its existing workspace`);
-console.log('Navigation regressions passed: 39 additions hidden, all older entries preserved, old workspace opt-in unchanged.');
+for (const slug of novemberArtworkSlugs) {
+  const entry = generatorRegistry.find((item) => item.slug === slug);
+  assert.ok(entry, `${slug}: registered artwork tool`);
+  assert.deepEqual(entry.intent.expectedOutputs, slug === stencilLetterSlug ? ['svg', 'png'] : ['png']);
+  assert.equal(entry.homepage.enabled, false);
+  assert.equal(isVisibleInGeneratorNavigation(entry.canonicalPath), false);
+}
+assert.equal(isVisibleInGeneratorNavigation('/text-repeater'), false);
+console.log('Navigation regressions passed: additions hidden, all older entries preserved, old workspace opt-in unchanged.');
 
 const { cursedTextResults, cleanCursedText, CURSED_CLEAN_LIMIT, CURSED_INPUT_LIMIT } = require('../lib/cursed-text.ts');
 const cursedInput = 'Café cafe\u0301 ñ\n中文 👨‍👩‍👧‍👦 1️⃣';

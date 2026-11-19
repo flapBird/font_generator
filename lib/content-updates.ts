@@ -1,13 +1,19 @@
 import { discoverySlugs } from './discovery-catalog';
+import { novemberArtworkRelatedLinks, novemberArtworkSlugs } from './november-artwork-catalog';
 
 const updateGroups = {
-  '2026-11-17': ['/font-tools', "/name-tracing-worksheet", "/roman-numeral-converter", "/emoji-translator", "/cross-stitch-font-generator", "/accents-keyboard", "/font-pairing"],
+  '2026-11-19': [
+    '/font-tools', '/text-repeater', '/tools', '/fandom', '/visual-art',
+    ...Object.keys(novemberArtworkRelatedLinks).map((slug) => `/${slug}`),
+    ...novemberArtworkSlugs.map((slug) => `/${slug}`),
+  ],
+  '2026-11-17': ["/name-tracing-worksheet", "/roman-numeral-converter", "/emoji-translator", "/cross-stitch-font-generator", "/accents-keyboard", "/font-pairing"],
   '2026-11-16': [
-    '/tools', '/fandom', '/unicode-tools', '/guides',
+    '/unicode-tools', '/guides',
     '/cuneiform-translator', '/enchanting-table-translator', '/enderman-translator', '/standard-galactic-alphabet',
     '/guides/what-is-cuneiform', '/guides/minecraft-enchanting-table',
   ],
-  '2026-11-14': ['/visual-art', '/spiderman-font-generator'],
+  '2026-11-14': ['/spiderman-font-generator'],
   '2026-11-13': ['/', '/styles', '/cursed-text-generator', '/letters-in-different-fonts', '/hieroglyphics-translator', '/sonic-font-generator'],
   '2026-11-01': ['/font-identifier', '/cute-font-generator', '/calligraphy-font-generator', '/cursive-font-generator', '/preppy-font-generator', '/heart-font-generator', '/invisible-character'],
   '2026-10-30': [
@@ -30,7 +36,7 @@ const updateGroups = {
     '/glitch-font-generator',
     '/gaming-font-generator',
     '/guides/reddit-fancy-text-guide',
-    ...discoverySlugs.filter((slug) => !['cute-font-generator', 'calligraphy-font-generator'].includes(slug)).map((slug) => `/${slug}`),
+    ...discoverySlugs.filter((slug) => !['cute-font-generator', 'calligraphy-font-generator', 'neon-font-generator', 'anime-font-generator'].includes(slug)).map((slug) => `/${slug}`),
     '/halloween-font-generator',
     '/k-pop-font-generator', '/wingdings-font-generator',
     '/emoji-font-generator',
@@ -38,7 +44,7 @@ const updateGroups = {
   ],
   '2026-10-27': [
     '/korean-font-generator',
-    '/chinese-font-generator', '/graffiti-font-generator',
+    '/chinese-font-generator',
     '/arabic-font-generator',
     '/bold-text-generator',
     '/strikethrough-text-generator',
@@ -93,7 +99,6 @@ const updateGroups = {
     '/christmas-font-generator',
     '/cursive-tattoo-font-generator',
     '/glitter-font-generator',
-    '/big-font-generator',
     '/ransom-note-font-generator',
     '/san-francisco-font-generator',
     '/metallica-font-generator',

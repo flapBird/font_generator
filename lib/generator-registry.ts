@@ -3,6 +3,8 @@ import { focusedLetterPages } from './letter-tool-pages';
 import { generatorStyles } from './generator';
 import { octoberArtSlugs, octoberTextSlugs } from './october-catalog';
 import { discoverySlugs, discoveryArtSlugs, discoveryTextSlugs } from './discovery-catalog';
+import { isFandomBrushSlug } from './fandom-brush-catalog';
+import { novemberArtworkSlugs, novemberStyleArtworkSlugs, stencilLetterSlug } from './november-artwork-catalog';
 
 export type GeneratorKind =
   | 'unicode'
@@ -70,6 +72,24 @@ export interface GeneratorDefinition {
 type GeneratorOverride = Partial<Omit<GeneratorDefinition, 'id' | 'slug' | 'title' | 'icon' | 'category' | 'canonicalPath'>>;
 
 const overrides: Record<string, GeneratorOverride> = {
+  ...Object.fromEntries(novemberArtworkSlugs.map((slug): [string, GeneratorOverride] => {
+    const stencil = slug === stencilLetterSlug;
+    const page = [...stylePages, ...fandomPages].find((page) => page.slug === slug)!;
+    const secondary = stencil
+      ? ['Classic, Military and Industrial presets. Adjustable bridge width and letter spacing. Fit artwork, A4 landscape and US Letter landscape.']
+      : isFandomBrushSlug(slug)
+        ? ['Three original brush presets with optional texture or motion, 120 UTF-16 units, banner or square PNG and optional transparency.']
+        : ['Customize the lettering and download a banner or square PNG with optional transparency.'];
+    return [slug, {
+      kind: stencil ? 'font-preview' : 'theme-logo',
+      tags: stencil ? ['military font', 'bridged stencil', 'printable cutout']
+        : slug === 'varsity-font-generator' ? ['jersey lettering', 'college athletics', 'block letters']
+        : slug === 'wavy-text-generator' ? ['wavy font', 'sinusoidal', 'curved lettering'] : ['anime brush lettering'],
+      intent: { primary: page.description, secondary, expectedOutputs: stencil ? ['svg', 'png'] : ['png'] },
+      capabilities: ['preset-gallery', 'png-export', ...(stencil ? ['svg-export' as const] : ['font-availability' as const])],
+      homepage: { enabled: false, featured: false, priority: 1000 },
+    }];
+  })),
   ...Object.fromEntries(discoveryTextSlugs.map((slug) => [slug, {
     kind: 'unicode',
     intent: {
@@ -400,7 +420,7 @@ const buildDefinition = (page: PageDefinition, priority: number): GeneratorDefin
 
 export const generatorRegistry: GeneratorDefinition[] = [
   ...stylePages.map((page, index) => buildDefinition(page, index)),
-  ...fandomPages.map((page, index) => buildDefinition(page, stylePages.length - octoberArtSlugs.length - octoberTextSlugs.length - discoverySlugs.length - focusedLetterPages.length + index)),
+  ...fandomPages.map((page, index) => buildDefinition(page, stylePages.length - octoberArtSlugs.length - octoberTextSlugs.length - discoverySlugs.length - focusedLetterPages.length - novemberStyleArtworkSlugs.length + index)),
 ];
 
 export const validateGeneratorRegistry = (definitions: GeneratorDefinition[] = generatorRegistry) => {

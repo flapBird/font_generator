@@ -25,6 +25,7 @@ const libraryDetails: Partial<Record<string, { output: string; keywords?: string
   'name-tracing-worksheet': { output: 'PDF & SVG worksheet' },
   'cross-stitch-font-generator': { output: 'SVG stitch chart' },
   'font-pairing': { output: 'Font previews & CSS' },
+  'text-repeater': { output: 'Text & TXT download', keywords: 'repeat text generator word repeater repeat words letters line multiplier copy paste' },
   'signature-generator': { output: 'Transparent PNG' },
   'cuneiform-translator': { output: 'Text & PNG', keywords: 'cuneiform generator alphabet symbols sumerian akkadian write my name in cuneiform' },
   'enchanting-table-translator': { output: 'Text & PNG', keywords: 'minecraft enchantment table language runes font translator standard galactic alphabet sga decoder' },

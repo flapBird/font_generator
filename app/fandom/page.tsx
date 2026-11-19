@@ -7,6 +7,7 @@
  import { sonicPresets } from '@/lib/sonic-artwork';
  import { spidermanPresets } from '@/lib/spiderman-artwork';
  import { isTitleArtworkSlug, type TitleArtworkSlug } from '@/lib/title-artwork';
+ import { fandomBrushConfigs, isFandomBrushSlug } from '@/lib/fandom-brush-catalog';
  import { getLibraryPage } from '@/lib/text-library/catalog';
  import IntentLink from '@/components/IntentLink';
 
@@ -39,7 +40,7 @@
              const config = getGeneratorPageConfig(page.slug, page.title, page.defaultStyleIds);
              const visualConfig = getVisualGeneratorConfig(page.slug);
              const definition = getGeneratorDefinition(page.slug);
-             const artworkPresets = isTitleArtworkSlug(page.slug) ? titlePresets[page.slug] : undefined;
+             const artworkPresets = isTitleArtworkSlug(page.slug) ? titlePresets[page.slug] : isFandomBrushSlug(page.slug) ? fandomBrushConfigs[page.slug].presets : undefined;
              const preview = generateStyleVariants(page.title.replace(' Font Generator', ''), config.styleIds.slice(0, 1))[0];
              return (
                <Link

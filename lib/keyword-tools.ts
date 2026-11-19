@@ -34,6 +34,12 @@ export const keywordTools = [
     "title": "Font Pairing Preview",
     "description": "Compare three heading and body font pairings using installed system fonts. Copy CSS font stacks; appearance depends on fonts installed on your device.",
     "sample": "Good design starts with type"
+  },
+  {
+    "id": "text-repeater",
+    "title": "Text Repeater",
+    "description": "Repeat text, lines, or emoji up to 10,000 times. Choose a separator, preview the result, and copy it or download a TXT file.",
+    "sample": "Hello!"
   }
 ] as const;
 export type KeywordToolId = typeof keywordTools[number]["id"];

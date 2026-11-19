@@ -1,6 +1,7 @@
 // Hide this batch from permanent navigation; the active text workspace may show a separate temporary current item.
 // Preserve every older entry, its order, search behavior and collection-link placement.
 import { discoverySlugs } from './discovery-catalog';
+import { novemberArtworkSlugs } from './november-artwork-catalog';
 
 export const hiddenNavigationSlugs = [
   'bold-text-generator', 'strikethrough-text-generator', 'underline-text-generator',
@@ -14,11 +15,12 @@ export const hiddenNavigationSlugs = [
   ...discoverySlugs,
   'cursed-text-generator', 'letters-in-different-fonts', 'sonic-font-generator',
   'spiderman-font-generator',
+  ...novemberArtworkSlugs,
 ] as const;
 
 // Utility pages have their own catalog; do not register them as font styles or artwork.
 export const hiddenUtilityNavigationPaths = [
-  '/name-tracing-worksheet','/roman-numeral-converter','/emoji-translator','/cross-stitch-font-generator','/accents-keyboard','/font-pairing',
+  '/name-tracing-worksheet','/roman-numeral-converter','/emoji-translator','/cross-stitch-font-generator','/accents-keyboard','/font-pairing','/text-repeater',
   '/symbols', '/symbols/heart-symbols', '/symbols/star-symbols', '/symbols/arrow-symbols',
   '/kaomoji', '/emoji-combos', '/unicode-tools', '/invisible-character',
   '/unicode-character-inspector', '/invisible-character-remover', '/fancy-text-to-normal-text',
